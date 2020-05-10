@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>Leaflet Map</title>
+	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css"/>
+	<!-- Other imports! -->
+	<!-- leaflet Javascript-->
+	<script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js"></script>
+	<!--jquery -->
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+	<!-- esri leaflet -->
+	<script src="https://unpkg.com/esri-leaflet@2.3.3/dist/esri-leaflet.js"
+		integrity="sha512-cMQ5e58BDuu1pr9BQ/eGRn6HaR6Olh0ofcHFWe5XesdCITVuSBiBZZbhCijBe5ya238f/zMMRYIMIIg1jxv4sQ=="
+		crossorigin=""></script>
+	<!-- Vector Tiles -->
+	<script src="https://unpkg.com/esri-leaflet-vector@2.0.2/dist/esri-leaflet-vector.js"
+			integrity="sha512-keaVwrBxpBNq1XF5XEUvQ8NtoBbGPs/gKJJ3tp1qiudO3mTk9YEa6/uPpxX/G2HIjFrquj/xGg+p/c7nDp0wUg=="
+			crossorigin=""></script>
+
+	<style>
+		/*-- Disable scroll bar so title stays in place! */
+		html, body{overflow:hidden;}
+
+		body {
+				 padding: 0;
+				 margin: 0;
+		 }
+		 /*
+		 html, body, #map {
+				 height: 100%;
+				 width: 100%;
+
+		 }
+		 */
+		 html{
+			 height: 100%;
+			 width: 100%;
+		 }
+		 #map{
+			 height: 900px;
+			 width: 900px;
+		 }
+
+		 /*Title Div, this doesnt seem to do anything? */
+		 .title-banner {
+			 background-color: red;
+		 }
+
+		 .title {
+			 margin-left: 0.3em;
+			 padding: 0;
+			 margin: 0;
+			 background-color: #cdd0d4;
+		 }
+		 .panel-right{
+			 float:right;
+			 height: 100%;
+			 width: 53%;
+			 padding: 0;
+			 margin: 0;
+			 background-color: #cdd0d4;
+
+		 }
+
+		 .panel-right-sub{
+			 height: 10%;
+			 width: 50%;
+			 background-color: #cdd0d4;
+
+		 }
+
+		 /*
+		 h1 {
+			 margin-left: 0.3em;
+			 padding: 0;
+			 margin: 0;
+			 background-image: url("leaflet/images/Flat-Mountains.svg");
+			 background-color: #cccccc;
+		 }
+		 */
+
+	</style>
+</head>
+<body>
+	<div class="title-banner">
+		<h1 class="title">Title here!</h1>
+	</div>
+	<div class="Button-Bar">
+		<p>Buttons!</p>
+	</div>
+	<div class="panel-right">
+		<p class="panel-right-sub">Right Panel 1!</p>
+		<p class="panel-right-sub">Right Panel 2!</p>
+	</div>
+
+	<div id="map"></div>
+
+	<script>
+		// intilize map:
+		var map = L.map('map').setView([36.63410,-121.77171],8);
+		L.titlePane
+		//Add osm basemap
+		L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+	    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'}).addTo(map);
+		// Create point feature
+		var datapoint1 = L.marker([36.60472,-121.79409]).addTo(map);
+		datapoint1.bindPopup("This is Fort Ord National Monument.");
+		// Create an Empty Popup
+		var latLongPopup = L.popup();
+
+		// Write function to set Properties of the Popup
+		/*
+		function onMapClick(e) {
+		    latLongPopup
+		        .setLatLng(e.latlng)
+		        .setContent("The point you selected is located at Lat, Long: " +
+						e.latlng.lat.toString().substring(0,8) + "," + e.latlng.lng.toString().substring(0,10))
+		        .openOn(map);
+		}
+		// Listen for a click event on the Map element
+		map.on('click', onMapClick);
+		*/
+
+		// load GeoJSON from an external file
+		/*
+		$.getJSON("leaflet/Data/test_ride.geojson",function(data){
+		    // add GeoJSON layer to the map once the file is loaded
+		    L.geoJson(data).addTo(map);
+		});
+		*/
+		/*
+		$.getJSON("leaflet/Data/Strava_All_tracks.geojson",function(data){
+				// add GeoJSON layer to the map once the file is loaded
+				L.geoJson(data).addTo(map);
+		});
+		*/
+
+		$.getJSON("leaflet/Data/OSM_MTB_Central_CA.geojson",function(data){
+		    // add GeoJSON layer to the map once the file is loaded
+		    L.geoJson(data).addTo(map);
+		});
+
+		/*
+		$.getJSON("leaflet/Data/All_Strava_Activities.geojson",function(data){
+				// add GeoJSON layer to the map once the file is loaded
+				L.geoJson(data).addTo(map);
+		});
+		*/
+
+		/*
+		$.getJSON("leaflet/Data/OSM_MTB_Central_CA.geojson",function(data){
+		    // add GeoJSON layer to the map once the file is loaded
+		    L.geoJson(data,{
+		        onEachFeature: function (feature, layer) {
+		            layer.bindPopup(feature.properties.name);
+		        }
+		    }).addTo(map);
+		});
+		*/
+		$.getJSON("leaflet/Data/OSM_MTB_Central_CA.geojson",function(data){
+			L.geoJson(data, {
+		   style: function (feature) {
+		       return {};
+		   },
+		   onEachFeature: function (feature, layer) {
+		       layer.bindPopup('<b>' + feature.properties.name + '</b><br> Biycle trail: '  + feature.properties.bicycle);
+		   }
+			}).addTo(map);
+		});
+
+
+	</script>
+</body>
+</html>

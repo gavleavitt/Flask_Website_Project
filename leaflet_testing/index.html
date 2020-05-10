@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>Leaflet Map</title>
+	<!-- Leaflet css-->
+	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css"/>
+	<!-- Other imports! -->
+	<!-- leaflet Javascript-->
+	<script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js"></script>
+	<!--jquery adds "$." functionality-->
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+	<!-- leaflet.wms  found from: https://github.com/heigeo/leaflet.wms -->
+	<script src="leaflet/Javascript/leaflet.wms.js"></script>
+	<!-- leaflet realtime -->
+	<script src="leaflet/Javascript/leaflet-realtime.js"></script>
+	<!--Use this instead for leaflet.wms? -->
+	<!-- <script src="https://cdn.rawgit.com/heigeo/leaflet.wms/gh-pages/dist/leaflet.wms.js"></script> -->
+	<!-- leaflet dialog -->
+	<script src="leaflet/Javascript/Leaflet.Dialog.js"></script>
+	<!-- leaflet dialog css -->
+	<link rel="stylesheet" href="leaflet/CSS/Leaflet.Dialog.css"/>
+	<!-- leaflet Mouse Position JS-->
+	<script src="leaflet/Javascript/L.Control.MousePosition.js"></script>
+	<!-- leaflet Mouse Position css -->
+	<link rel="stylesheet" href="L.Control.MousePosition.css"/>
+	<style>
+		/*-- Disable scroll bar so title stays in place! */
+		/*html, body{overflow:hidden;}*/
+
+		body {
+				 padding: 0;
+				 margin: 0;
+		 }
+		 /*
+		 html, body, #map {
+				 height: 100%;
+				 width: 100%;
+
+		 }
+		 */
+		 html{
+			 height: 100%;
+			 width: 100%;
+		 }
+		 #map{
+		     position: absolute;
+		     top: 0;
+		     left: 0;
+		     width: 100%;
+		     height: 100%;
+		 }
+
+		 /*Title Div, this doesnt seem to do anything? */
+		 .title-banner {
+			 background-color: red;
+		 }
+
+		 .title {
+			 margin-left: 0.3em;
+			 padding: 0;
+			 margin: 0;
+			 background-color: #cdd0d4;
+		 }
+		 .panel-right{
+			 float:right;
+			 height: 100%;
+			 width: 53%;
+			 padding: 0;
+			 margin: 0;
+			 background-color: #cdd0d4;
+
+		 }
+
+		 .panel-right-sub{
+			 height: 10%;
+			 width: 50%;
+			 background-color: #cdd0d4;
+
+		 }
+		 .bottom-left-panel{
+			 height: 10%;
+			 width: 50%;
+			 background-color: #cdd0d4;
+		 }
+
+	 </style>
+</head>
+<body>
+	<div id="map"></div>
+	<!--
+	<div class="title-banner">
+		<h1 class="title">Title here!</h1>
+	</div>
+	<div class="test-bar">
+		<p id="test-text">Data pending!</p>
+	</div>
+
+	<div class="bottom-left-panel">
+
+	</div>
+	<div class = "bottom-right-panel">
+	</div>
+	-->
+	<div class="leaflet-control-dialog-inner">
+	</div>
+	<script>
+		// intilize map:
+		var map = L.map('map').setView([36.61,-121.83],13);
+		L.titlePane
+		//Add osm basemap
+		L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+	    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'}).addTo(map);
+		// Create point feature
+		//var datapoint1 = L.marker([36.60472,-121.39409]).addTo(map);
+		//datapoint1.bindPopup("This is Fort Ord National Monument.");
+		// Create an Empty Popup
+		//var latLongPopup = L.popup();
+		var mousepos = {
+			position: "bottomright"
+		}
+		L.control.mousePosition(mousepos).addTo(map);
+		var testIcon = L.icon({
+			iconURL: "leaflet/images/raster_icon_self.png",
+			iconSize: [38, 95]
+		});
+
+		var livemarkersettings = {
+			radius: 8,
+	    weight: 1,
+			fillColor: "#FF0010",
+			color: "#00FF00",
+	    fillOpacity: 0.5
+	  };
+
+		var dialog_options = {
+			anchor: [90,5],
+			position: 'topleft',
+			size: [250,250]
+
+		};
+
+		var dialog = L.control.dialog(dialog_options)
+							.setContent("<p>Info is loading!</p>")
+							.addTo(map);
+
+		//var now = new Date();
+		//console.log(now)
+
+		//Poll for updates
+		realtime = L.realtime({
+		    url: 'http://localhost:8082/geoserver/MTB/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=MTB%3Agpsdata&outputFormat=application%2Fjson',
+		    crossOrigin: false,
+		    type: 'json'
+		}, {
+		    interval: 5 * 1000,
+				pointToLayer: function (feature, latlng) {
+					return L.circleMarker(latlng,livemarkersettings);
+				}
+		}).addTo(map);
+
+		//On every poll rebind the feature popup, see https://github.com/perliedman/leaflet-realtime/issues/122
+		realtime.on('update', function(e) {
+		    Object.keys(e.update).forEach(function(id) {
+					var feature = e.update[id];
+
+					 //see https://stackoverflow.com/questions/11038252/how-can-i-calculate-the-difference-between-two-times-that-are-in-24-hour-format
+					 // var timenow = new Date();
+					 // var gpstime = feature.properties.gpstime;
+					 // var timenow = timenow.split(':');
+					 // var gpstime = gpstime.split(':');
+					 // gpstime.setHours(timenow[0], timenow[1], timenow[2], 0)
+					 // gpstime.setHours(gpstime[0], gpstime[1], gpstime[2], 0)
+					 // var timedif = (time_end - time_start)
+					 //console.log(timedif)
+					 //var localDate = new Date(feature.properties.gpstime);
+					 //console.log(localDate)
+					 //console.log(feature.timeStamp)
+					 var loggedtime = new Date(feature.properties.gpstime);
+					 var loggedtime = loggedtime.toLocaleString();
+					 //document.getElementById("test-text").innerHTML = "Most recent logged time: " + loggedtime;
+					document.getElementsByClassName("leaflet-control-dialog-contents")[0].innerHTML = "Last logged time was: <br><b>" + loggedtime + "</b>";
+					//if (feature.properties.road ==
+					document.getElementsByClassName("leaflet-control-dialog-contents")[0].innerHTML += "<br> Nearest road: <br><b>" + feature.properties.road + " (" +
+						feature.properties.dist_nearestroad.toString().split(".")[0] + " feet away)</b>";
+					document.getElementsByClassName("leaflet-control-dialog-contents")[0].innerHTML += "<br>Phone battery: <br><b>" + feature.properties.battery + "%</b>";
+					 // window.onload = function(){
+						//  document.getElementById("test-text").innerHTML = "Last logged time was: " + feature.properties.gpstime;
+					 // }
+		       this.getLayer(id).bindPopup("Last logged time is: " + feature.properties.gpstime + "<br>I'm at: " + feature.properties.poi);
+					 map.fitBounds(realtime.getBounds(), {maxZoom: 13})
+				}.bind(this));
+		});
+
+	</script>
+</body>
+
+</html>

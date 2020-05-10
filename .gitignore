@@ -1,0 +1,8 @@
+
+*.pyc
+leaflet_testing/script_config.py
+Data.*
+Data/
+images/
+__pycache__/
+zip/
