@@ -1,0 +1,27 @@
+'''
+    WITH 
+        city AS (
+    SELECT 
+        "California_Places".name,
+        "California_Places".geom
+    FROM 
+        "California_Places"
+    WHERE
+        ST_Intersects("California_Places".geom,ST_GeomFromText(%s, 4326))
+    ),   
+    WITH 
+        county AS (
+    SELECT 
+        "CA_counties".name
+    FROM
+        "CA_counties"
+    WHERE
+        ST_Intersects("CA_counties".city.geom) 
+    )
+    SELECT 
+        city.*, 
+        county.*
+    FROM 
+        city,
+        county
+    '''

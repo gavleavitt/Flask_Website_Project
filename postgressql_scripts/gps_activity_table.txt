@@ -1,0 +1,36 @@
+psql MTB_Data
+
+CREATE TABLE gpsdata(
+	Id	serial	PRIMARY KEY,
+	gpstime	timestamp with time zone,
+	lat	double precision,
+	lon	double precision, 
+	elevation	real,         
+	accuracy	real,
+	bearing	real,
+	speed	real,
+	satellites	int,
+	provider	varchar(10),
+	hdop	real,
+	vdop	real,
+	pdop	real,
+	geoidheight	real,
+	ageofdgpsdata	varchar(15),
+	dgpsid	varchar(10),
+	activity varchar(40),
+	battery int,	
+	phone varchar(40),
+	inserttime time,
+	gpstimelocal time,
+	city varchar(30),
+	county varchar(30),
+	poi varchar(30),
+	road varchar(30),
+	dist_nearestroad real,
+	trail varchar(30),
+	dist_nearesttrail real,
+	geom geometry(point,4326)			
+);
+
+ALTER TABLE gpsdata ADD primary key (Id);
+#ALTER TABLE gpsdata ADD COLUMN geom geometry(Point,4326);

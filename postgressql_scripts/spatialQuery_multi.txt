@@ -1,0 +1,11 @@
+SELECT
+	 "POI".location,
+	"California_Places".name
+FROM "POI", "California_Places"
+WHERE ST_Intersects(
+        "POI".geom,
+        ST_GeometryFromText('POINT(-121.83590 36.61819)', 4326)) = true
+	and ST_Intersects(
+        "California_Places".geom,
+        ST_GeometryFromText('POINT(-121.83590 36.61819)', 4326)) = true
+;

@@ -16,7 +16,7 @@ import io
 import csv
 import psycopg2
 import zulu
-import queryDB20200429 as queryDB
+import queryDB as queryDB
 import script_config as config
 
 ####Active functions####
