@@ -130,7 +130,7 @@ def changePolling(pageToken,disconnect_timer,sleeptimer):
                 print("All done downloading and reading CSV, passing to data processing!")
                 #Take coordinates and append as a postgres POINT geometry type for SQL queries
                 coordinate = "POINT({0} {1})".format(csvDat[2],csvDat[1])
-                #coordinate = [coordinate]              
+                coordinate = [coordinate]             
                 query_results = queryDB.queryDB(coordinate,conn,POI_Outdoors)
                 insDat = dataAppend(csvDat,query_results,coordinate)
                 print("Finished processing data and querying database, inserting data!")
@@ -193,7 +193,7 @@ def csvProcessing(csvLoc):
                 #headers = row[0:-1]
                 counter += 1
                 #print(headers)
-            elif counter == 1:
+            elif counter > 0:
                 #print(row[0:-1])
                 rowdata = row[0:-1]
                 gpsDict[counter] = rowdata

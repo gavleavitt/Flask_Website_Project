@@ -24,6 +24,8 @@
 	<script src="leaflet/Javascript/L.Control.MousePosition.js"></script>
 	<!-- leaflet Mouse Position css -->
 	<link rel="stylesheet" href="L.Control.MousePosition.css"/>
+	<!-- Custom javascript functions -->
+	<script src="leaflet/Javascript/customfunctions.js"></script>
 	<style>
 		/*-- Disable scroll bar so title stays in place! */
 		/*html, body{overflow:hidden;}*/
@@ -165,22 +167,12 @@
 					var feature = e.update[id];
 
 					 //see https://stackoverflow.com/questions/11038252/how-can-i-calculate-the-difference-between-two-times-that-are-in-24-hour-format
-					 // var timenow = new Date();
-					 // var gpstime = feature.properties.gpstime;
-					 // var timenow = timenow.split(':');
-					 // var gpstime = gpstime.split(':');
-					 // gpstime.setHours(timenow[0], timenow[1], timenow[2], 0)
-					 // gpstime.setHours(gpstime[0], gpstime[1], gpstime[2], 0)
-					 // var timedif = (time_end - time_start)
-					 //console.log(timedif)
-					 //var localDate = new Date(feature.properties.gpstime);
-					 //console.log(localDate)
-					 //console.log(feature.timeStamp)
-					 var loggedtime = new Date(feature.properties.gpstime);
-					 var loggedtime = loggedtime.toLocaleString();
+					 var loggedtime = format_time(feature.properties.gpstime)
+					 elaptime = timedif(feature.properties.gpstime)
+
 					 //document.getElementById("test-text").innerHTML = "Most recent logged time: " + loggedtime;
 					document.getElementsByClassName("leaflet-control-dialog-contents")[0].innerHTML = "Last logged time was: <br><b>" + loggedtime + "</b>";
-					//if (feature.properties.road ==
+					document.getElementsByClassName("leaflet-control-dialog-contents")[0].innerHTM = "<br><b>(" + elaptime + ")</b>";
 					document.getElementsByClassName("leaflet-control-dialog-contents")[0].innerHTML += "<br> Nearest road: <br><b>" + feature.properties.road + " (" +
 						feature.properties.dist_nearestroad.toString().split(".")[0] + " feet away)</b>";
 					document.getElementsByClassName("leaflet-control-dialog-contents")[0].innerHTML += "<br>Phone battery: <br><b>" + feature.properties.battery + "%</b>";
