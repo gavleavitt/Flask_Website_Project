@@ -164,23 +164,19 @@
 		//On every poll rebind the feature popup, see https://github.com/perliedman/leaflet-realtime/issues/122
 		realtime.on('update', function(e) {
 		    Object.keys(e.update).forEach(function(id) {
-					var feature = e.update[id];
+				var feature = e.update[id];
+				//see https://stackoverflow.com/questions/11038252/how-can-i-calculate-the-difference-between-two-times-that-are-in-24-hour-format
+				var loggedtime = format_time(feature.properties.gpstime);
+				document.getElementsByClassName("leaflet-control-dialog-contents")[0].innerHTML = "Last logged time was: <br><b>" + loggedtime + "</b>";
+				document.getElementsByClassName("leaflet-control-dialog-contents")[0].innerHTML += "<br><b>(" + timedif(feature.properties.gpstime) + ")</b>";
+				document.getElementsByClassName("leaflet-control-dialog-contents")[0].innerHTML += locationtext(feature.properties.poi,feature.properties.city,
+					feature.properties.county,feature.properties.trail,feature.properties.dist_nearesttrail,feature.properties.road,feature.properties.dist_nearestroad)
+				document.getElementsByClassName("leaflet-control-dialog-contents")[0].innerHTML += "<br>Phone battery: <br><b>" + feature.properties.battery + "%</b>";
+				console.log(feature.properties)
+				//this.getLayer(id).bindPopup("Last logged time is: " + feature.properties.gpstime + "<br>I'm at: " + feature.properties.poi);
+				var gpstime = nulluser
 
-					 //see https://stackoverflow.com/questions/11038252/how-can-i-calculate-the-difference-between-two-times-that-are-in-24-hour-format
-					 var loggedtime = format_time(feature.properties.gpstime)
-					 elaptime = timedif(feature.properties.gpstime)
-
-					 //document.getElementById("test-text").innerHTML = "Most recent logged time: " + loggedtime;
-					document.getElementsByClassName("leaflet-control-dialog-contents")[0].innerHTML = "Last logged time was: <br><b>" + loggedtime + "</b>";
-					document.getElementsByClassName("leaflet-control-dialog-contents")[0].innerHTM = "<br><b>(" + elaptime + ")</b>";
-					document.getElementsByClassName("leaflet-control-dialog-contents")[0].innerHTML += "<br> Nearest road: <br><b>" + feature.properties.road + " (" +
-						feature.properties.dist_nearestroad.toString().split(".")[0] + " feet away)</b>";
-					document.getElementsByClassName("leaflet-control-dialog-contents")[0].innerHTML += "<br>Phone battery: <br><b>" + feature.properties.battery + "%</b>";
-					 // window.onload = function(){
-						//  document.getElementById("test-text").innerHTML = "Last logged time was: " + feature.properties.gpstime;
-					 // }
-		       this.getLayer(id).bindPopup("Last logged time is: " + feature.properties.gpstime + "<br>I'm at: " + feature.properties.poi);
-					 map.fitBounds(realtime.getBounds(), {maxZoom: 13})
+				map.fitBounds(realtime.getBounds(), {maxZoom: 13})
 				}.bind(this));
 		});
 
