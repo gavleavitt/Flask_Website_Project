@@ -24,7 +24,7 @@
 	<script src="leaflet/Javascript/L.Control.MousePosition.js"></script>
 	<!-- leaflet Mouse Position css -->
 	<link rel="stylesheet" href="L.Control.MousePosition.css"/>
-	<!-- Custom javascript functions -->
+	<!-- Custom local javascript functions -->
 	<script src="leaflet/Javascript/customfunctions.js"></script>
 	<style>
 		/*-- Disable scroll bar so title stays in place! */
@@ -56,6 +56,8 @@
 		 /*Title Div, this doesnt seem to do anything? */
 		 .title-banner {
 			 background-color: red;
+			 width: 100%;
+			 height: 30px;
 		 }
 
 		 .title {
@@ -90,26 +92,12 @@
 </head>
 <body>
 	<div id="map"></div>
-	<!--
-	<div class="title-banner">
-		<h1 class="title">Title here!</h1>
-	</div>
-	<div class="test-bar">
-		<p id="test-text">Data pending!</p>
-	</div>
-
-	<div class="bottom-left-panel">
-
-	</div>
-	<div class = "bottom-right-panel">
-	</div>
-	-->
-	<div class="leaflet-control-dialog-inner">
+	<div class ="title-banner">
+		<h1 class="title">Live GPS Tracking</h1>
 	</div>
 	<script>
 		// intilize map:
 		var map = L.map('map').setView([36.61,-121.83],13);
-		L.titlePane
 		//Add osm basemap
 		L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 	    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'}).addTo(map);
@@ -118,40 +106,46 @@
 		//datapoint1.bindPopup("This is Fort Ord National Monument.");
 		// Create an Empty Popup
 		//var latLongPopup = L.popup();
-		var mousepos = {
-			position: "bottomright"
-		}
-		L.control.mousePosition(mousepos).addTo(map);
+		//Set a null time for first loop
+		time = null
+		//Test icon
 		var testIcon = L.icon({
 			iconURL: "leaflet/images/raster_icon_self.png",
 			iconSize: [38, 95]
 		});
-
+		//Live tracking GPS icon, consider using an arrow with a rotation for bearing
 		var livemarkersettings = {
 			radius: 8,
-	    weight: 1,
+			weight: 1,
 			fillColor: "#FF0010",
 			color: "#00FF00",
-	    fillOpacity: 0.5
-	  };
-
+			fillOpacity: 0.5
+		};
+		//leaflet dialog plugin options
 		var dialog_options = {
 			anchor: [90,5],
 			position: 'topleft',
-			size: [250,250]
-
+			size: [250,450]
 		};
-
+		//leaflet Mouse Position plugin, uses leaflet position placement
+		var mousepos = {
+			position: "bottomright"
+		};
+		//Geoserver localhost WFS json link
 		var dialog = L.control.dialog(dialog_options)
-							.setContent("<p>Info is loading!</p>")
-							.addTo(map);
-
-		//var now = new Date();
-		//console.log(now)
-
-		//Poll for updates
+		/**
+		Dialog box, live stats are added to this dialog.
+		Need to figure out how to add a DOM id to this.
+		Contains temp text as the data is loading.
+		*/
+			.setContent("<p>Info is loading!</p>")
+			.addTo(map);
+		L.control.mousePosition(mousepos).addTo(map);
 		realtime = L.realtime({
-		    url: 'http://localhost:8082/geoserver/MTB/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=MTB%3Agpsdata&outputFormat=application%2Fjson',
+			/**
+			Leaflet realtime plugin, polls geoserver WFS json service id field for changes and places a marker at the most recent location.
+			*/
+				url: geoserver,
 		    crossOrigin: false,
 		    type: 'json'
 		}, {
@@ -160,23 +154,27 @@
 					return L.circleMarker(latlng,livemarkersettings);
 				}
 		}).addTo(map);
-
-		//On every poll rebind the feature popup, see https://github.com/perliedman/leaflet-realtime/issues/122
 		realtime.on('update', function(e) {
 		    Object.keys(e.update).forEach(function(id) {
 				var feature = e.update[id];
 				//see https://stackoverflow.com/questions/11038252/how-can-i-calculate-the-difference-between-two-times-that-are-in-24-hour-format
 				var loggedtime = format_time(feature.properties.gpstime);
-				document.getElementsByClassName("leaflet-control-dialog-contents")[0].innerHTML = "Last logged time was: <br><b>" + loggedtime + "</b>";
+				document.getElementsByClassName("leaflet-control-dialog-contents")[0].innerHTML = "Last logged time: <br><b>" + loggedtime + "</b>";
 				document.getElementsByClassName("leaflet-control-dialog-contents")[0].innerHTML += "<br><b>(" + timedif(feature.properties.gpstime) + ")</b>";
 				document.getElementsByClassName("leaflet-control-dialog-contents")[0].innerHTML += locationtext(feature.properties.poi,feature.properties.city,
-					feature.properties.county,feature.properties.trail,feature.properties.dist_nearesttrail,feature.properties.road,feature.properties.dist_nearestroad)
+					feature.properties.county,feature.properties.trail,feature.properties.dist_nearesttrail,
+					feature.properties.road,feature.properties.dist_nearestroad,feature.properties.poi);
+				document.getElementsByClassName("leaflet-control-dialog-contents")[0].innerHTML += "<br>Coordinates:" +
+					coors(feature.properties.lat,feature.properties.lon,feature.properties.provider);
 				document.getElementsByClassName("leaflet-control-dialog-contents")[0].innerHTML += "<br>Phone battery: <br><b>" + feature.properties.battery + "%</b>";
-				console.log(feature.properties)
-				//this.getLayer(id).bindPopup("Last logged time is: " + feature.properties.gpstime + "<br>I'm at: " + feature.properties.poi);
-				var gpstime = nulluser
-
-				map.fitBounds(realtime.getBounds(), {maxZoom: 13})
+				if (time !== feature.properties.gpstime){
+					/**
+					Changes map bounds only if the
+					*/
+					console.log("changing bounds!")
+					time = feature.properties.gpstime
+					map.fitBounds(realtime.getBounds(), {maxZoom: 13})
+				}
 				}.bind(this));
 		});
 
