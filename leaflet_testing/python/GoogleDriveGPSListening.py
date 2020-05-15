@@ -9,6 +9,8 @@ from __future__ import print_function
 from googleapiclient import discovery
 from apiclient.http import MediaIoBaseDownload
 from httplib2 import Http
+#Import just the error for exception handling!
+from httplib2 import ServerNotFoundError
 from oauth2client import file, client, tools
 import time
 import datetime

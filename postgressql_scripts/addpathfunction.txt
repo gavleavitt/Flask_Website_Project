@@ -1,0 +1,7 @@
+CREATE OR REPLACE addpath()
+	RETURNS trigger AS $func$
+	BEGIN
+		IF 
+	END
+	$func$
+	LANGUAGE 'plpgsql';
