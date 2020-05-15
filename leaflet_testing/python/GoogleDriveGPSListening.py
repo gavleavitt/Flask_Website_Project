@@ -99,8 +99,9 @@ def changePolling(pageToken,disconnect_timer,sleeptimer):
         #Get the list of changes from the drive using the token as comparison
         try:
             response = drive.changes().list(pageToken=pageToken,spaces='drive').execute()
-        except ServerNotFoundError:
-            print (f"\n###Failed to connect to Google Drive API, internet may be down, waiting {disconnect_timer} seconds to try again!### \n")
+        except Exception as error:
+            print (f"\nError:{error}\nFailed to interface with Google Drive API, internet may be down, waiting {disconnect_timer} seconds to try again!\n")
+            print
             time.sleep(disconnect_timer)
             continue
             
