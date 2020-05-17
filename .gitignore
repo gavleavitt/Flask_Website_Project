@@ -10,3 +10,4 @@ __pycache__/
 zip/
 GoogleDriveAPI/
 start_servers*
+leaflet_testing/activate_servers.sh
