@@ -29,7 +29,7 @@ function timedif(jsontime){
   if (hours > 24){
     res = "Over a day old!"
     return res;
-  } else if (24 > hours > 1){
+  } else if (24.0 > hours > 1.0){
     //Hours, minutes
     dif = new Date(msdif).toISOString().substr(11, 5);
     form_dif = dif.substr(0,2) + " Hours " + dif.substr(3,2) + " Minutes ago";
@@ -46,7 +46,7 @@ function timedif(jsontime){
   }
 };
 
-function locationtext(poi,city,county,trail,disttrail,road,distroad,speed){
+function locationtext(poi,city,county,trail,disttrail){
   /**
   Formats location responses
   */
@@ -58,13 +58,15 @@ function locationtext(poi,city,county,trail,disttrail,road,distroad,speed){
    display_text = "Location:" + "<br><b>" + poi + "</b>" + trail_text + region_text;
  } else {
    display_text = region(city,county);
- }
-road_text = "<br> Nearest road:<br><b>" + road + " (" +
-  distroad.toString().split(".")[0] + " feet away)</b>"
-display_text += road_text
+ };
 return display_text
 };
 
+function nearestroad(road,distroad){
+  road_text = "Nearest road:<br><b>" + road + " (" +
+    distroad.toString().split(".")[0] + " feet away)</b>"
+  return road_text
+};
 
 function region(city,county){
   /**
@@ -93,6 +95,10 @@ function trailinfo(poi,trail,disttrail,speed){
   }
   return res;
 };
+
+function batteryinfo(battery){
+  return battery;
+}
 
 function coors(lat,lon,provider){
   /**

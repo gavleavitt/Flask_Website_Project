@@ -23,65 +23,83 @@
 	<!-- leaflet Mouse Position JS-->
 	<script src="leaflet/Javascript/L.Control.MousePosition.js"></script>
 	<!-- leaflet Mouse Position css -->
-	<link rel="stylesheet" href="leaflet/CSS/L.Control.MousePosition.css"/>
+	<link rel="stylesheet" href="L.Control.MousePosition.css"/>
 	<!-- Custom local javascript functions -->
 	<script src="leaflet/Javascript/customfunctions.js"></script>
-	<!-- Custom CSS -->
-	<link rel="stylesheet" href="leaflet/CSS/customCSS.css"/>
 	<style>
 		/*-- Disable scroll bar so title stays in place! */
 		/*html, body{overflow:hidden;}*/
-		/*
 		body {
 				 padding: 0;
 				 margin: 0;
 		 }
+		 /*
+		 html, body, #map {
+				 height: 100%;
+				 width: 100%;
+		 }
 		 */
+		 html{
+			 height: 100%;
+			 width: 100%;
+		 }
+		 #map{
+		     position: absolute;
+		     top: 40px;
+		     left: 0;
+		     width: 100%;
+		     height: 96%;
+				 float:bottom;
+		 }
+		 /*Title Div*/
+		 #title-banner-box {
+			 background-color: #cbd6f5;
+			 width: 100%;
+			 height: 40px;
+			 outline:1px solid #000;
+			 outline-offset: -1px;
+		 }
+		 #title-text {
+			 float:left;
+			 margin: auto;
+			 padding-left: 2em;
+			 padding-top: 0.4em;
+			 padding-bottom:0px;
+			 /*
+			 margin-top:0;
+			 margin-left: 0;
+			 margin-right: 0;
+			 margin-bottom: 0;
+			 */
+			 font-size: 20px;
+			 font-weight: bold;
+		 }
+		 .panel-right{
+			 float:right;
+			 height: 100%;
+			 width: 53%;
+			 padding: 0;
+			 margin: 0;
+			 background-color: #cbd6f5;
+		 }
+		 .panel-right-sub{
+			 height: 10%;
+			 width: 50%;
+			 background-color: #cdd0d4;
+
+		 }
+		 .bottom-left-panel{
+			 height: 10%;
+			 width: 50%;
+			 background-color: #cdd0d4;
+		 }
 	 </style>
 </head>
 <body>
-	<div class="container sansserif">
-	  <div class="item header">GPS Location Tracking</div>
-	  	<div class="item map-panel detail-panel-col">
-				<div id='map'></div>
-		</div>
-	  <div class="item detail-panel">
-			<div class="item detail-1 detail-panel-col">
-				<div>
-					<p class='detail-context'>Last logged:</p>
-					<p id='last-logged'class='detail-text'>Loading!</p>
-				</div>
-			</div>
-			<div class="item detail-2 detail-panel-col">
-				<div>
-					<p class='detail-context'>Location:</p>
-					<p id='location' class='detail-text'>Loading!</p>
-				</div>
-			</div>
-			<div class="item detail-3 detail-panel-col">
-				<div>
-				<p class='detail-context'>Nearest Road:</p>
-				<p id='nearest-road' class='detail-text'>Loading!</p>
-				</div>
-			</div>
-			<div class="item detail-4 detail-panel-col">
-				<div>
-				<p class='detail-context'>Battery:</p>
-				<p id= 'batterylife' class='detail-text'>Loading!</p>
-				</div>
-			</div>
-			<div class="item detail-5 detail-panel-col">
-				<div>
-				<p class='detail-context'>Coordinates:</p>
-				<p  id='coordinates' class='detail-text'>Loading!</p>
-				</div>
-			</div>
-			<div class="item detail-6 detail-panel-col">
-				<div>
-				<p class='detail-context'>Placeholder:</p>
-				<p class='detail-text'>Placeholder!</p>
-				</div>
-			</div>
+	<div id="document">
+		<div id="map"></div>
+		<div id="title-banner-box">
+		<p id="title-text">Live GPS Tracking</p>
 		</div>
 	</div>
 	<script>
@@ -123,7 +141,7 @@
 		//Geoserver localhost WFS json link
 		var geoserver = 'http://localhost:8082/geoserver/MTB/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=MTB%3Agpsdata&outputFormat=application%2Fjson'
 		var dialog = L.control.dialog(dialog_options)
-		/*
+		/**
 		Dialog box, live stats are added to this dialog.
 		Need to figure out how to add a DOM id to this.
 		Contains temp text as the data is loading.
@@ -132,7 +150,7 @@
 			.addTo(map);
 		L.control.mousePosition(mousepos).addTo(map);
 		realtime = L.realtime({
-			/*
+			/**
 			Leaflet realtime plugin, polls geoserver WFS json service id field for changes and places a marker at the most recent location.
 			*/
 				url: geoserver,
@@ -149,25 +167,17 @@
 				var feature = e.update[id];
 				//see https://stackoverflow.com/questions/11038252/how-can-i-calculate-the-difference-between-two-times-that-are-in-24-hour-format
 				var loggedtime = format_time(feature.properties.gpstime);
-				// document.getElementsByClassName("leaflet-control-dialog-contents")[0].innerHTML = "Last logged time: <br><b>" + loggedtime + "</b>";
-				// document.getElementsByClassName("leaflet-control-dialog-contents")[0].innerHTML += "<br><b>(" + timedif(feature.properties.gpstime) + ")</b>";
-				// document.getElementsByClassName("leaflet-control-dialog-contents")[0].innerHTML += locationtext(feature.properties.poi,feature.properties.city,
-				// 	feature.properties.county,feature.properties.trail,feature.properties.dist_nearesttrail,
-				// 	feature.properties.road,feature.properties.dist_nearestroad,feature.properties.poi);
-				// document.getElementsByClassName("leaflet-control-dialog-contents")[0].innerHTML += "<br>Coordinates:" +
-				// 	coors(feature.properties.lat,feature.properties.lon,feature.properties.provider);
-				// document.getElementsByClassName("leaflet-control-dialog-contents")[0].innerHTML += "<br>Phone battery: <br><b>" + feature.properties.battery + "%</b>";
-				document.getElementById('last-logged')[0].innerHTML = loggedtime
-				document.getElementById('last-logged')[0].innerHTML += "(" + timedif(feature.properties.gpstime) + ")";
-				document.getElementById('location')[0].innerHTML = locationtext(feature.properties.poi,feature.properties.city,
-					feature.properties.county,feature.properties.trail,feature.properties.dist_nearesttrail);
-				document.getElementById('nearest-road')[0].innerHTML = nearestroad(feature.properties.road,feature.properties.dist_nearestroad);
-				document.getElementById('batterylife')[0].innerHTML = batteryinfo(feature.properties.battery);
-				document.getElementById('coordinates')[0].innerHTML = coors(feature.properties.lat,feature.properties.lon,feature.properties.provider);
-
+				document.getElementsByClassName("leaflet-control-dialog-contents")[0].innerHTML = "Last logged time: <br><b>" + loggedtime + "</b>";
+				document.getElementsByClassName("leaflet-control-dialog-contents")[0].innerHTML += "<br><b>(" + timedif(feature.properties.gpstime) + ")</b>";
+				document.getElementsByClassName("leaflet-control-dialog-contents")[0].innerHTML += locationtext(feature.properties.poi,feature.properties.city,
+					feature.properties.county,feature.properties.trail,feature.properties.dist_nearesttrail,
+					feature.properties.road,feature.properties.dist_nearestroad,feature.properties.poi);
+				document.getElementsByClassName("leaflet-control-dialog-contents")[0].innerHTML += "<br>Coordinates:" +
+					coors(feature.properties.lat,feature.properties.lon,feature.properties.provider);
+				document.getElementsByClassName("leaflet-control-dialog-contents")[0].innerHTML += "<br>Phone battery: <br><b>" + feature.properties.battery + "%</b>";
 				if (time !== feature.properties.gpstime){
 					/**
-					Changes map bounds only if the time field has changed.
+					Changes map bounds only if the
 					*/
 					console.log("changing bounds!")
 					time = feature.properties.gpstime
@@ -175,6 +185,7 @@
 				}
 				}.bind(this));
 		});
+
 	</script>
 </body>
 

@@ -9,3 +9,4 @@ script_config.*
 __pycache__/
 zip/
 GoogleDriveAPI/
+start_servers*
