@@ -10,3 +10,4 @@ __pycache__/
 zip/
 GoogleDriveAPI/
 start_servers.sh
+activate_servers
