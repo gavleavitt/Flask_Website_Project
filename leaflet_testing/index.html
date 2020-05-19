@@ -14,6 +14,20 @@
 	<script src="leaflet/Javascript/leaflet.wms.js"></script>
 	<!-- leaflet realtime -->
 	<script src="leaflet/Javascript/leaflet-realtime.js"></script>
+
+	<!-- Load Esri Leaflet from CDN, stable -->
+	<script src="https://unpkg.com/esri-leaflet@2.4.0/dist/esri-leaflet.js"
+	integrity="sha512-kq0i5Xvdq0ii3v+eRLDpa++uaYPlTuFaOYrfQ0Zdjmms/laOwIvLMAxh7cj1eTqqGG47ssAcTY4hjkWydGt6Eg=="
+	crossorigin=""></script>
+
+	<!-- Esri Leaflet and Esri Leaflet Vector, experimential -->
+	<script src="https://unpkg.com/esri-leaflet/dist/esri-leaflet.js"></script>
+	<script src="https://unpkg.com/esri-leaflet-vector/dist/esri-leaflet-vector.js"></script>
+	<link rel="stylesheet" href="https://unpkg.com/mapbox-gl/dist/mapbox-gl.css"/>
+	<script src="https://unpkg.com/mapbox-gl/dist/mapbox-gl.js"></script>
+	<!-- load the latest release from the cdn automatically -->
+	<script src="https://unpkg.com/esri-leaflet-vector/dist/esri-leaflet-vector-debug.js"></script>
+
 	<!--Use this instead for leaflet.wms? -->
 	<!-- <script src="https://cdn.rawgit.com/heigeo/leaflet.wms/gh-pages/dist/leaflet.wms.js"></script> -->
 	<!-- leaflet dialog -->
@@ -41,7 +55,7 @@
 </head>
 <body>
 	<div class="container sansserif">
-	  <div class="item header">GPS Location Tracking</div>
+	  <div class="item title">GPS Location Tracking</div>
 	  	<div class="item map-panel detail-panel-col">
 				<div id='map'></div>
 		</div>
@@ -86,10 +100,15 @@
 	</div>
 	<script>
 		// intilize map:
-		var map = L.map('map').setView([36.61,-121.83],13);
+		var map = L.map('map').setView([36.61,-121.83],15);
 		//Add osm basemap
-		L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-	    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'}).addTo(map);
+		// L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+	  //   attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'}).addTo(map);
+
+		L.esri.Vector.basemap('StreetsNight').addTo(map);
+		//L.esri.basemapLayer('DarkGrayLabels').addTo(map);
+
+
 		// Create point feature
 		//var datapoint1 = L.marker([36.60472,-121.39409]).addTo(map);
 		//datapoint1.bindPopup("This is Fort Ord National Monument.");
@@ -122,14 +141,14 @@
 		};
 		//Geoserver localhost WFS json link
 		var geoserver = 'http://localhost:8082/geoserver/MTB/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=MTB%3Agpsdata&outputFormat=application%2Fjson'
-		var dialog = L.control.dialog(dialog_options)
+		//var dialog = L.control.dialog(dialog_options)
 		/*
 		Dialog box, live stats are added to this dialog.
 		Need to figure out how to add a DOM id to this.
 		Contains temp text as the data is loading.
 		*/
-			.setContent("<p>Info is loading!</p>")
-			.addTo(map);
+			//.setContent("<p>Info is loading!</p>")
+			//.addTo(map);
 		L.control.mousePosition(mousepos).addTo(map);
 		realtime = L.realtime({
 			/*
@@ -157,13 +176,13 @@
 				// document.getElementsByClassName("leaflet-control-dialog-contents")[0].innerHTML += "<br>Coordinates:" +
 				// 	coors(feature.properties.lat,feature.properties.lon,feature.properties.provider);
 				// document.getElementsByClassName("leaflet-control-dialog-contents")[0].innerHTML += "<br>Phone battery: <br><b>" + feature.properties.battery + "%</b>";
-				document.getElementById('last-logged')[0].innerHTML = loggedtime
-				document.getElementById('last-logged')[0].innerHTML += "(" + timedif(feature.properties.gpstime) + ")";
-				document.getElementById('location')[0].innerHTML = locationtext(feature.properties.poi,feature.properties.city,
+				document.getElementById('last-logged').innerHTML = loggedtime
+				document.getElementById('last-logged').innerHTML += "<br>(" + timedif(feature.properties.gpstime) + ")";
+				document.getElementById('location').innerHTML = locationtext(feature.properties.poi,feature.properties.city,
 					feature.properties.county,feature.properties.trail,feature.properties.dist_nearesttrail);
-				document.getElementById('nearest-road')[0].innerHTML = nearestroad(feature.properties.road,feature.properties.dist_nearestroad);
-				document.getElementById('batterylife')[0].innerHTML = batteryinfo(feature.properties.battery);
-				document.getElementById('coordinates')[0].innerHTML = coors(feature.properties.lat,feature.properties.lon,feature.properties.provider);
+				document.getElementById('nearest-road').innerHTML = nearestroad(feature.properties.road,feature.properties.dist_nearestroad);
+				document.getElementById('batterylife').innerHTML = batteryinfo(feature.properties.battery) + "%";
+				document.getElementById('coordinates').innerHTML = coors(feature.properties.lat,feature.properties.lon,feature.properties.provider);
 
 				if (time !== feature.properties.gpstime){
 					/**
@@ -171,7 +190,7 @@
 					*/
 					console.log("changing bounds!")
 					time = feature.properties.gpstime
-					map.fitBounds(realtime.getBounds(), {maxZoom: 13})
+					map.fitBounds(realtime.getBounds(), {maxZoom: 15})
 				}
 				}.bind(this));
 		});

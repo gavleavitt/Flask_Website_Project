@@ -29,7 +29,7 @@ function timedif(jsontime){
   if (hours > 24){
     res = "Over a day old!"
     return res;
-  } else if (24.0 > hours > 1.0){
+  } else if (hours < 24.0 && hours > 1.0){
     //Hours, minutes
     dif = new Date(msdif).toISOString().substr(11, 5);
     form_dif = dif.substr(0,2) + " Hours " + dif.substr(3,2) + " Minutes ago";
@@ -51,11 +51,11 @@ function locationtext(poi,city,county,trail,disttrail){
   Formats location responses
   */
  if (["Home","Work"].includes(poi)){
-   display_text = "<br>Location:<br><b>" + poi + "</b>" + region(city,county);
+   display_text = poi + "</b>" + region(city,county);
  } else if (poi !== null){
    trail_text = trailinfo(poi,trail,disttrail);
    region_text = region(city,county);
-   display_text = "Location:" + "<br><b>" + poi + "</b>" + trail_text + region_text;
+   display_text = "<br><b>" + poi + "</b>" + trail_text + region_text;
  } else {
    display_text = region(city,county);
  };
@@ -63,8 +63,8 @@ return display_text
 };
 
 function nearestroad(road,distroad){
-  road_text = "Nearest road:<br><b>" + road + " (" +
-    distroad.toString().split(".")[0] + " feet away)</b>"
+  road_text = road + " (" +
+    distroad.toString().split(".")[0] + " feet away)"
   return road_text
 };
 
@@ -111,6 +111,6 @@ function coors(lat,lon,provider){
   } else {
     accur_stat = "(High accuarcy GPS!)";
   }
-  res = "<br>Lat: <b>" + lat + "</b> " + "Lon: <b> " + lon + "<br>" + accur_stat + "</b>";
+  res = "Lat: <b>" + lat + "</b> " + "Lon: <b> " + lon + "<br>" + accur_stat + "</b>";
   return res
 };

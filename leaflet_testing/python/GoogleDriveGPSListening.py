@@ -101,7 +101,6 @@ def changePolling(pageToken,disconnect_timer,sleeptimer):
             response = drive.changes().list(pageToken=pageToken,spaces='drive').execute()
         except Exception as error:
             print (f"\nError:{error}\nFailed to interface with Google Drive API, internet may be down, waiting {disconnect_timer} seconds to try again!\n")
-            print
             time.sleep(disconnect_timer)
             continue
             
@@ -321,10 +320,7 @@ TODO: Create function to read csv/dict and calculate data from previous to most 
 
 #Connect to MTB postgres database on Ubuntu Server
 conn = connectPOSTGRESSQL()
-#Connect to API and set scopes
-drive = setGoogleDriveScopes()
-#Initial start token to compare against, retrieved on script opening 
-startTokenValue = setInitialToken()
+
 
 ##Variables
 #POIs
@@ -339,11 +335,23 @@ phone = config.settings["phone"]
 sleeptimer = 5
 disconnect_timer = 60
 
+###Kick off script####
+while True:
+    try:
+        #Connect to API and set scopes
+        drive = setGoogleDriveScopes()
+        #Initial start token to compare against, retrieved on script opening 
+        startTokenValue = setInitialToken()
+        break
+    except Exception as error:
+        print (f"\nError:{error}\nFailed to interface with Google Drive API, internet may be down, waiting {disconnect_timer} seconds to try again!\n")
+        time.sleep(disconnect_timer)
+        continue
+
 print (f"Start token is: {startTokenValue}")
 #Poll change list to see if start token has changed, kicking off with initial token
 #Keep start token seperate, might use this info later. 
 pageToken = startTokenValue
-###Kick off script####  
 changePolling(pageToken,disconnect_timer,sleeptimer)
 
   
