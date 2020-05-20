@@ -11,3 +11,4 @@ zip/
 GoogleDriveAPI/
 start_servers.sh
 activate_servers
+source env/bin/activate
