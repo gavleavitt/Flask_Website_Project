@@ -70,38 +70,42 @@
 	  <div class="item detail-panel">
 			<div class="item detail-1 detail-panel-col">
 				<div>
-					<p class='detail-context'>Last logged:</p>
+					<p class='detail-context'>Last logged time</p>
 					<p id='last-logged'class='detail-text'>Loading!</p>
+					<!--
+					<p id='start-logging-context' class='detail-context'>Current logging start:</p>
+					<p id='start-logging-text' class='detail-text'>Loading!</p>
+				-->
 				</div>
 			</div>
 			<div class="item detail-2 detail-panel-col">
 				<div>
-					<p class='detail-context'>Location:</p>
-					<p id='location' class='detail-text'>Loading!</p>
+					<p class='detail-context'>Activity</p>
+					<p id='activity' class='detail-text'>Loading!</p>
 				</div>
 			</div>
 			<div class="item detail-3 detail-panel-col">
 				<div>
-				<p class='detail-context'>Nearest Road:</p>
-				<p id='nearest-road' class='detail-text'>Loading!</p>
+					<p class='detail-context'>Location</p>
+					<p id='location' class='detail-text'>Loading!</p>
 				</div>
 			</div>
 			<div class="item detail-4 detail-panel-col">
 				<div>
-				<p class='detail-context'>Battery:</p>
-				<p id= 'batterylife' class='detail-text'>Loading!</p>
+					<p class='detail-context'>Nearest Road</p>
+					<p id='nearest-road' class='detail-text'>Loading!</p>
 				</div>
 			</div>
 			<div class="item detail-5 detail-panel-col">
 				<div>
-				<p class='detail-context'>Coordinates:</p>
-				<p  id='coordinates' class='detail-text'>Loading!</p>
+				<p class='detail-context'>Battery</p>
+				<p id= 'batterylife' class='detail-text'>Loading!</p>
 				</div>
 			</div>
 			<div class="item detail-6 detail-panel-col">
 				<div>
-				<p class='detail-context'>Placeholder:</p>
-				<p class='detail-text'>Placeholder!</p>
+					<p class='detail-context'>Coordinates</p>
+					<p  id='coordinates' class='detail-text'>Loading!</p>
 				</div>
 			</div>
 		</div>
@@ -116,13 +120,6 @@
 		L.esri.Vector.basemap('StreetsNight').addTo(map);
 		//L.esri.basemapLayer('DarkGrayLabels').addTo(map);
 
-
-		// Create point feature
-		//var datapoint1 = L.marker([36.60472,-121.39409]).addTo(map);
-		//datapoint1.bindPopup("This is Fort Ord National Monument.");
-		// Create an Empty Popup
-		//var latLongPopup = L.popup();
-		//Set a null time for first loop
 		time = null
 		//Test icon
 		/*
@@ -145,25 +142,15 @@
 			position: 'topleft',
 			size: [200,450]
 		};
-		//leaflet Mouse Position plugin, uses leaflet position placement
+		//leaflet Mouse Position plugin, displays coordinates at cursor location, uses leaflet position placement
 		var mousepos = {
 			position: "bottomright"
 		};
-		//Geoserver localhost WFS json link
-		//var geoserver = 'http://localhost:8082/geoserver/MTB/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=MTB%3Agpsdata&outputFormat=application%2Fjson'
-		var geoserver = 'http://localhost:5000/getgeojson'
-		//var dialog = L.control.dialog(dialog_options)
-		/*
-		Dialog box, live stats are added to this dialog.
-		Need to figure out how to add a DOM id to this.
-		Contains temp text as the data is loading.
-		*/
-			//.setContent("<p>Info is loading!</p>")
-			//.addTo(map);
+		var geoserver = 'http://10.0.0.4:5000/getgeojson'
 		L.control.mousePosition(mousepos).addTo(map);
 		realtime = L.realtime({
 			/*
-			Leaflet realtime plugin, polls geoserver WFS json service id field for changes and places a marker at the most recent location.
+			Leaflet realtime plugin, polls json service id field for changes and places a marker at the most recent location.
 			*/
 				url: geoserver,
 		    crossOrigin:false,
@@ -175,29 +162,25 @@
 				}
 		}).addTo(map);
 		realtime.on('update', function(e) {
+			/**
+			Changes displayed text when changes are detected during polling.
+			*/
 		    Object.keys(e.update).forEach(function(id) {
 				var feature = e.update[id];
-				//see https://stackoverflow.com/questions/11038252/how-can-i-calculate-the-difference-between-two-times-that-are-in-24-hour-format
-				var loggedtime = format_time(feature.properties.gpstime);
-				// document.getElementsByClassName("leaflet-control-dialog-contents")[0].innerHTML = "Last logged time: <br><b>" + loggedtime + "</b>";
-				// document.getElementsByClassName("leaflet-control-dialog-contents")[0].innerHTML += "<br><b>(" + timedif(feature.properties.gpstime) + ")</b>";
-				// document.getElementsByClassName("leaflet-control-dialog-contents")[0].innerHTML += locationtext(feature.properties.poi,feature.properties.city,
-				// 	feature.properties.county,feature.properties.trail,feature.properties.dist_nearesttrail,
-				// 	feature.properties.road,feature.properties.dist_nearestroad,feature.properties.poi);
-				// document.getElementsByClassName("leaflet-control-dialog-contents")[0].innerHTML += "<br>Coordinates:" +
-				// 	coors(feature.properties.lat,feature.properties.lon,feature.properties.provider);
-				// document.getElementsByClassName("leaflet-control-dialog-contents")[0].innerHTML += "<br>Phone battery: <br><b>" + feature.properties.battery + "%</b>";
-				document.getElementById('last-logged').innerHTML = loggedtime
-				document.getElementById('last-logged').innerHTML += "<br>(" + timedif(feature.properties.gpstime) + ")";
-				document.getElementById('location').innerHTML = locationtext(feature.properties.poi,feature.properties.city,
-					feature.properties.county,feature.properties.trail,feature.properties.dist_nearesttrail);
-				document.getElementById('nearest-road').innerHTML = nearestroad(feature.properties.road,feature.properties.dist_nearestroad);
+				document.getElementById('last-logged').innerHTML = format_time(feature.properties.timeutc)
+				document.getElementById('last-logged').innerHTML += "<br>(" + timedif(feature.properties.timeutc) + ")";
+				document.getElementById('location').innerHTML = locationtext(feature.properties.POI,feature.properties.city,
+					feature.properties.county,feature.properties.nearesttrail,feature.properties.dist_nearesttrail);
+				document.getElementById('nearest-road').innerHTML = nearestroad(feature.properties.nearestroad,feature.properties.dist_nearestroad);
 				document.getElementById('batterylife').innerHTML = batteryinfo(feature.properties.battery) + "%";
 				document.getElementById('coordinates').innerHTML = coors(feature.properties.lat,feature.properties.lon,feature.properties.provider);
+				document.getElementById('activity').innerHTML = feature.properties.profile
+				//document.getElementById('start-logging-text').innerHTML = format_time(feature.properties.startstamp)
 
 				if (time !== feature.properties.gpstime){
 					/**
-					Changes map bounds only if the time field has changed.
+					Used to detect if a new record has been entered, changes map bounds only if the time field has changed,
+					consider using the "Id" field instead.
 					*/
 					console.log("changing bounds!")
 					time = feature.properties.gpstime

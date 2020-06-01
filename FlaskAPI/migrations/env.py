@@ -32,6 +32,30 @@ target_metadata = current_app.extensions['migrate'].db.metadata
 # my_important_option = config.get_main_option("my_important_option")
 # ... etc.
 
+# taken from https://alembic.sqlalchemy.org/en/latest/cookbook.html#don-t-generate-any-drop-table-directives-with-autogenerate
+# def include_object(object, name, type_, reflected, compare_to):
+#     if type_ == "table" and reflected and compare_to is None:
+#         return False
+#     else:
+#         return True
+
+#Taken from: https://stackoverflow.com/questions/39057587/preserve-existing-tables-in-database-when-running-flask-migrate
+def include_object(object, name, type_, reflected, compare_to):
+    if type_ == 'table' and name in ('geometry_columns', 'gpsdata', 'raster_columns', 'raster_overviews','spatial_ref_sys',
+                                      'All_Strava_Activities','CA_Counties','California_Places','OSM_Central_CA_Trails',
+                                      'POI','moco_roads'):
+        return False
+
+    return True
+
+# # in env.py
+# context.configure(
+#     # ...
+#     include_object=include_object
+# )
+
+
+
 
 def run_migrations_offline():
     """Run migrations in 'offline' mode.
@@ -52,7 +76,6 @@ def run_migrations_offline():
 
     with context.begin_transaction():
         context.run_migrations()
-
 
 def run_migrations_online():
     """Run migrations in 'online' mode.
@@ -81,6 +104,7 @@ def run_migrations_online():
     with connectable.connect() as connection:
         context.configure(
             connection=connection,
+            include_object = include_object, #Edited, see https://stackoverflow.com/questions/35342367/how-can-i-ignore-certain-schemas-with-alembic-autogenerate
             target_metadata=target_metadata,
             process_revision_directives=process_revision_directives,
             **current_app.extensions['migrate'].configure_args

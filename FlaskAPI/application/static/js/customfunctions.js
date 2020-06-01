@@ -1,5 +1,8 @@
 
 function gpsmarker(feature, latlng){
+  /**
+  Returns marker for gps point.
+  */
   return L.circleMarker(latlng,livemarkersettings);
 };
 
@@ -26,6 +29,7 @@ function timedif(jsontime){
   msdif = (currenttime - datetime);
   seconds = msdif/1000;
   hours = seconds/3600;
+  console.log(hours)
   if (hours > 24){
     res = "Over a day old!"
     return res;
@@ -51,11 +55,11 @@ function locationtext(poi,city,county,trail,disttrail){
   Formats location responses
   */
  if (["Home","Work"].includes(poi)){
-   display_text = poi + "</b>" + region(city,county);
+   display_text = "<div class='poi-text'>" + poi + "</div>" + "" + region(city,county);
  } else if (poi !== null){
    trail_text = trailinfo(poi,trail,disttrail);
    region_text = region(city,county);
-   display_text = "<br><b>" + poi + "</b>" + trail_text + region_text;
+   display_text = "<br>" + poi + "" + trail_text + region_text;
  } else {
    display_text = region(city,county);
  };
@@ -63,6 +67,9 @@ return display_text
 };
 
 function nearestroad(road,distroad){
+  /**
+  Formats nearest road information.
+  */
   road_text = road + " (" +
     distroad.toString().split(".")[0] + " feet away)"
   return road_text
@@ -70,39 +77,46 @@ function nearestroad(road,distroad){
 
 function region(city,county){
   /**
-
+  Formats region information.
   */
   if (city !== null){
-    cityloc = "<br>City:<br><b>" + city + "</b>";
+    cityloc = "<br><div class='detail-context'>City:</div>" + city;
   } else {
-    cityloc = "<br>City:<br><b>Not in a CA city</b>";
+    cityloc = "<br>City:<br>Not in a CA city";
   }
   if (county !== null){
-    countyloc = "<br>County:<br><b>" + county + "</b>";
+    countyloc = "<br><div class='detail-context'>County:</div>" + county ;
   } else {
-    countyloc = "<br>County:<br><b>Not in California!</b>";
+    countyloc = "<br>County:Not in California!";
   }
   res = cityloc + countyloc;
   return res;
 };
 
 function trailinfo(poi,trail,disttrail,speed){
-  res = "<br>Nearest trail is:<br><b>" + trail + "<br>(" + disttrail.toString().split(".")[0] + " feet away</b>)";
+  /**
+  Formats trail information.
+  */
+  res = "<br>Nearest trail is:<br>" + trail + "<br>(" + disttrail.toString().split(".")[0] + " feet away";
   if (speed == 0){
-    res += "<br><b>Not moving!</b>";
+    res += "<br>Not moving!";
   } else {
-    res += "<br>Speed: " + "<b>" + (speed*2.24).toString().split(".")[0] + "</b> mph"
+    res += "<br>Speed: " + "" + (speed*2.24).toString().split(".")[0] + "mph"
   }
   return res;
 };
 
 function batteryinfo(battery){
+  /**
+  Formats battery display.
+  Add logic and calls to static files to display a battery icon.
+  */
   return battery;
 }
 
 function coors(lat,lon,provider){
   /**
-
+  Formats location information.
   */
   lat = lat.toString().split(".")[0] + "." + lat.toString().split(".")[1].substr(0,4);
   lon = lon.toString().split(".")[0] + "." + lon.toString().split(".")[1].substr(0,4);
@@ -111,6 +125,6 @@ function coors(lat,lon,provider){
   } else {
     accur_stat = "(High accuarcy GPS!)";
   }
-  res = "Lat: <b>" + lat + "</b> " + "Lon: <b> " + lon + "<br>" + accur_stat + "</b>";
+  res = "Lat: " + lat + ", " + "Lon: " + lon + "<br>" + accur_stat + "";
   return res
 };

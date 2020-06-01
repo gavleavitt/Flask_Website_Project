@@ -16,7 +16,19 @@ from sqlalchemy import text
 def queries(geomdat):
     """
     
+
+    Parameters
+    ----------
+    geomdat : TYPE
+        DESCRIPTION.
+
+    Returns
+    -------
+    res : TYPE
+        DESCRIPTION.
+
     """
+    
     res = {}
     res["POI"] = POI_I_Q(geomdat)
     res['city'] = city_I_Q(geomdat)
@@ -35,6 +47,17 @@ def queries(geomdat):
 def POI_I_Q(geomdat):
     """
     
+    Parameters
+    ----------
+    geomdat : TYPE
+        DESCRIPTION.
+
+    Returns
+    -------
+    result : TYPE
+        DESCRIPTION.
+
+ 
     """
     query = db.session.query(models.POI).filter(models.POI.geom.ST_Intersects(geomdat))
     
@@ -59,7 +82,19 @@ def POI_I_Q(geomdat):
 def city_I_Q(geomdat):
     """
     
+
+    Parameters
+    ----------
+    geomdat : TYPE
+        DESCRIPTION.
+
+    Returns
+    -------
+    result : TYPE
+        DESCRIPTION.
+
     """
+
     query = db.session.query(models.CaliforniaPlace).filter(models.CaliforniaPlace.geom.ST_Intersects(geomdat))
     
     query_count = 0
@@ -83,7 +118,19 @@ def city_I_Q(geomdat):
 def county_I_Q(geomdat):
     """
     
+
+    Parameters
+    ----------
+    geomdat : TYPE
+        DESCRIPTION.
+
+    Returns
+    -------
+    TYPE
+        DESCRIPTION.
+
     """
+
     query = db.session.query(models.CACounty).filter(models.CACounty.geom.ST_Intersects(geomdat))
     
     query_count = 0
@@ -107,8 +154,20 @@ def county_I_Q(geomdat):
 
 def nearestroad(coordinate):
     """
+    
+
+    Parameters
+    ----------
+    coordinate : TYPE
+        DESCRIPTION.
+
+    Returns
+    -------
+    result : TYPE
+        DESCRIPTION.
 
     """
+  
     sql = text(    """WITH nearestcanidates AS (
     SELECT
         roads.name,
@@ -143,8 +202,20 @@ def nearestroad(coordinate):
 
 def nearesttrail(coordinate):
     """
+    
+
+    Parameters
+    ----------
+    coordinate : TYPE
+        DESCRIPTION.
+
+    Returns
+    -------
+    result : TYPE
+        DESCRIPTION.
 
     """
+ 
     sql = ('''
     WITH nearestcanidates AS (
     SELECT
@@ -183,6 +254,19 @@ def nearesttrail(coordinate):
 
 def getrecords(rec_limit):
     """
+    
+
+    Parameters
+    ----------
+    rec_limit : TYPE
+        DESCRIPTION.
+
+    Returns
+    -------
+    res_dict : TYPE
+        DESCRIPTION.
+
+
     SQL Alchemy ORM approach, see https://docs.sqlalchemy.org/en/13/orm/query.html and see:
         https://hackersandslackers.com/database-queries-sqlalchemy-orm/
     """
@@ -195,3 +279,56 @@ def getrecords(rec_limit):
         res_dict[row.__dict__['id']] = row.__dict__
         #row_count += 1 
     return res_dict
+
+def gethashpass(username):
+    """
+    
+
+    Parameters
+    ----------
+    username : TYPE
+        DESCRIPTION.
+
+    Returns
+    -------
+    res_dict : TYPE
+        DESCRIPTION.
+
+    """
+    query = db.session.query(models.User.hashpass).filter(models.User.user==username).all()
+    res_dict = {}
+    for row in query:
+        res_dict[username] = row.hashpass
+    if len(res_dict) == 0:
+        return None
+    else:
+        return res_dict
+    
+def getroles(username):
+    """
+    
+
+    Parameters
+    ----------
+    username : TYPE
+        DESCRIPTION.
+
+    Returns
+    -------
+    res : TYPE
+        DESCRIPTION.
+
+    """
+    query = db.session.query(models.Roles.roles).filter(models.Roles.user==username).all()
+    res = ()
+    for row in query:
+        res += row
+    if len(res) == 0:
+        return None
+    else:
+        res = list(res)
+        res = res[0].split(",")
+        return res
+    
+        
+    

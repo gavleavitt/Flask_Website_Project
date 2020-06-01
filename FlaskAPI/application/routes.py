@@ -17,3 +17,6 @@ def gps():
 def main():
     return render_template("public/index.html")
 
+@app.route("/testing")
+def testing():
+    return render_template("private/tracker_API.html")

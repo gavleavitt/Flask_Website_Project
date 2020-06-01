@@ -6,13 +6,12 @@ Created on Fri May 22 17:45:44 2020
 @author: user
 """
 from application import app, models, db
-from application import authentication as authmod
 from application import functions as func
+from application.authentication import auth
 from flask import request
 from flask import jsonify
 from flask import make_response
 import sys
-import json
 from sqlalchemy import Date
 import time
 from application import script_config as dbconfig
@@ -22,8 +21,17 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 
 @app.route("/gpsdat", methods=['POST'])
-@authmod.auth.login_required(role='admin')
+@auth.login_required(role='admin')
 def handle_gps():
+    """
+    
+
+    Returns
+    -------
+    TYPE
+        DESCRIPTION.
+
+    """
     if request.method == 'POST':
         if request.is_json:
             print("Hit server with POST request and valid json mime type!",file=sys.stdout)
@@ -58,8 +66,17 @@ def handle_gps():
     
 
 @app.route("/getgeojson", methods=['GET'])
-@authmod.auth.login_required(role='viewer')
+@auth.login_required(role='viewer')
 def get_geojson():
+    """
+    
+
+    Returns
+    -------
+    result : TYPE
+        DESCRIPTION.
+
+    """
     print("Hit with a get request!")
     result = func.to_geojson()
     return result
