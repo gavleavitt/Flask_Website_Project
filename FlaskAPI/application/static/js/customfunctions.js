@@ -55,7 +55,7 @@ function locationtext(poi,city,county,trail,disttrail){
   Formats location responses
   */
  if (["Home","Work"].includes(poi)){
-   display_text = "<div class='poi-text'>" + poi + "</div>" + "" + region(city,county);
+   display_text = "<span class='poi-text'>" + poi + "</span>" + "" + region(city,county);
  } else if (poi !== null){
    trail_text = trailinfo(poi,trail,disttrail);
    region_text = region(city,county);
@@ -85,7 +85,7 @@ function region(city,county){
     cityloc = "<br>City:<br>Not in a CA city";
   }
   if (county !== null){
-    countyloc = "<br><div class='detail-context'>County:</div>" + county ;
+    countyloc = "<br><span class='detail-context'>County:</span>" + county ;
   } else {
     countyloc = "<br>County:Not in California!";
   }
@@ -113,6 +113,19 @@ function batteryinfo(battery){
   */
   return battery;
 }
+
+function batteryicon(battery){
+/**
+*/
+if (battery >= 70){
+  return "{{ url_for('static', filename='images/batterygreen.') }}";
+} else if (battery >= 45){
+  return "{{ url_for('static', filename='images/batteryyellow.') }}";
+} else if (battery >= 10){
+  return "{{ url_for('static', filename='images/batterydead.') }}";
+} else {
+  return "{{ url_for('static', filename='images/batteryerror.') }}";
+};
 
 function coors(lat,lon,provider){
   /**
