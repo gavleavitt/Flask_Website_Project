@@ -1,7 +1,6 @@
-
 function gpsmarker(feature, latlng){
   /**
-  Returns marker for gps point.
+  Returns marker for gps point. Unused in HTML.
   */
   return L.circleMarker(latlng,livemarkersettings);
 };
@@ -114,19 +113,46 @@ function batteryinfo(battery){
   return battery;
 }
 
+function bearingarrow(bearing,feature,latlng){
+  img = "{{ url_for('static', filename='images/arrow.png') }}";
+  rotation = ("rotate" + "(" + bearing + "deg)")
+  img.style.transform = rotation;
+  var arrowicon = L.icon({
+    iconUrl: img,
+    iconSize: [50,50],
+    fillOpacity: 0.5
+  });
+  L.marker(latlng,{icon: bearingarrow}).addto(map);
+}
+
 function batteryicon(battery){
 /**
 */
-if (battery >= 70){
-  return "{{ url_for('static', filename='images/batterygreen.') }}";
+if (battery >= 80){
+  return "{{ url_for('static', filename='images/battery-green.svg') }}";
+} else if (battery >= 60){
+  return "{{ url_for('static', filename='images/battery-yellow.svg') }}";
 } else if (battery >= 45){
-  return "{{ url_for('static', filename='images/batteryyellow.') }}";
+  return "{{ url_for('static', filename='images/battery-orange.svg') }}";
 } else if (battery >= 10){
-  return "{{ url_for('static', filename='images/batterydead.') }}";
+  return "{{ url_for('static', filename='images/battery-red.svg') }}";
 } else {
-  return "{{ url_for('static', filename='images/batteryerror.') }}";
-};
+  return "{{ url_for('static', filename='images/battery-red-critical.svg) }}";
+}};
 
+function activityicon(profile){
+if (profile == "MTB"){
+  return "{{ url_for('static', filename='images/mtb.svg') }}";
+} else if (profile == "road_bike"){
+  return "{{ url_for('static', filename='images/roadbike.svg') }}";
+} else if (profile == "driving"){
+  return "{{ url_for('static', filename='images/fiesta-white.svg') }}";
+} else if (profile == "walk"){
+  return "{{ url_for('static', filename='images/walk.svg') }}";
+} else if (profile == "run"){
+  return "{{ url_for('static', filename='images/running-figure.svg') }}";
+}};
+  
 function coors(lat,lon,provider){
   /**
   Formats location information.
