@@ -26,23 +26,18 @@
 
 	<!-- Local static files-->
 	<!-- Custom local javascript functions -->
-	<!-- <script src="leaflet/Javascript/customfunctions.js"></script> -->
 	<script src="{{ url_for('static', filename='js/customfunctions.js') }}"></script>
 	<!-- Custom CSS -->
-	<!-- <link rel="stylesheet" href="leaflet/CSS/customCSS.css"/> -->
 	<link rel="stylesheet" href="{{ url_for('static', filename='css/customCSS.css') }}">
+	<!-- Leaflet rotate marker -->
+	<link rel="stylesheet" href="{{ url_for('static', filename='css/leaflet.rotatedMarker.js') }}">
 	<!-- leaflet realtime -->
-	<!-- <script src="leaflet/Javascript/leaflet-realtime.js"></script> -->
 	<script src="{{ url_for('static', filename='js/leaflet-realtime.js') }}"></script>
 	<!-- leaflet Mouse Position JS-->
-	<!-- <script src="leaflet/Javascript/L.Control.MousePosition.js"></script> -->
 	<script src="{{ url_for('static', filename='js/L.Control.MousePosition.js') }}"></script>
 	<!-- leaflet Mouse Position css -->
-	<!--<link rel="stylesheet" href="leaflet/CSS/L.Control.MousePosition.css"/> -->
 	<link rel="stylesheet" href="{{ url_for('static', filename='css/L.Control.MousePosition.css') }}">
 
-	<!--Use this instead for leaflet.wms? -->
-	<!-- <script src="https://cdn.rawgit.com/heigeo/leaflet.wms/gh-pages/dist/leaflet.wms.js"></script> -->
 	<!-- leaflet dialog -->
 	<!-- <script src="leaflet/Javascript/leaflet.wms.js"></script> -->
 	<!-- <script src="leaflet/Javascript/Leaflet.Dialog.js"></script> -->
@@ -51,9 +46,6 @@
 	<!-- <link rel="stylesheet" href="{{ url_for('static', filename='css/Leaflet.Dialog.css') }}" -->
 
 	<style>
-		/*-- Disable scroll bar so title stays in place! */
-		/*html, body{overflow:hidden;}*/
-		/*
 		body {
 				 padding: 0;
 				 margin: 0;
@@ -83,6 +75,9 @@
 					<p class='detail-context'>Activity</p>
 					<p id='activity' class='detail-text'>Loading!</p>
 				</div>
+				<div>
+				<img id='activity-icon' class='icon' src="{{ url_for('static', filename='images/question.svg') }}">
+				</div>
 			</div>
 			<div class="item detail-3 detail-panel-col">
 				<div>
@@ -98,8 +93,11 @@
 			</div>
 			<div class="item detail-5 detail-panel-col">
 				<div>
-				<p class='detail-context'>Battery</p>
-				<p id= 'batterylife' class='detail-text'>Loading!</p>
+					<p class='detail-context'>Battery</p>
+					<p id= 'batterylife' class='detail-text'>Loading!</p>
+				</div>
+				<div>
+					<img id='battery-icon' class='icon' src="{{ url_for('static', filename='images/battery-white-loading.svg') }}">
 				</div>
 			</div>
 			<div class="item detail-6 detail-panel-col">
@@ -110,6 +108,10 @@
 			</div>
 		</div>
 	</div>
+	<!-- Set the url root -->
+	<script type=text/javascript>
+  	$SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+	</script>
 	<script>
 		// intilize map:
 		var map = L.map('map').setView([36.61,-121.83],15);
@@ -121,13 +123,6 @@
 		//L.esri.basemapLayer('DarkGrayLabels').addTo(map);
 
 		time = null
-		//Test icon
-		/*
-		var testIcon = L.icon({
-			iconURL: "leaflet/images/raster_icon_self.png",
-			iconSize: [38, 95]
-		});
-		*/
 		//leaflet dialog plugin options
 		var dialog_options = {
 			anchor: [90,5],
@@ -138,35 +133,37 @@
 		var mousepos = {
 			position: "bottomright"
 		};
-		var geoserver = 'http://10.0.0.4:5000/getgeojson'
+		//var server = 'http://10.0.0.4:5000/getgeojson'
+		var server_livepts = $SCRIPT_ROOT + '/getgeojson'
 		L.control.mousePosition(mousepos).addTo(map);
 		realtime = L.realtime({
 			/*
 			Leaflet realtime plugin, polls json service id field for changes and places a marker at the most recent location.
 			*/
-				url: geoserver,
+				url: server_livepts,
 		    crossOrigin:false,
 		    type: 'json'
 		}, {
 			interval: 5 * 1000,
 			pointToLayer: function (feature, latlng) {
 				if (["MTB","Run","Walk","Hike","Driving","road_bike"].includes(feature.properties.profile)){
-					//Live tracking GPS icon, consider using an arrow with a rotation for bearing
+					//Live tracking GPS icon arrow, dynamic rotation according to direction, dynamic location
+						var livemarkersettings = L.icon({
+							iconUrl: "{{ url_for('static', filename='images/arrow.png') }}",
+							fillOpacity: 0.5,
+							rotationAngle: Number(feature.properties.Direction)
+						});
+					};
+						L.Marker(latlng,livemarkersettings).addTo(Map);
+				} else {
+					//Live tracking GPS icon, static shape, dynamic location
 					var livemarkersettings = {
 						radius: 8,
 						weight: 1,
 						fillColor: "#FF0010",
 						color: "#00FF00",
 						fillOpacity: 0.5
-					};
-					return L.circleMarker(latlng,livemarkersettings);
-				} else {
-					var livemarkersettings = L.icon({
-						iconUrl: "",
-						weight: 1,
-						fillOpacity: 0.5
-					});
-					return L.Marker(latlng,livemarkersettings);
+					L.circleMarker(latlng,livemarkersettings).addTo(Map);
 				}
 			}
 		}).addTo(map);
@@ -184,6 +181,8 @@
 				document.getElementById('batterylife').innerHTML = batteryinfo(feature.properties.battery) + "%";
 				document.getElementById('coordinates').innerHTML = coors(feature.properties.lat,feature.properties.lon,feature.properties.provider);
 				document.getElementById('activity').innerHTML = feature.properties.profile
+				document.getElementById('battery-icon').src = batteryicon(feature.properties.battery)
+				document.getElementById('activity-icon').src = activityicon(feature.properties.profile)
 				//document.getElementById('start-logging-text').innerHTML = format_time(feature.properties.startstamp)
 
 				if (time !== feature.properties.gpstime){
