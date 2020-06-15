@@ -128,14 +128,6 @@
 			iconSize: [38, 95]
 		});
 		*/
-		//Live tracking GPS icon, consider using an arrow with a rotation for bearing
-		var livemarkersettings = {
-			radius: 8,
-			weight: 1,
-			fillColor: "#FF0010",
-			color: "#00FF00",
-			fillOpacity: 0.5
-		};
 		//leaflet dialog plugin options
 		var dialog_options = {
 			anchor: [90,5],
@@ -156,10 +148,27 @@
 		    crossOrigin:false,
 		    type: 'json'
 		}, {
-		    interval: 5 * 1000,
-				pointToLayer: function (feature, latlng) {
+			interval: 5 * 1000,
+			pointToLayer: function (feature, latlng) {
+				if (["MTB","Run","Walk","Hike","Driving","road_bike"].includes(feature.properties.profile)){
+					//Live tracking GPS icon, consider using an arrow with a rotation for bearing
+					var livemarkersettings = {
+						radius: 8,
+						weight: 1,
+						fillColor: "#FF0010",
+						color: "#00FF00",
+						fillOpacity: 0.5
+					};
 					return L.circleMarker(latlng,livemarkersettings);
+				} else {
+					var livemarkersettings = L.icon({
+						iconUrl: "",
+						weight: 1,
+						fillOpacity: 0.5
+					});
+					return L.Marker(latlng,livemarkersettings);
 				}
+			}
 		}).addTo(map);
 		realtime.on('update', function(e) {
 			/**
