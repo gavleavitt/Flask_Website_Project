@@ -30,7 +30,7 @@
 	<!-- Custom CSS -->
 	<link rel="stylesheet" href="{{ url_for('static', filename='css/customCSS.css') }}">
 	<!-- Leaflet rotate marker -->
-	<link rel="stylesheet" href="{{ url_for('static', filename='css/leaflet.rotatedMarker.js') }}">
+	<script src="{{ url_for('static', filename='js/leaflet.rotatedMarker.js') }}"></script>
 	<!-- leaflet realtime -->
 	<script src="{{ url_for('static', filename='js/leaflet-realtime.js') }}"></script>
 	<!-- leaflet Mouse Position JS-->
@@ -46,6 +46,7 @@
 	<!-- <link rel="stylesheet" href="{{ url_for('static', filename='css/Leaflet.Dialog.css') }}" -->
 
 	<style>
+	/*
 		body {
 				 padding: 0;
 				 margin: 0;
@@ -62,6 +63,35 @@
 	  <div class="item detail-panel">
 			<div class="item detail-1 detail-panel-col">
 				<div>
+					<div class="div-span-margin">
+						<span class='detail-context'>Location</span>
+					</div>
+					<div class="div-span-margin">
+						<span id='location' class='detail-text'><br>Loading!</span>
+					</div>
+				</div>
+			</div>
+			<div class="item detail-2 detail-panel-col text-icon-panel">
+				<div>
+					<div>
+						<p class='detail-context'>Activity</p>
+					</div>
+					<div>
+						<p id='activity' class='detail-text'>Loading!</p>
+					</div>
+				</div>
+				<div>
+				<img id='activity-icon' class='icon-activity' src="{{ url_for('static', filename='images/loading.svg') }}">
+				</div>
+			</div>
+			<div class="item detail-3 detail-panel-col">
+				<div>
+					<p id= "nearest-road-text" class='detail-context'>Nearest Road</p>
+					<p id='nearest-road' class='detail-text'>Loading!</p>
+				</div>
+			</div>
+			<div class="item detail-4 detail-panel-col">
+				<div>
 					<p class='detail-context'>Last logged time</p>
 					<p id='last-logged'class='detail-text'>Loading!</p>
 					<!--
@@ -70,34 +100,13 @@
 				-->
 				</div>
 			</div>
-			<div class="item detail-2 detail-panel-col">
-				<div>
-					<p class='detail-context'>Activity</p>
-					<p id='activity' class='detail-text'>Loading!</p>
-				</div>
-				<div>
-				<img id='activity-icon' class='icon' src="{{ url_for('static', filename='images/question.svg') }}">
-				</div>
-			</div>
-			<div class="item detail-3 detail-panel-col">
-				<div>
-					<p class='detail-context'>Location</p>
-					<p id='location' class='detail-text'>Loading!</p>
-				</div>
-			</div>
-			<div class="item detail-4 detail-panel-col">
-				<div>
-					<p class='detail-context'>Nearest Road</p>
-					<p id='nearest-road' class='detail-text'>Loading!</p>
-				</div>
-			</div>
-			<div class="item detail-5 detail-panel-col">
+			<div class="item detail-5 detail-panel-col text-icon-panel">
 				<div>
 					<p class='detail-context'>Battery</p>
 					<p id= 'batterylife' class='detail-text'>Loading!</p>
 				</div>
 				<div>
-					<img id='battery-icon' class='icon' src="{{ url_for('static', filename='images/battery-white-loading.svg') }}">
+					<img id='battery-icon' class='icon-battery' src="{{ url_for('static', filename='images/battery-white-loading.svg') }}">
 				</div>
 			</div>
 			<div class="item detail-6 detail-panel-col">
@@ -134,7 +143,9 @@
 			position: "bottomright"
 		};
 		//var server = 'http://10.0.0.4:5000/getgeojson'
-		var server_livepts = $SCRIPT_ROOT + '/getgeojson'
+		var server_livepts = $SCRIPT_ROOT + '/api/v0.1/getgeojson'
+		console.log("############# Address is: " + server_livepts)
+		console.log($SCRIPT_ROOT)
 		L.control.mousePosition(mousepos).addTo(map);
 		realtime = L.realtime({
 			/*
@@ -148,13 +159,14 @@
 			pointToLayer: function (feature, latlng) {
 				if (["MTB","Run","Walk","Hike","Driving","road_bike"].includes(feature.properties.profile)){
 					//Live tracking GPS icon arrow, dynamic rotation according to direction, dynamic location
-						var livemarkersettings = L.icon({
-							iconUrl: "{{ url_for('static', filename='images/arrow.png') }}",
-							fillOpacity: 0.5,
-							rotationAngle: Number(feature.properties.Direction)
+					var liveicon = L.icon({
+							iconUrl: 'static/images/arrow_green.png',
+							iconSize: [30, 50],
+							//fillOpacity: 0.5
 						});
-					};
-						L.Marker(latlng,livemarkersettings).addTo(Map);
+					//};
+					angle = Number(feature.properties.direction)
+					return L.marker(latlng,{icon: liveicon,rotationAngle:angle,rotationOrigin:'center'});
 				} else {
 					//Live tracking GPS icon, static shape, dynamic location
 					var livemarkersettings = {
@@ -163,7 +175,8 @@
 						fillColor: "#FF0010",
 						color: "#00FF00",
 						fillOpacity: 0.5
-					L.circleMarker(latlng,livemarkersettings).addTo(Map);
+					};
+					return L.circleMarker(latlng,livemarkersettings);
 				}
 			}
 		}).addTo(map);
@@ -173,25 +186,24 @@
 			*/
 		    Object.keys(e.update).forEach(function(id) {
 				var feature = e.update[id];
-				document.getElementById('last-logged').innerHTML = format_time(feature.properties.timeutc)
-				document.getElementById('last-logged').innerHTML += "<br>(" + timedif(feature.properties.timeutc) + ")";
-				document.getElementById('location').innerHTML = locationtext(feature.properties.POI,feature.properties.city,
-					feature.properties.county,feature.properties.nearesttrail,feature.properties.dist_nearesttrail);
-				document.getElementById('nearest-road').innerHTML = nearestroad(feature.properties.nearestroad,feature.properties.dist_nearestroad);
-				document.getElementById('batterylife').innerHTML = batteryinfo(feature.properties.battery) + "%";
+				document.getElementById('last-logged').innerHTML = formattime(feature.properties.timeutc);
+				document.getElementById('last-logged').innerHTML += timedif(feature.properties.timeutc);
+				document.getElementById('nearest-road').innerHTML = nearestpathway(feature.properties.nearestroad,feature.properties.nearesttrail,feature.properties.dist_nearestroad,
+					feature.properties.dist_nearesttrail,feature.properties.POI,feature.properties.speed);
+				document.getElementById('batterylife').innerHTML = batteryinfo(feature.properties.battery);
 				document.getElementById('coordinates').innerHTML = coors(feature.properties.lat,feature.properties.lon,feature.properties.provider);
-				document.getElementById('activity').innerHTML = feature.properties.profile
-				document.getElementById('battery-icon').src = batteryicon(feature.properties.battery)
-				document.getElementById('activity-icon').src = activityicon(feature.properties.profile)
-				//document.getElementById('start-logging-text').innerHTML = format_time(feature.properties.startstamp)
+				document.getElementById('activity').innerHTML = activitytext(feature.properties.profile);
+				document.getElementById('location').innerHTML = locationtext(feature.properties.POI,feature.properties.city,feature.properties.county);
+				document.getElementById('battery-icon').src = batteryicon(feature.properties.battery);
+				activityicon(feature.properties.profile)
 
-				if (time !== feature.properties.gpstime){
+				if (time !== feature.properties.timestamp_epoch){
 					/**
 					Used to detect if a new record has been entered, changes map bounds only if the time field has changed,
 					consider using the "Id" field instead.
 					*/
 					console.log("changing bounds!")
-					time = feature.properties.gpstime
+					time = feature.properties.timestamp_epoch
 					map.fitBounds(realtime.getBounds(), {maxZoom: 15})
 				}
 				}.bind(this));
