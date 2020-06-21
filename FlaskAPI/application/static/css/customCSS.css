@@ -47,15 +47,19 @@ html{
   color:white;
 }
 
-.poi-text{
+.teal-text{
   color:#20ebf5;
+  font-size: 1.5rem;
 }
 
 .detail-text{
   color:#5ac73e;
   /* text-shadow: 1px 1px 4px #5ac73e; */
 }
-
+.detail-text-important{
+  color:#FF073A;
+  /* text-shadow: 1px 1px 4px #5ac73e; */
+}
 .item {
   /*background-color: #719ef0;*/
   box-shadow: 0 5px 10px rgba(0,0,0,0.19), 0 3px 3px rgba(0,0,0,0.23);
@@ -92,7 +96,6 @@ html{
 .map-panel{
  grid-row: 2/4;
  grid-column: 1/2;
-
 }
 
 .detail-panel{
@@ -106,9 +109,37 @@ html{
 }
 
 .detail-2{
+  display: grid;
+
 }
 
-.icon{
+.icon-activity{
   width: 5vw;
   height: 5vw;
+}
+
+.icon-battery{
+  width: 7vw;
+  height: 7vw;
+}
+
+.text-icon-panel{
+  display: grid;
+  width:100%;
+  height:100%;
+  grid-template-columns: auto;
+  grid-template-rows: 60% 0%;
+  grid-gap: 0.5rem;
+  border: 0;
+  border-radius: 0;
+}
+
+.div-span-margin{
+  margin-top: 10%;
+  margin-bottom: 10%;
+}
+
+.div-span-nomargin{
+  margin-top: 0%;
+  margin-bottom: 0%;
 }

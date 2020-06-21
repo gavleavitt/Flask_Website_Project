@@ -24,7 +24,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 @auth.login_required(role='admin')
 def handle_gps():
     """
-    
+
 
     Returns
     -------
@@ -38,15 +38,16 @@ def handle_gps():
             #data = request.get_json(force = True)
             data = request.get_json()
             print("Request data has been fetched!",file=sys.stdout)
-            geomdat = (f"SRID={dbconfig.settings['srid']};POINT({data['Longitude']} {data['Latitude']})") 
+            geomdat = (f"SRID={dbconfig.settings['srid']};POINT({data['Longitude']} {data['Latitude']})")
+            print(geomdat)
             times = func.converttime(data['Timestamp'],data['Start_timestamp'])
             #intersects = DBQ.POI_I_Q(geomdat)
             #print (f"Intersection test: {intersects}")
             querydat = DBQ.queries(geomdat)
-            newrecord = models.gpsdatmodel(lat=data['Latitude'], lon=data['Longitude'], satellites=int(data['Satellites']), 
-                altitude=float(data['Altitude']), speed=float(data['Speed']),accuracy=data['Accuracy'].split(".")[0], 
+            newrecord = models.gpsdatmodel(lat=data['Latitude'], lon=data['Longitude'], satellites=int(data['Satellites']),
+                altitude=float(data['Altitude']), speed=float(data['Speed']),accuracy=data['Accuracy'].split(".")[0],
                 direction=data['Direction'].split(".")[0], provider=data['Provider'],
-                timestamp_epoch= times['timestamp_e'], timeutc=data['Time_UTC'],date=data['Date'], startstamp=times['timestart'], 
+                timestamp_epoch= times['timestamp_e'], timeutc=data['Time_UTC'],date=data['Date'], startstamp=times['timestart'],
                 battery=data['Battery'].split(".")[0], androidid=data['Android_ID'],serial=data['Serial'], profile=data['Profile'],
                 hhop=func.string_to_none((data['hdop'])), vdop=func.string_to_none((data['vdop'])), pdop=func.string_to_none((data['pdop'])),
                 activity = data['Activity'],travelled=data['Dist_Travelled'].split(".")[0],
@@ -63,13 +64,13 @@ def handle_gps():
         else:
             print("Got a POST request but the payload isnt in JSON!", file=sys.stdout)
             return {"error": "The request payload is not in JSON format"}
-    
 
-@app.route("/getgeojson", methods=['GET'])
+
+@app.route("/api/v0.1/getgeojson", methods=['GET'])
 @auth.login_required(role='viewer')
 def get_geojson():
     """
-    
+
 
     Returns
     -------

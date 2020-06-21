@@ -227,6 +227,7 @@ def nearestroad(coordinate):
         distance
     LIMIT 1""")
     #Execute database query using the coordinates as a variable.
+    print(f"Going to run query with coordinate: {coordinate}")
     query = db.session.execute(sql,{"param":coordinate})
     result = {}
     query_count = 0

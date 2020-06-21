@@ -5,7 +5,7 @@ function gpsmarker(feature, latlng){
   return L.circleMarker(latlng,livemarkersettings);
 };
 
-function format_time(jsontime){
+function formattime(jsontime){
   /**
   Converts JSON gps timestamp from ISO 8601 UTC to local time.
   input:
@@ -28,49 +28,56 @@ function timedif(jsontime){
   msdif = (currenttime - datetime);
   seconds = msdif/1000;
   hours = seconds/3600;
-  console.log(hours)
   if (hours > 24){
     res = "Over a day old!"
-    return res;
   } else if (hours < 24.0 && hours > 1.0){
     //Hours, minutes
     dif = new Date(msdif).toISOString().substr(11, 5);
-    form_dif = dif.substr(0,2) + " Hours " + dif.substr(3,2) + " Minutes ago";
-    return form_dif;
+    res = dif.substr(0,2) + " Hours " + dif.substr(3,2) + " Minutes ago";
   } else if ( hours < 1 && seconds > 60) {
     //Minutes, seconds
     dif = new Date(msdif).toISOString().substr(14, 5);
-    form_dif = dif.substr(0,2) + " Minutes " + dif.substr(3,2) + " Seconds ago";
-    return form_dif;
+    res = dif.substr(0,2) + " Minutes " + dif.substr(3,2) + " Seconds ago";
   } else if (seconds < 60){
-    return "Less than a minute ago!";
+    res = "Less than a minute ago!";
   } else {
-    return "Time difference error!";
+    res = "Time difference error!";
   }
+  return ("<br>("+ res + ")")
 };
 
-function locationtext(poi,city,county,trail,disttrail){
-  /**
-  Formats location responses
-  */
- if (["Home","Work"].includes(poi)){
-   display_text = "<span class='poi-text'>" + poi + "</span>" + "" + region(city,county);
- } else if (poi !== null){
-   trail_text = trailinfo(poi,trail,disttrail);
-   region_text = region(city,county);
-   display_text = "<br>" + poi + "" + trail_text + region_text;
- } else {
-   display_text = region(city,county);
- };
-return display_text
+function nearestpathway(road,trail,distroad,disttrail,poi,speed){
+  res = ""
+  //if ((poi!=["Home","Work","Relative-Home"]) || (poi!=null)){
+  if ((!["Home","Work","Relative-Home"].includes(poi)) && (poi != null)){
+      if (disttrail < distroad){
+        document.getElementById('nearest-road-text').innerHTML = "<div class='detail-context'>Nearest trail</div>";
+      };
+    res += trailinfo(poi,trail,disttrail,speed);
+    res += "<div class='detail-context'>Nearest road</div>"
+  };
+  res += nearestroad(road,distroad);
+  return res
+};
+
+function activitytext(profile){
+  return "<div class='div-span-margin'><span class='teal-text'<br>" + profile + "</div></span>"
+};
+
+function locationtext(poi,city,county){
+  if (poi !== null){
+    display_text = "<div class='div-span-margin'><span class='teal-text'<br>" + poi + "</div></span>" + region(city,county);
+  }else{
+    display_text = region(city,county);
+  };
+  return display_text
 };
 
 function nearestroad(road,distroad){
   /**
   Formats nearest road information.
   */
-  road_text = road + " (" +
-    distroad.toString().split(".")[0] + " feet away)"
+  road_text = road + "<br>(" + distroad.toString().split(".")[0] + " feet away)"
   return road_text
 };
 
@@ -79,15 +86,18 @@ function region(city,county){
   Formats region information.
   */
   if (city !== null){
-    cityloc = "<br><div class='detail-context'>City:</div>" + city;
+    cityloc = "<div class='detail-context'>City</div>" + city;
   } else {
-    cityloc = "<br>City:<br>Not in a CA city";
-  }
-  if (county !== null){
-    countyloc = "<br><span class='detail-context'>County:</span>" + county ;
+    cityloc = "<div class='detail-context'>City</div>Not within city-limits";
+  };
+  if (county == "Out of State!"){
+    document.getElementById('nearest-road').innerHTML = "<span class='detail-text-important'>Not near any roads!</span>"
+    return "<span class='detail-text-important'>Not in California!</span>";
+  }else if (county !== null){
+    countyloc = "<br><span class='detail-context'>County</span><br>" + county;
   } else {
-    countyloc = "<br>County:Not in California!";
-  }
+    return "<span class='detail-context-important'>Not in California!</span>";
+  };
   res = cityloc + countyloc;
   return res;
 };
@@ -96,11 +106,12 @@ function trailinfo(poi,trail,disttrail,speed){
   /**
   Formats trail information.
   */
-  res = "<br>Nearest trail is:<br>" + trail + "<br>(" + disttrail.toString().split(".")[0] + " feet away";
+  res = "<div class='div-span-nomargin'><span class='teal-text'>" + trail + "</div></span>" + "(" + disttrail.toString().split(".")[0] + " feet away)";
+  res += "<div class='detail-context'><br>Speed</div>"
   if (speed == 0){
-    res += "<br>Not moving!";
+    res += "Not moving!<br>";
   } else {
-    res += "<br>Speed: " + "" + (speed*2.24).toString().split(".")[0] + "mph"
+    res += (speed*2.24).toString().split(".")[0] + "mph<br>"
   }
   return res;
 };
@@ -110,49 +121,42 @@ function batteryinfo(battery){
   Formats battery display.
   Add logic and calls to static files to display a battery icon.
   */
-  return battery;
-}
-
-function bearingarrow(bearing,feature,latlng){
-  img = "{{ url_for('static', filename='images/arrow.png') }}";
-  rotation = ("rotate" + "(" + bearing + "deg)")
-  img.style.transform = rotation;
-  var arrowicon = L.icon({
-    iconUrl: img,
-    iconSize: [50,50],
-    fillOpacity: 0.5
-  });
-  L.marker(latlng,{icon: bearingarrow}).addto(map);
+  return (battery + "%");
 }
 
 function batteryicon(battery){
 /**
 */
 if (battery >= 80){
-  return "{{ url_for('static', filename='images/battery-green.svg') }}";
+  return 'static/images/battery-green.svg';
 } else if (battery >= 60){
-  return "{{ url_for('static', filename='images/battery-yellow.svg') }}";
+  return 'static/images/battery-yellow.svg';
 } else if (battery >= 45){
-  return "{{ url_for('static', filename='images/battery-orange.svg') }}";
+  return 'static/images/battery-orange.svg';
 } else if (battery >= 10){
-  return "{{ url_for('static', filename='images/battery-red.svg') }}";
+  return 'static/images/battery-red.svg';
 } else {
-  return "{{ url_for('static', filename='images/battery-red-critical.svg) }}";
+  return 'static/images/battery-red-critical.svg';;
 }};
 
 function activityicon(profile){
 if (profile == "MTB"){
-  return "{{ url_for('static', filename='images/mtb.svg') }}";
-} else if (profile == "road_bike"){
-  return "{{ url_for('static', filename='images/roadbike.svg') }}";
-} else if (profile == "driving"){
-  return "{{ url_for('static', filename='images/fiesta-white.svg') }}";
-} else if (profile == "walk"){
-  return "{{ url_for('static', filename='images/walk.svg') }}";
-} else if (profile == "run"){
-  return "{{ url_for('static', filename='images/running-figure.svg') }}";
-}};
-  
+  document.getElementById('activity-icon').src = 'static/images/Downhill_sketch.svg';
+} else if (profile == "Road Biking"){
+  document.getElementById('activity-icon').src = 'static/images/roadbike1.svg';
+} else if (profile == "Driving"){
+  document.getElementById('activity-icon').src = 'static/images/fiesta-white.png';
+  document.getElementById("activity-icon").style.width = "9vw";
+  document.getElementById("activity-icon").style.height = "4vw";
+} else if (profile == "Walking"){
+  document.getElementById('activity-icon').src = 'static/images/walk.svg';
+} else if (profile == "Running"){
+  document.getElementById('activity-icon').src = 'static/images/running-figure.svg';
+} else {
+  document.getElementById('activity-icon').src = 'static/images/ellipsis.svg';
+}
+};
+
 function coors(lat,lon,provider){
   /**
   Formats location information.
@@ -160,7 +164,7 @@ function coors(lat,lon,provider){
   lat = lat.toString().split(".")[0] + "." + lat.toString().split(".")[1].substr(0,4);
   lon = lon.toString().split(".")[0] + "." + lon.toString().split(".")[1].substr(0,4);
   if (provider == "network"){
-    accur_stat = "(Low accuracy GPS!)";
+    accur_stat = "(Low accuracy triangulation!)";
   } else {
     accur_stat = "(High accuarcy GPS!)";
   }
