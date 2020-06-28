@@ -5,50 +5,21 @@ Created on Mon May 25 17:40:53 2020
 
 @author: Gavin Leavitt
 
-This module contains PostgresSQL database query functions. 
+This module contains PostgresSQL database query functions that are called by the functions module.  
 
 """
 from application import app, models, db
+from application.models import gpsdatmodel, gpstracks, POI, CaliforniaPlaces, CACounty 
 from application import functions as func
 from application import script_config as dbconfig
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import text
-
-
-
-def queries(geomdat):
-    """
-    Takes Flask API HTTP POST GPS data and issues pre-defined SQLAlchemy database query functions.
-    Data is returned in a dict format that is prepared for insertion into the gps activity database table.
-
-    Parameters
-    ----------
-    geomdat : TYPE
-        DESC
-
-    Returns
-    -------
-    res : Dictonary
-        Dictonary with results of database queries, with the following keys:
-            POI, City, county, road, dist_road, trail, and dist_trail.
-        Empty result values are returned as None, a database friendy format.
-
-    """
-    
-    res = {}
-    res["POI"] = POI_I_Q(geomdat)
-    res['city'] = city_I_Q(geomdat)
-    res["county"] = county_I_Q(geomdat)
-    roadinfo = nearestroad(geomdat)
-    res["road"] = roadinfo["street"]
-    res["dist_road"] = roadinfo["distance"]
-    if res["POI"] in dbconfig.settings["POI_Outdoors"]:
-        outdoors = nearesttrail(geomdat)
-        res["trail"]=outdoors['trail']
-        res['dist_trail']=outdoors['trail_distance']
-    else:
-        res['trail'],res['dist_trail']=None,None
-    return res 
+from application.models import gpsdatmodel as gpsdat
+from sqlalchemy import func as sqlfunc
+from datetime import datetime
+from flask.json import jsonify
+from geojson import Point, Feature, FeatureCollection, LineString
+from geoalchemy2.shape import to_shape
 
 def POI_I_Q(geomdat):
     """
@@ -74,7 +45,6 @@ def POI_I_Q(geomdat):
     """
     #SQLAlchemy and GeoAlchemy SQL query
     query = db.session.query(models.POI).filter(models.POI.geom.ST_Intersects(geomdat))
-    
     #Get the size of the result, used for building out the string result.
     query_count = 0
     for i in query:
@@ -114,7 +84,7 @@ def city_I_Q(geomdat):
 
     """
 
-    query = db.session.query(models.CaliforniaPlace).filter(models.CaliforniaPlace.geom.ST_Intersects(geomdat))
+    query = db.session.query(CaliforniaPlaces).filter(CaliforniaPlaces.geom.ST_Intersects(geomdat))
     
     query_count = 0
     for i in query:
@@ -152,7 +122,7 @@ def county_I_Q(geomdat):
 
     """
 
-    query = db.session.query(models.CACounty).filter(models.CACounty.geom.ST_Intersects(geomdat))
+    query = db.session.query(CACounty).filter(CACounty.geom.ST_Intersects(geomdat))
     
     query_count = 0
     for i in query:
@@ -207,7 +177,7 @@ def nearestroad(coordinate):
     #Raw SQL expression using triple quotes to maintain formatting in SQL form.
     sql = text(    """WITH nearestcanidates AS (
     SELECT
-        roads.name,
+        roads.full_name,
         roads.geom
     FROM
         	moco_roads AS roads
@@ -216,7 +186,7 @@ def nearestroad(coordinate):
     LIMIT 40)
 
     SELECT 
-        nearestcanidates.name,
+        nearestcanidates.full_name,
         ST_Distance(
                 ST_Transform(nearestcanidates.geom,2228),
                 ST_Transform(ST_GeomFromText(:param, 4326),2228)
@@ -307,9 +277,9 @@ def nearesttrail(coordinate):
         result['trail'],result['trail_distance'] = None,None
     return result
 
-def getrecords(rec_limit):
+def getrecords(rec_limit,dataType):
     """
-    Queries PostgresSQL database for newest records.
+    Queries PostgresSQL gps data table for records.
 
     Parameters
     ----------
@@ -325,17 +295,38 @@ def getrecords(rec_limit):
     SQL Alchemy ORM approach, see https://docs.sqlalchemy.org/en/13/orm/query.html and see:
         https://hackersandslackers.com/database-queries-sqlalchemy-orm/
     """
+    #Query based on GET request recieved
     #SQL Alchemy ORM query returning newest records based on the utc timestamp field, .all() method creates a object that's easier to work with
-    query = db.session.query(models.gpsdatmodel).order_by(models.gpsdatmodel.timeutc.desc()).limit(rec_limit).all()
+    if dataType == "gpspoints":
+        #query = db.session.query(models.gpsdatmodel).order_by(models.gpsdatmodel.timeutc.desc()).limit(rec_limit).all()
+        query = db.session.query(gpsdatmodel).order_by(gpsdatmodel.timeutc.desc()).limit(rec_limit)
+    #SQL Alchemy ORM query returning all gps tracks for the current day, this will likely need to be adjusted to account for time-zones
+    #to ensure that "todaydate" always returns date time in california 
+    elif dataType == "gpstracks":
+        todaydate = datetime.today().strftime('%Y-%m-%d')        
+        query = db.session.query(gpstracks).filter_by(date=todaydate)
+        
+        #Unused:
+        #Taken from https://gis.stackexchange.com/questions/233184/converting-geoalchemy2-elements-wkbelement-to-wkt
+        #Queries Postgres table and returns a tuple of 2 items, one with a gpstracks result object, the other with a geojson string representation
+        #of the coordinates
+        #query = db.session.query(gpstracks, sqlfunc.ST_AsGeoJSON(gpstracks.geom)).filter_by(date=todaydate).all()
+        
     res_dict = {}
-    #row_count = 0
-    for row in query:
-        #print(row.__dict__)
+    for row in query:  
         #Create a dictonary for every row in the result object and add to result dictonary, with the record ID as the key to the nested dictonary
-        #.__dict__ is used to make a dictonary from parameters in the query object, this is used for easier processing.
-        res_dict[row.__dict__['id']] = row.__dict__
-        #row_count += 1 
-    return res_dict
+        #.__dict__ is used to make a dictonary from parameters in the query object, this is used for easier processing
+        res_dict[row.__dict__['id']] = row.__dict__ 
+        
+        #Unused:
+        #Build dictonary using different parameters depending on the type of GET request recieved, the db queries return different result objects
+        #that must be parsed differently
+        # if dataType == "gpspoints": 
+        #     res_dict[row.__dict__['id']] = row.__dict__ 
+        # elif dataType == "gpstracks":
+        #     res_dict[row[0].__dict__['id']] = row[0].__dict__
+    #Returning single dict so return can be built out with more entries if needed.        
+    return {"dict":res_dict}
 
 def gethashpass(username):
     """
@@ -397,4 +388,49 @@ def getroles(username):
         res = list(res)
         res = res[0].split(",")
         return res
+            
+def getdist(coordinate1, coordinate2): 
+    #Geoalchemy ORM expression
+    res = db.session.query(sqlfunc.ST_Distance_Sphere(sqlfunc.ST_GeomFromText(coordinate1),sqlfunc.ST_GeomFromText(coordinate2)))
+    #coordinate1 = coordinate1
+    #res = db.session.query(sqlfunc.ST_Distance_Sphere(coordinate1,coordinate2))
+    dist = None
+    for i in res:
+        #Make sure the data comes through as a float, not a ORM object
+        dist = float(i[0])
+        #Round off number, don't need high precision 
+        dist = round(dist,1)
+    return dist
     
+def getpathpointrecords(datetoday):
+    """
+    
+    Returns a dictonary with a single top level key and a nested dictonary of record details, kept logic for multiple top level keys in 
+    case I need to build this function out. 
+
+    Parameters
+    ----------
+    coordinate : TYPE
+        DESCRIPTION.
+    datetoday : TYPE
+        DESCRIPTION.
+
+    Returns
+    -------
+    res_dict : TYPE
+        DESCRIPTION.
+
+    """
+    records = db.session.query(gpsdat.id,gpsdat.lat,gpsdat.lon,gpsdat.geom,gpsdat.timeutc,gpsdat.date).\
+        filter(gpsdat.date == datetoday).\
+        order_by(gpsdat.timeutc.desc()).limit(1).all()
+    res_dict = {}
+    row_count = 0
+    for row in records:
+        row_count += 1
+    if row_count > 0:
+        for row in records:
+            res_dict[row.id] = {"lat":row.lat,"lon":row.lon,"utc":row.timeutc,"date":row.date,"geom":row.geom}
+        return res_dict
+    else:
+        return None

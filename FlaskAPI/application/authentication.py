@@ -5,8 +5,8 @@ Created on Fri May 29 13:32:44 2020
 
 @author: user
 """
-from application import app, db, models
-from application import script_config as dbconfig
+#from application import app, db, models
+#from application import script_config as dbconfig
 from werkzeug.security import generate_password_hash, check_password_hash
 from application import DB_Queries as DBQ
 from flask_httpauth import HTTPBasicAuth
