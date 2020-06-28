@@ -3,7 +3,6 @@
 leaflet_testing/script_config.py
 Data.*
 Data/
-images/
 script_config.*
 .spyproject/
 __pycache__/
