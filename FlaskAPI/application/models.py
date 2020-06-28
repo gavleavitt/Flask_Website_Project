@@ -13,8 +13,23 @@ from geoalchemy2.types import Geometry
 from geoalchemy2 import Geometry
 from flask_sqlalchemy import SQLAlchemy
 
+
+class gpstracks(db.Model):
+    __tablename__ = 'gpstracks'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    timestamp_epoch = db.Column(db.DateTime())
+    timeutc = db.Column(db.DateTime())
+    date = db.Column(db.Date())
+    startstamp = db.Column(db.DateTime())
+    gpsid = db.Column(db.Integer())
+    androidid = db.Column(db.String(30))
+    serial = db.Column(db.String(30))
+    profile = db.Column(db.String(30))
+    geom = db.Column(Geometry('Linestring', 4326, from_text='ST_GeomFromEWKT', name='geometry'))
+    
 class gpsdatmodel(db.Model):
-    __tablename__ = 'gpsapidattest'
+    __tablename__ = 'gpsapidata'
 
     id = db.Column(db.Integer, primary_key=True)
     lat = db.Column(db.Float())
@@ -52,6 +67,7 @@ class gpsdatmodel(db.Model):
 
 class User(db.Model):
     __tablename__ = 'app_users'
+    
     id = db.Column(db.Integer, primary_key=True)
     user = db.Column(db.String())
     hashpass = db.Column(db.String(120))
@@ -59,6 +75,7 @@ class User(db.Model):
     
 class Roles(db.Model):
     __tablename__ = 'app_roles'
+    
     id = db.Column(db.Integer, primary_key=True)
     user = db.Column(db.String())
     roles = db.Column(db.String())
@@ -104,7 +121,7 @@ class CACounty(db.Model):
     intptlat = db.Column(db.String(11))
     intptlon = db.Column(db.String(12))
 
-class CaliforniaPlace(db.Model):
+class CaliforniaPlaces(db.Model):
     __tablename__ = 'California_Places'
 
     id = db.Column(db.Integer, primary_key=True, server_default=db.FetchedValue())

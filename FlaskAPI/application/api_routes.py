@@ -7,25 +7,24 @@ Created on Fri May 22 17:45:44 2020
 """
 from application import app, models, db
 from application import functions as func
+from application import objectgeneration as OBG
 from application.authentication import auth
 from flask import request
 from flask import jsonify
-from flask import make_response
+#from flask import make_response
 import sys
-from sqlalchemy import Date
-import time
+#from sqlalchemy import Date
+#import time
 from application import script_config as dbconfig
 from application import DB_Queries as DBQ
-from flask_httpauth import HTTPBasicAuth
-from werkzeug.security import generate_password_hash, check_password_hash
+#from flask_httpauth import HTTPBasicAuth
+#from werkzeug.security import generate_password_hash, check_password_hash
 
 
 @app.route("/gpsdat", methods=['POST'])
 @auth.login_required(role='admin')
 def handle_gps():
     """
-
-
     Returns
     -------
     TYPE
@@ -35,27 +34,23 @@ def handle_gps():
     if request.method == 'POST':
         if request.is_json:
             print("Hit server with POST request and valid json mime type!",file=sys.stdout)
-            #data = request.get_json(force = True)
             data = request.get_json()
-            print("Request data has been fetched!",file=sys.stdout)
-            geomdat = (f"SRID={dbconfig.settings['srid']};POINT({data['Longitude']} {data['Latitude']})")
-            print(geomdat)
-            times = func.converttime(data['Timestamp'],data['Start_timestamp'])
-            #intersects = DBQ.POI_I_Q(geomdat)
-            #print (f"Intersection test: {intersects}")
-            querydat = DBQ.queries(geomdat)
-            newrecord = models.gpsdatmodel(lat=data['Latitude'], lon=data['Longitude'], satellites=int(data['Satellites']),
-                altitude=float(data['Altitude']), speed=float(data['Speed']),accuracy=data['Accuracy'].split(".")[0],
-                direction=data['Direction'].split(".")[0], provider=data['Provider'],
-                timestamp_epoch= times['timestamp_e'], timeutc=data['Time_UTC'],date=data['Date'], startstamp=times['timestart'],
-                battery=data['Battery'].split(".")[0], androidid=data['Android_ID'],serial=data['Serial'], profile=data['Profile'],
-                hhop=func.string_to_none((data['hdop'])), vdop=func.string_to_none((data['vdop'])), pdop=func.string_to_none((data['pdop'])),
-                activity = data['Activity'],travelled=data['Dist_Travelled'].split(".")[0],
-                POI = querydat['POI'], city = querydat['city'], county = querydat['county'], nearestroad = querydat['road'], dist_nearestroad = querydat['dist_road'],
-                nearesttrail = querydat['trail'], dist_nearesttrail = querydat['dist_trail'],
-                geom=geomdat)
-            print(newrecord.__dict__)
-            db.session.add(newrecord)
+            print("Request data has been fetched!",file=sys.stdout)            
+            #Create a new dict to hold new objects that will be added to PostGresSQL
+            newObjDict = {}
+            trackrecord = OBG.gpstrackobj(data)
+            #Check if there has been movement, if so add to new object dictonary, otherwise no entry will be made
+            if trackrecord["activity"] == "Yes":
+                newObjDict["track"] = trackrecord["model"]
+            #Add new gps record object to new objects dictonary
+            newObjDict["gpspoint"] = OBG.newgpsrecord(data,trackrecord["activity"])
+            print(newObjDict["gpspoint"].__dict__)
+            #Iterate over new objdict, can allow building out so many things can be commited to db
+            #This allows for empty models to be skipped
+            newObjs = []
+            for obj in newObjDict.keys():
+                newObjs.append(newObjDict[obj])          
+            db.session.add_all(newObjs)
             db.session.commit()
             print("Data added and committed to postgres!",file=sys.stdout)
             resp = jsonify(success=True)
@@ -68,7 +63,23 @@ def handle_gps():
 
 @app.route("/api/v0.1/getgeojson", methods=['GET'])
 @auth.login_required(role='viewer')
-def get_geojson():
+def get_pointgeojson():
+    """
+
+
+    Returns
+    -------
+    result : TYPE
+        DESCRIPTION.
+
+    """
+    print("Hit with a point get request!")
+    result = func.to_geojson(recLimit = 1, dataType = "gpspoints")
+    return result
+
+@app.route("/api/v0.1/gettracks", methods=['GET'])
+@auth.login_required(role='viewer')
+def get_trackgeojson():
     """
 
 
@@ -79,5 +90,5 @@ def get_geojson():
 
     """
     print("Hit with a get request!")
-    result = func.to_geojson()
+    result = func.to_geojson(recLimit = "all", dataType = "gpstracks")
     return result
