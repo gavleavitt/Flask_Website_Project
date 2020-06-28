@@ -37,6 +37,12 @@
 	<script src="{{ url_for('static', filename='js/L.Control.MousePosition.js') }}"></script>
 	<!-- leaflet Mouse Position css -->
 	<link rel="stylesheet" href="{{ url_for('static', filename='css/L.Control.MousePosition.css') }}">
+	<!-- leaflet Polyline Decorator JS-->
+	<script src="{{ url_for('static', filename='js/leaflet.polylineDecorator.js') }}"></script>
+	<!-- leaflet Ajax JS-->
+	<script src="{{ url_for('static', filename='js/leaflet.ajax.js') }}"></script>
+	<!-- leaflet Ajax JS-->
+	<script src="{{ url_for('static', filename='js/leaflet.ajax.min.js') }}"></script>
 
 	<!-- leaflet dialog -->
 	<!-- <script src="leaflet/Javascript/leaflet.wms.js"></script> -->
@@ -138,12 +144,21 @@
 			position: 'topleft',
 			size: [200,450]
 		};
+
+
+		var lineStyle = {
+			"color": "#ff7800",
+			"weight": 3,
+			"opacity": 0.5
+		};
+
 		//leaflet Mouse Position plugin, displays coordinates at cursor location, uses leaflet position placement
 		var mousepos = {
 			position: "bottomright"
 		};
 		//var server = 'http://10.0.0.4:5000/getgeojson'
 		var server_livepts = $SCRIPT_ROOT + '/api/v0.1/getgeojson'
+		var server_tracks = $SCRIPT_ROOT + '/api/v0.1/gettracks'
 		console.log("############# Address is: " + server_livepts)
 		console.log($SCRIPT_ROOT)
 		L.control.mousePosition(mousepos).addTo(map);
@@ -197,6 +212,102 @@
 				document.getElementById('battery-icon').src = batteryicon(feature.properties.battery);
 				activityicon(feature.properties.profile)
 
+
+
+				 $.getJSON(server_tracks, function(data) {
+					 var geojsondat = L.geoJson(data, {
+						 onEachFeature: function (feature, layer) {
+						    L.polylineDecorator(layer, {
+						        patterns: [
+											{ offset: 12, repeat: 25, symbol: L.Symbol.dash({pixelSize: 10, pathOptions: {color: '#f00', weight: 2}}) },
+											//{ offset: 0, repeat: 25, symbol: L.Symbol.dash({pixelSize: 0}), pathOptions:{color:'orange'} },
+											{offset: "5%", repeat: "40%", symbol: L.Symbol.arrowHead({pixelSize: 15, pathOptions: {fillOpacity: 1, weight: 0, color:'orange'}})}
+										]
+						    }).addTo(map);
+						 }
+					 })
+					//var polyline = L.geoJson(data,lineStyle).addTo(map);
+				 });
+
+				// var geojsonTracks = new L.GeoJSON.AJAX(server_tracks,
+				// {style:lineStyle});
+				// geojsonTracks.addTo(map);
+				// var polyline = L.polyline(geojsonTracks)
+				// console.log(polyline)
+				// var gpstracks = $.getJSON(server_tracks, function(data) {
+				// 	L.geoJson(data, {
+				// 		style: lineStyle
+				// }).addTo(map);
+				// });
+				// see https://gis.stackexchange.com/questions/234460/how-to-convert-geojson-to-polygon-in-leaflet
+				//also see https://groups.google.com/forum/#!topic/leaflet-js/2Ncsgvrz2Yg
+				// var gpstracks = $.getJSON(server_tracks, function(data) {
+				// 	L.geoJson(json, {
+				// 		 onEachFeature: function (feature, layer) {
+				// 			 L.polylineDecorator(layer, {
+	 			// 	      patterns: [
+	 			// 	        {offset: 25, repeat: 30, symbol: L.Symbol.arrowHead({pixelSize: 15, pathOptions: {fillOpacity: 1, weight: 0}})}
+				// 				]
+				// 				}).addTo(map);
+				// 			}
+				// 		}})).addTo(map);
+				//
+				// 			L.geoJson(data, {
+				// 				style: lineStyle
+				// 		}).addTo(map);
+				// 		});
+				//
+				//
+				//   onEachFeature: function (feature, layer) {
+				//     L.polylineDecorator(layer, {
+				//       patterns: [
+				//         {offset: 25, repeat: 30, symbol: L.Symbol.arrowHead({pixelSize: 15, pathOptions: {fillOpacity: 1, weight: 0}})}
+				//       ]
+				//     }).addTo(map);  /// Adds each decorator to the map!!!!
+				//   }
+				// }).addTo(map);
+
+
+
+				//
+				// forEach(function(gpstracks) {
+				//     var polyline = L.polyline(state.geometry.coordinates, {
+				//         weight: 3,
+				//         fillOpacity: 0.5,
+				//         color: 'red',
+				//         dashArray: '3'
+				//     }).addTo(map);
+				// });
+
+				// coordstest = $.getJSON(server_tracks, function(data) {
+				//    var coords = data.features.map(feat => feat.geometry.coordinates.slice().reverse())
+				// 	 L.geoJson(data, {
+				// 	 		style: lineStyle
+				// 	 }).addTo(map);
+					 //return coords
+				// 	 //var polyline = L.polyline(coords,{color: 'red'}).addTo(map);
+				// });
+				// console.log("test coords are:" + coords)
+				// var polyline = L.polyline(coordstest,{color: 'red'}).addTo(map);
+				// console.log(polyline)
+				// var lines = gpstracks.features
+			  //   .filter(function(feature) { return feature.geometry.type == "LineString" })
+			  //   .map(function(feature) {
+			  //       var coordinates = feature.geometry.coordinates;
+			  //       coordinates.forEach(function(coordinate) { coordinate.reverse(); })
+			  //       return L.polyline(coordinates);
+			  //   })
+				//
+				// var trackspolyline = L.polyline(gpstracks)
+				// console.log(trackspolyline)
+				// var decorator = L.polylineDecorator(trackspolyline, {
+				// 	patterns:[
+				// 		{offset: 0, repeat: 20, symbol: L.Symbol.dash({pixelSize: 10})}
+    		// 		]
+				// }).addTo(map);
+
+				// // });
+
 				if (time !== feature.properties.timestamp_epoch){
 					/**
 					Used to detect if a new record has been entered, changes map bounds only if the time field has changed,
@@ -208,6 +319,14 @@
 				}
 				}.bind(this));
 		});
+
+		// $.getJSON(server_tracks, function(data) {
+    // 	L.geoJson(data, {
+    //     style: lineStyle
+    // }).addTo(map);
+		// });
+
+
 	</script>
 </body>
 </html>
