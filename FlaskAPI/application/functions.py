@@ -148,6 +148,7 @@ def handletracks(coordinate2, datetoday):
                 
     """
     record = DBQ.getpathpointrecords(datetoday)
+    print(f"!!!! Record result is: {record}")
     #check if a previous record exists, if not then this is the first record of the day and no movement could have occurred
     if record != None:
         #Convert keys to list
@@ -161,8 +162,12 @@ def handletracks(coordinate2, datetoday):
         coor2_Q_str = (f"POINT({coordinate2})")
         dist = DBQ.getdist(coor1_Q_str,coor2_Q_str)
         if dist > 3:
+            print("Movement!")
             #Movement greater than 3m, 10ft, returns dictonary with linestring formmated WKT record and activity type
             return {'Linestring':f'SRID={dbconfig.settings["srid"]};LINESTRING({record[recid[0]]["lon"]} {record[recid[0]]["lat"]}, {coordinate2})',"activity":"Yes"}
+        else:
+            return {"activity":"No"}
     else:
         #No previous record, first of the day thus no movement, or no movement greater than 10 feet since last record
+        print("No movement!")
         return {"activity":"No"}

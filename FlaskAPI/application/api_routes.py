@@ -15,8 +15,8 @@ from flask import jsonify
 import sys
 #from sqlalchemy import Date
 #import time
-from application import script_config as dbconfig
-from application import DB_Queries as DBQ
+# from application import script_config as dbconfig
+# from application import DB_Queries as DBQ
 #from flask_httpauth import HTTPBasicAuth
 #from werkzeug.security import generate_password_hash, check_password_hash
 
