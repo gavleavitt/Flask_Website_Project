@@ -430,7 +430,7 @@ def getpathpointrecords(datetoday):
         row_count += 1
     if row_count > 0:
         for row in records:
-            res_dict[row.id] = {"lat":row.lat,"lon":row.lon,"utc":row.timeutc,"date":row.date,"geom":row.geom}
+            res_dict[row.id] = {"id":row.id,"lat":row.lat,"lon":row.lon,"utc":row.timeutc,"date":row.date,"geom":row.geom}
         return res_dict
     else:
         return None

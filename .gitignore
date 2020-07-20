@@ -3,7 +3,6 @@
 leaflet_testing/script_config.py
 Data.*
 Data/
-script_config.*
 .spyproject/
 __pycache__/
 zip/
@@ -12,3 +11,6 @@ start_servers.sh
 activate_servers
 source env/bin/activate
 startflask
+.flaskenv
+script_config_BU.*
+.env
