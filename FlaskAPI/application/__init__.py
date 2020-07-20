@@ -15,11 +15,12 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from application import script_config as dbconfig
+import os
 
-
-app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = (f"postgresql://{dbconfig.settings['user']}:{dbconfig.settings['password']}@{dbconfig.settings['host']}" +
-          f":{dbconfig.settings['port']}/{dbconfig.settings['dbname']}")
+application = app = Flask(__name__)
+# app.config['SQLALCHEMY_DATABASE_URI'] = (f"postgresql://{dbconfig.settings['user']}:{dbconfig.settings['password']}@{dbconfig.settings['host']}" +
+#           f":{dbconfig.settings['port']}/{dbconfig.settings['dbname']}")
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get("DBCON")
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)

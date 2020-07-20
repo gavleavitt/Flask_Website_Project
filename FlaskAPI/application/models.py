@@ -222,9 +222,9 @@ class MocoRoad(db.Model):
     shape_len = db.Column(db.Numeric)
     shape__len = db.Column(db.Numeric)
 
-class Testtab(db.Model):
-    __tablename__ = 'testtab'
+# class Testtab(db.Model):
+#     __tablename__ = 'testtab'
 
-    id = db.Column(db.Integer, primary_key=True, server_default=db.FetchedValue())
-    testf1 = db.Column(db.String(30))
-    testf2 = db.Column(db.String(30))
+#     id = db.Column(db.Integer, primary_key=True, server_default=db.FetchedValue())
+#     testf1 = db.Column(db.String(30))
+#     testf2 = db.Column(db.String(30))
