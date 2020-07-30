@@ -8,7 +8,7 @@ Created on Mon May 25 17:40:53 2020
 This module contains PostgresSQL database query functions that are called by the functions module.  
 
 """
-from application import app, models, db
+from application import application, models, db
 from application.models import gpsdatmodel, gpstracks, POI, CaliforniaPlaces, CACounty 
 from application import functions as func
 from application import script_config as dbconfig
@@ -175,27 +175,52 @@ def nearestroad(coordinate):
 
     """
     #Raw SQL expression using triple quotes to maintain formatting in SQL form.
+    # sql = text(    """WITH nearestcanidates AS (
+    # SELECT
+    #     roads.full_name,
+    #     roads.geom
+    # FROM
+    #     	roads AS roads
+    # ORDER BY
+    #     	roads.geom <-> (ST_GeomFromText(:param, 4326))
+    # LIMIT 40)
+
+    # SELECT 
+    #     nearestcanidates.full_name,
+    #     ST_Distance(
+    #             ST_Transform(nearestcanidates.geom,2228),
+    #             ST_Transform(ST_GeomFromText(:param, 4326),2228)
+    #             ) AS distance
+    # FROM
+    #     nearestcanidates
+    # ORDER BY
+    #     distance
+    # LIMIT 1""")
+    
     sql = text(    """WITH nearestcanidates AS (
     SELECT
-        roads.full_name,
+        roads.name,
         roads.geom
     FROM
-        	moco_roads AS roads
+        	roads AS roads
+    WHERE
+        roads.name IS NOT NULL
     ORDER BY
         	roads.geom <-> (ST_GeomFromText(:param, 4326))
     LIMIT 40)
 
     SELECT 
-        nearestcanidates.full_name,
-        ST_Distance(
-                ST_Transform(nearestcanidates.geom,2228),
-                ST_Transform(ST_GeomFromText(:param, 4326),2228)
+        nearestcanidates.name,
+        ST_Distance_Sphere(
+                nearestcanidates.geom,
+                ST_GeomFromText(:param, 4326)
                 ) AS distance
     FROM
         nearestcanidates
     ORDER BY
         distance
     LIMIT 1""")
+    
     #Execute database query using the coordinates as a variable.
     print(f"Going to run query with coordinate: {coordinate}")
     query = db.session.execute(sql,{"param":coordinate})
@@ -203,7 +228,7 @@ def nearestroad(coordinate):
     query_count = 0
     for dat in query:
         result["street"] = dat[0]
-        result["distance"] = dat[1]
+        result["distance"] = dat[1] * 3.28
         query_count += 1
     if query_count == 0:
         result['street'],result['distance'] = None,None

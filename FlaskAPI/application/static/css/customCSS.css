@@ -123,6 +123,14 @@ html{
   height: 7vw;
 }
 
+.leaflet-control-layers{
+  background: #2b3940;
+}
+
+.leaflet-control-layers-extended{
+  background: #2b3940;
+}
+
 .text-icon-panel{
   display: grid;
   width:100%;
