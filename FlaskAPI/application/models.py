@@ -5,7 +5,7 @@ Created on Fri May 22 01:09:08 2020
 
 @author: user
 """
-from application import app
+from application import app, application 
 from application import db
 from sqlalchemy import ARRAY, BigInteger, Boolean, CheckConstraint, Column, Date, DateTime, Float, Integer, Numeric, String, Table, Text, Time, TEXT
 from sqlalchemy.schema import FetchedValue
@@ -182,45 +182,60 @@ class POI(db.Model):
     location = db.Column(db.String(80))
     desc = db.Column(db.String(80))
 
-class MocoRoad(db.Model):
-    __tablename__ = 'moco_roads'
+class Roads(db.Model):
+    __tablename__ = 'roads'
 
     id = db.Column(db.Integer, primary_key=True, server_default=db.FetchedValue())
     geom = db.Column(Geometry('MULTILINESTRING', 4326), index=True)
-    fid = db.Column(db.BigInteger)
-    prefix = db.Column(db.String(80))
+    full_id  = db.Column(db.String(80))
+    osm_id = db.Column(db.String(80))
+    osm_type = db.Column(db.String(80))
+    bicycle = db.Column(db.String(80))
+    foot = db.Column(db.String(80))
+    highway = db.Column(db.String(80))
     name = db.Column(db.String(80))
-    suffix = db.Column(db.String(80))
-    full_name = db.Column(db.String(80))
-    alias = db.Column(db.String(80))
-    route = db.Column(db.String(80))
-    road_type = db.Column(db.String(80))
-    func_class = db.Column(db.String(80))
-    l_cmnty_co = db.Column(db.String(80))
-    r_cmnty_co = db.Column(db.String(80))
-    l_zip = db.Column(db.BigInteger)
-    r_zip = db.Column(db.BigInteger)
-    from_l_add = db.Column(db.BigInteger)
-    to_l_addre = db.Column(db.BigInteger)
-    from_r_add = db.Column(db.BigInteger)
-    to_r_addre = db.Column(db.BigInteger)
-    low_addres = db.Column(db.BigInteger)
-    high_addre = db.Column(db.BigInteger)
-    maint_by = db.Column(db.String(80))
     surface = db.Column(db.String(80))
-    road_numbe = db.Column(db.String(80))
-    road_seg = db.Column(db.String(80))
-    map_number = db.Column(db.String(80))
-    map_coord = db.Column(db.String(80))
-    one_way = db.Column(db.String(80))
-    length = db.Column(db.Numeric)
-    minutes = db.Column(db.BigInteger)
-    f_zlev = db.Column(db.BigInteger)
-    t_zlev = db.Column(db.BigInteger)
-    _class = db.Column('class', db.BigInteger)
-    speed = db.Column(db.BigInteger)
-    shape_len = db.Column(db.Numeric)
-    shape__len = db.Column(db.Numeric)
+    
+
+# class Roads(db.Model):
+#     __tablename__ = 'roads'
+
+#     id = db.Column(db.Integer, primary_key=True, server_default=db.FetchedValue())
+#     geom = db.Column(Geometry('MULTILINESTRING', 4326), index=True)
+#     fid = db.Column(db.BigInteger)
+#     prefix = db.Column(db.String(80))
+#     name = db.Column(db.String(80))
+#     suffix = db.Column(db.String(80))
+#     full_name = db.Column(db.String(80))
+#     alias = db.Column(db.String(80))
+#     route = db.Column(db.String(80))
+#     road_type = db.Column(db.String(80))
+#     func_class = db.Column(db.String(80))
+#     l_cmnty_co = db.Column(db.String(80))
+#     r_cmnty_co = db.Column(db.String(80))
+#     l_zip = db.Column(db.BigInteger)
+#     r_zip = db.Column(db.BigInteger)
+#     from_l_add = db.Column(db.BigInteger)
+#     to_l_addre = db.Column(db.BigInteger)
+#     from_r_add = db.Column(db.BigInteger)
+#     to_r_addre = db.Column(db.BigInteger)
+#     low_addres = db.Column(db.BigInteger)
+#     high_addre = db.Column(db.BigInteger)
+#     maint_by = db.Column(db.String(80))
+#     surface = db.Column(db.String(80))
+#     road_numbe = db.Column(db.String(80))
+#     road_seg = db.Column(db.String(80))
+#     map_number = db.Column(db.String(80))
+#     map_coord = db.Column(db.String(80))
+#     one_way = db.Column(db.String(80))
+#     length = db.Column(db.Numeric)
+#     minutes = db.Column(db.BigInteger)
+#     f_zlev = db.Column(db.BigInteger)
+#     t_zlev = db.Column(db.BigInteger)
+#     _class = db.Column('class', db.BigInteger)
+#     speed = db.Column(db.BigInteger)
+#     shape_len = db.Column(db.Numeric)
+#     shape__len = db.Column(db.Numeric)
 
 # class Testtab(db.Model):
 #     __tablename__ = 'testtab'

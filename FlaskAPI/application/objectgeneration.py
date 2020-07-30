@@ -30,7 +30,7 @@ def gpstrackobj(data):
     coordinates = (f"{data['Longitude']} {data['Latitude']}")
     datetoday = data["Date"]
     times = func.converttime(data['Timestamp'],data['Start_timestamp'])
-    tracks = func.handletracks(coordinates, datetoday)
+    tracks = func.handletracks(coordinates, datetoday, data['Provider'])
     print(f"!! tracks result is: {tracks}")
     if tracks["activity"] == "Yes":
         model = models.gpstracks(timestamp_epoch= times['timestamp_e'],timeutc=data['Time_UTC'],date=data["Date"],
