@@ -1,4 +1,4 @@
-from application import app
+from application import application, app
 from flask import render_template
 
 @app.route("/")
@@ -17,6 +17,6 @@ def gps():
 def main():
     return render_template("public/index.html")
 
-@app.route("/testing")
+@app.route("/liveviewer")
 def testing():
     return render_template("private/tracker_API.html")

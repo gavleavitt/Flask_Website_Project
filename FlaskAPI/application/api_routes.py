@@ -5,7 +5,7 @@ Created on Fri May 22 17:45:44 2020
 
 @author: user
 """
-from application import app, models, db
+from application import app, application, models, db
 from application import functions as func
 from application import objectgeneration as OBG
 from application.authentication import auth
@@ -21,7 +21,7 @@ import sys
 #from werkzeug.security import generate_password_hash, check_password_hash
 
 
-@app.route("/gpsdat", methods=['POST'])
+@app.route("/api/v0.1/postgpsdata", methods=['POST'])
 @auth.login_required(role='admin')
 def handle_gps():
     """

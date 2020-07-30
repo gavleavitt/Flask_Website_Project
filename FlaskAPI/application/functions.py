@@ -125,7 +125,7 @@ def to_geojson(recLimit,dataType):
     return feature_collection
     
 
-def handletracks(coordinate2, datetoday):
+def handletracks(coordinate2, datetoday, locationtype):
     """
     Determines if the incoming record is the first of the day, which returns no activty, then determines if movement has occured between 
     the incoming record and most recent record for the day. Movement is determined if the distance is greater than 3m, or 10ft, between points.
@@ -161,10 +161,10 @@ def handletracks(coordinate2, datetoday):
         #Incoming record
         coor2_Q_str = (f"POINT({coordinate2})")
         dist = DBQ.getdist(coor1_Q_str,coor2_Q_str)
-        if dist > 3:
+        if (dist > 3 and locationtype != 'Provider') or dist > 60:
             print("Movement!")
             #Movement greater than 3m, 10ft, returns dictonary with linestring formmated WKT record and activity type
-            return {'Linestring':f'SRID={dbconfig.settings["srid"]};LINESTRING({record[recid[0]]["lon"]} {record[recid[0]]["lat"]}, {coordinate2})',"activity":"Yes"}
+            return {'Linestring':f'SRID={dbconfig.settings["srid"]};LINESTRING({record[recid[0]]["lon"]} {record[recid[0]]["lat"]}, {coordinate2})',"activity":"Yes"}  
         else:
             return {"activity":"No"}
     else:
