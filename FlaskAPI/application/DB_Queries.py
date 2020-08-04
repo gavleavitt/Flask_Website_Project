@@ -414,7 +414,22 @@ def getroles(username):
         res = res[0].split(",")
         return res
             
-def getdist(coordinate1, coordinate2): 
+def getdist(coordinate1, coordinate2):
+    """
+    
+    Parameters
+    ----------
+    coordinate1 : TYPE
+        DESCRIPTION.
+    coordinate2 : TYPE
+        DESCRIPTION.
+
+    Returns
+    -------
+    dist : TYPE
+        DESCRIPTION.
+
+    """
     #Geoalchemy ORM expression
     res = db.session.query(sqlfunc.ST_Distance_Sphere(sqlfunc.ST_GeomFromText(coordinate1),sqlfunc.ST_GeomFromText(coordinate2)))
     #coordinate1 = coordinate1

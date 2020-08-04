@@ -35,7 +35,7 @@ def gpstrackobj(data):
     if tracks["activity"] == "Yes":
         model = models.gpstracks(timestamp_epoch= times['timestamp_e'],timeutc=data['Time_UTC'],date=data["Date"],
                                  startstamp=times['timestart'],androidid=data['Android_ID'],serial=data['Serial'],
-                                 profile=data['Profile'], gpsid=None, geom=tracks['Linestring'])
+                                 profile=data['Profile'],length=tracks['length'], gpsid=None, geom=tracks['Linestring'])
     else:
         model = None
     return {"model":model,"activity":tracks["activity"]}

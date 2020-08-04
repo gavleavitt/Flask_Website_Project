@@ -76,7 +76,6 @@ def queries(geomdat):
     else:
         res['trail'],res['dist_trail']=None,None
     return res 
-#TODO Build out this function to return any query result as geojson, for points and lines 
 def to_geojson(recLimit,dataType):   
     """
     Queries gps table in POSTGRES database and returns the most recent record formated as geojson.
@@ -105,7 +104,7 @@ def to_geojson(recLimit,dataType):
             #print(f"point ojbect: {geometryDat}")
             features.append(Feature(geometry=geometryDat, properties=dbdat[key]))
         elif dataType == "gpstracks":
-            print("Making  gps track result!")
+            # print("Making  gps track result!")
             #to_shape is a geoalchemy method that converts a geometry to a shapely geometry
             #mapping is a shapely method that cnverts a geometry to a geojson object, a dictonary with formatted geom type and coordinates 
             geometryWKT = mapping(to_shape(geom))
@@ -161,10 +160,10 @@ def handletracks(coordinate2, datetoday, locationtype):
         #Incoming record
         coor2_Q_str = (f"POINT({coordinate2})")
         dist = DBQ.getdist(coor1_Q_str,coor2_Q_str)
-        if (dist > 3 and locationtype != 'Provider') or dist > 60:
+        if (dist > 10 and locationtype != 'network') or dist > 100:
             print("Movement!")
-            #Movement greater than 3m, 10ft, returns dictonary with linestring formmated WKT record and activity type
-            return {'Linestring':f'SRID={dbconfig.settings["srid"]};LINESTRING({record[recid[0]]["lon"]} {record[recid[0]]["lat"]}, {coordinate2})',"activity":"Yes"}  
+            #Movement greater than 10m, returns dictonary with linestring formmated WKT record and activity type
+            return {'Linestring':f'SRID={dbconfig.settings["srid"]};LINESTRING({record[recid[0]]["lon"]} {record[recid[0]]["lat"]}, {coordinate2})',"activity":"Yes","length":dist}  
         else:
             return {"activity":"No"}
     else:

@@ -16,13 +16,16 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from application import script_config as dbconfig
 import os
+import time
 
 application = app = Flask(__name__)
 # app.config['SQLALCHEMY_DATABASE_URI'] = (f"postgresql://{dbconfig.settings['user']}:{dbconfig.settings['password']}@{dbconfig.settings['host']}" +
 #           f":{dbconfig.settings['port']}/{dbconfig.settings['dbname']}")
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get("DBCON")
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-
+# Set timezone used by time, set as environmential variable 
+os.environ['TZ'] = 'America/Los_Angeles'
+time.tzset()
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 

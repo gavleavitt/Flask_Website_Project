@@ -26,6 +26,7 @@ class gpstracks(db.Model):
     androidid = db.Column(db.String(30))
     serial = db.Column(db.String(30))
     profile = db.Column(db.String(30))
+    length = db.Column(db.Float())
     geom = db.Column(Geometry('Linestring', 4326, from_text='ST_GeomFromEWKT', name='geometry'))
     
 class gpsdatmodel(db.Model):

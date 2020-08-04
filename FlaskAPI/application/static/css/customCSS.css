@@ -79,7 +79,6 @@ html{
   border-radius: 0;
 }
 
-
 .title{
   background-color: #2b3940;
   color:#59c2fe;
@@ -123,14 +122,21 @@ html{
   height: 7vw;
 }
 
+
 .leaflet-control-layers{
   background: #2b3940;
-}
+  color: #20ebf5;
+  text-align: left;
+  align-items: left;
+  justify-content: left;
 
-.leaflet-control-layers-extended{
-  background: #2b3940;
 }
-
+/*
+.leaflet-bar a:hover{
+  background-color: #2b3940;
+  border-bottom: #282a2b;
+}
+*/
 .text-icon-panel{
   display: grid;
   width:100%;
@@ -150,4 +156,27 @@ html{
 .div-span-nomargin{
   margin-top: 0%;
   margin-bottom: 0%;
+}
+
+.leaflet-bar a:hover {
+    background-color: #20ebf5;
+}
+/*
+.leaflet-control-layers-toggle{
+  background-image: url(images/layers.png);
+  background-color: blue;
+}
+*/
+.leaflet-bar a{
+    background-color: #2b3940;
+    color: #20ebf5;
+    /*
+    border: 2px solid #445dfe;
+    border-bottom: 2px solid #445dfe;
+    */
+}
+
+.leaflet-bar.leaflet-ruler.leaflet-control{
+  background-color: #2b3940;
+  color: #20ebf5;
 }
