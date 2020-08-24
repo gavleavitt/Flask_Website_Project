@@ -7,12 +7,12 @@ Created on Fri May 22 01:09:08 2020
 """
 from application import app, application 
 from application import db
-from sqlalchemy import ARRAY, BigInteger, Boolean, CheckConstraint, Column, Date, DateTime, Float, Integer, Numeric, String, Table, Text, Time, TEXT
+from sqlalchemy import ARRAY, BigInteger, Boolean, CheckConstraint, Column, Date, DateTime, Float, Integer, Numeric, String, Table, Text, Time, TEXT, ForeignKey
 from sqlalchemy.schema import FetchedValue
 from geoalchemy2.types import Geometry
 from geoalchemy2 import Geometry
 from flask_sqlalchemy import SQLAlchemy
-
+from sqlalchemy.orm import relationship
 
 class gpstracks(db.Model):
     __tablename__ = 'gpstracks'
@@ -197,6 +197,45 @@ class Roads(db.Model):
     name = db.Column(db.String(80))
     surface = db.Column(db.String(80))
     
+
+class beaches(db.Model):
+    __tablename__ = 'Beaches'
+
+    id = Column(Integer, primary_key=True)
+    BeachName = Column(String)
+
+class waterQualityMD5(db.Model):
+    __tablename__ = 'water_qual_md5'
+
+    id = Column(Integer, primary_key=True)
+    pdfdate = Column(Date)
+    insdate = Column(Date)
+    md5 = Column(String)
+    pdfName = Column(String)
+
+
+class stateStandards(db.Model):
+    __tablename__ = "StateStandards"
+
+    id = Column(Integer, primary_key=True)
+    Name = Column(String)
+    StandardMPN = Column(String)
+
+class waterQuality(db.Model):
+    __tablename__ = "Water_Quality"
+
+    id = Column(Integer, primary_key=True)
+    TotColi = Column(Integer)
+    FecColi = Column(Integer)
+    Entero = Column(Integer)
+    ExceedsRatio = Column(String)
+    BeachStatus = Column(String)
+    beach_id = Column(Integer, ForeignKey("Beaches.id"))
+    md5_id = Column(Integer, ForeignKey("water_qual_md5.id"))
+    resample = Column(String)
+
+    beach_rel = relationship(beaches, backref="Water_Quality")
+    hash_rel = relationship(waterQualityMD5, backref="Water_Quality")
 
 # class Roads(db.Model):
 #     __tablename__ = 'roads'

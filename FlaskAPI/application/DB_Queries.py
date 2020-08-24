@@ -9,11 +9,11 @@ This module contains PostgresSQL database query functions that are called by the
 
 """
 from application import application, models, db
-from application.models import gpsdatmodel, gpstracks, POI, CaliforniaPlaces, CACounty 
+from application.models import gpsdatmodel, gpstracks, POI, CaliforniaPlaces, CACounty, waterQuality, waterQualityMD5, beaches
 from application import functions as func
 from application import script_config as dbconfig
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import text
+from sqlalchemy import text, distinct
 from application.models import gpsdatmodel as gpsdat
 from sqlalchemy import func as sqlfunc
 from datetime import datetime
@@ -474,3 +474,10 @@ def getpathpointrecords(datetoday):
         return res_dict
     else:
         return None
+    
+def getwaterqual():
+    records = db.session.query(distinct(waterQuality.md5_id)) \
+        .join(beaches) \
+        .join() \
+        .order_by(waterQualityMD5.insdate)
+        

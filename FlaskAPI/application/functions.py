@@ -40,7 +40,8 @@ def converttime(timestamp_e,timestart):
     """
     timestamp = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(int(timestamp_e)))
     start_time = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(int(timestart)))
-    result = {"timestamp_e":timestamp ,"timestart":start_time}
+    date_today = time.strftime('%Y-%m-%d', time.localtime(int(timestamp_e)))
+    result = {"timestamp_e":timestamp ,"timestart":start_time,"Date":date_today}
     return result
 
 def queries(geomdat):

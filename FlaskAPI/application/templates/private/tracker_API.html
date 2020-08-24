@@ -210,7 +210,7 @@
 				}
 			}
 		}).addTo(map);
-
+		/*
 		var decGroup = L.layerGroup().addTo(map);
 		var decor = $.getJSON(server_tracks, function(data) {
 			L.geoJson(data, {
@@ -226,7 +226,9 @@
 				 }
 			 })
 		 });
-		 /*
+		 */
+
+		 var decGroup = L.layerGroup().addTo(map);
 		 realtime_polylines = L.realtime({
 			url: server_tracks,
 			crossOrigin:false,
@@ -234,19 +236,17 @@
  			}, {
  				interval: 5 * 1000,
 				onEachFeature: function (feature, layer) {
-					L.polylineDecorator(layer, {
+					var polydec = L.polylineDecorator(layer, {
 							 patterns: [
 								 { offset: 12, repeat: 25, symbol: L.Symbol.dash({pixelSize: 10, pathOptions: {color: '#f00', weight: 2, interactive:'false'}}) },
 								 //{ offset: 0, repeat: 25, symbol: L.Symbol.dash({pixelSize: 0}), pathOptions:{color:'orange'} },
 								 {offset: 12, repeat: 200, symbol: L.Symbol.arrowHead({pixelSize: 15, pathOptions: {fillOpacity: 1, weight: 0, color:'orange', interactive:'false'}})}
 							 ]
 					}).addTo(map);
+					decGroup.addLayer(polydec);
 				}
 			}
-		)
-		*/
-
-		//console.log("Cursor location updated and waiting for .on()")
+		);
 		realtime.on('update', function(e) {
 			/**
 			Changes displayed text when changes are detected during polling.
@@ -265,21 +265,6 @@
 				document.getElementById('location').innerHTML = locationtext(feature.properties.POI,feature.properties.city,feature.properties.county);
 				document.getElementById('battery-icon').src = batteryicon(feature.properties.battery);
 				activityicon(feature.properties.profile)
-				/*
-				 $.getJSON(server_tracks, function(data) {
-					 var geojsondat = L.geoJson(data, {
-						 onEachFeature: function (feature, layer) {
-						    var tracks = L.polylineDecorator(layer, {
-						        patterns: [
-											{ offset: 12, repeat: 25, symbol: L.Symbol.dash({pixelSize: 10, pathOptions: {color: '#f00', weight: 2}}) },
-											//{ offset: 0, repeat: 25, symbol: L.Symbol.dash({pixelSize: 0}), pathOptions:{color:'orange'} },
-											{offset: 12, repeat: 200, symbol: L.Symbol.arrowHead({pixelSize: 15, pathOptions: {fillOpacity: 1, weight: 0, color:'orange'}})}
-										]
-						    }).addTo(map);
-						 }
-					 })
-				 });
-				 */
 
 				if (time !== feature.properties.timestamp_epoch){
 					/**
@@ -301,7 +286,7 @@
 		};
 		var livedata = {
 			"<span><b>Location</b></span>":realtime,
-			"<span>Tracks-Dec</span>":decGroup
+			"<span><b>Tracks</b></span>":decGroup
 		}
 		//Add control menu for basemaps
 		L.control.layers(basemaps,livedata).addTo(map);
@@ -309,9 +294,9 @@
 		var ruler_options = {
 			position: 'topright',
 			lengthUnit: {
-				display: 'ft',
-				factor: 0.0003048,    //  from km to feet
-				display: 'Distance',
+				factor: 3280.84,    //  from km to feet
+				display: 'feet',
+				label: 'Distance',
 				decimal: 2
 			}
 		};
