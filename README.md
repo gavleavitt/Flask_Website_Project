@@ -13,7 +13,7 @@ The dashboard also displays activity information, nearest road and distance to r
 
 ### GPS Logging and processing
 
-The open source mobile app **GPS Logger for Android** is used to log location and other phone data, note that this app is Android only. 
+The open source mobile app **[GPS Logger for Android](https://gpslogger.app/)** is used to log location and other phone data, note that this app is Android only. 
 When logging begins the appropriate profile name is selected, which is used to control query and display logic.  
 Logging is set to use cell tower information or GPS if available, usually only when a GPS-dependant app like Strava is already collecting data, however the mobile app can also be set to obtain only GPS data at the cost of battery life.   
 
@@ -75,10 +75,10 @@ When a change is detected the location marker is moved to the new location and n
 # Santa Barbara Water Quality Reports
 
 The Santa Barbara County Health Department posts Ocean Water Test results to their Ocean Water Monitoring Program webpage:
-[https://www.countyofsb.org/phd/oceanwatermonitoring](https://www.countyofsb.org/phd/oceanwatermonitoring)
+https://www.countyofsb.org/phd/oceanwatermonitoring
 
 The results are posted as a PDF to the link:
-[https://www.countyofsb.org/uploadedFiles/phd/PROGRAMS/EHS/Ocean Water Weekly Results.pdf](https://www.countyofsb.org/uploadedFiles/phd/PROGRAMS/EHS/Ocean Water Weekly Results.pdf)
+https://www.countyofsb.org/uploadedFiles/phd/PROGRAMS/EHS/Ocean Water Weekly Results.pdf
 
 This PDF has a static name and download link with dynamic content that is updated at least weekly.
 
