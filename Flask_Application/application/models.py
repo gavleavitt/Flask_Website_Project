@@ -199,7 +199,6 @@ class Roads(db.Model):
     name = db.Column(db.String(80))
     surface = db.Column(db.String(80))
     
-
 class beaches(db.Model):
     __tablename__ = 'Beaches'
 
@@ -239,4 +238,3 @@ class waterQuality(db.Model):
 
     beach_rel = relationship(beaches, backref="Water_Quality")
     hash_rel = relationship(waterQualityMD5, backref="Water_Quality")
-
