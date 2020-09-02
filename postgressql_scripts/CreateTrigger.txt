@@ -1,4 +1,0 @@
-CREATE TRIGGER pathtrigger
-	AFTER INSERT on gpsact 
-	FOR EACH STATEMENT
-	EXECUTE PROCEDURE addpath()

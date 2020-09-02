@@ -14,3 +14,5 @@ startflask
 .flaskenv
 script_config_BU.*
 .env
+Misc/
+script_config.py
