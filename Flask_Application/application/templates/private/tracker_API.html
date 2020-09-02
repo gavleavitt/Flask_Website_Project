@@ -262,7 +262,7 @@
 				document.getElementById('batterylife').innerHTML = batteryinfo(feature.properties.battery);
 				document.getElementById('coordinates').innerHTML = coors(feature.properties.lat,feature.properties.lon,feature.properties.provider);
 				document.getElementById('activity').innerHTML = activitytext(feature.properties.profile);
-				document.getElementById('location').innerHTML = locationtext(feature.properties.POI,feature.properties.city,feature.properties.county);
+				document.getElementById('location').innerHTML = locationtext(feature.properties.AOI,feature.properties.city,feature.properties.county);
 				document.getElementById('battery-icon').src = batteryicon(feature.properties.battery);
 				activityicon(feature.properties.profile)
 
