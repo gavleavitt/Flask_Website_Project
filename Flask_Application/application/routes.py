@@ -55,4 +55,4 @@ def waterQual():
     """
     beachqual = func.handleBeaches()
     standards = DBQ.getStandards()
-    return render_template("public/leaflet_map.html", beachgeojson = beachqual, standards=standards)
+    return render_template("public/Water_Qual_Map.html", beachgeojson = beachqual, standards=standards)

@@ -143,8 +143,31 @@
 		//This requires HTTPS to work!
 		//L.control.locate({drawCircle: false, showCompass: false}).addTo(map);
 
-		map.addControl(new L.Control.Search({layer: beachreports}));
-		
+
+		//Leaflet search, see https://github.com/stefanocudini/leaflet-search
+		// Build search control object, set to search beach name
+		var searchControl = new L.Control.Search({
+			layer: beachreports,
+			propertyName: 'Name',
+			zoom:15
+		});
+
+		//Adds a .on listener to pan to selected location and open a popup
+		//See example: https://github.com/stefanocudini/leaflet-search/blob/master/examples/geojson-layer.html
+		searchControl.on('search:locationfound', function(e) {
+			//e.layer.setStyle({fillColor: '#3f0', color: '#0f0'});
+			if(e.layer._popup)
+				e.layer.openPopup();
+
+		// }).on('search:collapsed', function(e) {
+		//
+		// 	featuresLayer.eachLayer(function(layer) {	//restore feature color
+		// 		featuresLayer.resetStyle(layer);
+		// 	});
+		});
+
+		map.addControl(searchControl); // Add control to map
+
 	</script>
 </body>
 </html>
