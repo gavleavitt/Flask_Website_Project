@@ -17,3 +17,4 @@ script_config_BU.*
 Misc/
 script_config.py
 flaskdeployment.zip
+env_BU
