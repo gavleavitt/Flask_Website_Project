@@ -78,11 +78,11 @@ The Santa Barbara County Health Department posts Ocean Water Test results to the
 https://www.countyofsb.org/phd/oceanwatermonitoring
 
 The results are posted as a PDF to the link:
-https://www.countyofsb.org/uploadedFiles/phd/PROGRAMS/EHS/Ocean Water Weekly Results.pdf
+https://www.countyofsb.org/uploadedFiles/phd/PROGRAMS/EHS/Ocean%20Water%20Weekly%20Results.pdf
 
 This PDF has a static name and download link with dynamic content that is updated at least weekly.
 
-My script located [here](https://github.com/gavleavitt/Water_Quality_PDF_Parsing) processes the PDF and sends the data to the Postgres AWS RDS. This script currently runs on a schedule on my local machine.
+My script located in this [repo](https://github.com/gavleavitt/Water_Quality_PDF_Parsing) processes the PDF and sends the data to the Postgres AWS RDS. This script currently runs on a schedule on my local machine.
 
 ## Santa Barbara Water Quality Leaflet - Frontend
 Located at /SBCOceanWaterQuality
@@ -90,8 +90,9 @@ Located at /SBCOceanWaterQuality
 Displays a Leaflet map with the Santa Barbara County beaches mapped out. The beach icons reflect the most recently reported status of the beach and popups contain  test report data. 
 On page load Flask queries the postgres AWS RDS (populated by the previously mentioned script) to find the most recent water quality report for each beach and passes this information as a geojson feature collection to the HTML document. 
 
-#TODO
-Register a domain to make a friendly domain main to share publically and to enable HTTPS. 
+#TODO:
+
+Register a domain to make a friendly domain name to share website publically and to enable HTTPS. 
 
 Integrate PDF parsing script into this Flask application using the APScheduler library. 
 
@@ -99,7 +100,7 @@ Build a GIS/mapping portfolio page to display and describe projects, also includ
 
 Build a script to use the Strava API to download new activities, including spatial data, and add to database 
 
-Build a Leafet and data dashboard page to allow a user to dynamically filter Strava and/or GPS Logger data. 
+Build a Leafet and data dashboard page to allow a user to dynamically filter stored Strava and/or GPS Logger data.
 
 
  
