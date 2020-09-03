@@ -1,8 +1,10 @@
 # Live GPS Tracking Dashboard and other web pages.
 
+**The URL to this application is not posted due to outstanding issues, it will be posted once I resolve these issues and register a domain.**
+
 This project uses Flask to serve a variety of web pages, including a live GPS Tracking Dashboard, water quality Leaflet map, and will be built out to contain other web pages.
 
-Currently this application is hosted on a AWS Elastic Beanstalk Free-Tier instance and can be publically accessed, but sensitive data/webpages are secured using HTTP Authenication. The instance also does not yet have a registered domain name and uses the generic address provided by AWS.
+Currently this Flask application is hosted on an AWS Elastic Beanstalk Free-Tier instance and can be publically accessed, but sensitive data/webpages are secured using HTTP Authenication. The instance does not yet have a registered domain name and uses the generic address provided by AWS.
 
 Web pages are dynamic and pull their data from a Postgres/PostGIS AWS RDS backend that is interacted with using Python and SQLAlchemy ORM.
 
