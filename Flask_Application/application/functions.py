@@ -10,6 +10,7 @@ Created on Sun May 24 22:25:08 2020
 """
 
 import time
+import datetime
 from geojson import Point, Feature, FeatureCollection, LineString, dumps
 from application import DB_Queries as DBQ
 from application import script_config as dbconfig
@@ -222,9 +223,18 @@ def handleBeaches():
     # Call database query to get most recent test results
     beach_results = DBQ.getBeachWaterQual()
     # geojson_dump = dumps(waterQualGeoJSON(beach_results))
+    mostrecent = recentrecord(beach_results)
     # Format results into geojson
     geojson_res = waterQualGeoJSON(beach_results)
-    return geojson_res
+    return {"waterqual":geojson_res, "recent":mostrecent}
+
+def recentrecord(records):
+    maxrec = 0
+    for i in records:
+        recdate = datetime.datetime.strptime(str(i.waterQuality.hash_rel.insdate), "%Y-%m-%d").timestamp()
+        if recdate > maxrec:
+            maxrec = recdate
+    return datetime.datetime.fromtimestamp(maxrec).strftime("%Y-%m-%d")
 
 def waterQualGeoJSON(records):
     """

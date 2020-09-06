@@ -53,6 +53,8 @@ def waterQual():
        Leaflet webpage with the beaches and water quality reports passed in a variables.
 
     """
-    beachqual = func.handleBeaches()
+    beachresults = func.handleBeaches()
+    beachqual = beachresults["waterqual"]
+    recentrec = beachresults["recent"]
     standards = DBQ.getStandards()
-    return render_template("public/Water_Qual_Map.html", beachgeojson = beachqual, standards=standards)
+    return render_template("public/Water_Qual_Map.html", beachgeojson = beachqual, standards=standards, recentdate = recentrec)
