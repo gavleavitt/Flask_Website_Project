@@ -175,7 +175,44 @@ function coors(lat,lon,provider){
 function subten(number){
   if (number == 0){
     return "<10"
+  } else if (number == null) {
+    return "Results Pending"
   } else {
   return number
   }
 };
+
+function colortext(status){
+  if (status == "Open"){
+    res = "<span style='color:#00159e'>" + status + "</span>"
+  } else if (status == "Warning"){
+    res = "<span style='color:#ff8400'>" + status + "</span>"
+  } else if (status == "Closed"){
+    res = "<span style='color:#d40808'>" + status + "</span>"
+  } else {
+    res = "<span>" + status + "</span>"
+  }
+  return res
+};
+
+// function getMaxOfJson(jsonalreadyparsed, property) {
+//     var max = null;
+//     for (var i=0 ; i<jsonalreadyparsed.length ; i++) {
+//
+//             if(max == null){
+//
+//                 max = jsonalreadyparsed[i][property];
+//
+//             } else {
+//
+//             if (parseFloat(jsonalreadyparsed[i][property]) > max){
+//
+//                 max = jsonalreadyparsed[i][property];
+//
+//             }
+//
+//         }
+//
+//     }
+//     return max;
+// }
