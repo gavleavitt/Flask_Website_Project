@@ -12,7 +12,7 @@ from application import DB_Queries as DBQ
 
 @app.route("/")
 def index():
-    return "Hello world"
+    return render_template("public/index.html")
 
 @app.route("/about")
 def about():
@@ -40,7 +40,7 @@ def liveGPS():
     """
     return render_template("private/tracker_API.html")
 
-@app.route("/SBCOceanWaterQuality")
+@app.route("/sbcoceanwaterquality")
 def waterQual():
     """
     Function to handle webpage requests of the Santa Barbara Ocean Water Quality web page.
@@ -57,4 +57,8 @@ def waterQual():
     beachqual = beachresults["waterqual"]
     recentrec = beachresults["recent"]
     standards = DBQ.getStandards()
-    return render_template("public/Water_Qual_Map.html", beachgeojson = beachqual, standards=standards, recentdate = recentrec)
+    return render_template("public/maps/Water_Qual_Map.html", beachgeojson = beachqual, standards=standards, recentdate = recentrec)
+
+@app.route("/projects/sbcoceanquality")
+def waterqualproj():
+    return render_template("public/projects/waterqual.html")

@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>Home</title>
+
+	<!--jquery adds "$." functionality-->
+	<!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script> -->
+
+	<!-- Custom local javascript functions -->
+	<script src="{{ url_for('static', filename='js/customfunctions.js') }}"></script>
+	<!-- Custom CSS -->
+	<link rel="stylesheet" href="{{ url_for('static', filename='css/customCSS_main.css') }}">
+</head>
+<body>
+  <div class="container sansserif">
+		<!-- See for how to deal with resizing too small https://www.w3schools.com/howto/tryit.asp?filename=tryhow_js_topnav -->
+		<div class = "navbar">
+      <div class ="navbarleft">Placeholder</div>
+      <div class="navbarright">
+        <a href = "/">Home</a>
+				<a href = "#home">Projects</a>
+        <a href = "#about">About</a>
+        <a href = "#resume">Resume</a>
+        <a href = "#contact">Contact</a>
+			</div>
+		</div>
+</body>
+<script type=text/javascript>
+	$SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+</script>

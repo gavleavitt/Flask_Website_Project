@@ -2,7 +2,9 @@
 <html>
 <head>
 	<meta charset="utf-8">
-	<title>Leaflet Map</title>
+	<!-- <meta name="viewport" content="width=device-width, initial-scale=1"> -->
+	<meta name="viewport" content="width=device-width, initial-scale=0.7">
+	<title>Water Quality Map</title>
 	<!-- CDN files-->
 	<!-- Leaflet css-->
 	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css"/>
@@ -78,43 +80,45 @@
 			<!-- Modal -->
 			<!-- The Modal -->
 			<div id="myModal" class="modal">
-			  <!-- Modal content -->
-			  <div class="modal-content">
-			    <span class="close">&times;</span>
-					<p><b>Map Details</b>
-					<br>
-					This map shows the most recent ocean water quality test results for beaches in Santa Barbara County.
-					</p>
-					<p>These tests are conducted by the Santa Barbara County Public Health Department Ocean Water Monitoring Program and are posted as PDFs to
-					the agency's <a href="https://www.countyofsb.org/phd/oceanwatermonitoring/">website</a>.
-					</p>
-					<p>The data displayed on this map, accessible by clicking a beach icon or by searching for a beach using the magnifying glass icon,
-					originate from these report PDFs. The County releases these reports at least weekly but may release them more frequently*. This site checks daily
-					for updated information and updates records accordingly.
-					</p>
-					<p><b>Disclaimer</b>
-					<br>
-					This is an unofficial personal project and I have no affiliation with any Santa Barbara County public agencies. All provided data should be used for <b>reference</b> only,
-					I hold no responsibility for the accuracy of these data or any decisions made based on information provided from the application. Use good judgement and respect any
-					instructions, directives, and posted signage provided by the Santa Barbara County Public Health Department.
-					</p>
-					<p><b>Activate Development Notes and Data Limitations</b>
-					<br>
-					This website is still undergoing active development and is prone to changes and downtime without notice. I have tried my best to ensure that displayed data reflect the
-					newest data available from the county, however I cannot guarantee this will always be true. Time lag exists between when the county posts new reports, usually mornings,
-					and when my site checks for updates, which is around noon each day, any County releases later in the day won't be reflected until the next day. Also, due to the active
-					development of the scripts that process the PDFs, certain County postings may not be handled by the script properly, requiring me to fix any bugs, which may take some time.
-					</p>
-					<p>
-					*Amended reports may be released more frequently when a beach exceeds state health standards, requiring additional testing, or when individual beach results are still
-					pending on initial weekly report release.
-					</p>
-					<p><b>Contact Me</b>
-					<br>
-					If you have any questions, feature suggestions, comments, or notice any errors/bugs feel free to email me at <span id="emailaddr"></span>
-					</p>
-					<p>You can visit the GitHub repo for the PDF processing script <a href= "https://github.com/gavleavitt/Water_Quality_PDF_Parsing">here</a> and the repo for the website/Leaflet application <a href= "https://github.com/gavleavitt/Flask_Website_Project">here</a>.
-					</p>
+			  <div class="modal-content-container">
+			    <!-- <div class="close">&times;</div> -->
+					<span div class="close">&times;</span>
+					<div class="modal-text">
+						<p style="margin-top:0px;"><b>Map Details</b>
+						<br>
+						This map shows the most recent ocean water quality test results for beaches in Santa Barbara County.
+						</p>
+						<p>These tests are conducted by the Santa Barbara County Public Health Department Ocean Water Monitoring Program and are posted as PDFs to
+						the agency's <a href="https://www.countyofsb.org/phd/oceanwatermonitoring/">website</a>.
+						</p>
+						<p>The data displayed on this map, accessible by clicking a beach icon or by searching for a beach using the magnifying glass icon,
+						originate from these report PDFs. The County releases these reports at least weekly but may release them more frequently*. This site checks daily
+						for updated information and updates records accordingly.
+						</p>
+						<p><b>Disclaimer</b>
+						<br>
+						This is an unofficial personal project and I have no affiliation with any Santa Barbara County public agencies. All provided data should be used for <b>reference</b> only,
+						I hold no responsibility for the accuracy of these data or any decisions made based on information provided from the application. Use good judgement and respect any
+						instructions, directives, and posted signage provided by the Santa Barbara County Public Health Department.
+						</p>
+						<p><b>Activate Development Notes and Data Limitations</b>
+						<br>
+						This website is still undergoing active development and is prone to changes and downtime without notice. I have tried my best to ensure that displayed data reflect the
+						newest data available from the county, however I cannot guarantee this will always be true. Time lag exists between when the county posts new reports, usually mornings,
+						and when my site checks for updates, which is around noon each day, any County releases later in the day won't be reflected until the next day. Also, due to the active
+						development of the scripts that process the PDFs, certain County postings may not be handled by the script properly, requiring me to fix any bugs, which may take some time.
+						</p>
+						<p>
+						*Amended reports may be released more frequently when a beach exceeds state health standards, requiring additional testing, or when individual beach results are still
+						pending on initial weekly report release.
+						</p>
+						<p><b>Contact Me</b>
+						<br>
+						If you have any questions, feature suggestions, comments, or notice any errors/bugs feel free to email me at <span id="emailaddr"></span>
+						</p>
+						<p>You can visit the GitHub repo for the PDF processing script <a href= "https://github.com/gavleavitt/Water_Quality_PDF_Parsing">here</a> and the repo for the website/Leaflet application <a href= "https://github.com/gavleavitt/Flask_Website_Project">here</a>.
+						</p>
+					</div>
 			 </div>
 		 </div>
 			<!-- <div class="popupbuttontext"> Map Details
