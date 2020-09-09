@@ -1,0 +1,330 @@
+:root{
+  --backgroundwhite: #fcfcfc;
+  --titlebackground: #f7f7f7;
+  --bluecol: #394463;
+  --fontcol: #0f0f0f;
+}
+
+body {
+  background-color:var(--backgroundwhite:);
+  /* height: 98%; */
+  height: 1500px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0;
+}
+
+html{
+  height: 100%;
+}
+
+.container {
+  display: grid;
+  width:100%;
+  height:100%;
+  /* grid-template-rows: 5% 35% 60%; */
+  grid-template-rows: 50px 300px 1fr;
+  grid-gap: 0px;
+  background-color: #e8e9fa;
+}
+
+.sansserif {
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.navbar{
+  grid-row: 1/2;
+  background-color: #394463;
+  color: white;
+  overflow: hidden;
+  position: fixed;
+  width: 100%;
+  /* height: 50px; */
+  top: 0px;
+  font-size: 18px;
+  display: grid;
+  grid-template-columns: 5% 45% 45% 5%;
+  margin: auto;
+  z-index: 10;
+  opacity: 0.96;
+}
+
+.navbar a{
+  padding-right: 15px;
+  padding-left: 15px;
+  padding-top: 16px;
+  padding-bottom: 16px;
+  font-size: 12px;
+  color: white;
+  font-size: 16px;
+  text-decoration: none;
+}
+
+.navbarleft{
+  display: flex;
+  align-items: center;
+  padding-left: 15px;
+  justify-content: flex-start;
+  /* text-align: left; */
+  grid-column: 2/3;
+}
+
+.navbarright{
+  display: flex;
+  /* text-align: right; */
+  align-items: center;
+  justify-content: flex-end;
+  grid-column: 3/4;
+}
+
+.navbar a:hover{
+  background: #ddd;
+  color: black;
+}
+
+img{
+  max-width: 100%;
+}
+
+.titlecard{
+  /* background-image: url("../images/oceanbackground1_shrunk.jpg"); */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  background-repeat:no-repeat;
+  background-position: center;
+  background-size: cover;
+  background-color: gray;
+  grid-row: 2/3;
+  z-index: 1;
+}
+
+.titlename{
+  color: black;
+  font-size: 40px;
+  /* padding-top: 150px; */
+  z-index: 2;
+}
+
+.namesubtext{
+  color: var(--backgroundwhite);
+  /* text-align: center; */
+  font-weight: bold;
+  font-size: 16px;
+  padding-top: 20px;
+}
+
+.project-head{
+  color: #394463;
+  padding-left: 50px;
+  padding-top: 15px;
+  font-size: 25px;
+  font-weight: bold;
+}
+
+.project-container{
+  grid-row: 3/4;
+}
+
+/* .project-grid{
+  display: grid;
+  margin-top: 10px;
+  margin-left: 50px;
+  margin-right: 50px;
+  grid-template-columns: 3.3fr 3.3fr 3.3fr;
+  grid-template-rows: 33% 33% 33%;
+  grid-gap: 50px;
+  height: 100%;
+} */
+
+/* .project-grid{
+  display: grid;
+  margin-top: 10px;
+  margin-left: 50px;
+  margin-right: 50px;
+  grid-template-columns: repeat(auto-fit, minmax(450px, 0.4fr));
+  grid-gap: 5%;
+  height: 100%;
+} */
+/* https://stackoverflow.com/questions/49514794/centering-grid-items-in-an-auto-fill-container */
+.project-grid{
+  display: grid;
+  margin-top: 10px;
+  margin-left: 50px;
+  margin-right: 50px;
+  grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+  grid-gap: 3%;
+  justify-items: center;
+}
+
+.grid-item{
+  border: 2px solid var(--bluecol);
+  border-radius: 20px;
+  color: var(--fontcol);
+  font-size: 16px;
+  padding: 15px;
+}
+
+
+
+
+
+
+
+
+.name-border{
+  border-bottom-width: 2px;
+  border-bottom-style: solid;
+  border-bottom-color: #000;
+}
+
+
+.detail-panel-col{
+  background-color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+
+.detail-context{
+  color:white;
+}
+
+.teal-text{
+  color:#20ebf5;
+  font-size: 1.5rem;
+}
+
+.detail-text{
+  color:#5ac73e;
+  /* text-shadow: 1px 1px 4px #5ac73e; */
+}
+.detail-text-important{
+  color:#FF073A;
+  /* text-shadow: 1px 1px 4px #5ac73e; */
+}
+.item {
+  /*background-color: #719ef0;*/
+  box-shadow: 0 5px 10px rgba(0,0,0,0.19), 0 3px 3px rgba(0,0,0,0.23);
+  color: #fff; /*Text color */
+  border-radius: 3px;
+  border: 2px solid #171717;
+}
+
+.detail-panel{
+  display: grid;
+  width:100%;
+  height:100%;
+  grid-template-columns: repeat(2,1fr);
+  grid-template-rows: repeat(3,1fr);
+  grid-gap: 0.5rem;
+  border: 0;
+  border-radius: 0;
+}
+
+
+.popupbuttontext{
+  /* text-align: right; */
+  grid-row: 1/1;
+  grid-column: 2/3;
+  font-size: 14px;
+  font-weight: bold;
+  padding-left: 0.8rem;
+  padding-top:0.8rem;
+  padding-bottom:0.8rem;
+  padding-right:1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.titletext{
+  color:#000;
+  float:left;
+  font-weight: bold;
+  grid-row: 1/1;
+  grid-column: 1/1;
+  font-size: 18px;
+  padding-left: 0.8rem;
+  padding-top:0.8rem;
+  padding-bottom:0.8rem;
+}
+
+.map-panel{
+ grid-row: 2/4;
+ grid-column: 1/3;
+}
+
+.detail-panel{
+  grid-row: 2/4;
+  grid-column: 2/3;
+}
+
+.detail-1{
+  grid-row: 1/1;
+  grid-column: 1/1;
+}
+
+.detail-2{
+  display: grid;
+
+}
+
+.text-icon-panel{
+  display: grid;
+  width:100%;
+  height:100%;
+  grid-template-columns: auto;
+  grid-template-rows: 60% 0%;
+  grid-gap: 0.5rem;
+  border: 0;
+  border-radius: 0;
+}
+
+.div-span-margin{
+  margin-top: 10%;
+  margin-bottom: 10%;
+}
+
+.div-span-nomargin{
+  margin-top: 0%;
+  margin-bottom: 0%;
+}
+
+.headerbtn{
+  border: none;
+  font-size: 18px;
+  background-color: var(--titlebackground);
+  padding: none;
+  cursor: pointer;
+}
+
+.headerbtn:hover,
+.headerbtn:focus{
+  color: #1d27ff;
+}
+
+.divlink{
+  text-decoration: none;
+  color: var(--fontcol);
+}
+
+.proj-img{
+  /*  */
+}
+/* https://stackoverflow.com/questions/5061940/changing-the-child-elements-css-when-the-parent-is-hovered */
+.grid-item:hover .proj-img{
+  opacity: 0.8;
+  /* box-shadow: 0px 0px 12px 4px #394463; */
+}
+
+.grid-item:hover{
+    text-decoration: underline;
+}
+
+  /* box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19); */

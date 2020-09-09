@@ -1,18 +1,66 @@
 <!DOCTYPE html>
-<html lang="en">
-
+<html>
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="X-UA-Compatible" content="ie=edge">
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-  <title>Index</title>
+	<meta charset="utf-8">
+	<title>Home</title>
+
+	<!--jquery adds "$." functionality-->
+	<!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script> -->
+
+	<!-- Custom local javascript functions -->
+	<script src="{{ url_for('static', filename='js/customfunctions.js') }}"></script>
+	<!-- Custom CSS -->
+	<link rel="stylesheet" href="{{ url_for('static', filename='css/customCSS_main.css') }}">
 </head>
-
 <body>
-  <h1 style="color: blue">Index</h1>
-  <p>This is an HTML file served up by Flask</p>
-  <script src="{{ url_for('static', filename='js/app.js') }}"></script>
-</body>
+  <div class="container sansserif">
+		<!-- See for how to deal with resizing too small https://www.w3schools.com/howto/tryit.asp?filename=tryhow_js_topnav -->
+		<div class = "navbar">
+      <div class ="navbarleft">Placeholder</div>
+      <div class="navbarright">
+        <a href = "/">Home</a>
+				<a href = "#home">Projects</a>
+        <a href = "#about">About</a>
+        <a href = "#resume">Resume</a>
+        <a href = "#contact">Contact</a>
+			</div>
+		</div>
+    <div class="titlecard">
+      <div class="titlename">Gavin Leavitt</div>
+			<div class="namesubtext">GIS Tech | Marine Scientist | Mountain Biker</div>
+    </div>
+    <div class="project-container">
+			<div class="project-head">Projects</div>
+			<div class="project-grid">
+				<div class="grid-item">
+					<a class = "divlink" href = "/projects/sbcoceanquality">
+						<img class="proj-img" src="static/images/SBCWQ_zoomed.PNG"></img>
+						<b>Santa Barbara County Ocean Water Quality</b>
+						<span>Leaflet map displaying water test results conducted by the Santa Barbara Public Health Department. </span>
+				</a>
+				</div>
+				<div class="grid-item">
+					<img class="proj-img" src="static/images/SBCWQ_zoomed.PNG"></img>
+					<b>Title</b>
+					<span>Desc text</span>
+				</div>
+				<div class="grid-item">
+					<img class="proj-img" src="static/images/SBCWQ_zoomed.PNG"></img>
+					<b>Title</b>
+					<span>Desc text</span>
+				</div>
+				<div class="grid-item">
+					<img class="proj-img" src="static/images/SBCWQ_zoomed.PNG"></img>
+					<b>Title</b>
+					<span>Desc text</span>
+				</div>
+				<div class="grid-item">5</div>
+				<div class="grid-item">6</div>
+			<!-- <img src="static/images/oceanbackground1.jpg"> -->
+    </div>
 
-</html>
+</body>
+<!-- Set the url root -->
+<script type=text/javascript>
+	$SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+</script>
