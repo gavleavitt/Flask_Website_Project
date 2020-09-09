@@ -19,7 +19,8 @@
       <div class ="navbarleft">Placeholder</div>
       <div class="navbarright">
         <a href = "/">Home</a>
-				<a href = "#home">Projects</a>
+				<!-- See for anchor https://css-tricks.com/hash-tag-links-padding/ -->
+				<a href = "#goto-proj">Projects</a>
         <a href = "#about">About</a>
         <a href = "#resume">Resume</a>
         <a href = "#contact">Contact</a>
@@ -30,6 +31,7 @@
 			<div class="namesubtext">GIS Tech | Marine Scientist | Mountain Biker</div>
     </div>
     <div class="project-container">
+			<span id="goto-proj">&nbsp;</span>
 			<div class="project-head">Projects</div>
 			<div class="project-grid">
 				<div class="grid-item">
@@ -37,30 +39,47 @@
 						<img class="proj-img" src="static/images/SBCWQ_zoomed.PNG"></img>
 						<b>Santa Barbara County Ocean Water Quality</b>
 						<span>Leaflet map displaying water test results conducted by the Santa Barbara Public Health Department. </span>
-				</a>
+					</a>
 				</div>
 				<div class="grid-item">
-					<img class="proj-img" src="static/images/SBCWQ_zoomed.PNG"></img>
-					<b>Title</b>
-					<span>Desc text</span>
+					<a class = "divlink" href = "/projects/sbcoceanquality">
+						<img class="proj-img" src="static/images/SBCWQ_zoomed.PNG"></img>
+						<b>Live Tracking Dashboard</b>
+						<span>Desc text</span>
+					</a>
 				</div>
 				<div class="grid-item">
-					<img class="proj-img" src="static/images/SBCWQ_zoomed.PNG"></img>
-					<b>Title</b>
-					<span>Desc text</span>
+					<a class = "divlink" href = "/projects/sbcoceanquality">
+						<img class="proj-img" src="static/images/sewer_trace_result_map.png"></img>
+						<b>Sanitary Sewer Trace Application</b>
+						<span>Desc</span>
+					</a>
 				</div>
 				<div class="grid-item">
-					<img class="proj-img" src="static/images/SBCWQ_zoomed.PNG"></img>
-					<b>Title</b>
-					<span>Desc text</span>
+					<a class = "divlink" href = "/projects/sbcoceanquality">
+						<img class="proj-img" src="static/images/SBCWQ_zoomed.PNG"></img>
+						<b>Sanitary Sewer and Storm Drain System GIS Build-out</b>
+						<span>Desc text</span>
+					</a>
 				</div>
-				<div class="grid-item">5</div>
-				<div class="grid-item">6</div>
-			<!-- <img src="static/images/oceanbackground1.jpg"> -->
+				<div class="grid-item">
+					<a class = "divlink" href = "/projects/sbcoceanquality">
+						<img class="proj-img" src="static/images/SBCWQ_zoomed.PNG"></img>
+						<b>Streetlight Pole 5G Deployment Permitting</b>
+						<span>Desc text</span>
+					</a>
+				</div>
+				<div class="grid-item">
+					<a class = "divlink" href = "/projects/sbcoceanquality">
+						<img class="proj-img" src="static/images/SBCWQ_zoomed.PNG"></img>
+						<b>Esri Operations Dashboards and Various Maps</b>
+						<span>Desc text</span>
+					</a>
+				</div>
     </div>
 
 </body>
 <!-- Set the url root -->
-<script type=text/javascript>
+<!-- <script type=text/javascript>
 	$SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
-</script>
+</script> -->

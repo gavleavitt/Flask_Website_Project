@@ -180,3 +180,13 @@ html{
   background-color: #2b3940;
   color: #20ebf5;
 }
+
+.leaflet-pulsing-icon:after {
+content: "";
+border-radius: 50%;
+height: 300%;
+width: 300%;
+position: absolute;
+margin: -100% 0 0 -150%;
+opacity:0;
+}
