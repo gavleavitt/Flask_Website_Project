@@ -1,22 +1,33 @@
 :root{
-  --backgroundwhite: #fcfcfc;
+  /* --backgroundwhite: #fcfcfc; */
   --titlebackground: #f7f7f7;
   --bluecol: #394463;
   --fontcol: #0f0f0f;
+  --backgroundwhite: #b5baff;
+  --textwhite: #fcfcfc;
+  /* --projbackcol: #e8e9fa; */
+  --projbackcol:#e0e3ff;
 }
 
 body {
   background-color:var(--backgroundwhite:);
+  /* Height is causing issues with the size of the grid */
   /* height: 98%; */
-  height: 1500px;
-  display: flex;
+  /* height: 3000px; */
+  /* height: 100%; */
+  min-height: 100%;
+  /* display: flex;
   justify-content: center;
-  align-items: center;
+  align-items: center; */
   margin: 0;
 }
 
 html{
-  height: 100%;
+  margin: 0;
+  min-height: 100%;
+  width: 100%;
+  overflow: auto;
+  /* height: 100%; */
 }
 
 .container {
@@ -26,7 +37,8 @@ html{
   /* grid-template-rows: 5% 35% 60%; */
   grid-template-rows: 50px 500px 1fr;
   grid-gap: 0px;
-  background-color: #e8e9fa;
+  /* background-color: #e8e9fa; */
+  background-color: var(--projbackcol);
 }
 
 .sansserif {
@@ -35,16 +47,19 @@ html{
 
 .navbar{
   grid-row: 1/2;
-  background-color: #394463;
+  background-color: var(--bluecol);
   color: white;
   overflow: hidden;
   position: fixed;
   width: 100%;
-  /* height: 50px; */
+  height: 50px;
   top: 0px;
   font-size: 18px;
+  font-weight: bold;
+  font-family: 'Lato', sans-serif;
   display: grid;
   grid-template-columns: 5% 45% 45% 5%;
+  grid-template-rows: 50px;
   margin: auto;
   z-index: 10;
   opacity: 0.96;
@@ -68,11 +83,12 @@ html{
   justify-content: flex-start;
   /* text-align: left; */
   grid-column: 2/3;
+  padding-top: 16px;
+  padding-bottom: 16px;
 }
 
 .navbarright{
   display: flex;
-  /* text-align: right; */
   align-items: center;
   justify-content: flex-end;
   grid-column: 3/4;
@@ -83,27 +99,48 @@ html{
   color: black;
 }
 
+.navbarright .menu-icon{
+  display: none;
+  padding-top: 6px;
+  padding-bottom: 6px;
+}
+
+
+
 img{
   max-width: 100%;
   /* max-height: 100%; */
 }
 
 .titlecard{
-  background-image: url("../images/oceanbackground1.jpg");
   display: flex;
   align-items: center;
   justify-content: center;
   flex-direction: column;
+  background-image: linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2)), url("../images/IMG_20181005_165851136_HDR.jpg");
+  /* background-image: url("../images/IMG_20181005_165851136_HDR.jpg"); */
   background-repeat:no-repeat;
   background-position: center;
   background-size: cover;
   background-color: gray;
+  /* border-bottom: 5px solid var(--bluecol); */
   grid-row: 2/3;
   z-index: 1;
 }
 
+.card-text{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  padding: 30px;
+  background-color: rgba(0, 0, 0, 0.7);
+  border-radius: 20px;
+  font-family: 'Source Sans Pro', sans-serif;
+}
+
 .titlename{
-  color: black;
+  color: white;
   font-size: 40px;
   /* padding-top: 150px; */
   z-index: 2;
@@ -111,54 +148,52 @@ img{
 }
 
 .namesubtext{
-  color: var(--backgroundwhite);
+  color: var(--textwhite);
   /* text-align: center; */
   font-weight: bold;
   font-size: 18px;
   padding-top: 10px;
 }
 
+.separatorbar{
+  height: 3px;
+  background-color: #bab8b8;
+  margin-top: 15px;
+  margin-left: 25px;
+  margin-right: 25px;
+  border-radius: 2px;
+}
+
 .project-head{
-  color: #394463;
-  padding-left: 50px;
+  color: var(--bluecol);
+  /* padding-left: 50px; */
+  margin-right: 50px;
+  margin-left: 50px;
   padding-top: 15px;
   font-size: 25px;
   font-weight: bold;
+  /* border-bottom: 2px solid black; */
 }
 
 .project-container{
   grid-row: 3/4;
+  /* background-color: var(--projbackcol); */
 }
 
-/* .project-grid{
-  display: grid;
-  margin-top: 10px;
-  margin-left: 50px;
-  margin-right: 50px;
-  grid-template-columns: 3.3fr 3.3fr 3.3fr;
-  grid-template-rows: 33% 33% 33%;
-  grid-gap: 50px;
-  height: 100%;
-} */
-
-/* .project-grid{
-  display: grid;
-  margin-top: 10px;
-  margin-left: 50px;
-  margin-right: 50px;
-  grid-template-columns: repeat(auto-fit, minmax(450px, 0.4fr));
-  grid-gap: 5%;
-  height: 100%;
-} */
 /* https://stackoverflow.com/questions/49514794/centering-grid-items-in-an-auto-fill-container */
 .project-grid{
   display: grid;
+  /* height: 100%; */
   margin-top: 10px;
   margin-left: 50px;
   margin-right: 50px;
-  grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
-  grid-gap: 3%;
-  justify-items: center;
+  /* grid-template-columns: repeat(auto-fit, minmax(450px, 1fr)); */
+  grid-template-columns: repeat(auto-fit, minmax(250px, 575px));
+  /* grid-template-columns: repeat(auto-fill, minmax(450px, 600px)); */
+  /* grid-template-columns: repeat(auto-fill, minmax(250px, 580px)); */
+  grid-gap: 30px;
+  justify-content: center;
+  /* justify-content: space-around; */
 }
 
 .grid-item{
@@ -167,66 +202,6 @@ img{
   color: var(--fontcol);
   font-size: 16px;
   padding: 15px;
-}
-
-
-
-
-
-
-
-
-.name-border{
-  border-bottom-width: 2px;
-  border-bottom-style: solid;
-  border-bottom-color: #000;
-}
-
-
-.detail-panel-col{
-  background-color: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  font-size: 1.2rem;
-  font-weight: bold;
-}
-
-.detail-context{
-  color:white;
-}
-
-.teal-text{
-  color:#20ebf5;
-  font-size: 1.5rem;
-}
-
-.detail-text{
-  color:#5ac73e;
-  /* text-shadow: 1px 1px 4px #5ac73e; */
-}
-.detail-text-important{
-  color:#FF073A;
-  /* text-shadow: 1px 1px 4px #5ac73e; */
-}
-.item {
-  /*background-color: #719ef0;*/
-  box-shadow: 0 5px 10px rgba(0,0,0,0.19), 0 3px 3px rgba(0,0,0,0.23);
-  color: #fff; /*Text color */
-  border-radius: 3px;
-  border: 2px solid #171717;
-}
-
-.detail-panel{
-  display: grid;
-  width:100%;
-  height:100%;
-  grid-template-columns: repeat(2,1fr);
-  grid-template-rows: repeat(3,1fr);
-  grid-gap: 0.5rem;
-  border: 0;
-  border-radius: 0;
 }
 
 
@@ -257,46 +232,6 @@ img{
   padding-bottom:0.8rem;
 }
 
-.map-panel{
- grid-row: 2/4;
- grid-column: 1/3;
-}
-
-.detail-panel{
-  grid-row: 2/4;
-  grid-column: 2/3;
-}
-
-.detail-1{
-  grid-row: 1/1;
-  grid-column: 1/1;
-}
-
-.detail-2{
-  display: grid;
-
-}
-
-.text-icon-panel{
-  display: grid;
-  width:100%;
-  height:100%;
-  grid-template-columns: auto;
-  grid-template-rows: 60% 0%;
-  grid-gap: 0.5rem;
-  border: 0;
-  border-radius: 0;
-}
-
-.div-span-margin{
-  margin-top: 10%;
-  margin-bottom: 10%;
-}
-
-.div-span-nomargin{
-  margin-top: 0%;
-  margin-bottom: 0%;
-}
 
 .headerbtn{
   border: none;
@@ -327,22 +262,65 @@ img{
 
 
 #goto-proj{
-  margin-top: -15px;
-  padding-bottom: 15px;
+  margin-top: -50px;
+  padding-bottom: 50px;
+  height: 0px;
   display: block;
 }
-
-/* #projects:before {
-  display:block;
-  content: " ";
-  margin-top: -5px;
-  height: 5px;
-  visibility: hidden;
-  pointer-events: none;
-} */
 
 .grid-item:hover{
     text-decoration: underline;
 }
 
-  /* box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19); */
+  /* box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19); *
+
+
+  /
+  /* When screen is small, hide navbar links and show menu icon */
+  @media screen and (max-width: 650px) {
+    .navbarright a:not(.blank) {
+      display: none;
+    }
+    .navbarright a.menu-icon{
+      display: block;
+    }
+  }
+
+  /* Media queries, set behavior based on size */
+
+  @media screen and (max-width: 430px) {
+    .namesubtext{
+      font-size: 16px;
+    }
+    .card-text{
+      padding: 10px;
+    }
+  }
+  /* The "responsive" class is added to the topnav with JavaScript when the user clicks on the icon. This class makes the topnav look good on small
+  screens (display the links vertically instead of horizontally) */
+
+  @media screen and (max-width: 650px) {
+    .navbarright.responsive {
+      position: fixed;
+      flex-direction: column;
+      background-color: #4c5161;
+      margin-top: 50px;
+      width: 100%;
+    }
+    .navbarright.responsive a.menu-icon {
+      position: fixed;
+      top:0;
+      right: 5%;
+    }
+    .navbarright.responsive a {
+      float: none;
+      display: block;
+      text-align: center;
+      /* padding-left: 50%;
+      padding-right: 50% */
+    }
+    .navbarright.responsive a.menu-option {
+      padding-left: 50%;
+      padding-right: 50%
+    }
+  }

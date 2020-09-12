@@ -52,6 +52,16 @@
 	<link rel="stylesheet" href="{{ url_for('static', filename='css/leaflet-search.src.css') }}">
 	<!-- Search JS -->
 	<script src="{{ url_for('static', filename='js/leaflet-search.src.js') }}"></script>
+
+	<!-- Favicon links -->
+	<link rel="apple-touch-icon" sizes="180x180" href="/static/images/apple-touch-icon.png">
+	<link rel="icon" type="image/png" sizes="32x32" href="/static/images//favicon-32x32.png">
+	<link rel="icon" type="image/png" sizes="16x16" href="/static/images/favicon-16x16.png">
+	<link rel="manifest" href="/static/images//site.webmanifest">
+	<link rel="mask-icon" href="/static/images//safari-pinned-tab.svg" color="#5bbad5">
+	<meta name="msapplication-TileColor" content="#da532c">
+	<meta name="theme-color" content="#ffffff">
+
 	<style>
 	/*
 		body {
@@ -188,7 +198,8 @@
 			{layers: [osm]}).setView([34.41,-119.86],15);
 		var waterquality_geojson = {{beachgeojson|tojson}}
 		var standards = {{standards|tojson}}
-
+		//Add flaticon attribution
+		map.attributionControl.addAttribution("Icons made by <a href='https://www.flaticon.com/authors/freepik' title='Freepik'>Freepik</a> and edited by me, taken from from <a href='https://www.flaticon.com/' title='Flaticon'> www.flaticon.com</a>")
 		beachreports = L.geoJSON(waterquality_geojson, {
 			//Create custom icons for each point, depending on its open status
 			pointToLayer: function(feature, latlng){
@@ -251,7 +262,8 @@
 			layer: beachreports,
 			propertyName: 'Name',
 			zoom:15,
-			marker:false
+			marker:false,
+			autoCollapse:true
 		});
 
 		//Adds a .on listener to pan to selected location and open a popup

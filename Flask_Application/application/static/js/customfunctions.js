@@ -195,24 +195,35 @@ function colortext(status){
   return res
 };
 
-// function getMaxOfJson(jsonalreadyparsed, property) {
-//     var max = null;
-//     for (var i=0 ; i<jsonalreadyparsed.length ; i++) {
-//
-//             if(max == null){
-//
-//                 max = jsonalreadyparsed[i][property];
-//
-//             } else {
-//
-//             if (parseFloat(jsonalreadyparsed[i][property]) > max){
-//
-//                 max = jsonalreadyparsed[i][property];
-//
-//             }
-//
-//         }
-//
-//     }
-//     return max;
+function menuHover(){
+  document.getElementById("menu-icon-img").setAttribute('src', '/static/images/menu-icon-blue.svg')
+};
+
+function menuUnhover(){
+  document.getElementById("menu-icon-img").setAttribute('src', '/static/images/menu-icon-gray.svg')
+};
+
+// function closeMenu(){
+//   console.log("Scrolling!")
+//   var menu = document.getElementsByClassName("navbarright responsive")
+//   if (menu.length){
+//     menu.className = "navbarright";
+//   }
 // }
+
+function closeMenu(){
+  var menu = document.getElementById("interactiveBarRight")
+  if (menu.className = ("navbarright responsive")){
+    menu.className = "navbarright";
+  }
+}
+
+/* Toggle between adding and removing the "responsive" class to navbarright when the user clicks on the icon */
+function navBarFunction() {
+  var x = document.getElementById("interactiveBarRight");
+  if (x.className === "navbarright") {
+    x.className += " responsive";
+  } else {
+    x.className = "navbarright";
+  }
+}
