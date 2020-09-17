@@ -269,7 +269,10 @@ html{
   /* display: grid; */
   /* grid-template-rows: 32px 1fr; */
   margin: auto;
-  padding: 5px;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  padding-left: 25px;
+  padding-right: 25px;
   border: 2px solid #000;
   border-radius: 20px;
   /* width: 60%; */
@@ -285,12 +288,15 @@ html{
 .close {
   /* grid-row: 1/1; */
   color: #aaaaaa;
-  float: right;
   font-size: 32px;
   font-weight: bold;
-  text-align: right;
-  /* position: fixed; */
-  /* width: inherit; */
+  margin-top: -10px;
+  /* text-align: right; */
+  /* position: sticky; */
+  /* position: -webkit-sticky; */
+  position: fixed;
+  right: 10%;
+  transform: translateX(40%);
   /* background-color: var(--titlebackground); */
   /* opacity: 95%; */
 }

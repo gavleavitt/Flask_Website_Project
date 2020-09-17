@@ -92,14 +92,15 @@
 			<div id="myModal" class="modal">
 			  <div class="modal-content-container">
 			    <!-- <div class="close">&times;</div> -->
-					<span div class="close">&times;</span>
+					<div class="close">&times;</div>
 					<div class="modal-text">
 						<p style="margin-top:0px;"><b>Map Details</b>
 						<br>
 						This map shows the most recent ocean water quality test results for beaches in Santa Barbara County.
 						</p>
 						<p>These tests are conducted by the Santa Barbara County Public Health Department Ocean Water Monitoring Program and are posted as PDFs to
-						the agency's <a href="https://www.countyofsb.org/phd/oceanwatermonitoring/">website</a>.
+						the agency's <a href="https://www.countyofsb.org/phd/oceanwatermonitoring/">website</a>. Beach status is given in respect to test results <b>only</b> and not to any
+						other factors that may warrant beach closures, please follow all official postings and signage.
 						</p>
 						<p>The data displayed on this map, accessible by clicking a beach icon or by searching for a beach using the magnifying glass icon,
 						originate from these report PDFs. The County releases these reports at least weekly but may release them more frequently*. This site checks daily
@@ -107,9 +108,9 @@
 						</p>
 						<p><b>Disclaimer</b>
 						<br>
-						This is an unofficial personal project and I have no affiliation with any Santa Barbara County public agencies. All provided data should be used for <b>reference</b> only,
-						I hold no responsibility for the accuracy of these data or any decisions made based on information provided from the application. Use good judgement and respect any
-						instructions, directives, and posted signage provided by the Santa Barbara County Public Health Department.
+						This is an unofficial personal project and I have no affiliation with any Santa Barbara county public agencies. All provided data should be used for <b>reference</b> only,
+						I hold no responsibility for the accuracy of these data or any decisions made based on information provided here. Use good judgement and respect any
+						instructions, directives, and posted signage provided by the Santa Barbara County Public Health Department or any local authority.
 						</p>
 						<p><b>Activate Development Notes and Data Limitations</b>
 						<br>
@@ -126,7 +127,7 @@
 						<br>
 						If you have any questions, feature suggestions, comments, or notice any errors/bugs feel free to email me at <span id="emailaddr"></span>
 						</p>
-						<p>You can visit the GitHub repo for the PDF processing script <a href= "https://github.com/gavleavitt/Water_Quality_PDF_Parsing">here</a> and the repo for the website/Leaflet application <a href= "https://github.com/gavleavitt/Flask_Website_Project">here</a>.
+						<p>You can visit the GitHub repo for the PDF processing script <a href=https://github.com/gavleavitt/Water_Quality_PDF_Parsing target="_blank">here</a> and the repo for the website/Leaflet application <a href=https://github.com/gavleavitt/Flask_Website_Project target="_blank">here</a>.
 						</p>
 					</div>
 			 </div>
@@ -195,7 +196,7 @@
 
 		// intilize map with basemap:
 		var map = L.map('map',
-			{layers: [osm]}).setView([34.41,-119.86],15);
+			{layers: [osm]}).setView([34.41,-119.86],12);
 		var waterquality_geojson = {{beachgeojson|tojson}}
 		var standards = {{standards|tojson}}
 		//Add flaticon attribution
@@ -273,6 +274,10 @@
 			//Not sure how this works, opens popup
 			if(e.layer._popup)
 				e.layer.openPopup();
+		});
+
+		searchControl.on('search:expanded', function(e) {
+			map.closePopup()
 		});
 
 		map.addControl(searchControl); // Add control to map

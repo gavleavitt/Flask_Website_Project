@@ -67,7 +67,7 @@ def newgpsrecord(data,actStatus):
         altitude=float(data['Altitude']), speed=float(data['Speed']),accuracy=data['Accuracy'].split(".")[0],
         direction=data['Direction'].split(".")[0], provider=data['Provider'],
         timestamp_epoch= times['timestamp_e'], timeutc=data['Time_UTC'],date=times['Date'], startstamp=times['timestart'],
-        battery=data['Battery'].split(".")[0], androidid=data['Android_ID'],serial=data['Serial'], profile=data['Profile'],
+        battery=data['Battery'].split(".")[0], androidid=data['Android_ID'],serial=data['Serial'], profile=data['Profile'].replace("+"," "),
         hhop=func.string_to_none((data['hdop'])), vdop=func.string_to_none((data['vdop'])), pdop=func.string_to_none((data['pdop'])),
         activity = actStatus,travelled=data['Dist_Travelled'].split(".")[0],
         AOI = querydat['AOI'], city = querydat['city'], county = querydat['county'], nearestroad = querydat['road'], dist_nearestroad = querydat['dist_road'],

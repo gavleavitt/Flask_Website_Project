@@ -43,7 +43,7 @@ function timedif(jsontime){
   } else {
     res = "Time difference error!";
   }
-  return ("<br>("+ res + ")")
+  return ("<br>("+ res + ")<br>60 Second Logging Interval")
 };
 
 function nearestpathway(road,trail,distroad,disttrail,poi,speed){
@@ -51,7 +51,7 @@ function nearestpathway(road,trail,distroad,disttrail,poi,speed){
   //if ((poi!=["Home","Work","Relative-Home"]) || (poi!=null)){
   if ((!["Home","Work","Relative-Home"].includes(poi)) && (poi != null)){
       if (disttrail < distroad){
-        document.getElementById('nearest-road-text').innerHTML = "<div class='detail-context'>Nearest trail</div>";
+        document.getElementById('nearest-road-text').innerHTML = "<div class='detail-context'>Nearest trail/path</div>";
       };
     res += trailinfo(poi,trail,disttrail,speed);
     res += "<div class='detail-context'>Nearest road</div>"

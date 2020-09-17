@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Template Testing</title>
+
+	<!--jquery adds "$." functionality-->
+	<!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script> -->
+
+	<!-- Custom local javascript functions -->
+	<script src="{{ url_for('static', filename='js/customfunctions.js') }}"></script>
+	<!-- Custom CSS -->
+	<link rel="stylesheet" href="{{ url_for('static', filename='css/customCSS_main.css') }}">
+	<!-- Set favicon -->
+
+	<!-- Favicon links -->
+	<link rel="apple-touch-icon" sizes="180x180" href="/static/images/apple-touch-icon.png">
+	<link rel="icon" type="image/png" sizes="32x32" href="/static/images/favicon-32x32.png">
+	<link rel="icon" type="image/png" sizes="16x16" href="/static/images/favicon-16x16.png">
+	<link rel="manifest" href="/static/images//site.webmanifest">
+	<link rel="mask-icon" href="/static/images//safari-pinned-tab.svg" color="#5bbad5">
+	<meta name="msapplication-TileColor" content="#da532c">
+	<meta name="theme-color" content="#ffffff">
+
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Lato:wght@700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@700&display=swap" rel="stylesheet">
+<link href='https://fonts.googleapis.com/css?family=Quicksand' rel='stylesheet'>
+
+<!-- Font Awesome Social media icons -->
+<!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/brands.min.css"> -->
+
+<!-- Font Awesome Kit -->
+<script src="https://kit.fontawesome.com/fd8b0845f1.js" crossorigin="anonymous"></script>
+
+<!-- Highlight.js -->
+<link rel="stylesheet"
+      href="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.2.0/build/styles/default.min.css">
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.2.0/build/highlight.min.js"></script>
+
+</head>
+<body>
+  <div class="container-projects sansserif">
+		<div class = "navbar">
+      <div class ="navbarleft">
+				<img id="nav-icon" src = "/static/images/wheel_custom.png">
+				<div class="nav-name">Gavin Leavitt</div>
+			</div>
+      <div id="interactiveBarRight" class="navbarright">
+        <a class= "menu-option" href = "/">Home</a>
+				<a class= "menu-option" href = "/#goto-proj">Projects</a>
+        <a class= "menu-option" href = "#about">About</a>
+        <a class= "menu-option" href = "#resume">Resume</a>
+        <a class= "menu-option" href = "#contact">Contact</a>
+				<a href = "javascript:void(0);" class="menu-icon" onclick="navBarFunction()" onmouseover="menuHover();" onmouseout="menuUnhover();">
+						<img id="menu-icon-img" src="/static/images/menu-icon-gray.svg" style="width:35px;height:35px">
+				</a>
+			</div>
+		</div>
+		<div class="project-content">
+			<div class="project-title">Santa Barbara County Ocean Water Quality</div>
+			<div class="separatorbar-title"></div>
+			<iframe src="/sbcoceanwaterquality"></iframe>
+			<div class="iframe-link">
+				<a href="/sbcoceanwaterquality" target="_blank">View fullpage map</a>
+			</div>
+			<div class="separatorbar-title"></div>
+			<h2>
+				Desc
+			</h2>
+			<p>
+				Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Erat nam at lectus urna duis convallis convallis tellus id. Ultrices mi tempus imperdiet nulla malesuada pellentesque elit eget. Suspendisse sed nisi lacus sed viverra tellus. Fermentum et sollicitudin ac orci phasellus egestas tellus rutrum tellus. Fermentum posuere urna nec tincidunt praesent semper feugiat. Pretium aenean pharetra magna ac placerat.
+			</p>
+			<h3>
+				Project Workflow
+			</h3>
+			<h4> Section Title </h4>
+				<p>
+					Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Erat nam at lectus urna duis convallis convallis tellus id. Ultrices mi tempus imperdiet nulla malesuada pellentesque elit eget. Suspendisse sed nisi lacus sed viverra tellus. Fermentum et sollicitudin ac orci phasellus egestas tellus rutrum tellus. Fermentum posuere urna nec tincidunt praesent semper feugiat. Pretium aenean pharetra magna ac placerat.
+				</p>
+			<h4> Section Title 2 </h4>
+				<p>
+					Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Erat nam at lectus urna duis convallis convallis tellus id. Ultrices mi tempus imperdiet nulla malesuada pellentesque elit eget. Suspendisse sed nisi lacus sed viverra tellus. Fermentum et sollicitudin ac orci phasellus egestas tellus rutrum tellus. Fermentum posuere urna nec tincidunt praesent semper feugiat. Pretium aenean pharetra magna ac placerat.
+				</p>
+		</div>
+		<div class="footer">
+			<p>© 2020 Gavin Leavitt
+			<br>Images, maps, and webpages created by Gavin Leavitt unless otherwise noted.
+			<br>Icons made by <a href="https://www.flaticon.com/authors/roundicons" title="Roundicons">Roundicons</a>,  <a href="https://www.flaticon.com/authors/freepik" title="Freepik">Freepik</a> from <a href="https://www.flaticon.com/" title="Flaticon"> www.flaticon.com</a> and modified by Gavin Leavitt.
+			<br> Contact: <span id="emailaddr"></span>
+			</p>
+			<div class="social-media">
+				<div class="social-icon">
+					<a href="https://github.com/gavleavitt" target="_blank" class="fab fa-github">
+					</a>
+				</div>
+				<div class="social-icon">
+					<a href="https://www.facebook.com/gavin.leavitt.7/" target="_blank" class="fab fa-facebook">
+					</a>
+				</div>
+				<div class="social-icon">
+					<a href="https://github.com/gavleavitt" target="_blank" class="fab fa-linkedin">
+					</a>
+				</div>
+			</div>
+		</div>
+		</div>
+	</div>
+	<script>
+	var email = "gav" + "lea" + "web" + "@g" + "mail" + ".com";
+	document.getElementById("emailaddr").innerHTML = "<a href='mailto:" + email + "'>" + email + "</a>"
+	</script>
