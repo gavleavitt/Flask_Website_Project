@@ -18,15 +18,11 @@ def index():
 def about():
     return "All about Flask"
 
-@app.route("/gps")
-def gps():
-    return render_template("private/tracker.html")
-
 @app.route("/main")
 def main():
     return render_template("public/index.html")
 
-@app.route("/liveviewer")
+@app.route("/projects/livetracker")
 def liveGPS():
     """
     This HTML document contains Javascript to poll other APIs in this application, allowing for dynamic 
@@ -40,7 +36,7 @@ def liveGPS():
     """
     return render_template("private/tracker_API.html")
 
-@app.route("/sbcoceanwaterquality")
+@app.route("/maps/sbcoceanwaterquality")
 def waterQual():
     """
     Function to handle webpage requests of the Santa Barbara Ocean Water Quality web page.
@@ -61,4 +57,12 @@ def waterQual():
 
 @app.route("/projects/sbcoceanquality")
 def waterqualproj():
-    return render_template("public/projects/waterqual.html")
+    return render_template("public/projects/project-Water-Quality.html")
+
+@app.route("/templatetesting")
+def template():
+	return render_template("public/projects/project-template.html")
+
+@app.route("/resume")
+def resume():
+	return render_template("public/resume.html")

@@ -41,7 +41,7 @@
 
 	<!-- Local static files-->
 	<!-- Leaflet rotate marker -->
-	<script src="{{ url_for('static', filename='js/leaflet.rotatedMarker.js') }}"></script>
+	<!-- <script src="{{ url_for('static', filename='js/leaflet.rotatedMarker.js') }}"></script> -->
 	<!-- leaflet realtime -->
 	<script src="{{ url_for('static', filename='js/leaflet-realtime.js') }}"></script>
 	<!-- leaflet Mouset Position JS-->
@@ -185,11 +185,12 @@
 			position: "bottomright"
 		};
 		//var server = 'http://10.0.0.4:5000/getgeojson'
-		var server_livepts = $SCRIPT_ROOT + '/api/v0.1/getpoint'
-		var server_tracks = $SCRIPT_ROOT + '/api/v0.1/gettracks'
+		var server_livepts = '/api/v0.1/getpoint'
+		var server_tracks = '/api/v0.1/gettracks'
 		//console.log("############# Address is: " + server_livepts)
 		//console.log($SCRIPT_ROOT)
 		L.control.mousePosition(mousepos).addTo(map);
+
 		realtime = L.realtime({
 			/*
 			Leaflet realtime plugin, polls json service id field for changes and places a marker at the most recent location.
@@ -199,55 +200,77 @@
 		    type: 'json'
 		}, {
 			interval: 5 * 1000,
-			pointToLayer: function (feature, latlng) {
-				if (["MTB","Run","Walk","Hike","Driving","road_bike"].includes(feature.properties.profile)){
-					//Live tracking GPS icon arrow, dynamic rotation according to direction, dynamic location
-					var liveicon = L.icon({
-							iconUrl: 'static/images/arrow_green.png',
-							iconSize: [30, 50],
-							//fillOpacity: 0.5
-						});
-					//};
-					//angle = Number(feature.properties.direction)
-					//return L.marker(latlng,{icon: liveicon,rotationAngle:angle,rotationOrigin:'center'});
-					var pulsingIcon = L.icon.pulse({iconSize:[15,15],color:'red'});
-					return L.marker([15,15],{icon: pulsingIcon}).addTo(map);
-				} else {
-					//Live tracking GPS icon, static shape, dynamic location
-					/*
-					var livemarkersettings = {
-						radius: 8,
-						weight: 1,
-						fillColor: "#FF0010",
-						color: "#00FF00",
-						fillOpacity: 0.5
-					};
-					return L.circleMarker(latlng,livemarkersettings);
-					*/
-					var pulsingIcon = L.icon.pulse({iconSize:[15,15],color:'red'});
-					return L.marker([15,15],{icon: pulsingIcon}).addTo(map);
-				}
+			/**
+			onEachFeature is used instead of pointToLayer sn
+			*/
+			onEachFeature: function(feature, layer){
+				var pulsingIcon = L.icon.pulse({iconSize:[15,15],color:'red'});
+				layer.setIcon(pulsingIcon);
 			}
+			// pointToLayer: function (feature, latlng) {
+			// 	if (["MTB","Run","Walk","Hike","Driving","road_bike"].includes(feature.properties.profile)){
+			// 		//Live tracking GPS icon arrow, dynamic rotation according to direction, dynamic location
+			// 		var liveicon = L.icon({
+			// 				iconUrl: 'static/images/arrow_green.png',
+			// 				iconSize: [30, 50],
+			// 				//fillOpacity: 0.5
+			// 			});
+			// 		//};
+			// 		//angle = Number(feature.properties.direction)
+			// 		//return L.marker(latlng,{icon: liveicon,rotationAngle:angle,rotationOrigin:'center'});
+			// 		var pulsingIcon = L.icon.pulse({iconSize:[15,15],color:'red'});
+			// 		return L.marker([15,15],{icon: pulsingIcon}).addTo(map);
+			// 	} else {
+			// 		//Live tracking GPS icon, static shape, dynamic location
+			// 		/*
+			// 		var livemarkersettings = {
+			// 			radius: 8,
+			// 			weight: 1,
+			// 			fillColor: "#FF0010",
+			// 			color: "#00FF00",
+			// 			fillOpacity: 0.5
+			// 		};
+			// 		return L.circleMarker(latlng,livemarkersettings);
+			// 		*/
+			// 		var pulsingIcon = L.icon.pulse({iconSize:[15,15],color:'red'});
+			// 		return L.marker([15,15],{icon: pulsingIcon}).addTo(map);
+			// 	}
+			// }
 		}).addTo(map);
+
 		 var decGroup = L.layerGroup().addTo(map);
+
 		 realtime_polylines = L.realtime({
 			url: server_tracks,
 			crossOrigin:false,
 			type: 'json'
  			}, {
  				interval: 5 * 1000,
+				style: function (feature) {
+					return {color: "#20ebf5"}
+				},
 				onEachFeature: function (feature, layer) {
 					var polydec = L.polylineDecorator(layer, {
 							 patterns: [
-								 { offset: 12, repeat: 25, symbol: L.Symbol.dash({pixelSize: 10, pathOptions: {color: '#f00', weight: 2, interactive:'false'}}) },
+								 // { offset: 12, repeat: 25, symbol: L.Symbol.dash({pixelSize: 10, pathOptions: {color: '#f00', weight: 2, interactive:'false'}}) },
 								 //{ offset: 0, repeat: 25, symbol: L.Symbol.dash({pixelSize: 0}), pathOptions:{color:'orange'} },
-								 {offset: 12, repeat: 200, symbol: L.Symbol.arrowHead({pixelSize: 15, pathOptions: {fillOpacity: 1, weight: 0, color:'orange', interactive:'false'}})}
+								 // {offset: 12, repeat: 200, symbol: L.Symbol.arrowHead({pixelSize: 15, pathOptions: {fillOpacity: 1, weight: 0, color:'orange', interactive:'false'}})}
+								 {offset: 12, repeat: 400, symbol: L.Symbol.marker({rotate: true, markerOptions: {
+									 rotationOrigin: 'center center',
+									 icon: L.icon({
+										 iconUrl: "/static/images/arrow-up.svg",
+										 iconSize: [20,20]
+									 })
+								 }})}
 							 ]
 					}).addTo(map);
 					decGroup.addLayer(polydec);
 				}
 			}
-		);
+		).addTo(map);
+
+		decGroup.addLayer(realtime_polylines);
+
 		realtime.on('update', function(e) {
 			/**
 			Changes displayed text when changes are detected during polling.

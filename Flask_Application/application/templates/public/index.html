@@ -16,7 +16,7 @@
 
 	<!-- Favicon links -->
 	<link rel="apple-touch-icon" sizes="180x180" href="/static/images/apple-touch-icon.png">
-	<link rel="icon" type="image/png" sizes="32x32" href="/static/images//favicon-32x32.png">
+	<link rel="icon" type="image/png" sizes="32x32" href="/static/images/favicon-32x32.png">
 	<link rel="icon" type="image/png" sizes="16x16" href="/static/images/favicon-16x16.png">
 	<link rel="manifest" href="/static/images//site.webmanifest">
 	<link rel="mask-icon" href="/static/images//safari-pinned-tab.svg" color="#5bbad5">
@@ -26,19 +26,29 @@
 <!-- Google Fonts -->
 <link href="https://fonts.googleapis.com/css2?family=Lato:wght@700&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@700&display=swap" rel="stylesheet">
+<link href='https://fonts.googleapis.com/css?family=Quicksand' rel='stylesheet'>
+
+<!-- Social media icons -->
+<!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"> -->
+
+<!-- Font Awesome Kit -->
+<script src="https://kit.fontawesome.com/fd8b0845f1.js" crossorigin="anonymous"></script>
 
 </head>
 <body>
-  <div class="container sansserif">
+  <div class="container-main sansserif">
 		<!-- See for how to deal with resizing too small https://www.w3schools.com/howto/tryit.asp?filename=tryhow_js_topnav -->
 		<div class = "navbar">
-      <div class ="navbarleft">Gavin Leavitt</div>
+      <div class ="navbarleft">
+				<img id="nav-icon" src = "/static/images/wheel_custom.png">
+				<div class="nav-name">Gavin Leavitt</div>
+			</div>
       <div id="interactiveBarRight" class="navbarright">
         <a class= "menu-option" href = "/">Home</a>
 				<!-- See for anchor https://css-tricks.com/hash-tag-links-padding/ -->
 				<a class= "menu-option" href = "#goto-proj">Projects</a>
         <a class= "menu-option" href = "#about">About</a>
-        <a class= "menu-option" href = "#resume">Resume</a>
+        <a class= "menu-option" href = "/resume">Resume</a>
         <a class= "menu-option" href = "#contact">Contact</a>
 				<a href = "javascript:void(0);" class="menu-icon" onclick="navBarFunction()" onmouseover="menuHover();" onmouseout="menuUnhover();">
 						<img id="menu-icon-img" src="/static/images/menu-icon-gray.svg" style="width:35px;height:35px">
@@ -60,7 +70,7 @@
 					<a class = "divlink" href = "/projects/sbcoceanquality">
 						<img class="proj-img" src="static/images/SBCWQ_zoomed.PNG"></img>
 						<b>Santa Barbara County Ocean Water Quality</b>
-						<span>Leaflet map displaying water test results conducted by the Santa Barbara Public Health Department. </span>
+						<span>Leaflet map displaying up-to-date water quality test results conducted by the Santa Barbara Public Health Department. </span>
 					</a>
 				</div>
 				<div class="grid-item">
@@ -98,8 +108,36 @@
 						<span>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam.</span>
 					</a>
 				</div>
-				<div class="bottom-cell">d </div>
-    </div>
+    	</div>
+		</div>
+			<div class="footer" style="grid-row:4/5">
+				<p>© 2020 Gavin Leavitt
+				<br>Images, maps, and webpages created by Gavin Leavitt unless otherwise noted.
+				<br>Icons made by <a href="https://www.flaticon.com/authors/roundicons" title="Roundicons">Roundicons</a>,  <a href="https://www.flaticon.com/authors/freepik" title="Freepik">Freepik</a> from <a href="https://www.flaticon.com/" title="Flaticon"> www.flaticon.com</a> and modified by Gavin Leavitt.
+				<br> Contact: <span id="emailaddr"></span>
+				</p>
+				<div class="social-media">
+					<div class="social-icon">
+						<a href="https://www.github.com/gavleavitt" target="_blank" rel="external" class="fab fa-github">
+						</a>
+					</div>
+					<div class="social-icon">
+						<a href="https://www.facebook.com/gavin.leavitt.7/" target="_blank" rel="external" class="fab fa-facebook">
+						</a>
+					</div>
+					<div class="social-icon">
+						<a href="https://www.github.com/gavleavitt" target="_blank" rel="external" class="fab fa-linkedin">
+						</a>
+					</div>
+				</div>
+			</div>
+			</div>
+		</div>
+		<script>
+		var email = "gav" + "lea" + "web" + "@g" + "mail" + ".com";
+		document.getElementById("emailaddr").innerHTML = "<a href='mailto:" + email + "'>" + email + "</a>"
+		</script>
+		</div>
 	<script>
 	window.onscroll = function(){closeMenu()};
 	</script>
