@@ -14,10 +14,6 @@ from application import DB_Queries as DBQ
 def index():
     return render_template("public/index.html")
 
-@app.route("/about")
-def about():
-    return "All about Flask"
-
 @app.route("/main")
 def main():
     return render_template("public/index.html")
@@ -66,3 +62,7 @@ def template():
 @app.route("/resume")
 def resume():
 	return render_template("public/resume.html")
+
+@app.route("/about")
+def about():
+	return render_template("public/aboutme.html")

@@ -13,21 +13,23 @@
 
 body {
   background-color:var(--projbackcol);
-  min-height: 100%;
+  /* min-height: 100%; */
   margin: 0;
-  color: var(--graytext)
+  color: var(--graytext);
+  height: 100%;
 }
 
 html{
   margin: 0;
-  min-height: 100%;
+  /* min-height: 100%; */
   width: 100%;
   /* font-family: 'Quicksand', Helvetica, Arial; */
   overflow: auto;
+  height: 100%;
 }
 
 .sansserif {
-  font-family: Helvetica, sans-serif;
+  font-family: 'Sans Source Pro', Helvetica, sans-serif;
 }
 
 img{
@@ -58,7 +60,7 @@ pre{
 p {
   font-size: 18px;
   color: var(--graytext);
-  font-family: 'Quicksand', Helvetica, Arial;
+  /* font-family: 'Quicksand', Helvetica, Arial; */
 }
 
 h1{
@@ -115,6 +117,23 @@ h5{
   grid-gap: 0px;
   background-color: var(--projbackcol);
 }
+
+.container-resume {
+  display: grid;
+  width:100%;
+  height:100%;
+  grid-template-rows: 50px 1fr auto;
+  grid-gap: 0px;
+  background-color: var(--projbackcol);
+}
+
+
+.container-about{
+  grid-row: 2/3;
+  margin-right: 100px;
+  margin-left: 100px;
+}
+
 
 .navbar{
   grid-row: 1/2;
@@ -237,12 +256,29 @@ height:40px;
 .resume-content{
   display: grid;
   grid-template-columns: 70% 1fr;
+  margin-top: 25px;
+  margin-bottom: 25px;
+}
+
+
+.about-content{
+  /* display: grid;
+  grid-template-columns: 400px 1fr; */
+  margin-right: 40px;
+  margin-left: 40px;
+}
+
+.about-text{
+}
+
+#image-me{
+  border-radius: 30px;
 }
 
 .experience-education{
   grid-column: 1/2;
   display:grid;
-  grid-template-rows: 0.5fr 0.5fr;
+  /* grid-template-rows: 0.5fr 0.5fr; */
 }
 
 .skills{
@@ -252,24 +288,40 @@ height:40px;
   /* align-items: center; */
   border-left: 2px solid #394463;
   /* margin-top: 50px; */
-  margin-left: 100px;
-  padding-left: 40px;
+  margin-left: 30px;
+  padding-left: 20px;
 }
 
 .skill-categories{
-
+margin-left: 20px;
 }
 
 .resume-entry{
+  margin-left: 20px;
+  margin-bottom: 25px;
+}
+
+.resume-entry img{
+  width: 85px;
+  height: 85px;
+  margin-right: 10px;
+  float: left;
 }
 
 .resume-employ-dates{
-  display:flex;
-  justify-content: space-between;
+  /* display:flex;
+  justify-content: space-between; */
+  margin-bottom: 5px;
 }
+
+/* .resume-content h3{
+  margin-top: 0px;
+} */
+
 
 .resume-text{
   font-size: 16px;
+  margin-bottom: 5px;
 }
 
 .separatorbar{
@@ -282,19 +334,52 @@ height:40px;
 }
 
 .separatorbar-title{
-  height: 3px;
+  height: 4px;
   background-color: #bab8b8;
   margin-top: 15px;
-  border-radius: 2px;
+  border-radius: 4px;
 }
 
 
 .project-content .separatorbar-title{
-  margin-bottom: 50px;
+  margin-bottom: 0px;
 }
 
 .project-content h3{
   margin-top: 0px;
+  margin-bottom: 25px;
+  font-size: 24px;
+  border-bottom: 2px solid var(--bluecol);
+  color: #070095;
+}
+
+.project-content h4{
+  margin-top: 0px;
+  margin-bottom: 5px;
+  font-size: 20px;
+}
+
+.project-content h5{
+  margin-top: 0px;
+  margin-bottom: 5px;
+  font-weight: normal;
+}
+
+#education-volunteer-section{
+  margin-top: -5px;
+}
+
+.project-content .skills ul{
+  margin-bottom: 5px;
+}
+
+.project-content ul{
+margin-top: 0px;
+margin-bottom: 0px;
+}
+
+.resume-entry ul{
+  margin-top: 20px;
 }
 
 .project-head{
@@ -334,6 +419,9 @@ height:40px;
   grid-row: 3/4;
   /* background-color: var(--projbackcol); */
 }
+
+
+
 
 /* https://stackoverflow.com/questions/49514794/centering-grid-items-in-an-auto-fill-container */
 .project-grid{
@@ -437,6 +525,9 @@ height:40px;
   background-color: #5a789c;
   border-top: 2px #2e2e2e solid;
   margin-top: 20px;
+  /* position: absolute;
+  bottom: 0; */
+  width: 100%;
 }
 
 .footer p{
@@ -529,12 +620,20 @@ box-shadow: 5px 10px 8px #888888;
   }
 
 
-  @media screen and (max-width: 700px) {
+  @media screen and (max-width: 900px) {
     .navbarright a:not(.blank) {
       display: none;
     }
     .navbarright a.menu-icon{
       display: block;
+    }
+    .resume-content{
+      display: block;
+    }
+    .resume-content .skills{
+      margin-left: 0px;
+      padding-left: 0px;
+      border-left: 0;
     }
   }
 
@@ -551,7 +650,7 @@ box-shadow: 5px 10px 8px #888888;
   /* The "responsive" class is added to the topnav with JavaScript when the user clicks on the icon. This class makes the topnav look good on small
   screens (display the links vertically instead of horizontally) */
 
-  @media screen and (max-width: 700px) {
+  @media screen and (max-width: 900px) {
     .navbarright.responsive {
       position: fixed;
       flex-direction: column;

@@ -27,6 +27,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Lato:wght@700&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@700&display=swap" rel="stylesheet">
 <link href='https://fonts.googleapis.com/css?family=Quicksand' rel='stylesheet'>
+<link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300&display=swap" rel="stylesheet">
 
 <!-- Font Awesome Social media icons -->
 <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/brands.min.css"> -->
@@ -51,8 +52,8 @@
       <div id="interactiveBarRight" class="navbarright">
         <a class= "menu-option" href = "/">Home</a>
 				<a class= "menu-option" href = "/#goto-proj">Projects</a>
-        <a class= "menu-option" href = "#about">About</a>
-        <a class= "menu-option" href = "#resume">Resume</a>
+        <a class= "menu-option" href = "/about">About</a>
+        <a class= "menu-option" href = "/resume">Resume</a>
         <a class= "menu-option" href = "#contact">Contact</a>
 				<a href = "javascript:void(0);" class="menu-icon" onclick="navBarFunction()" onmouseover="menuHover();" onmouseout="menuUnhover();">
 						<img id="menu-icon-img" src="/static/images/menu-icon-gray.svg" style="width:35px;height:35px">
@@ -62,9 +63,9 @@
 		<div class="project-content">
 			<div class="project-title">Santa Barbara County Ocean Water Quality</div>
 			<div class="separatorbar-title"></div>
-			<iframe src="/sbcoceanwaterquality" style="border-radius:10px;"></iframe>
+			<iframe src="/maps/sbcoceanwaterquality" style="border-radius:10px;"></iframe>
 			<div class="iframe-link">
-				<a href="/sbcoceanwaterquality" target="_blank">View fullpage map</a>
+				<a href="/maps/sbcoceanwaterquality" target="_blank">View fullpage map</a>
 			</div>
 			<div class="separatorbar-title"></div>
 			<h2>
@@ -211,8 +212,7 @@ for key in resultDict.keys():
 
 featCollect = FeatureCollection(featList)
 return featCollect
-</pre></code></div>style=""
-				</p>
+</pre></code></div>
 			<h3>Leaflet</h3>
 			<p>
 				Finally, it’s time to display the data with a responsive web map. Loading and displaying the data in Leaflet with custom markers and legend is relatively easy. The beach open status
@@ -241,10 +241,9 @@ searchControl.on('search:expanded', function(e) {
 			</p>
 		</div>
 		<div class="footer" style="grid-row:3/4">
-			<p>© 2020 Gavin Leavitt
+			<p>© 2020 Gavin Leavitt | Contact: <span id="emailaddr"></span>
 			<br>Images, maps, and webpages created by Gavin Leavitt unless otherwise noted.
 			<br>Icons made by <a href="https://www.flaticon.com/authors/roundicons" title="Roundicons">Roundicons</a>,  <a href="https://www.flaticon.com/authors/freepik" title="Freepik">Freepik</a> from <a href="https://www.flaticon.com/" title="Flaticon"> www.flaticon.com</a> and modified by Gavin Leavitt.
-			<br> Contact: <span id="emailaddr"></span>
 			</p>
 			<div class="social-media">
 				<div class="social-icon">
