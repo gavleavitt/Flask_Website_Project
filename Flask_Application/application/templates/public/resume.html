@@ -27,6 +27,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Lato:wght@700&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@700&display=swap" rel="stylesheet">
 <link href='https://fonts.googleapis.com/css?family=Quicksand' rel='stylesheet'>
+<link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300&display=swap" rel="stylesheet">
 
 <!-- Font Awesome Social media icons -->
 <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/brands.min.css"> -->
@@ -51,7 +52,7 @@
       <div id="interactiveBarRight" class="navbarright">
         <a class= "menu-option" href = "/">Home</a>
 				<a class= "menu-option" href = "/#goto-proj">Projects</a>
-        <a class= "menu-option" href = "#about">About</a>
+        <a class= "menu-option" href = "/about">About</a>
         <a class= "menu-option" href = "/resume">Resume</a>
         <a class= "menu-option" href = "#contact">Contact</a>
 				<a href = "javascript:void(0);" class="menu-icon" onclick="navBarFunction()" onmouseover="menuHover();" onmouseout="menuUnhover();">
@@ -66,10 +67,11 @@
 				<div class="experience-education">
 					<h3>Professional Experience</h3>
 					<div class="resume-entry">
+						<img src="/static/images/SalinasLogo-updated_cropped.png">
 						<span><h4>Temporary GIS Tech</h4></span>
 						<div class="resume-employ-dates">
 							<span class="resume-text">
-									City of Salinas
+									<h5>City of Salinas</h5>
 							</span>
 							<span class="resume-text">
 								Jan 2017 – July 2020
@@ -86,10 +88,11 @@
 						</div>
 					</div>
 					<div class="resume-entry">
+						<img src="static/images/mbari_cropped.svg">
 						<span><h4>Research Assistant</h4></span>
 						<div class="resume-employ-dates">
 							<span class="resume-text">
-								Monterey Bay Aquarium Research Institute
+								<h5>Monterey Bay Aquarium Research Institute</h5>
 							</span>
 							<span class="resume-text">
 							Jun – November 2016
@@ -104,10 +107,11 @@
 						</div>
 					</div>
 					<div class="resume-entry">
+						<img src="/static/images/csumb_SFML.png" >
 						<span><h4>Student Research Assistant</h4></span>
 						<div class="resume-employ-dates">
 							<span class="resume-text">
-									CSUMB Seafloor Mapping Lab
+									<h5>CSUMB Seafloor Mapping Lab</h5>
 							</span>
 							<span class="resume-text">
 								October 2015 – August 2016
@@ -124,48 +128,47 @@
 							</ul>
 						</div>
 					</div>
-					<span><h3>Education</h3></span>
+					<span id="#education-volunteer-section"><h3>Education</h3></span>
 					<div class="resume-entry">
+						<img src="static/images/csumb_round_cropped.png">
 						<span><h4>M.S. Applied Marine and Watershed Science</h4></span>
 						<div class="resume-employ-dates">
-							<span class="resume-text">
-									California State university Monterey Bay
-							</span>
-							<span class="resume-text">
+							<div class="resume-text">
+									California State University Monterey Bay
+							</div>
+							<div class="resume-text">
 								2015 – August 2017
-							</span>
+							</div>
 						</div>
 					</div>
 					<div class="resume-entry">
+						<img src="static/images/csumb_round_cropped.png">
 						<span><h4>B.S. Marine Science</h4></span>
 						<div class="resume-employ-dates">
-							<span class="resume-text">
-									California State university Monterey Bay
-							</span>
-							<span class="resume-text">
+							<div class="resume-text">
+									California State University Monterey Bay
+							</div>
+							<div class="resume-text">
 								2011 – January 2015
-							</span>
+							</div>
 						</div>
 					</div>
-					<span><h3>Volunteer Work</h3></span>
+					<span id="#education-volunteer-section"><h3>Volunteer Work</h3></span>
 					<div class="resume-entry">
-						<span><h4>Student Research Assistant</h4></span>
+						<img src="static/images/Monterey_Bay_Aquarium_Logo.svg">
+						<span><h4>Volunteer Guide</h4></span>
 						<div class="resume-employ-dates">
 							<span class="resume-text">
-									CSUMB Seafloor Mapping Lab
+									<h5>Monterey Bay Aquarium</h5>
 							</span>
 							<span class="resume-text">
-								October 2015 – August 2016
+								October 2014 – November 2018
 							</span>
 						</div>
 						<div>
 							<ul>
-								<li>Generated clean bathymetric data products for California state agencies and university researchers</li>
-								<li>Collected and processed data for shallow areas within the San Francisco Bay estuary as part of the California Seafloor Mapping Program</li>
-								<li>Deckhand and hydrographic assistant during field data collection onboard small research vessels </li>
-								<li>Operated and maintained data collection equipment and logs</li>
-								<li>Assisted in general maintenance of research vessels and equipment</li>
-								<li>Mapped and measured seasonal variability of coastal dunes using handheld Trimble GPS units</li>
+								<li>Interpreted aquarium attractions for guests, explained environmental and ecological processes, conveyed marine conservation messages, and answered marine science questions</li>
+								<li>Assisted in training new volunteers on best practices and interpretative techniques</li>
 							</ul>
 						</div>
 					</div>
@@ -188,10 +191,11 @@
 							<li>R Programming Language</li>
 						</ul>
 					</div>
-					<span><h5>Database Querying/Management</h5><span>
+					<span><h5>Database Querying & Management</h5><span>
 					<div>
 						<ul>
 							<li>PostGreSQL/PostGIS</li>
+							<li>pgAdmin 4</li>
 							<li>SQL Expressions</li>
 							<li>Python SQLAlchemy-ORM</li>
 						</ul>
@@ -202,7 +206,7 @@
 							<li>HTML</li>
 							<li>CSS</li>
 							<li>JavaScript</li>
-							<li>Python-Flask</li>
+							<li>Python Flask</li>
 						</ul>
 						<span><h5>UAV Operator</h5><span>
 						<div>
