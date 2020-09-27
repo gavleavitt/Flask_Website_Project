@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<title>About Me</title>
+	<title>Sanitary Sewer Trace</title>
 
 	<!--jquery adds "$." functionality-->
 	<!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script> -->
@@ -43,7 +43,7 @@
 
 </head>
 <body>
-  <div class="container-resume sansserif">
+  <div class="container-projects sansserif">
 		<div class = "navbar">
       <div class ="navbarleft">
 				<img id="nav-icon" src = "/static/images/wheel_custom.png">
@@ -60,35 +60,26 @@
 				</a>
 			</div>
 		</div>
-		<div class="container-about" style="grid-row:2/3">
-			<div class="title">About Me</div>
+		<div class="project-content">
+			<div class="title">Sanitary Sewer Trace Application</div>
 			<div class="separatorbar-title"></div>
-			<div class="about-content">
-				<div class="about-text">
-					<h3>Gavin Leavitt</h3>
-					<img id="image-me" src="static/images/imgme1_comp.png">
-					<p>
-					<!-- <img id="image-me" src="static/images/imgme1.png" style="height:250px;min-width:250px;float:left;margin-right:30px;border-radius:50%;"> -->
-					I am an environmental scientist with a strong interest in working to expand our understanding of human impacts on the natural environment. My goal is to mitigate these impacts and conserve natural resources by providing
-					policy-makers with information that is based on rigorous science that incorporates all available data, technologies, and stakeholders. I see spatial data, analytics, and visualizations as critical tools to this process. I
-					have spent my education and professional careers working to expand my knowledge of environmental policy, ecological data collection, and the application of these tools. While working with these technologies and
-					techniques can be difficult, especially for those of us without computer science backgrounds, I appreciate the powerful utility they provide and enjoy the challenge.
-					</p>
-					<p>
-						My professional interests include terrestrial and marine science, remote sensing, ecosystem and habitat modeling, climate science, live tracking of assets and animals, species protection, natural resource multi-use policies, and environmental conservation.
-					</p>
-					<p>
-						With the City of Salinas, I worked to expand the City’s geographic information system (GIS) capabilities. Significant projects include digitizing the City’s Sanitary Sewer and Municipal Separate Storm Sewer System (MS4) into GIS using historic engineering and development plans.
-						I also built a <a href=/projects/sanitarysewertraceapp>Web Map Application</a> that enables city staff to estimate the size of sewer spills and affected homes using the location of the sewer main break. This tool allows the City to meet rapid reporting requirements while providing a repeatable, defensible, and data-driven estimate.
-					</p>
-					<p>
-						Recently I have begun exploring open source web development, mapping, and database management as tools to collect and display spatial data. These projects, along with select projects I did with the City of Salinas, can be found in my <a href=/#goto-proj>Projects section</a>.
-					</p>
-					<p>
-						In my free time I enjoy mountain biking and road cycling. I hope to see you out on the single-track!
-					</p>
-				</div>
+			<a href="../static/images/Sanitary_Sewer_App_Poser_shrunk_comp.jpg" target="_blank"><img src="../static/images/Sanitary_Sewer_App_Poser_shrunk_comp.jpg" style="margin-top:10px;"></a>
+			<div class="fullsize-link">
+				<a href="../static/images/Sanitary_Sewer_App_Poser_shrunk_comp.jpg" target="_blank">View fullsize image</a>
 			</div>
+			<div class="separatorbar-title"></div>
+			<h2>
+				Description
+			</h2>
+			<p>
+				This application allows City of Salinas staff to estimate the size of sanitary sewer spills that resulted from breaks in gravity mains. City staff select the location of the break, using the system network as reference, input the start and end times of the spill, and receive a volumetric estimation of gallons spilled and number of homes upstream of the break. In additional to other estimation methods, staff are able meet rapid reporting requirements with a repeatable and data-backed tool. This approach also saves employee time during a time sensitive period and reduces reliance on error-prone manual calculations and paper map interpretations.
+			</p>
+			<p>
+				The Geoprocessing Service takes the users inputs, snaps the inputted point to the nearest manhole or network node, then conducts an Upstream Trace on the City’s sanitary sewer Geometric Network, which contains pseudo connections to residential parcels. These connections were GIS generated based on proximity to nearest gravity main to establish most likely lateral connection points. These connections are used to select features within another non-network dataset containing all residential housing addresses per parcel. Next, inputted time information and the count of total affected addresses are passed through an algorithm that uses average flow rates following a diurnal pattern. Finally, the estimated sewage spill volume, total number of affected residences, and a GIS layer of affected residences are returned to the user within the web application.
+			</p>
+			<p>
+				I first developed the application as an ArcMap Geoprocessing Script using ArcPy to conduct an Upstream Trace on a sanitary sewer Geometric Network, the script was then hosted on ArcGIS for Server as a Geoprocessing Service and accessed in an ArcGIS Online Application using the Geoprocessing Service widget. While the script functioned well in ArcMap, getting it to work as expected in ArcGIS Server/Online took the bulk of the development time, as many errors and bugs had to be resolved.
+			</p>
 		</div>
 		<div class="footer" style="grid-row:3/4">
 			<p>© 2020 Gavin Leavitt | Contact: <span id="emailaddr"></span>
@@ -109,6 +100,7 @@
 					</a>
 				</div>
 			</div>
+		</div>
 		</div>
 	</div>
 	<script>

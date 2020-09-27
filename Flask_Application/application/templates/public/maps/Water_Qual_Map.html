@@ -206,17 +206,17 @@
 			pointToLayer: function(feature, latlng){
 				if (feature.properties.BeachStatus == "Open"){
 					var beach_icon = L.icon({
-						iconUrl: 'static/images/beach_open.svg',
+						iconUrl: '../static/images/beach_open.svg',
 						iconSize: [50, 50]
 					});
 				}else if (feature.properties.BeachStatus == "Warning"){
 					var beach_icon = L.icon({
-						iconUrl: 'static/images/beach_warning.svg',
+						iconUrl: '../static/images/beach_warning.svg',
 						iconSize: [50, 50]
 					});
 				}else if (feature.properties.BeachStatus == "Closed"){
 					var beach_icon = L.icon({
-						iconUrl: 'static/images/beach_closed.svg',
+						iconUrl: '../static/images/beach_closed.svg',
 						iconSize: [50, 50]
 					});
 				}
@@ -294,9 +294,9 @@
 			// div.innerHTML += "<br><img src='static/images/beach_warning.svg' class='legendicon'><span class='legendtext'><b>Warning</b></span>";
 			// div.innerHTML += "<br><img src='static/images/beach_closed.svg' class='legendicon'><span class='legendtext'><b>Closed</b></span>";
 			div.innerHTML =  "<div class='legendheader spanbotbord'><b>Beach Status</b><span>"
-			div.innerHTML += "<div><img src='static/images/beach_open.svg'    class='legendicon'><span class='legendtext'>Open</span></div>";
-			div.innerHTML += "<div><img src='static/images/beach_warning.svg' class='legendicon'><span class='legendtext'>Warning</span></div>";
-			div.innerHTML += "<div><img src='static/images/beach_closed.svg'  class='legendicon'><span class='legendtext'>Closed</span></div>";
+			div.innerHTML += "<div><img src='../static/images/beach_open.svg'    class='legendicon'><span class='legendtext'>Open</span></div>";
+			div.innerHTML += "<div><img src='../static/images/beach_warning.svg' class='legendicon'><span class='legendtext'>Warning</span></div>";
+			div.innerHTML += "<div><img src='../static/images/beach_closed.svg'  class='legendicon'><span class='legendtext'>Closed</span></div>";
 		  return div;
 		};
 		// Add legend to map

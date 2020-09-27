@@ -78,9 +78,9 @@ def queries(geomdat):
 
     Returns
     -------
-    res : Dictonary
-        Dictonary with results of database queries, with the following keys:
-            POI, City, county, road, dist_road, trail, and dist_trail.
+    res : dictionary
+        dictionary with results of database queries, with the following keys:
+            AOI, City, county, road, dist_road, trail, and dist_trail.
         Empty result values are returned as None, a database friendy format.
 
     """
@@ -144,7 +144,7 @@ def to_geojson(recLimit,dataType):
         dbdat[key].pop('_sa_instance_state')
         geom = dbdat[key]['geom']
         dbdat[key].pop('geom')
-        # Format records as a list of geojson filters, dependaing on which GET request was sent
+        # Format records as a list of geojson filters, depending on which GET request was sent
         if dataType == "gpspoints":
             print("Making gps point result!")
             geometryDat = Point((float(dbdat[key]['lon']), float(dbdat[key]['lat'])))
@@ -152,7 +152,7 @@ def to_geojson(recLimit,dataType):
             features.append(Feature(geometry=geometryDat, properties=dbdat[key]))
         elif dataType == "gpstracks":
             # to_shape is a geoalchemy method that converts a geometry to a shapely geometry
-            # mapping is a shapely method that converts a geometry to a geojson object, a dictonary with formatted geom type and coordinates 
+            # mapping is a shapely method that converts a geometry to a geojson object, a dictionary with formatted geom type and coordinates 
             geometryWKT = mapping(to_shape(geom))
             # Take the geojson formated geom and create a geojson feature with it and the rest of the record properties, add to list of features
             features.append(Feature(geometry=geometryWKT, properties=dbdat[key]))
@@ -200,7 +200,7 @@ def handletracks(coordinate2, datetoday, locationtype):
         dist = DBQ.getdist(coor1_Q_str,coor2_Q_str)
         if (dist > 10 and locationtype != 'network') or dist > 100:
             print("Movement!")
-            #Movement greater than 10m, returns dictonary with linestring formmated WKT record and activity type
+            #Movement greater than 10m, returns dictionary with linestring formmated WKT record and activity type
             return {'Linestring':f'SRID={dbconfig.settings["srid"]};LINESTRING({record[recid[0]]["lon"]} {record[recid[0]]["lat"]}, {coordinate2})',"activity":"Yes","length":dist}  
         else:
             return {"activity":"No"}

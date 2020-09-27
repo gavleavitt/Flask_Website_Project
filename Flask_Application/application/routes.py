@@ -55,6 +55,10 @@ def waterQual():
 def waterqualproj():
     return render_template("public/projects/project-Water-Quality.html")
 
+@app.route("/projects/livetrackingdashboard")
+def livetrackingdash():
+    return render_template("public/projects/project-Live-Tracking-Dashboard.html")
+
 @app.route("/templatetesting")
 def template():
 	return render_template("public/projects/project-template.html")
@@ -66,3 +70,23 @@ def resume():
 @app.route("/about")
 def about():
 	return render_template("public/aboutme.html")
+
+@app.route("/projects/sanitarysewertraceapp")
+def sanitarysewertrace():
+	return render_template("public/projects/project-Sanitary-Sewer-Trace.html")
+
+@app.route("/projects/sanitaryewerstormdrainbuildout")
+def sanitarysewerstormdrainbuildout():
+	return render_template("public/projects/project-Sanitary-Sewer-Storm-Drain-Builtout.html")
+
+@app.route("/projects/streetlightpolepermitting")
+def streetlightpolepermitting():
+	return render_template("public/projects/project-Streetlight-Pole-Permitting.html")
+
+@app.route("/projects/dashboardsmaps")
+def dashboardsmaps():
+	return render_template("public/projects/project-Operations-Dashboards-Maps.html")
+
+@app.route("/contact")
+def contact():
+	return render_template("public/contactme.html")

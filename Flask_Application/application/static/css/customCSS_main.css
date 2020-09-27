@@ -6,7 +6,8 @@
   --backgroundwhite: #b5baff;
   --textwhite: #fcfcfc;
   /* --projbackcol: #e8e9fa; */
-  --projbackcol:#e0e3ff;
+  /* --projbackcol:#e0e3ff; */
+  --projbackcol:white;
   --graytext: #121212;
   --codebackground:#dedede;
 }
@@ -45,16 +46,22 @@ iframe{
 }
 
 pre{
-  white-space: pre-wrap;
+  /* white-space: pre-wrap; */
   overflow-x: auto;
   border-radius: 20px;
   box-shadow: 5px 6px 8px #888;
+  tab-size: 2;
+  -moz-tab-size: 2;
   /* overflow-y: auto;
   display: inline-block;
   min-width: 100%;
   word-wrap: normal;
   background-color: var(--codebackground);
   */
+}
+
+code{
+
 }
 
 p {
@@ -76,26 +83,27 @@ h1{
 
 h2{
   /* font-family: 'Quicksand', Helvetica, Arial; */
-  color: var(--graytext);
+  color: #0800ad;
   font-size: 28px;
 }
 
 h3{
   /* font-family: 'Quicksand', Helvetica, Arial; */
-  color: var(--graytext);
+  color: var(--bluecol);
   font-size: 24px;
 }
 
 h4{
   /* font-family: 'Quicksand', Helvetica, Arial; */
-  color: var(--graytext);
+  color: var(--bluecol);
   font-size: 22px;
 }
 
 h5{
   /* font-family: 'Quicksand', Helvetica, Arial; */
-  color: var(--graytext);
+  color: var(--bluecol);
   font-size: 18px;
+  font-weight: bold;
 }
 
 
@@ -114,6 +122,7 @@ h5{
   width:100%;
   height:100%;
   grid-template-rows: 50px 1fr auto;
+  grid-template-columns: minmax(0, 1fr);
   grid-gap: 0px;
   background-color: var(--projbackcol);
 }
@@ -134,6 +143,11 @@ h5{
   margin-left: 100px;
 }
 
+.container-contact{
+  grid-row: 2/3;
+  margin-right: 100px;
+  margin-left: 100px;
+}
 
 .navbar{
   grid-row: 1/2;
@@ -209,7 +223,7 @@ height:40px;
   align-items: center;
   justify-content: center;
   flex-direction: column;
-  background-image: linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2)), url("../images/IMG_20181005_165851136_HDR.jpg");
+  background-image: linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2)), url("../images/index_title_background1.jpg");
   /* background-image: url("../images/IMG_20181005_165851136_HDR.jpg"); */
   background-repeat:no-repeat;
   background-position: center;
@@ -218,6 +232,7 @@ height:40px;
   /* border-bottom: 5px solid var(--bluecol); */
   grid-row: 2/3;
   z-index: 1;
+  box-shadow: 5px 6px 8px #888;
 }
 
 .card-text{
@@ -256,7 +271,7 @@ height:40px;
 .resume-content{
   display: grid;
   grid-template-columns: 70% 1fr;
-  margin-top: 25px;
+  margin-top: 10px;
   margin-bottom: 25px;
 }
 
@@ -272,7 +287,12 @@ height:40px;
 }
 
 #image-me{
-  border-radius: 30px;
+  height:250px;
+  min-width:250px;
+  float:left;
+  margin-right:30px;
+  border-radius:50%;
+  box-shadow: 5px 6px 8px #888;
 }
 
 .experience-education{
@@ -290,6 +310,7 @@ height:40px;
   /* margin-top: 50px; */
   margin-left: 30px;
   padding-left: 20px;
+  text-align: center;
 }
 
 .skill-categories{
@@ -378,6 +399,14 @@ margin-top: 0px;
 margin-bottom: 0px;
 }
 
+.project-content img{
+  box-shadow: 5px 6px 8px #888;
+}
+
+.container-resume img{
+  /* box-shadow: 5px 6px 8px #888; */
+}
+
 .resume-entry ul{
   margin-top: 20px;
 }
@@ -388,12 +417,12 @@ margin-bottom: 0px;
   margin-right: 50px;
   margin-left: 50px;
   padding-top: 15px;
-  font-size: 25px;
+  font-size: 30px;
   font-weight: bold;
   /* border-bottom: 2px solid black; */
 }
 
-.project-title{
+.title{
     color: var(--bluecol);
     /* padding-left: 50px; */
     padding-top: 15px;
@@ -402,17 +431,17 @@ margin-bottom: 0px;
     /* border-bottom: 2px solid black; */
 }
 
-.iframe-link{
+.fullsize-link{
   text-align: right;
 }
 
-.iframe-link a{
+.fullsize-link a{
   text-align: right;
   font-size: 12px;
   text-decoration: none;
 }
 
-.iframe-link a:hover{
+.fullsize-link a:hover{
   color: gray;
 }
 .project-container{
@@ -420,8 +449,14 @@ margin-bottom: 0px;
   /* background-color: var(--projbackcol); */
 }
 
+.dashboardsMaps{
+  margin-bottom: 5px;
+  margin-top: 10px;
+}
 
-
+.resume-content img{
+  box-shadow: none;
+}
 
 /* https://stackoverflow.com/questions/49514794/centering-grid-items-in-an-auto-fill-container */
 .project-grid{
@@ -446,6 +481,7 @@ margin-bottom: 0px;
   color: var(--fontcol);
   font-size: 16px;
   padding: 15px;
+  box-shadow: 5px 6px 8px #888;
 }
 
 
@@ -530,6 +566,26 @@ margin-bottom: 0px;
   width: 100%;
 }
 
+.contact-content{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  height: 94%;
+}
+
+#contact-image-div{
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  height:100%;
+}
+
+.contact-content p{
+  margin-top: 10px;
+  margin-bottom: 0px;
+}
+
 .footer p{
   margin-bottom: 2px;
   text-align: center;
@@ -602,8 +658,63 @@ border-radius: 10px;
 box-shadow: 5px 10px 8px #888888;
 }
 
+.about-text h3{
+  margin-left: 55px;
+}
+
+.skill-div{
+  display:flex;
+  flex-direction: row;
+  align-items: baseline;
+  flex-wrap: wrap;
+  justify-content: center;
+  /* border-top: 2px solid gray; */
+}
+
+.skill-div img{
+  min-height: 85px;
+  min-width: 85px;
+  max-height: 85px;
+  max-width: 85px;
+}
 
 
+.skills h4{
+    margin-top: 0px;
+    margin-bottom: 0px;
+}
+
+.resume-download h4:hover{
+  color: gray;
+}
+
+/* .skill-icon-text span{
+  font-weight: bold;
+} */
+
+#contact-image{
+  box-shadow: 5px 6px 8px #888;
+  /* height: 500px; */
+  border: 2px solid gray;
+  border-radius: 5%;
+  /* margin-top: 40px; */
+  max-width: 750px;
+  width:100%;
+  height:auto;
+  margin-bottom: 10px;
+}
+
+.skill-icon-text{
+  display:flex;
+  flex-direction: column;
+  margin-right: 10px;
+  margin-left: 10px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  justify-content: center;
+  text-align: center;
+  align-items: center;
+}
   /* Media queries for responsive behavior */
   /* When screen is small, hide navbar links and show menu icon */
 
@@ -637,7 +748,32 @@ box-shadow: 5px 10px 8px #888888;
     }
   }
 
-  /* Media queries, set behavior based on size */
+  @media screen and (max-width: 600px) {
+    .project-content{
+      margin-right: 25px;
+      margin-left: 25px;
+    }
+  }
+
+
+  @media screen and (max-width: 700px) {
+    #image-me{
+      float: none;
+    }
+    .container-about{
+      margin-right: 25px;
+      margin-left: 25px;
+    }
+    .container-contact{
+      margin-right: 25px;
+      margin-left: 25px;
+    }
+    .about-content{
+      margin-right: 15px;
+      margin-left: 15px;
+    }
+  }
+
 
   @media screen and (max-width: 430px) {
     .namesubtext{

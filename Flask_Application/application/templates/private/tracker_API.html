@@ -80,7 +80,7 @@
 </head>
 <body>
 	<div class="container sansserif">
-	  <div class="item title">GPS Location Tracking</div>
+	  <div class="item title">Live Mobile Location Tracking</div>
 	  	<div class="item map-panel detail-panel-col">
 				<div id='map'></div>
 		</div>
@@ -105,7 +105,7 @@
 					</div>
 				</div>
 				<div>
-				<img id='activity-icon' class='icon-activity' src="{{ url_for('static', filename='images/loading.svg') }}">
+				<img id='activity-icon' class='icon-activity' src="{{ url_for('static', filename='/images/loading.svg') }}">
 				</div>
 			</div>
 			<div class="item detail-3 detail-panel-col">
@@ -164,8 +164,6 @@
 		document.getElementsByClassName("leaflet-control-zoom-in")[0].style.setProperty('color', '#5ac73e');
 		*/
 
-		// Set time variable to null, used to determine if a record is new
-		time = null
 		//leaflet dialog plugin options
 		var dialog_options = {
 			anchor: [90,5],
@@ -271,6 +269,8 @@
 
 		decGroup.addLayer(realtime_polylines);
 
+		// Set time variable to null, used to determine if a record is new
+		time = null
 		realtime.on('update', function(e) {
 			/**
 			Changes displayed text when changes are detected during polling.
