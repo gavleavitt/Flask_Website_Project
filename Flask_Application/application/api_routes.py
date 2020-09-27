@@ -43,10 +43,10 @@ def handle_gps():
             #Create a new dict to hold new objects that will be added to PostGresSQL
             newObjDict = {}
             trackrecord = OBG.gpstrackobj(data)
-            #Check if there has been movement, if so add to new object dictonary, otherwise no entry will be made
+            #Check if there has been movement, if so add to new object dictionary, otherwise no entry will be made
             if trackrecord["activity"] == "Yes":
                 newObjDict["track"] = trackrecord["model"]
-            #Add new gps record object to new objects dictonary
+            #Add new gps record object to new objects dictionary
             newObjDict["gpspoint"] = OBG.newgpsrecord(data,trackrecord["activity"])
             print(newObjDict["gpspoint"].__dict__)
             #Iterate over new objdict, can allow building out so many things can be commited to db

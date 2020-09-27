@@ -128,32 +128,32 @@ function batteryicon(battery){
 /**
 */
 if (battery >= 80){
-  return 'static/images/battery-green.svg';
+  return '../static/images/battery-green.svg';
 } else if (battery >= 60){
-  return 'static/images/battery-yellow.svg';
+  return '../static/images/battery-yellow.svg';
 } else if (battery >= 45){
-  return 'static/images/battery-orange.svg';
+  return '../static/images/battery-orange.svg';
 } else if (battery >= 10){
-  return 'static/images/battery-red.svg';
+  return '../static/images/battery-red.svg';
 } else {
-  return 'static/images/battery-red-critical.svg';;
+  return '../static/images/battery-red-critical.svg';;
 }};
 
 function activityicon(profile){
 if (profile == "MTB"){
-  document.getElementById('activity-icon').src = 'static/images/Downhill_sketch.svg';
+  document.getElementById('activity-icon').src = '../static/images/Downhill_sketch.svg';
 } else if (profile == "Road Biking"){
-  document.getElementById('activity-icon').src = 'static/images/roadbike1.svg';
+  document.getElementById('activity-icon').src = '../static/images/roadbike1.svg';
 } else if (profile == "Driving"){
-  document.getElementById('activity-icon').src = 'static/images/fiesta-white.png';
+  document.getElementById('activity-icon').src = '../static/images/fiesta-white.png';
   document.getElementById("activity-icon").style.width = "9vw";
   document.getElementById("activity-icon").style.height = "4vw";
 } else if (profile == "Walking"){
-  document.getElementById('activity-icon').src = 'static/images/walk.svg';
+  document.getElementById('activity-icon').src = '../static/images/walk.svg';
 } else if (profile == "Running"){
-  document.getElementById('activity-icon').src = 'static/images/running-figure.svg';
+  document.getElementById('activity-icon').src = '../static/images/running-figure.svg';
 } else {
-  document.getElementById('activity-icon').src = 'static/images/ellipsis.svg';
+  document.getElementById('activity-icon').src = '../static/images/ellipsis.svg';
 }
 };
 

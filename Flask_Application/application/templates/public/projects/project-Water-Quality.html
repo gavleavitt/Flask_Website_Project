@@ -54,17 +54,17 @@
 				<a class= "menu-option" href = "/#goto-proj">Projects</a>
         <a class= "menu-option" href = "/about">About</a>
         <a class= "menu-option" href = "/resume">Resume</a>
-        <a class= "menu-option" href = "#contact">Contact</a>
+        <a class= "menu-option" href = "/contact">Contact</a>
 				<a href = "javascript:void(0);" class="menu-icon" onclick="navBarFunction()" onmouseover="menuHover();" onmouseout="menuUnhover();">
 						<img id="menu-icon-img" src="/static/images/menu-icon-gray.svg" style="width:35px;height:35px">
 				</a>
 			</div>
 		</div>
 		<div class="project-content">
-			<div class="project-title">Santa Barbara County Ocean Water Quality</div>
+			<div class="title">Santa Barbara County Ocean Water Quality</div>
 			<div class="separatorbar-title"></div>
 			<iframe src="/maps/sbcoceanwaterquality" style="border-radius:10px;"></iframe>
-			<div class="iframe-link">
+			<div class="fullsize-link">
 				<a href="/maps/sbcoceanwaterquality" target="_blank">View fullpage map</a>
 			</div>
 			<div class="separatorbar-title"></div>
@@ -78,7 +78,7 @@
 				Water quality reports are posted as PDFs to the <a href=https://www.countyofsb.org/phd/oceanwatermonitoring/>Ocean Water Monitoring page</a> and result data are not otherwise
 				accessible on the internet. I saw this as an opportunity to expand my Python, database, and web design skills. I designed a workflow and web map to display these data in an
 				easily usable and mobile friendly format. My python scripts download and process these PDFs before inserting the test result data into a Postgres database. My Flask web
-				application then uses these data to populate a Leaflet map. You can see these scripts on my Github Repos, <a href=https://www.github.com/gavleavitt/Water_Quality_PDF_Parsing>PDF Parsing</a>
+				application then uses these data to populate a Leaflet map. You can see these scripts on my GitHub Repos, <a href=https://www.github.com/gavleavitt/Water_Quality_PDF_Parsing>PDF Parsing</a>
 				and <a href=https://www.github.com/gavleavitt/Flask_Website_Project>Flask Web Application</a>.
 			</p>
 			<h3>PDF Processing</h3>
@@ -89,23 +89,23 @@
 				</p>
 				<p>
 					Extracting PDF contents was a bit of a challenge. The PDFs are machine generated, i.e. exported for a Word Document, so OCR isn’t needed, but I had a hard time finding a python library
-					that extracted the contents correctly. After trying a couple libraries I came across the <a href=https://www.github.com/jsvine/pdfplumber>pdfplumber</a> library that not only extracted
+					that extracted the contents correctly. After trying a couple libraries, I came across the <a href=https://www.github.com/jsvine/pdfplumber>pdfplumber</a> library that not only extracted
 					the contents well, but also had the ability to pull out the data table content as a separate object.
 				</p>
 				<p>
-					In this example you can see a beach with an exceedance and two beaches missing results. The second image shows the PDF from later in the week with re-sampling and data fill amendments.
+					In this example, you can see a beach with an exceedance and two beaches missing results. The second image shows the PDF from later in the week with re-sampling and data fill amendments.
 					<div class="centered-imgs">
-						<a href="/static/images/PDF_Ex_Exceed_highlight.png" target="_blank">
-							<img src="/static/images/PDF_Ex_Exceed_highlight.png" style="box-shadow: 5px 6px 8px #888;border-radius:10px;">
+						<a href="/static/images/PDF_Ex_Exceed_highlight_comp.png" target="_blank">
+							<img src="/static/images/PDF_Ex_Exceed_highlight_comp.png" style="box-shadow: 5px 6px 8px #888;border-radius:10px;">
 						</a>
-						<a href="/static/images/PDF_Ex_Resample_highlight.png"  target="_blank">
-							<img src="/static/images/PDF_Ex_Resample_highlight.png" style="box-shadow: 5px 6px 8px #888;border-radius:10px;">
+						<a href="/static/images/PDF_Ex_Resample_highlight_comp.png"  target="_blank">
+							<img src="/static/images/PDF_Ex_Resample_highlight_comp.png" style="box-shadow: 5px 6px 8px #888;border-radius:10px;">
 						</a>
 					</div>
 				</p>
 				<p>
 					Now I was finally getting somewhere and had data to work with. However, I quickly
-					ran into another problem, equality checks kept failing for beach names and data didn’t come through as expected. After research and and many print statements, I
+					ran into another problem, equality checks kept failing for beach names and data didn’t come through as expected. After research and many print statements, I
 					finally discovered that I was having Unicode issues. The strings provided by pdfplumber contained non-breaking spaces, new-line notations,
 					and different dashes that were not standard keyboard keys, as well as other characters/notations. Fortunately, there’s a
 					<a href=https://www.docs.python.org/3/library/unicodedata.html#unicodedata.normalize>normalization function</a> to handle most of these issues.
@@ -131,8 +131,8 @@
 				<p>
 					Here is a quick visualization of the simple schema:
 					<p>
-					<a href="/static/images/Water_Quality_Diagram_Cropped.png"  target="_blank">
-						<img src="/static/images/Water_Quality_Diagram_Cropped.png" style="box-shadow: 5px 6px 8px #888;border-radius:10px;">
+					<a href="/static/images/Water_Quality_Diagram_Cropped_comp.png"  target="_blank">
+						<img src="/static/images/Water_Quality_Diagram_Cropped_comp.png" style="box-shadow: 5px 6px 8px #888;border-radius:10px;">
 					</a>
 					</p>
 				</p>
@@ -140,8 +140,8 @@
 				<p>
 				Now it’s time to query that data I worked so hard to get into the database. For simplicity, I decided to serve out just the most recent results for each beach. Then Flask templates and
 				expressions are used to pass the data into the HTML document to be accessed by JavaScript and Leaflet. This process provided me with major two hurdles, querying and accessing data from
-				related records and getting the data into proper geojson format for Leaflet. I had a hard time finding solid examples of how to setup SQLAlchemy models for foreign key relationships and
-				how to query and extract information from them. Fortunately this
+				related records and getting the data into proper GeoJSON format for Leaflet. I had a hard time finding solid examples of how to setup SQLAlchemy models for foreign key relationships and
+				how to query and extract information from them. Fortunately, this
 				<a href=https://www.stackoverflow.com/questions/44069023/sqlalchemy-show-only-latest-result-if-a-join-returns-multiple-results>post</a> contained example code and I could use to
 				get just the newest record per beach, based on related tables.
 				</p>
@@ -179,10 +179,10 @@ return records
 					</code></pre>
 				</p>
 				<p>
-				Working with geojson data was difficult, as I wanted to avoid manually formatting the structure of the data. While I had a method developed for my Livetracker, I wanted a more direct
-				method for generating feature collections. Fortunately the <a href=https://www.pypi.org/project/geojson/ rel="external">geojson</a> library worked perfectly and had solid example code. Working with the
-				well-known binary (WKB) representation of coordinates, provided when using select queries against Postgres/Postgis, was also challenging. However, the
-				<a href=https://www.geoalchemy-2.readthedocs.io/en/latest/> Geo-Alchemy2</a> library contains Postgis query functions to query coordinates directly, avoiding the need to convert text from binary.
+				Working with GeoJSON data was difficult, as I wanted to avoid manually formatting the structure of the data. While I had a method developed for my Livetracker, I wanted a more direct
+				method for generating feature collections. Fortunately the <a href=https://www.pypi.org/project/geojson/ rel="external">GeoJSON</a> library worked perfectly and had solid example code. Working with the
+				well-known binary (WKB) representation of coordinates, provided when using select queries against PostgreSQL/PostGIS, was also challenging. However, the
+				<a href=https://www.geoalchemy-2.readthedocs.io/en/latest/> Geo-Alchemy2</a> library contains PostGIS query functions to query coordinates directly, avoiding the need to convert text from binary.
 				</p>
 				<p>
 					Python function to generate a Feature Collection result:
@@ -217,11 +217,11 @@ return featCollect
 			<p>
 				Finally, it’s time to display the data with a responsive web map. Loading and displaying the data in Leaflet with custom markers and legend is relatively easy. The beach open status
 				property is used to determine which icon to display and up-to-date beach information is available in a popup. To facilitate navigating beaches I
-				used <a href=https://www.github.com/stefanocudini/leaflet-search>Leaflet Search</a></span> to allow searching of beaches.I also included a modal that opens on page load, and is openable with a
-				button, so users can read about the map and data limitations.The final step was to make the map mobile friendly. A viewport tag to size content down on mobile screens allows all
+				used <a href=https://www.github.com/stefanocudini/leaflet-search>Leaflet Search</a></span> to allow searching of beaches. I also included a modal that opens on page load, and is openable with a
+				button, so users can read about the map and data limitations. The final step was to make the map mobile friendly. A viewport tag to size content down on mobile screens allows all
 				popup information to be clearly visible and not in conflict with other map elements. JavaScript event listeners further reduce clutter by closing popups on user actions.
 			</p>
-			<p> JavaScript Listners:
+			<p> JavaScript Listeners:
 				<pre><code class="javascript">
 searchControl.on('search:locationfound', function(e) {
 	if(e.layer._popup)
@@ -236,7 +236,9 @@ searchControl.on('search:expanded', function(e) {
 			<h2>Final Thoughts</h2>
 			<p>
 			This was a fun project that allowed me to expand and refine many of my coding and web development skills while generating a product that’s useful for beach-goers. My next goal for this
-			map is to add expandable graphs to the information popups that show the histories of the respective test results. This will become increasing appealing and valuable as I collect and
+			map is to add expandable graphs to the beach pop-ups that show the histories of the respective test results. While I currently only have test result data going back to the start of this project, as time goes on I will expand the
+
+			 to the information popups that show the histories of the . This will become increasing appealing and valuable as I collect and
 			store result data over time.
 			</p>
 		</div>
@@ -255,7 +257,7 @@ searchControl.on('search:expanded', function(e) {
 					</a>
 				</div>
 				<div class="social-icon">
-					<a href="https://www.github.com/gavleavitt" target="_blank" rel="external" class="fab fa-linkedin">
+					<a href="https://www.linkedin.com/in/gavin-leavitt-326973165/" target="_blank" rel="external" class="fab fa-linkedin">
 					</a>
 				</div>
 			</div>
@@ -265,4 +267,5 @@ searchControl.on('search:expanded', function(e) {
 	<script>
 	var email = "gav" + "lea" + "web" + "@g" + "mail" + ".com";
 	document.getElementById("emailaddr").innerHTML = "<a href='mailto:" + email + "'>" + email + "</a>"
+	window.onscroll = function(){closeMenu()};
 	</script>

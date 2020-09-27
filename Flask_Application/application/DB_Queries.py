@@ -41,7 +41,7 @@ def AOI_I_Q(geomdat):
         AOI results as a string with individual results comma seperated or None in case
             of empty result.
         A comma seperated string is returned for easier processing and insertion into
-        dictonary created by the queries function.
+        dictionary created by the queries function.
 
     """
     #SQLAlchemy and GeoAlchemy SQL query
@@ -148,18 +148,16 @@ def county_I_Q(geomdat):
 
 def nearestroad(coordinate):
     """
-    Issues a SQLAlchemy/GeoAlchemy intersection query against the roads PostGIS table and returns a dictonary of nearest road
+    Issues a SQLAlchemy/GeoAlchemy intersection query against the roads PostGIS table and returns a dictionary of nearest road
     and distance to road in feet.
    
     SQL expression is in raw form until it can be converted to SQLAlchemy format.
     
     Query uses bounding box index location (<-> in SQL) to get candiate roads (40 records) then passes the results into the
-    ST_Distance function to get the nearest road. Points are transformed into the local coordinate
-    system California State Plane 4 (EPSG 2228) for better accurary and so that results are in feet instead of degrees, 
-    the default of WGS 1984 (EPSG 4326).
+    ST_Distance_Sphere function to get the nearest road. ST_Distance_Sphere assumes the data are in WGS 84 and returns distance in meters. 
     
     The bounding box index calculations are fast but not entirely accurate, this method is useful for creating a smaller
-    list of results to run more costly ST_Distance calculations on.
+    list of results to run more costly ST_Distance_Sphere calculations on.
     
     Parameters
     ----------
@@ -169,8 +167,8 @@ def nearestroad(coordinate):
 
     Returns
     -------
-    result : Dictonary
-        Dictonary with the keys: "street" and "distance".
+    result : dictionary
+        dictionary with the keys: "street" and "distance".
             street:
                 String of nearest street
             distance:
@@ -219,18 +217,16 @@ def nearestroad(coordinate):
 
 def nearesttrail(coordinate):
     """
-    Issues a SQLAlchemy/GeoAlchemy intersection query against the trails PostGIS table and returns a dictonary of nearest trail
+    Issues a SQLAlchemy/GeoAlchemy intersection query against the trails PostGIS table and returns a dictionary of nearest trail
     and distance to trail in feet. Trails with name "Unknown" are excluded from results.
    
     SQL expression is in raw form until it can be converted to SQLAlchemy format.
     
-    Query uses bounding box index location (<-> in SQL) to get candiate trails (40 records) then passes the results into the
-    ST_Distance function to get the nearest trail. Points are transformed into the local coordinate
-    system California State Plane 4 (EPSG 2228) for better accurary and so that results are in feet instead of degrees, 
-    the default of WGS 1984 (EPSG 4326).
+    Query uses bounding box index location (<-> in SQL) to get candiate roads (40 records) then passes the results into the
+    ST_Distance_Sphere function to get the nearest road. ST_Distance_Sphere assumes the data are in WGS 84 and returns distance in meters. 
     
     The bounding box index calculations are fast but not entirely accurate, this method is useful for creating a smaller
-    list of results to run more costly ST_Distance calculations on.
+    list of results to run more costly ST_Distance_Sphere calculations on.
     
     Parameters
     ----------
@@ -239,8 +235,8 @@ def nearesttrail(coordinate):
         
     Returns
     -------
-    result : Dictonary
-        Dictonary with the keys: "trail" and "trail_distance"
+    result : dictionary
+        dictionary with the keys: "trail" and "trail_distance"
             street:
                 String of nearest trail
             distance:
@@ -299,8 +295,8 @@ def getrecords(rec_limit,dataType):
 
     Returns
     -------
-    res_dict : Dictonary
-        Dictonary with all database column names as keys.
+    res_dict : dictionary
+        dictionary with all database column names as keys.
 
 
     SQL Alchemy ORM approach, see https://docs.sqlalchemy.org/en/13/orm/query.html and see:
@@ -318,8 +314,8 @@ def getrecords(rec_limit,dataType):
         
     res_dict = {}
     for row in query:  
-        #Create a nested dictonary for every row in the result object and add to result dictonary, with the record ID as the key to the nested dictonary
-        #.__dict__ is used to make a dictonary from parameters in the query object, this is used for easier processing
+        #Create a nested dictionary for every row in the result object and add to result dictionary, with the record ID as the key to the nested dictionary
+        #.__dict__ is used to make a dictionary from parameters in the query object, this is used for easier processing
         # However key value pairs are added that are popped off in another function to avoid issues converting them to geojson 
         res_dict[row.__dict__['id']] = row.__dict__ 
         
@@ -337,14 +333,14 @@ def gethashpass(username):
 
     Returns
     -------
-    res_dict : Dictonary
+    res_dict : dictionary
         keys:
             username (string, parameter)
          value:
             hashed password (string)
             None (if no matching user in table)
     
-    A dictonary is returned to maintain connection between username supplied and password.
+    A dictionary is returned to maintain connection between username supplied and password.
     """
     query = db.session.query(models.User.hashpass).filter(models.User.user==username).all()
     res_dict = {}
@@ -422,7 +418,7 @@ def getpathpointrecords(datetoday):
     Gets the most recently recorded GPS point, used to check for movement and to generate a GPS track. This entire function may not be needed
     and can likely be combined with "getrecords".
     
-    Returns a dictonary with a single top level key and a nested dictonary of record details, kept logic for multiple top level keys in 
+    Returns a dictionary with a single top level key and a nested dictionary of record details, kept logic for multiple top level keys in 
     case I need to build this function out. 
 
     Parameters

@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Live Tracking Dashboard</title>
+
+	<!--jquery adds "$." functionality-->
+	<!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script> -->
+
+	<!-- Custom local javascript functions -->
+	<script src="{{ url_for('static', filename='js/customfunctions.js') }}"></script>
+	<!-- Custom CSS -->
+	<link rel="stylesheet" href="{{ url_for('static', filename='css/customCSS_main.css') }}">
+	<!-- Set favicon -->
+
+	<!-- Favicon links -->
+	<link rel="apple-touch-icon" sizes="180x180" href="/static/images/apple-touch-icon.png">
+	<link rel="icon" type="image/png" sizes="32x32" href="/static/images/favicon-32x32.png">
+	<link rel="icon" type="image/png" sizes="16x16" href="/static/images/favicon-16x16.png">
+	<link rel="manifest" href="/static/images//site.webmanifest">
+	<link rel="mask-icon" href="/static/images//safari-pinned-tab.svg" color="#5bbad5">
+	<meta name="msapplication-TileColor" content="#da532c">
+	<meta name="theme-color" content="#ffffff">
+
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Lato:wght@700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@700&display=swap" rel="stylesheet">
+<link href='https://fonts.googleapis.com/css?family=Quicksand' rel='stylesheet'>
+<link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300&display=swap" rel="stylesheet">
+
+<!-- Font Awesome Social media icons -->
+<!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/brands.min.css"> -->
+
+<!-- Font Awesome Kit -->
+<script src="https://kit.fontawesome.com/fd8b0845f1.js" crossorigin="anonymous"></script>
+
+<!-- Highlight.js -->
+<link rel="stylesheet"
+      href="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.2.0/build/styles/default.min.css">
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.2.0/build/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+
+</head>
+<body>
+  <div class="container-projects sansserif">
+		<div class = "navbar">
+      <div class ="navbarleft">
+				<img id="nav-icon" src = "/static/images/wheel_custom.png">
+				<div class="nav-name">Gavin Leavitt</div>
+			</div>
+      <div id="interactiveBarRight" class="navbarright">
+        <a class= "menu-option" href = "/">Home</a>
+				<a class= "menu-option" href = "/#goto-proj">Projects</a>
+        <a class= "menu-option" href = "/about">About</a>
+        <a class= "menu-option" href = "/resume">Resume</a>
+        <a class= "menu-option" href = "/contact">Contact</a>
+				<a href = "javascript:void(0);" class="menu-icon" onclick="navBarFunction()" onmouseover="menuHover();" onmouseout="menuUnhover();">
+						<img id="menu-icon-img" src="/static/images/menu-icon-gray.svg" style="width:35px;height:35px">
+				</a>
+			</div>
+		</div>
+		<div class="project-content">
+			<div class="title">Live Tracking Dashboard</div>
+			<div class="separatorbar-title"></div>
+			<a href="../static/images/tracker_ex4_comp.png" target="_blank"><img src="../static/images/tracker_ex4_comp.png" style="margin-top:10px;"></a>
+			<div class="fullsize-link">
+				<a href="../static/images/tracker_ex4_comp.png" target="_blank">View fullsize image</a>
+			</div>
+			<div class="separatorbar-title"></div>
+			<h2>
+				Summary
+			</h2>
+			<p>
+				This dashboard displays real-time mobile phone location information collected by the open source mobile application <a href=https://gpslogger.app/>GPSLogger for Android</a> as well other phone details and variable icons.
+			</p>
+			<p>
+				The mobile application logs location and
+				other phone details through HTTP POST requests to a personal Flask server. Upon receiving these requests, the server's python scripts parse the incoming information and perform spatial queries against a <a href=https://aws.amazon.com/rds/>Amazon Relation Database Service (RDS)</a> PostgresSQL/PostGIS
+				database to determine nearby features before inserting the data into the database.
+			</p>
+			<p>
+				These results are updated in near real-time on the dashboard as data are inserted into the database. This is accomplished using by JavaScript functions to poll a Flask API connected to the database for changes, when changes are detected details on the page are automatically updated, without requiring a page refresh.
+			</p>
+			<p>
+				This workflow only works for Android, as the mobile application is Android only, and currently only tracks one user, myself. As this map and associated API display sensitive location information, access is restricted
+				to close family and friends through HTTP authentication and links to the application are not shared here.
+			</p>
+			<p>
+				This project is viewable in my <a href=https://github.com/gavleavitt/Flask_Website_Project>Flask Project Github Repo</a>, but note that the scripts and functions are integrated within the larger project for my Flask website.
+			</p>
+			<p>
+				Here is a dashboard example showing additional trail information when I am mountain biking:
+			</p>
+				<div style="display:flex;justify-content:center;margin-bottom:18px;">
+					<img src="../static/images/dash_mtb_ex1_comp.png" style="min-width:50%;">
+				</div>
+			<h3>Location Data Collection - GPSLogger for Android</h3>
+				<p>
+					GPSLogger was chosen for this project due to its ability to send information to a custom URL as HTTP POST requests as the data are
+					collected. Another useful feature is its ability to queue requests when a mobile or Wi-Fi data connection is unavailable, and send the requests in logged order once a connection is reestablished.
+				</p>
+				<p>
+					GPSLogger is configured with default settings besides the following:
+					<h4 style="color:black;">Logging details -> Log to custom URL:</h4>
+					<p style="margin-left:20px;">
+						<b>URL:</b>
+						<br>URL path to API route on webserver running Flask
+						<br><b>HTTP Body (Gathers all details the application provides as a dictionary with keys):</b>
+					</p>
+				</p>
+				<pre><code>
+{
+	"Longitude":"%LON",
+	"Latitude":"%LAT",
+	"Satellites":"%SAT",
+	"Altitude":"%ALT",
+	"Speed":"%SPD",
+	"Accuracy":"%ACC",
+	"Direction":"%DIR",
+	"Provider":"%PROV",
+	"Timestamp":"%TIMESTAMP",
+	"Time_UTC":"%TIME",
+	"Date":"%DATE",
+	"Start_timestamp":"%STARTTIMESTAMP",
+	"Battery":"%BATT",
+	"Android_ID":"%AID",
+	"Serial":"%SER",
+	"Profile":"%PROFILE",
+	"hdop":"%HDOP",
+	"vdop":"%VDOP",
+	"pdop":"%PDOP",
+	"Dist_Travelled":"%DIST",
+	"Activity":"%ACT"
+}
+				</code></pre>
+				<p style="margin-left:20px;">
+					<br><b>HTTP Headers:</b>
+					<br>"Content-Type: application/json"
+					<br><b>HTTP Method:</b>
+					<br>"POST"
+					<br><b>Basic Authentication:</b>
+					<br>Username and password with admin/POST permission
+				</p>
+				<p>
+					Besides those settings, <b>Log GPS/GNSS locations</b> and <b>Log network locations</b> are enabled, <b>Log passive locations</b> is disabled, and logging interval is variable depending on profile. These settings allow the app to log location based on cellular network location only, which has low accuracy but better battery life, when GPS is not being used by another application. However, if another app is running that's actively using GPS, such as Strava, then the GPS location will be logged instead of cellular network location. These settings hopefully cause only marginal loss in battery life compared to running just Strava. In my experience enabling Log passive locations will cause GPSLogger to log at the interval of the other GPS app, such as every second for Strava, resulting in far more logged records and POST requests than desired.
+				</p>
+				<p>
+					I have a profile set for each activity type I may record, with the profile's name being the activity, such as road biking, walking or driving. These profiles have duplicated settings, besides logging interval.
+					This is important since the profile name is sent in the POST request and can be used for logic/filtering later on.
+				</p>
+			<h3>Handling Incoming HTTP POST Data - Python Flask</h3>
+				<p>
+					Upon receiving a POST request to the API, the Flask Application parses the incoming data. After the mobile data are collected, a series of functions generate additional data for the dashboard, with all database
+					interactions being handled by the <a href=https://www.sqlalchemy.org/>SQLAlchemy</a> python library.
+				</p>
+				<p>
+					First, the script determines if the mobile device has moved since the last point recorded in the database, based on a distance threshold of 10m for GPS locations and 100m for cellular locations. If movement is detected,
+					the incoming data is flagged as such and a line is generated and inserted into the database that connects the incoming point with the most recent recorded location. If the point is the first for the day, in local time, PST,
+					or no movement is detected, then the point is flagged as no activity and no line is generated.
+				</p>
+				<p>
+					These thresholds filter out most GPS and cellular location drifts due to logging inaccuracy while enabling movement to be logged. However, movement is still often detected incorrectly, especially for cellular
+					locations due to the high amount of inaccuracy. In the future I will consider fine-tuning these thresholds, logging only GPS locations, or exploring GPSLogger’s movement detection settings.
+				</p>
+				<p>
+					 Next, a series of spatial intersections are calculated to determine if the incoming point is within an area of interest, California county, California city, or any combination.
+					 Here is an example of a city intersection query using SQLAlchemy ORM and a GeoAlchemy function:
+				</p>
+				<pre><code>
+query = db.session.query(CaliforniaPlaces).filter(CaliforniaPlaces.geom.ST_Intersects(geomdat))
+query_count = 0
+for i in query:
+		query_count += 1
+# Logic to create a comma separted string of all results in case multiple cities
+# are returned, this should not happen under normal circumstances
+if query_count > 0:
+		result = ""
+		count = 0
+		for city in query:
+				if count > 0:
+						result += "," + city.name
+						count += 1
+				else:
+						result += city.name
+						count += 1
+else:
+		return None
+return result
+				</pre></code>
+				<p>
+					Next, nearby road and distance to road is calculated for all incoming points. Currently I use a copy of the <a href= https://www.openstreetmap.org/>OpenStreetMap (OSM)</a> roads dataset for Santa Barbara County
+					that’s stored in my PostgresSQL/PostGIS database. I used <a href= https://www.geofabrik.de/>Geofabrik</a> to download all OSM data for Southern California, available from
+					<a href= http://download.geofabrik.de/north-america/us/california/socal.html>here</a>, and extracted just the road lines data.
+				</p>
+				<p>
+				The nearest road to the incoming GPS point and distance to it are queried using a raw SQL query in SQLAlchemy/GeoAlchemy:
+				</p>
+				<pre><code>
+sql = text("""WITH nearestcanidates AS (
+SELECT
+		roads.name,
+		roads.geom
+FROM
+		roads AS roads
+WHERE
+		roads.name IS NOT NULL
+ORDER BY
+		roads.geom <-> (ST_GeomFromText(:param, 4326))
+LIMIT 40)
+
+SELECT
+		nearestcanidates.name,
+		ST_Distance_Sphere(
+						nearestcanidates.geom,
+						ST_GeomFromText(:param, 4326)
+						) AS distance
+FROM
+		nearestcanidates
+ORDER BY
+		distance
+LIMIT 1""")
+
+# Execute database query using the coordinates as a variable.
+query = db.session.execute(sql,{"param":coordinate})
+result = {}
+query_count = 0
+# Build out dict with each result in query
+for dat in query:
+		result["street"] = dat[0]
+		# Convert meters (default unit of postgis function) to feet
+		result["distance"] = dat[1] * 3.28
+		query_count += 1
+if query_count == 0:
+		result['street'],result['distance'] = None,None
+return result
+				</pre></code>
+				<p>
+					The query does the following:
+				</p>
+				<p>
+					The incoming GPS coordinate is passed into the raw SQL expression using ":param" as a variable. The bounding box index location (<-> in SQL) is calculated for 40 street records with non-null names to get nearby candidates. Records are then passed into the ST_Distance_Sphere function to get the nearest road. The bounding box index calculations use the spatial bounding box of features, out any distance from the querying point, and are fast to calculate, but not entirely accurate. Instead of relying on the index results alone, the nearest records are passed into the more accurate, but more time consuming, ST_Distance_Sphere function. After the query, the results are parsed and distance	is converted to feet as ST_Distance_Sphere always returns distance in meters.
+    		</p>
+				<p>
+					If the incoming point is within a area of interest flagged as a outdoor activity area (digitized by myself), then an additional query is conducted to get the nearest trail and distance to it. These trail data where pulled from OSM using the same method used for roads. The spatial query for these trails also uses the same method as mentioned previously for finding the nearest road.
+				</p>
+				<p>
+					Date information in local time, PST, is calculated, the incoming GPS coordinates are converted to a well-known text (WKT) representation so they can be inserted as a geometric point, and other data are cleaned such that any values coming in as a string with a value of “0” are converted to a None type.
+				</p>
+				<p>
+					Finally, the incoming point and generated line data are inserted into the PostgreSQL database as single records.
+				</p>
+			<h3>Making the Data Available through an API - Python Flask and PostgreSQL/PostGIS</h3>
+				<p>
+					Now that the data are stored away, its time to get them out on demand. I wanted these data available for polling using JavaScript, so I created Flask routes for each on my website to response to GET requests with the data from the database formatted in GeoJSON. This was my first attempt at created an API, so to keep things simple I hard-coded the scripts to return only the most recent point record and all track records for that day, in PST. Also, since these data show my live location, they are protected by HTTP authentication, which is discussed later on.
+				</p>
+				<p>
+					Here is an example of the Python code to return the most recent point location and track data:
+				</p>
+				<pre><code>
+@app.route("/api/v0.1/getpoint", methods=['GET'])
+@auth.login_required(role='viewer')
+def get_pointgeojson():
+    result = to_geojson(recLimit = 1, dataType = "gpspoints")
+    return result
+
+def to_geojson(recLimit,dataType):
+    features = []
+    #Get records from database to be converted to geojson.
+    dbres = getrecords(recLimit,dataType)
+    dbdat = dbres["dict"]
+
+    for key in dbdat.keys():
+        # Pop unnecessary entries, they don't convert to json properly, but the geom WKB element is needed, make it a variable before popping off
+        dbdat[key].pop('_sa_instance_state')
+        geom = dbdat[key]['geom']
+        dbdat[key].pop('geom')
+        # Format records as a list of geojson filters, depending on which GET request was sent
+        if dataType == "gpspoints":
+            geometryDat = Point((float(dbdat[key]['lon']), float(dbdat[key]['lat'])))
+            features.append(Feature(geometry=geometryDat, properties=dbdat[key]))
+        elif dataType == "gpstracks":
+            # to_shape is a geoalchemy method that converts a geometry to a shapely geometry
+            # mapping is a shapely method that converts a geometry to a geojson object, a dictionary with formatted geom type and coordinates
+            geometryWKT = mapping(to_shape(geom))
+            # Take the geojson formated geom and create a geojson feature with it and the rest of the record properties, add to list of features
+            features.append(Feature(geometry=geometryWKT, properties=dbdat[key]))
+
+    #Take list of geojson formatted features and convert to geojson FeatureCollection object
+    feature_collection = FeatureCollection(features)
+    return feature_collection
+
+def getrecords(rec_limit,dataType):
+    if dataType == "gpspoints":
+        query = db.session.query(gpsdatmodel).order_by(gpsdatmodel.timeutc.desc()).limit(rec_limit)
+    elif dataType == "gpstracks":
+        todaydate = datetime.today().strftime('%Y-%m-%d')
+        query = db.session.query(gpstracks).filter_by(date=todaydate)
+
+res_dict = {}
+for row in query:
+    #Create a nested dictionary for every row in the result object and add to result dictionary, with the record ID as the key to the nested dictionary
+    #.__dict__ is used to make a dictionary from parameters in the query object, this is used for easier processing
+    # However key value pairs are added that are popped off in another function to avoid issues converting them to geojson
+    res_dict[row.__dict__['id']] = row.__dict__
+
+#Returning single dict so return can be built out with more entries if needed.
+return {"dict":res_dict}
+
+				</pre></code>
+				<p>
+					As this was my first attempt at creating code to use SQLAlchemy and to return GeoJSON formatted features, it isn't pretty and contains inefficient and unnecessary steps. While working on my <a href=/projects/sbcoceanquality>Water Quality Map Project</a> I learned how to better extract just the data that I'm interested in, without the need of removing dictionary entries as seen above. I also discovered that the <a href=https://pypi.org/project/Shapely/>Shapely</a> library is not needed and that the <a href=https://pypi.org/project/geojson/>GeoJSON</a> library works perfectly for my workflow.
+				</p>
+				<p>
+					While these scripts are functional, they can be vastly improved and I would like to return to them at a later time.
+				</p>
+			<h3>Displaying data in real-time - Leaflet</h3>
+				<p>
+					The dashboard uses Leaflet to display the GPS locations and tracks and panels to show textual information. The Leaflet plugin <a href=https://github.com/perliedman/leaflet-realtime>leaflet-realtime</a> is used to poll my APIs at regular intervals, if the API returns a new record, based on Id, and then the new record is added to the map.
+				</p>
+				<p>
+					Here is an example using the <a href=https://github.com/mapshakers/leaflet-icon-pulse>leaflet-icon-pulse</a> plugin to create the real-time icon:
+				</p>
+				<pre><code>
+realtime = L.realtime({
+		url: [GPS_Point_API],
+		crossOrigin:false,
+		type: 'json'
+}, {
+	interval: 5 * 1000,
+	onEachFeature: function(feature, layer){
+		var pulsingIcon = L.icon.pulse({iconSize:[15,15],color:'red'});
+		layer.setIcon(pulsingIcon);
+	}
+}).addTo(map);
+				</pre></code>
+				<p>
+					Normally the pointToLayer function would be used for point features, however, this caused an issue where the point layer would not be added to the map until the first update interval was over. This was resolved by using onEachFeature and .setIcon() instead to bind the pulsing icon to the feature.
+				</p>
+				<p>
+					A JavaScript listener is used to update textual information and icons whenever a new GPS record is polled. The following script calls on other functions to parse data and icon links to be updated before updating the dashboard:
+				</p>
+				<pre><code>
+time = null
+realtime.on('update', function(e) {
+		Object.keys(e.update).forEach(function(id) {
+		var feature = e.update[id];
+		document.getElementById('last-logged').innerHTML = formattime(feature.properties.timeutc);
+		document.getElementById('last-logged').innerHTML += timedif(feature.properties.timeutc);
+		document.getElementById('nearest-road').innerHTML = nearestpathway(feature.properties.nearestroad,feature.properties.nearesttrail,feature.properties.dist_nearestroad,
+			feature.properties.dist_nearesttrail,feature.properties.POI,feature.properties.speed);
+		document.getElementById('batterylife').innerHTML = batteryinfo(feature.properties.battery);
+		document.getElementById('coordinates').innerHTML = coors(feature.properties.lat,feature.properties.lon,feature.properties.provider);
+		document.getElementById('activity').innerHTML = activitytext(feature.properties.profile);
+		document.getElementById('location').innerHTML = locationtext(feature.properties.AOI,feature.properties.city,feature.properties.county);
+		document.getElementById('battery-icon').src = batteryicon(feature.properties.battery);
+		activityicon(feature.properties.profile)
+
+		if (time !== feature.properties.timestamp_epoch){
+			/**
+			Used to detect if a new record has been entered, changes map bounds only if the time field has changed,
+			consider using the "Id" field instead.
+			*/
+			//console.log("changing bounds!")
+			time = feature.properties.timestamp_epoch
+			map.fitBounds(realtime.getBounds(), {maxZoom: 15})
+		}
+		}.bind(this));
+});
+				</pre></code>
+				<p>
+					Note the check to see if the time variable equals the new record's time before updating the map’s bounds. While I am not entirely sure if this is the most appropriate approach, it allows the map zoom to new records as they are polled. Before incorporating this check to the .fitbounds() function, the listener would fire the function on every poll interval, even if no new records were detected.
+				</p>
+				<p>
+					Currently this application only tracks one user, myself, however I believe it can be easily expanded to track multiple Android users, based on the AndroidID attribute thats collected by GPSLogger.
+				</p>
+			<h3>Authenication - Python Werkzeug and flask-HTTPAuth</h3>
+			<p>
+				Access to the APIs and dashboard data are restricted using HTTP authentication provided by <a href=https://flask-httpauth.readthedocs.io/en/latest>Flask-HTTPAuth</a> and password hashing is conducted by <a href=https://werkzeug.palletsprojects.com/en/1.0.x/utils/>Werkzeug</a>. User roles and credentials are stored within PostgreSQL and are queried whenever a user attempts to access the restricted resources. User roles and credentials are administered by myself and stored within PostgreSQL where they are queried whenever a user attempts to access restricted resources. Passwords are stored as cryptographic hashes using Werkzeug. When a user attempts to authenticate, the provided credentials are checked against the stored user’s existence, access roles, and then the provided password is hashed and checked against the user’s stored hash. If the credentials are valid and the user has the appropriate role required by Flask-HTTPAuth then they can access the resource.
+			</p>
+			<h2>Final Thoughts</h2>
+			<p>
+				This application shows a workflow for live mobile asset tracking based on free open source tools. It's also useful for sharing your location with friends and family as you travel or take part of outdoor activities. While a mobile data connection is required, which may not be readily available when hiking or mountain biking, the workflow and dashboard still provide utility since the GPSLogger application will attempt to send out data at intervals if no connection is available. This ensures that if a connection is available, if only briefly, that the data will be sent out and visible to dashboard viewers.
+			</p>
+			<p>
+				I used this project to take a dive into front-end and back-end web development and design. Before started this project I had very limited knowledge of JavaScript, HTML, CSS, SQL, database management, cloud based web server creation, and server-side scripting. Over the course of my work on this application, I learned a lot about these technologies. While I am far from experienced with them, especially since I have only taken training courses for Python, I am much more confident in my understanding of them and possess enough knowledge to create simple webpages, web maps, and web mapping applications. This personal website branched off from my work on this application since I decided to create a portfolio to show this project and others while further expanding my web development skills.
+			</p>
+			<p>
+				While very confusing and frustrating at times, I greatly enjoyed working on this project. I plan to continue improving and building out this application over time since there are additional features I would like to add and much of the existing code can use improvements as well.
+			</p>
+		</div>
+		<div class="footer" style="grid-row:3/4">
+			<p>© 2020 Gavin Leavitt | Contact: <span id="emailaddr"></span>
+			<br>Images, maps, and webpages created by Gavin Leavitt unless otherwise noted.
+			<br>Icons made by <a href="https://www.flaticon.com/authors/roundicons" title="Roundicons">Roundicons</a>,  <a href="https://www.flaticon.com/authors/freepik" title="Freepik">Freepik</a> from <a href="https://www.flaticon.com/" title="Flaticon"> www.flaticon.com</a> and modified by Gavin Leavitt.
+			</p>
+			<div class="social-media">
+				<div class="social-icon">
+					<a href="https://www.github.com/gavleavitt" target="_blank" rel="external" class="fab fa-github">
+					</a>
+				</div>
+				<div class="social-icon">
+					<a href="https://www.facebook.com/gavin.leavitt.7/" target="_blank" rel="external" class="fab fa-facebook">
+					</a>
+				</div>
+				<div class="social-icon">
+					<a href="https://www.linkedin.com/in/gavin-leavitt-326973165/" target="_blank" rel="external" class="fab fa-linkedin">
+					</a>
+				</div>
+			</div>
+		</div>
+		</div>
+	</div>
+	<script>
+	var email = "gav" + "lea" + "web" + "@g" + "mail" + ".com";
+	document.getElementById("emailaddr").innerHTML = "<a href='mailto:" + email + "'>" + email + "</a>"
+	window.onscroll = function(){closeMenu()};
+	</script>
