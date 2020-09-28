@@ -330,8 +330,9 @@ margin-left: 20px;
 }
 
 .resume-employ-dates{
-  /* display:flex;
-  justify-content: space-between; */
+  display:flex;
+  flex-direction: column;
+  /* justify-content: space-between; */
   margin-bottom: 5px;
 }
 
@@ -342,7 +343,7 @@ margin-left: 20px;
 
 .resume-text{
   font-size: 16px;
-  margin-bottom: 5px;
+  /* margin-bottom: 5px; */
 }
 
 .separatorbar{
