@@ -19,6 +19,13 @@ from flask_migrate import Migrate
 from application import script_config as dbconfig
 import os
 import time
+# from parsePDF import handlePDF
+
+# from apscheduler.schedulers.background import BackgroundScheduler
+
+# sched = BackgroundScheduler(daemon=True)
+# sched.add_job(handlePDF,'cron',minute='*')
+# sched.start()
 
 # Create flask application, I believe "application" has to be used to work properly on AWS EB
 application = app = Flask(__name__)
