@@ -9,6 +9,7 @@ from application import application, app
 from flask import render_template
 from application import functions as func
 from application import DB_Queries as DBQ
+from application import parsePDF
 
 @app.route("/")
 def index():
@@ -90,3 +91,7 @@ def dashboardsmaps():
 @app.route("/contact")
 def contact():
 	return render_template("public/contactme.html")
+
+@app.route("/testdownload")
+def testdownload():
+    return("Ran test download!")

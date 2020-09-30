@@ -19,3 +19,5 @@ script_config.py
 flaskdeployment.zip
 env_BU
 .ebextensions/
+GoogleDrive_Config/
+*.json
