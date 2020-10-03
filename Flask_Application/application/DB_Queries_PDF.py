@@ -76,6 +76,18 @@ def insmd5(MD5, pdfDate, pdfName, insDate):
 
 
 def insertWaterQual(beachDict, md5_fk):
+    """
+    Inserts water quality results into water quality database table with md5 foreign key relationship.
+
+    Parameters
+    ----------
+    beachDict: Dictionary. Dictionary containing values to be inserted into database.
+    md5_fk: String. Foreign key from md5 table.
+
+    Returns
+    -------
+    Print statement.
+    """
     inslist = []
     for key in beachDict.keys():
         inslist.append(

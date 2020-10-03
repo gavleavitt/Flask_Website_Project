@@ -15,32 +15,43 @@ https://blog.miguelgrinberg.com/post/the-flask-mega-tutorial-part-i-hello-world
 """
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
-from flask_migrate import Migrate
+# from flask_migrate import Migrate
 from application import script_config as dbconfig
 import os
+import atexit
 import time
-# from parsePDF import handlePDF
+from apscheduler.schedulers.background import BackgroundScheduler
 
-# from apscheduler.schedulers.background import BackgroundScheduler
 
-# sched = BackgroundScheduler(daemon=True)
-# sched.add_job(handlePDF,'cron',minute='*')
-# sched.start()
 
 # Create flask application, I believe "application" has to be used to work properly on AWS EB
 application = app = Flask(__name__)
-# app.config['SQLALCHEMY_DATABASE_URI'] = (f"postgresql://{dbconfig.settings['user']}:{dbconfig.settings['password']}@{dbconfig.settings['host']}" +
-#           f":{dbconfig.settings['port']}/{dbconfig.settings['dbname']}")
+
 # Get environmental variables for AWS RDS connection 
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get("DBCON")
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 # Set timezone used by time, set as environmential variable 
-os.environ['TZ'] = 'America/Los_Angeles'
-time.tzset()
+# os.environ['TZ'] = 'America/Los_Angeles'
+# try:
+#     time.tzset()
+# except:
+#     print("Can't set timezone, on a Windows machine")
+
 # Set up Flask-SQLAlchemy database connection with the Flask app. 
 db = SQLAlchemy(app)
 # Setup Flask migrate connection with the application and database 
-migrate = Migrate(app, db)
+# migrate = Migrate(app, db)
 
-#Imports from the application flask object have to be after flask application is initialized to avoid circular imports
-from application import routes, api_routes, models
+# Imports from the application flask object have to be after flask application is initialized to avoid circular imports
+from application import routes, api_routes, models, parsePDF
+
+sched = BackgroundScheduler(daemon=True)
+# Trigger every day at 9:30 am
+sched.add_job(parsePDF.pdfjob, trigger='cron', hour='9', minute='30')
+# sched.add_job(parsePDF.pdfjob, trigger='cron', hour='15', minute='37')
+# Trigger every minute
+# sched.add_job(parsePDF.pdfjob, 'cron', minute='*')
+sched.start()
+
+# Shutdown your cron thread if the web process is stopped
+atexit.register(lambda: sched.shutdown(wait=False))

@@ -10,16 +10,19 @@ from flask import render_template
 from application import functions as func
 from application import DB_Queries as DBQ
 from application import parsePDF
-
+from application import errorEmail
+from application import GoogleDrive
 @app.route("/")
 def index():
     return render_template("public/index.html")
+
 
 @app.route("/main")
 def main():
     return render_template("public/index.html")
 
-@app.route("/projects/livetracker")
+
+@app.route("/dashboards/livetracker")
 def liveGPS():
     """
     This HTML document contains Javascript to poll other APIs in this application, allowing for dynamic 
@@ -32,6 +35,7 @@ def liveGPS():
 
     """
     return render_template("private/tracker_API.html")
+
 
 @app.route("/maps/sbcoceanwaterquality")
 def waterQual():
@@ -50,48 +54,69 @@ def waterQual():
     beachqual = beachresults["waterqual"]
     recentrec = beachresults["recent"]
     standards = DBQ.getStandards()
-    return render_template("public/maps/Water_Qual_Map.html", beachgeojson = beachqual, standards=standards, recentdate = recentrec)
+    return render_template("public/maps/Water_Qual_Map.html", beachgeojson=beachqual, standards=standards,
+                           recentdate=recentrec)
+
 
 @app.route("/projects/sbcoceanquality")
 def waterqualproj():
     return render_template("public/projects/project-Water-Quality.html")
 
+
 @app.route("/projects/livetrackingdashboard")
 def livetrackingdash():
     return render_template("public/projects/project-Live-Tracking-Dashboard.html")
 
+
 @app.route("/templatetesting")
 def template():
-	return render_template("public/projects/project-template.html")
+    return render_template("public/projects/project-template.html")
+
 
 @app.route("/resume")
 def resume():
-	return render_template("public/resume.html")
+    return render_template("public/resume.html")
+
 
 @app.route("/about")
 def about():
-	return render_template("public/aboutme.html")
+    return render_template("public/aboutme.html")
+
 
 @app.route("/projects/sanitarysewertraceapp")
 def sanitarysewertrace():
-	return render_template("public/projects/project-Sanitary-Sewer-Trace.html")
+    return render_template("public/projects/project-Sanitary-Sewer-Trace.html")
+
 
 @app.route("/projects/sanitaryewerstormdrainbuildout")
 def sanitarysewerstormdrainbuildout():
-	return render_template("public/projects/project-Sanitary-Sewer-Storm-Drain-Builtout.html")
+    return render_template("public/projects/project-Sanitary-Sewer-Storm-Drain-Builtout.html")
+
 
 @app.route("/projects/streetlightpolepermitting")
 def streetlightpolepermitting():
-	return render_template("public/projects/project-Streetlight-Pole-Permitting.html")
+    return render_template("public/projects/project-Streetlight-Pole-Permitting.html")
+
 
 @app.route("/projects/dashboardsmaps")
 def dashboardsmaps():
-	return render_template("public/projects/project-Operations-Dashboards-Maps.html")
+    return render_template("public/projects/project-Operations-Dashboards-Maps.html")
+
 
 @app.route("/contact")
 def contact():
-	return render_template("public/contactme.html")
+    return render_template("public/contactme.html")
 
-@app.route("/testdownload")
-def testdownload():
-    return("Ran test download!")
+@app.route("/sendemail")
+def email():
+    errorEmail.senderroremail()
+    return("Email sent!")
+@app.route("/uploadpdf")
+def upload():
+    GoogleDrive. addtoGDrive( r"G:\My Drive\Projects\test_documents\Ocean_Water_Quality_Report_testing_20201002.pdf",
+                              "Ocean_Water_Quality_Report_testing_20201002.pdf")
+    return("uploaded!")
+# @app.route("/testdownload")
+# def testdownload():
+#     parsePDF.parsePDF()
+#     return ("Ran test download!")

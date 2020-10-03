@@ -12,6 +12,7 @@ Created on Fri May 22 17:45:44 2020
 """
 from application import app, application, models, db
 from application import functions as func
+from application import DB_Queries as DBQ
 from application import objectgeneration as OBG
 from application.authentication import auth
 from flask import request
@@ -40,17 +41,17 @@ def handle_gps():
             print("Hit server with POST request and valid json mime type!",file=sys.stdout)
             data = request.get_json()
             print("Request data has been fetched!",file=sys.stdout)            
-            #Create a new dict to hold new objects that will be added to PostGresSQL
+            # Create a new dict to hold new objects that will be added to PostGresSQL
             newObjDict = {}
             trackrecord = OBG.gpstrackobj(data)
-            #Check if there has been movement, if so add to new object dictionary, otherwise no entry will be made
+            # Check if there has been movement, if so add to new object dictionary, otherwise no entry will be made
             if trackrecord["activity"] == "Yes":
                 newObjDict["track"] = trackrecord["model"]
             #Add new gps record object to new objects dictionary
             newObjDict["gpspoint"] = OBG.newgpsrecord(data,trackrecord["activity"])
             print(newObjDict["gpspoint"].__dict__)
-            #Iterate over new objdict, can allow building out so many things can be commited to db
-            #This allows for empty models to be skipped
+            # Iterate over new objdict, can allow building out so many things can be commited to db
+            # This allows for empty models to be skipped
             newObjs = []
             for obj in newObjDict.keys():
                 newObjs.append(newObjDict[obj])
@@ -61,7 +62,7 @@ def handle_gps():
             # Return a json success code
             resp = jsonify(success=True)
             return resp
-            #return {"message": f"GPS entry {newrecord.date} has been created successfully."}
+            # return {"message": f"GPS entry {newrecord.date} has been created successfully."}
         else:
             # POST request is not in json, return error 
             print("Got a POST request but the payload isnt in JSON!", file=sys.stdout)
@@ -88,7 +89,7 @@ def get_pointgeojson():
 
     """
     print("Hit with a point get request!")
-    result = func.to_geojson(recLimit = 1, dataType = "gpspoints")
+    result = DBQ.getFeatCollection(reclimit=1, datatype="gpspoints")
     return result
 
 @app.route("/api/v0.1/gettracks", methods=['GET'])
@@ -108,6 +109,6 @@ def get_trackgeojson():
         Geojson representation of the gps tracks spatial data
 
     """
-    print("Hit with a get request!")
-    result = func.to_geojson(recLimit = "all", dataType = "gpstracks")
+    print("Hit with a gpstrack get request!")
+    result = DBQ.getFeatCollection(reclimit="all", datatype="gpstracks")
     return result

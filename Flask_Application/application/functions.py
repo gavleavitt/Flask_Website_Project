@@ -14,9 +14,9 @@ import datetime
 from geojson import Point, Feature, FeatureCollection, LineString, dumps
 from application import DB_Queries as DBQ
 from application import script_config as dbconfig
-from geoalchemy2.shape import to_shape
+# from geoalchemy2.shape import to_shape
 from flask.json import jsonify
-from shapely.geometry import mapping
+# from shapely.geometry import mapping
 
 def string_to_none(x):
     """
@@ -101,65 +101,71 @@ def queries(geomdat):
         res['trail'],res['dist_trail']=None,None
     return res 
 
-def to_geojson(recLimit,dataType):   
-    """
-    Queries spatial tables in Postgres database and returns the most recent records formatted as a geojson feature collection 
-    (which contains geometries and properties). This function is reliant on the "geojson" library, I am unclear if this is 
-    needed to return a geojson result as either a feature or a feature collection. The flask function jsonify may be able to 
-    return a geojson result if the data are formatted properly. 
-    
-    *This method to generate a geojson feature collection uses shapely to create the individual geojson feature objects, however 
-    I later discovered that I can use the geojson library to generate everything as seen in the "waterQualGeoJSON" function, 
-    that method is likely better as it requires one less installed library, I will consider rewriting this to follow that method
-    
-    ##TODO:
-    
-    Build out to use reclimit to provide a dynamic number of results as requested in a URL query string.
-    Rewrite to remove depenance on shapely 
-    Rewrite to condense code and handle linestring/points at the same time
-    
-    Parameters
-    ----------
-    recLimit: Int
-        Int of records to return, hard coded in a upstream function
-        
-    dataType: String
-        Type of data to return, "gpspoints" or "gpstracks", used to control output type, linestring or point
-        * I may be able to condense code and remove this variable 
-    
-    Returns
-    -------
-    feature_collection : geojson feature collection
-        Geojson feature collection containing all queried records and all associated properties stored in Postgres
-    """
-    features = []
-    #Get records from database to be converted to geojson.
-    #TODO:
-    # Clean up to one line when rewriting 
-    dbres = DBQ.getrecords(recLimit,dataType)
-    dbdat = dbres["dict"]
-
-    for key in dbdat.keys():
-        # Pop unnecessary entries, they don't convert to json properly, but the geom WKB element is needed, make it a variable before popping off
-        dbdat[key].pop('_sa_instance_state')
-        geom = dbdat[key]['geom']
-        dbdat[key].pop('geom')
-        # Format records as a list of geojson filters, depending on which GET request was sent
-        if dataType == "gpspoints":
-            print("Making gps point result!")
-            geometryDat = Point((float(dbdat[key]['lon']), float(dbdat[key]['lat'])))
-            # print(f"point ojbect: {geometryDat}")
-            features.append(Feature(geometry=geometryDat, properties=dbdat[key]))
-        elif dataType == "gpstracks":
-            # to_shape is a geoalchemy method that converts a geometry to a shapely geometry
-            # mapping is a shapely method that converts a geometry to a geojson object, a dictionary with formatted geom type and coordinates 
-            geometryWKT = mapping(to_shape(geom))
-            # Take the geojson formated geom and create a geojson feature with it and the rest of the record properties, add to list of features
-            features.append(Feature(geometry=geometryWKT, properties=dbdat[key]))
-
-    #Take list of geojson formatted features and convert to geojson FeatureCollection object 
-    feature_collection = FeatureCollection(features)
-    return feature_collection
+# def to_geojson(recLimit,dataType):
+#     """
+#     Queries spatial tables in Postgres database and returns the most recent records formatted as a geojson feature collection
+#     (which contains geometries and properties). This function is reliant on the "geojson" library, I am unclear if this is
+#     needed to return a geojson result as either a feature or a feature collection. The flask function jsonify may be able to
+#     return a geojson result if the data are formatted properly.
+#
+#     *This method to generate a geojson feature collection uses shapely to create the individual geojson feature objects, however
+#     I later discovered that I can use the geojson library to generate everything as seen in the "waterQualGeoJSON" function,
+#     that method is likely better as it requires one less installed library, I will consider rewriting this to follow that method
+#
+#     ##TODO:
+#
+#     Build out to use reclimit to provide a dynamic number of results as requested in a URL query string.
+#     Rewrite to remove dependence on shapely
+#     Rewrite to condense code and handle linestring/points at the same time
+#
+#     Parameters
+#     ----------
+#     recLimit: Int
+#         Int of records to return, hard coded in a upstream function
+#
+#     dataType: String
+#         Type of data to return, "gpspoints" or "gpstracks", used to control output type, linestring or point
+#         * I may be able to condense code and remove this variable
+#
+#     Returns
+#     -------
+#     feature_collection : geojson feature collection
+#         Geojson feature collection containing all queried records and all associated properties stored in Postgres
+#     """
+#     features = []
+#     #Get records from database to be converted to geojson.
+#     #TODO:
+#     # Clean up to one line when rewriting
+#     dbres = DBQ.getrecords(recLimit,dataType)
+#     dbdat = dbres["dict"]
+#
+#     for key in dbdat.keys():
+#         # Pop unnecessary entries, they don't convert to json properly, but the geom WKB element is needed, make it a variable before popping off
+#         dbdat[key].pop('_sa_instance_state')
+#         geom = dbdat[key]['geom']
+#         dbdat[key].pop('geom')
+#         # Format records as a list of geojson features, depending on which GET request was sent
+#         if dataType == "gpspoints":
+#             geometryDat = Point((float(dbdat[key]['lon']), float(dbdat[key]['lat'])))
+#         elif dataType == "gpstracks":
+#             pass
+#         features.append(Feature(geometry=geometryDat, properties=dbdat[key]))
+#
+#         # if dataType == "gpspoints":
+#         #     print("Making gps point result!")
+#         #     geometryDat = Point((float(dbdat[key]['lon']), float(dbdat[key]['lat'])))
+#         #     # print(f"point ojbect: {geometryDat}")
+#         #     features.append(Feature(geometry=geometryDat, properties=dbdat[key]))
+#         # elif dataType == "gpstracks":
+#         #     # to_shape is a geoalchemy method that converts a geometry to a shapely geometry
+#         #     # mapping is a shapely method that converts a geometry to a geojson object, a dictionary with formatted geom type and coordinates
+#         #     # geometryWKT = mapping(to_shape(geom))
+#         #     # Take the geojson formated geom and create a geojson feature with it and the rest of the record properties, add to list of features
+#         #     features.append(Feature(geometry=geometryWKT, properties=dbdat[key]))
+#
+#     # Take list of geojson formatted features and convert to geojson FeatureCollection object
+#     feature_collection = FeatureCollection(features)
+#     return feature_collection
     
 
 def handletracks(coordinate2, datetoday, locationtype):
@@ -286,5 +292,3 @@ def waterQualGeoJSON(records):
     featCollect = FeatureCollection(featList)
     return featCollect
 
-
-    

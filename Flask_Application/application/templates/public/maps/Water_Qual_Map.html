@@ -200,7 +200,7 @@
 		var waterquality_geojson = {{beachgeojson|tojson}}
 		var standards = {{standards|tojson}}
 		//Add flaticon attribution
-		map.attributionControl.addAttribution("Icons made by <a href='https://www.flaticon.com/authors/freepik' title='Freepik'>Freepik</a> and edited by me, taken from from <a href='https://www.flaticon.com/' title='Flaticon'> www.flaticon.com</a>")
+		map.attributionControl.addAttribution("Icons made by <a href='https://www.flaticon.com/authors/freepik' title='Freepik'>Freepik</a> taken from <a href='https://www.flaticon.com/' title='Flaticon'> www.flaticon.com</a> and edited by Gavin Leavitt")
 		beachreports = L.geoJSON(waterquality_geojson, {
 			//Create custom icons for each point, depending on its open status
 			pointToLayer: function(feature, latlng){

@@ -20,3 +20,9 @@ flaskdeployment.zip
 env_BU
 GoogleDrive_Config/
 *.json
+.idea/
+settings.yaml
+*.yaml
+*.yml
+*.pdf
+query_testing
