@@ -32,7 +32,21 @@ class gpstracks(db.Model):
     profile = db.Column(db.String(30))
     length = db.Column(db.Float())
     geom = db.Column(Geometry('Linestring', 4326, from_text='ST_GeomFromEWKT', name='geometry'))
-    
+
+    def builddict(self):
+        """
+        Formats data in a GeoJSON friendly format, removes troublesome columns and formats datetime fields using .isoformat()
+        :return: Dictionary with attribute data
+        """
+        removedictlist = ['_sa_instance_state', 'geom']
+        dateCol = ["timestamp_epoch", "timeutc", "date", "startstamp"]
+        res_dict = self.__dict__
+        for i in removedictlist:
+            res_dict.pop(i, None)
+        for i in dateCol:
+            res_dict[i] = res_dict[i].isoformat()
+        return res_dict
+
 class gpsdatmodel(db.Model):
     __tablename__ = 'gpsapidata'
 
@@ -65,10 +79,21 @@ class gpsdatmodel(db.Model):
     AOI = db.Column(db.String(30))
     city = db.Column(db.String(30))
     county = db.Column(db.String(30))
-    #geom = db.Column(Geometry('POINT',srid=4326))
     geom = db.Column(Geometry('POINT', 4326, from_text='ST_GeomFromEWKT', name='geometry'))
-    #geom = db.Column(Geometry('POINT', 4326))
-    #see https://stackoverflow.com/questions/39215278/alembic-migration-for-geoalchemy2-raises-nameerror-name-geoalchemy2-is-not-de
+
+    def builddict(self):
+        """
+        Formats data in a GeoJSON friendly format, removes troublesome columns and formats datetime fields using .isoformat()
+        :return: Dictionary with attribute data
+        """
+        removedictlist = ['_sa_instance_state', 'geom']
+        dateCol = ["timestamp_epoch", "timeutc", "date", "startstamp"]
+        res_dict = self.__dict__
+        for i in removedictlist:
+            res_dict.pop(i, None)
+        for i in dateCol:
+            res_dict[i] = res_dict[i].isoformat()
+        return res_dict
 
 class User(db.Model):
     __tablename__ = 'app_users'

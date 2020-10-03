@@ -8,9 +8,10 @@ from datetime import datetime
 import hashlib
 from urllib.parse import quote
 from urllib.request import urlretrieve
+from application import app, errorEmail, GoogleDrive
 from application import DB_Queries_PDF as DBQ_PDF
 import os
-from application import app
+
 
 beachList = ['Carpinteria State Beach', 'Summerland Beach', 'Hammond\'s', 'Butterfly Beach',
              'East Beach @ Sycamore Creek',
@@ -27,7 +28,7 @@ beachfk = {'Carpinteria State Beach': 1, 'Summerland Beach': 2, 'Hammond\'s': 3,
 col = ['Total Coliform Results (MPN*)', 'Total Coliform State Health Standard (MPN*)',
        "Fecal Coliform Results (MPN*)", 'Fecal Coliform State Health Standard (MPN*)', 'Enterococcus Results (MPN*)',
        'Enterococcus State Health Standard (MPN*)', 'Exceeds FC:TC ratio standard **', 'Beach Status', 'fk']
-resampcol = ['Total Coliform Results (MPN*)',"Fecal Coliform Results (MPN*)", 'Enterococcus Results (MPN*)']
+resampcol = ['Total Coliform Results (MPN*)', "Fecal Coliform Results (MPN*)", 'Enterococcus Results (MPN*)']
 resampdict = {}
 
 
@@ -39,7 +40,7 @@ def downloadPDF(url, pdfDest):
     :param pdfDest:
     :return:
     """
-    #url = quote(url)
+    # url = quote(url)
     urlretrieve(url, pdfDest)
 
 
@@ -52,6 +53,7 @@ def md5hash(text):
     """
     return hashlib.md5(text.encode()).hexdigest()
 
+
 def deletePDFQuit(pdfLoc):
     """
     Deletes pdf and ends the script
@@ -61,6 +63,7 @@ def deletePDFQuit(pdfLoc):
     os.remove(pdfLoc)
     quit()
 
+
 def pdfUpdate():
     """
 
@@ -68,14 +71,23 @@ def pdfUpdate():
     """
     pass
 
+
 def handlePDFStatus(pdfstatus, pdfLoc, hashedtext, pdfDict, pdfName, currentTime, beachList):
     if pdfstatus == "Exists":
-        print("Already processed this pdf, removing pdf and quitting!")
+        print("Already processed this pdf, removing local pdf and quitting!")
         try:
             os.remove(pdfLoc)
         except:
             print("Failed to delete file!")
         quit()
+    else:
+        try:
+            GoogleDrive.addtoGDrive(pdfLoc, pdfName)
+        except Exception as e:
+            print("Google Drive upload threw an error, emailing exception")
+            errorEmail.senderroremail(script="addtoGDrive", exceptiontype=e.__class__.__name__, body=e)
+        print("File uploaded to Google Drive, removing local PDF")
+        os.remove(pdfLoc)
     if checkresamp(pdfDict['cleanedtext']) == True:
         print("This PDF contains re-sampled results")
         beachDict = genReSampleDict(pdfDict['cleanedtext'], hashedtext, pdfDict['pdfDate'])
@@ -97,7 +109,7 @@ def handlePDFStatus(pdfstatus, pdfLoc, hashedtext, pdfDict, pdfName, currentTime
                     # del nullbeaches[beachkey]
                     # print(f"Removing {beachDict[beachkey]} key from the beach dictionary")
                     del beachDict[beachkey]
-    #return beachDict
+    # return beachDict
     # Get the md5 hash for the new pdf
     hashid = DBQ_PDF.insmd5(hashedtext, pdfDict['pdfDate'], pdfName, currentTime)
     # Insert records into postgres, using the beachDict
@@ -116,7 +128,7 @@ def cleanText(textList):
     text = []
     for item in textList:
         # print(f"item value is {item}")
-        #item = convertValue(item)
+        # item = convertValue(item)
         if item == '':
             item = None
         elif item == "<10":
@@ -160,6 +172,7 @@ def convertValue(record):
         return "0"
     else:
         return record
+
 
 def genReSampleDict(tab, hashedtext, pdfDate):
     """
@@ -214,6 +227,7 @@ def genReSampleDict(tab, hashedtext, pdfDate):
 
     return combinedDict
 
+
 def checkresamp(tab):
     for sub_list in tab:
         if "sample" in sub_list[0]:
@@ -261,30 +275,76 @@ def populateDict(tab, beachDict, resample):
             # original list (table), this index is needed to grab the proper column name(key) starting at index 0,
             # so its decreased by 1 to maintain proper index location for filling in data
             # beachDict[tab[row][0]][col[i-1]] = tab[row][i]
-            beachDict[tab[row][0]][col[i - 1]] = tab[row][i].rstrip(" ")
+            if tab[row][i] is not None:
+                beachDict[tab[row][0]][col[i - 1]] = tab[row][i].rstrip(" ")
+            else:
+                beachDict[tab[row][0]][col[i - 1]] = None
             beachDict[tab[row][0]]['resample'] = resample
     return beachDict
+
+def parsePDF():
+    """
+    Kicks off process to parse the water quality PDF.
+    Returns
+    -------
+    Print Statement
+    """
+    # Kick off script by downloading PDF
+    print("Starting to parse PDF")
+    downloadPDF(downloadURL, pdfDest)
+    # Get pdf details
+    pdfDict = getPDFContents(pdfLoc)
+    # Hash text of pdf document
+    hashedtext = md5hash(pdfDict['text'])
+    # Check if md5 hash is already in postgres
+    pdfstatus = DBQ_PDF.checkmd5(hashedtext, pdfDict['pdfDate'])
+    # Handle the results of the md5 hash check and control generation of dictionaries and interactions with postgres
+    # handlePDFStatus(pdfstatus, pdfLoc, hashedtext, pdfDict, pdfName, currentTime, beachList)
+    handlePDFStatus(pdfstatus, pdfLoc, hashedtext, pdfDict, pdfName, currentTime, beachList)
+    print("All done processing PDF!")
+
+def pdfjob():
+    """
+    Function called by APScheduler BackgroundScheduler to kick off PDF parsing script.
+    Uses try/except block to call function. This is done because quit() is called within the script as flow control
+    to end it early, if this exception is not caught then an exception is raised, while the script will continue to
+    run on schedule, it will pollute logs with tracebacks.
+
+    Returns
+    -------
+    Nothing
+    """
+    try:
+        parsePDF()
+    except SystemExit:
+        print("Ended ParsePDF job early")
+    except Exception as e:
+        print("Parse PDF threw an error, emailing exception")
+        errorEmail.senderroremail(script="ParsePDF", exceptiontype=e.__class__.__name__, body=e)
+
+
+
 
 currentTime = datetime.now()
 pdfName = f"Ocean_Water_Quality_Report_{datetime.now().strftime('%Y%m%d')}.pdf"
 #  pdfLoc = pdfDest = r"G:\My Drive\Projects\Water_Quality\pdf" + pdfName
 pdfLoc = pdfDest = os.path.join(app.root_path, 'static', 'documents', 'Water_Qual_PDFs', pdfName)
 downloadURL = "http://countyofsb.org/uploadedFiles/phd/PROGRAMS/EHS/Ocean%20Water%20Weekly%20Results.pdf"
-#Testing variables
+
+
+# Testing variables
 # pdfName = r"Ocean_Water_Quality_Report_20200814.pdf"
 # pdfLoc = r"G:\My Drive\Projects\Water_Quality\pdf\\" + pdfName
 
-
-# Kick off script by downloading PDF
-downloadPDF(downloadURL, pdfDest)
-# Get pdf details
-pdfDict = getPDFContents(pdfLoc)
-# Hash text of pdf document
-hashedtext = md5hash(pdfDict['text'])
-# Check if md5 hash is already in postgres
-pdfstatus = DBQ_PDF.checkmd5(hashedtext, pdfDict['pdfDate'])
-# Handle the results of the md5 hash check and control generation of dictionaries and interactions with postgres
-#handlePDFStatus(pdfstatus, pdfLoc, hashedtext, pdfDict, pdfName, currentTime, beachList)
-handlePDF = handlePDFStatus(pdfstatus, pdfLoc, hashedtext, pdfDict, pdfName, currentTime, beachList)
-print("All done processing PDF!")
-
+# # Kick off script by downloading PDF
+# downloadPDF(downloadURL, pdfDest)
+# # Get pdf details
+# pdfDict = getPDFContents(pdfLoc)
+# # Hash text of pdf document
+# hashedtext = md5hash(pdfDict['text'])
+# # Check if md5 hash is already in postgres
+# pdfstatus = DBQ_PDF.checkmd5(hashedtext, pdfDict['pdfDate'])
+# # Handle the results of the md5 hash check and control generation of dictionaries and interactions with postgres
+# #handlePDFStatus(pdfstatus, pdfLoc, hashedtext, pdfDict, pdfName, currentTime, beachList)
+# handlePDF = handlePDFStatus(pdfstatus, pdfLoc, hashedtext, pdfDict, pdfName, currentTime, beachList)
+# print("All done processing PDF!")

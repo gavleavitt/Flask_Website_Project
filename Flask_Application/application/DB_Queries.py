@@ -10,6 +10,7 @@ Created on Mon May 25 17:40:53 2020
 
 """
 from application import application, models, db
+import pytz
 from application.models import gpsdatmodel, gpstracks, AOI, CaliforniaPlaces, CACounty, waterQuality, waterQualityMD5, beaches, stateStandards
 from application import functions as func
 from application import script_config as dbconfig
@@ -19,8 +20,9 @@ from application.models import gpsdatmodel as gpsdat
 from sqlalchemy import func as sqlfunc
 from datetime import datetime
 from flask.json import jsonify
+import geojson
 from geojson import Point, Feature, FeatureCollection, LineString
-from geoalchemy2.shape import to_shape
+# from geoalchemy2.shape import to_shape
 
 def AOI_I_Q(geomdat):
     """
@@ -54,10 +56,10 @@ def AOI_I_Q(geomdat):
     if query_count > 0:
         result = ""
         count = 0
-        #Iterate over SQL Alchemy result object, if greater than 1 result build out with comma seperation.
+        # Iterate over SQL Alchemy result object, if greater than 1 result build out with comma seperation.
         for POI in query:
             if count > 0:
-                #result object columns can be individually called with their column names, only want location info.
+                # result object columns can be individually called with their column names, only want location info.
                 result += "," + POI.location
                 count += 1
             else:
@@ -212,7 +214,7 @@ def nearestroad(coordinate):
         result["distance"] = dat[1] * 3.28
         query_count += 1
     if query_count == 0:
-        result['street'],result['distance'] = None,None
+        result['street'],result['distance'] = None, None
     return result    
 
 def nearesttrail(coordinate):
@@ -281,46 +283,88 @@ def nearesttrail(coordinate):
         result['trail'],result['trail_distance'] = None,None
     return result
 
-def getrecords(rec_limit,dataType):
+def getFeatCollection(datatype, reclimit):
     """
-    Queries PostgresSQL GPS data table for records. These results are used to generate geojson data
-    that are provided to the live dashboard. 
+    Queries PostgreSQL using SQLAlchemy and GeoAlchemy functions, returns data formatted as a geoJSON feature collection.
+    All stored attribute information are returned along with the geometries. gpstracks are returned for the current day,
+    using the pytz library to set the today date to the US/Pacific timezone, instead of using the system clock. This
+    enables the map to be accurate for the west coast, where most of the usage of the app will take place.
 
     Parameters
     ----------
-    rec_limit : INT
-        Size of records to return from database, currently hard-coded to 1 upstream.
-        #TODO:
-        Build out to allow multiple returned records based on URL query strings
+    datatype: String. Type of data being queried, points or tracks
+    reclimit: Int. Number of gpspoints to return
 
     Returns
     -------
-    res_dict : dictionary
-        dictionary with all database column names as keys.
+    GeoJSON Feature Collection of datatype parameter containing all stored attribute information.
 
-
-    SQL Alchemy ORM approach, see https://docs.sqlalchemy.org/en/13/orm/query.html and see:
-        https://hackersandslackers.com/database-queries-sqlalchemy-orm/
     """
-    #Query based on GET request recieved
-    #SQL Alchemy ORM query returning newest records based on the utc timestamp field, .all() method creates a object that's easier to work with
-    if dataType == "gpspoints":
-        query = db.session.query(gpsdatmodel).order_by(gpsdatmodel.timeutc.desc()).limit(rec_limit)
-    #SQL Alchemy ORM query returning all gps tracks for the current day, this will likely need to be adjusted to account for time-zones
-    #to ensure that "todaydate" always returns date time in california 
-    elif dataType == "gpstracks":
-        todaydate = datetime.today().strftime('%Y-%m-%d')        
-        query = db.session.query(gpstracks).filter_by(date=todaydate)
-        
-    res_dict = {}
-    for row in query:  
-        #Create a nested dictionary for every row in the result object and add to result dictionary, with the record ID as the key to the nested dictionary
-        #.__dict__ is used to make a dictionary from parameters in the query object, this is used for easier processing
-        # However key value pairs are added that are popped off in another function to avoid issues converting them to geojson 
-        res_dict[row.__dict__['id']] = row.__dict__ 
-        
-    #Returning single dict so return can be built out with more entries if needed.        
-    return {"dict":res_dict}
+    if datatype == "gpspoints":
+        # Query using GeoAlchemy PostGIS function to get geojson representation of geometry and regular query to get
+        # tabular data
+        query = db.session.query(sqlfunc.ST_AsGeoJSON(gpsdatmodel.geom), gpsdatmodel).limit(reclimit)
+    elif datatype == "gpstracks":
+        # todaydate = datetime.today().strftime('%Y-%m-%d')
+        # Set timezine to US/Pacific
+        tz = pytz.timezone("US/Pacific")
+        # Set the current date in the set timezone
+        todaydate = tz.localize(datetime.today(), is_dst=None).strftime('%Y-%m-%d')
+        # Query using GeoAlchemy PostGIS function to get geojson representation of geometry and regular query to get
+        # tabular data
+        query = db.session.query(sqlfunc.ST_AsGeoJSON(gpstracks.geom), gpstracks).filter_by(date=todaydate)
+    features = []
+    for row in query:
+        # Build a dictionary of the attribute information
+        prop_dict = row[1].builddict()
+        # Take ST_AsGeoJSON() result and load as geojson object
+        geojson_geom = geojson.loads(row[0])
+        # Build the feature and add to feature list
+        features.append(Feature(geometry=geojson_geom, properties=prop_dict))
+    # Build the feature collection result
+    feature_collection = FeatureCollection(features)
+    return feature_collection
+
+# def getrecords(rec_limit,dataType):
+#     """
+#     Queries PostgresSQL GPS data table for records. These results are used to generate geojson data
+#     that are provided to the live dashboard.
+#
+#     Parameters
+#     ----------
+#     rec_limit : INT
+#         Size of records to return from database, currently hard-coded to 1 upstream.
+#         #TODO:
+#         Build out to allow multiple returned records based on URL query strings
+#
+#     Returns
+#     -------
+#     res_dict : dictionary
+#         dictionary with all database column names as keys.
+#
+#
+#     SQL Alchemy ORM approach, see https://docs.sqlalchemy.org/en/13/orm/query.html and see:
+#         https://hackersandslackers.com/database-queries-sqlalchemy-orm/
+#     """
+#     #Query based on GET request recieved
+#     #SQL Alchemy ORM query returning newest records based on the utc timestamp field, .all() method creates a object that's easier to work with
+#     if dataType == "gpspoints":
+#         query = db.session.query(gpsdatmodel).order_by(gpsdatmodel.timeutc.desc()).limit(rec_limit)
+#     #SQL Alchemy ORM query returning all gps tracks for the current day, this will likely need to be adjusted to account for time-zones
+#     #to ensure that "todaydate" always returns date time in california
+#     elif dataType == "gpstracks":
+#         todaydate = datetime.today().strftime('%Y-%m-%d')
+#         query = db.session.query(gpstracks).filter_by(date=todaydate)
+#
+#     res_dict = {}
+#     for row in query:
+#         #Create a nested dictionary for every row in the result object and add to result dictionary, with the record ID as the key to the nested dictionary
+#         #.__dict__ is used to make a dictionary from parameters in the query object, this is used for easier processing
+#         # However key value pairs are added that are popped off in another function to avoid issues converting them to geojson
+#         res_dict[row.__dict__['id']] = row.__dict__
+#
+#     #Returning single dict so return can be built out with more entries if needed.
+#     return {"dict":res_dict}
 
 def gethashpass(username):
     """
