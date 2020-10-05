@@ -22,19 +22,23 @@ def senderroremail(script, exceptiontype, body):
     -------
     Print statement.
     """
-    # Create a secure SSL context
-    context = ssl.create_default_context()
-    # create connection to gmail smtplib server
-    with smtplib.SMTP_SSL("smtp.gmail.com", port, context=context) as server:
-        # login to server
-        server.login(emailaddr, emailpassword)
-        # Create a multipart message and set headers
-        message = MIMEMultipart()
-        message["from"] = emailaddr
-        message["To"] = emailtoaddr
-        message["Subject"] = f"The Python script {script} raised an {exceptiontype} exception"
-        # Add body to email
-        message.attach(MIMEText(body, "plain"))
-        # Send email
-        server.sendmail(emailaddr, emailtoaddr, message.as_string())
-        print("Message has been sent!")
+    try:
+        # Create a secure SSL context
+        context = ssl.create_default_context()
+        # create connection to gmail smtplib server
+        with smtplib.SMTP_SSL("smtp.gmail.com", port, context=context) as server:
+            # login to server
+            server.login(emailaddr, emailpassword)
+            # Create a multipart message and set headers
+            message = MIMEMultipart()
+            message["from"] = emailaddr
+            message["To"] = emailtoaddr
+            message["Subject"] = f"The Python script {script} raised an {exceptiontype} exception"
+            # Add body to email
+            message.attach(MIMEText(body, "plain"))
+            # Send email
+            server.sendmail(emailaddr, emailtoaddr, message.as_string())
+            print("Message has been sent!")
+    except Exception as e:
+        print("The following exception was thrown when trying to email error report")
+        print(e)
