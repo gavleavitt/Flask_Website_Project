@@ -114,7 +114,7 @@ def contact():
 #     return("Email sent!")
 # @app.route("/uploadpdf")
 # def upload():
-#     GoogleDrive. addtoGDrive( r"G:\My Drive\Projects\test_documents\Ocean_Water_Quality_Report_testing_20201002.pdf",
+#     GoogleDrive. addtoGDrive(r"G:\My Drive\Projects\test_documents\Ocean_Water_Quality_Report_testing_20201002.pdf",
 #                               "Ocean_Water_Quality_Report_testing_20201002.pdf")
 #     return("uploaded!")
 # @app.route("/testdownload")

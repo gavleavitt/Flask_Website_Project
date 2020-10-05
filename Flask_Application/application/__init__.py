@@ -21,7 +21,7 @@ import os
 import atexit
 import time
 from apscheduler.schedulers.background import BackgroundScheduler
-
+from pytz import utc
 
 
 # Create flask application, I believe "application" has to be used to work properly on AWS EB
@@ -45,10 +45,12 @@ db = SQLAlchemy(app)
 # Imports from the application flask object have to be after flask application is initialized to avoid circular imports
 from application import routes, api_routes, models, parsePDF
 
-sched = BackgroundScheduler(daemon=True)
+sched = BackgroundScheduler(daemon=True, timezone=utc)
 # Trigger every day at 9:30 am
-sched.add_job(parsePDF.pdfjob, trigger='cron', hour='9', minute='30')
+# sched.add_job(parsePDF.pdfjob, trigger='cron', hour='9', minute='30')
 # sched.add_job(parsePDF.pdfjob, trigger='cron', hour='15', minute='37')
+# Trigger at 4:30 pm UTC, 9:30 PST
+sched.add_job(parsePDF.pdfjob, trigger='cron', hour='16', minute='30')
 # Trigger every minute
 # sched.add_job(parsePDF.pdfjob, 'cron', minute='*')
 sched.start()

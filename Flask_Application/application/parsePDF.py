@@ -300,6 +300,7 @@ def parsePDF():
     pdfstatus = DBQ_PDF.checkmd5(hashedtext, pdfDict['pdfDate'])
     # Handle the results of the md5 hash check and control generation of dictionaries and interactions with postgres
     # handlePDFStatus(pdfstatus, pdfLoc, hashedtext, pdfDict, pdfName, currentTime, beachList)
+    currentTime = datetime.now()
     handlePDFStatus(pdfstatus, pdfLoc, hashedtext, pdfDict, pdfName, currentTime, beachList)
     print("All done processing PDF!")
 
@@ -325,7 +326,7 @@ def pdfjob():
 
 
 
-currentTime = datetime.now()
+
 pdfName = f"Ocean_Water_Quality_Report_{datetime.now().strftime('%Y%m%d')}.pdf"
 #  pdfLoc = pdfDest = r"G:\My Drive\Projects\Water_Quality\pdf" + pdfName
 pdfLoc = pdfDest = os.path.join(app.root_path, 'static', 'documents', 'Water_Qual_PDFs', pdfName)
