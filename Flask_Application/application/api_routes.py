@@ -112,3 +112,4 @@ def get_trackgeojson():
     print("Hit with a gpstrack get request!")
     result = DBQ.getFeatCollection(reclimit="all", datatype="gpstracks")
     return result
+

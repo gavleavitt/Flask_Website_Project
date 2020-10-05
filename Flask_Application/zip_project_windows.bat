@@ -1,0 +1,2 @@
+"F:\Program Files\7-Zip\7z.exe" a "B:\Github\MTB_Tracking\Flask_Application\flaskdeployment.zip" "B:\Github\MTB_Tracking\Flask_Application\application.py" "B:\Github\MTB_Tracking\Flask_Application\credentials.json" "B:\Github\MTB_Tracking\Flask_Application\requirements.txt" "B:\Github\MTB_Tracking\Flask_Application\.ebextensions\" "B:\Github\MTB_Tracking\Flask_Application\application\"
+pause
