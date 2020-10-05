@@ -6,7 +6,7 @@ LOG_PATH=$(find /var/log/ -type f -iname 'eb-hooks.log')
 DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 
 CERTBOT_NAME='mappingcert2'
-CERTBOT_EMAIL='gavleavitt@gmail.com'
+CERTBOT_EMAIL='gavleaweb@gmail.com'
 # Multiple domain example: CERTBOT_DOMAINS='bort.com,www.bort.com,bort-env.eba-2kg3gsq2.us-east-2.elasticbeanstalk.com'
 CERTBOT_DOMAINS='flasktrackingdashboard-env.eba-icgpdrng.us-west-1.elasticbeanstalk.com,www.leavittmapping.com,leavittmapping.com>'
 
