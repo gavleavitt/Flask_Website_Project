@@ -5,11 +5,11 @@ from dotenv import load_dotenv
 import requests
 import os
 import time
-load_dotenv()
-
-# strava_oauth2(client_id=os.getenv("STRAVA_CLIENT_ID"), client_secret=os.getenv("STRAVA_CLIENT_SECRET"))
-# client = StravaIO(access_token=os.getenv("STRAVA_ACCESS_TOKEN"))
-print("Running!")
+# load_dotenv()
+#
+# # strava_oauth2(client_id=os.getenv("STRAVA_CLIENT_ID"), client_secret=os.getenv("STRAVA_CLIENT_SECRET"))
+# # client = StravaIO(access_token=os.getenv("STRAVA_ACCESS_TOKEN"))
+# print("Running!")
 
 
 def stravaAuth():
