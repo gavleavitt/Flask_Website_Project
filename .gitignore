@@ -14,3 +14,15 @@ startflask
 .flaskenv
 script_config_BU.*
 .env
+Misc/
+script_config.py
+flaskdeployment.zip
+env_BU
+GoogleDrive_Config/
+*.json
+.idea/
+settings.yaml
+*.yaml
+*.yml
+*.pdf
+query_testing

@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Sanitary Sewer Trace</title>
+
+	<!--jquery adds "$." functionality-->
+	<!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script> -->
+
+	<!-- Custom local javascript functions -->
+	<script src="{{ url_for('static', filename='js/customfunctions.js') }}"></script>
+	<!-- Custom CSS -->
+	<link rel="stylesheet" href="{{ url_for('static', filename='css/customCSS_main.css') }}">
+	<!-- Set favicon -->
+
+	<!-- Favicon links -->
+	<link rel="apple-touch-icon" sizes="180x180" href="/static/images/apple-touch-icon.png">
+	<link rel="icon" type="image/png" sizes="32x32" href="/static/images/favicon-32x32.png">
+	<link rel="icon" type="image/png" sizes="16x16" href="/static/images/favicon-16x16.png">
+	<link rel="manifest" href="/static/images//site.webmanifest">
+	<link rel="mask-icon" href="/static/images//safari-pinned-tab.svg" color="#5bbad5">
+	<meta name="msapplication-TileColor" content="#da532c">
+	<meta name="theme-color" content="#ffffff">
+
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Lato:wght@700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@700&display=swap" rel="stylesheet">
+<link href='https://fonts.googleapis.com/css?family=Quicksand' rel='stylesheet'>
+<link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300&display=swap" rel="stylesheet">
+
+<!-- Font Awesome Social media icons -->
+<!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/brands.min.css"> -->
+
+<!-- Font Awesome Kit -->
+<script src="https://kit.fontawesome.com/fd8b0845f1.js" crossorigin="anonymous"></script>
+
+<!-- Highlight.js -->
+<link rel="stylesheet"
+      href="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.2.0/build/styles/default.min.css">
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.2.0/build/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+
+</head>
+<body>
+  <div class="container-projects sansserif">
+		<div class = "navbar">
+      <div class ="navbarleft">
+				<img id="nav-icon" src = "/static/images/wheel_custom.png">
+				<div class="nav-name">Gavin Leavitt</div>
+			</div>
+      <div id="interactiveBarRight" class="navbarright">
+        <a class= "menu-option" href = "/">Home</a>
+				<a class= "menu-option" href = "/#goto-proj">Projects</a>
+        <a class= "menu-option" href = "/about">About</a>
+        <a class= "menu-option" href = "/resume">Resume</a>
+        <a class= "menu-option" href = "/contact">Contact</a>
+				<a href = "javascript:void(0);" class="menu-icon" onclick="navBarFunction()" onmouseover="menuHover();" onmouseout="menuUnhover();">
+						<img id="menu-icon-img" src="/static/images/menu-icon-gray.svg" style="width:35px;height:35px">
+				</a>
+			</div>
+		</div>
+		<div class="project-content">
+			<div class="title">Sanitary Sewer Trace Application</div>
+			<div class="separatorbar-title"></div>
+			<img src="../static/images/Sanitary_Sewer_App_Poser_shrunk_comp.jpg" style="margin-top:10px;">
+			<div class="fullsize-link">
+				<a href="../static/images/Sanitary_Sewer_App_Poser_shrunk_comp.jpg" target="_blank">View fullsize image</a>
+			</div>
+			<div class="separatorbar-title"></div>
+			<h2>
+				Description
+			</h2>
+			<p>
+				This application allows City of Salinas staff to estimate the size of sanitary sewer spills that resulted from breaks in gravity mains. City staff select the location of the break, using the system network as reference, input the start and end times of the spill, and receive a volumetric estimation of gallons spilled and number of homes upstream of the break. In additional to other estimation methods, staff are able meet rapid reporting requirements with a repeatable and data-backed tool. This approach also saves employee time during a time sensitive period and reduces reliance on error-prone manual calculations and paper map interpretations.
+			</p>
+			<p>
+				The Geoprocessing Service takes the users inputs, snaps the inputted point to the nearest manhole or network node, then conducts an Upstream Trace on the City’s sanitary sewer Geometric Network, which contains pseudo connections to residential parcels. These connections were GIS generated based on proximity to nearest gravity main to establish most likely lateral connection points. These connections are used to select features within another non-network dataset containing all residential housing addresses per parcel. Next, inputted time information and the count of total affected addresses are passed through an algorithm that uses average flow rates following a diurnal pattern. Finally, the estimated sewage spill volume, total number of affected residences, and a GIS layer of affected residences are returned to the user within the web application.
+			</p>
+			<p>
+				I first developed the application as an ArcMap Geoprocessing Script using ArcPy to conduct an Upstream Trace on a sanitary sewer Geometric Network, the script was then hosted on ArcGIS for Server as a Geoprocessing Service and accessed in an ArcGIS Online Application using the Geoprocessing Service widget. While the script functioned well in ArcMap, getting it to work as expected in ArcGIS Server/Online took the bulk of the development time, as many errors and bugs had to be resolved.
+			</p>
+		</div>
+		<div class="footer" style="grid-row:3/4">
+			<p>© 2020 Gavin Leavitt | Contact: <span id="emailaddr"></span>
+			<br>Images, maps, and webpages created by Gavin Leavitt unless otherwise noted.
+			<br>Icons made by <a href="https://www.flaticon.com/authors/roundicons" title="Roundicons">Roundicons</a>,  <a href="https://www.flaticon.com/authors/freepik" title="Freepik">Freepik</a> from <a href="https://www.flaticon.com/" title="Flaticon"> www.flaticon.com</a> and modified by Gavin Leavitt.
+			</p>
+			<div class="social-media">
+				<div class="social-icon">
+					<a href="https://www.github.com/gavleavitt" target="_blank" rel="external" class="fab fa-github">
+					</a>
+				</div>
+				<div class="social-icon">
+					<a href="https://www.facebook.com/gavin.leavitt.7/" target="_blank" rel="external" class="fab fa-facebook">
+					</a>
+				</div>
+				<div class="social-icon">
+					<a href="https://www.linkedin.com/in/gavin-leavitt-326973165/" target="_blank" rel="external" class="fab fa-linkedin">
+					</a>
+				</div>
+			</div>
+		</div>
+		</div>
+	</div>
+	<script>
+	var email = "gav" + "lea" + "web" + "@g" + "mail" + ".com";
+	document.getElementById("emailaddr").innerHTML = "<a href='mailto:" + email + "'>" + email + "</a>"
+	window.onscroll = function(){closeMenu()};
+	</script>

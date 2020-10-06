@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Resume</title>
+
+	<!--jquery adds "$." functionality-->
+	<!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script> -->
+
+	<!-- Custom local javascript functions -->
+	<script src="{{ url_for('static', filename='js/customfunctions.js') }}"></script>
+	<!-- Custom CSS -->
+	<link rel="stylesheet" href="{{ url_for('static', filename='css/customCSS_main.css') }}">
+	<!-- Set favicon -->
+
+	<!-- Favicon links -->
+	<link rel="apple-touch-icon" sizes="180x180" href="/static/images/apple-touch-icon.png">
+	<link rel="icon" type="image/png" sizes="32x32" href="/static/images/favicon-32x32.png">
+	<link rel="icon" type="image/png" sizes="16x16" href="/static/images/favicon-16x16.png">
+	<link rel="manifest" href="/static/images//site.webmanifest">
+	<link rel="mask-icon" href="/static/images//safari-pinned-tab.svg" color="#5bbad5">
+	<meta name="msapplication-TileColor" content="#da532c">
+	<meta name="theme-color" content="#ffffff">
+
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Lato:wght@700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@700&display=swap" rel="stylesheet">
+<link href='https://fonts.googleapis.com/css?family=Quicksand' rel='stylesheet'>
+<link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300&display=swap" rel="stylesheet">
+
+<!-- Font Awesome Social media icons -->
+<!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/brands.min.css"> -->
+
+<!-- Font Awesome Kit -->
+<script src="https://kit.fontawesome.com/fd8b0845f1.js" crossorigin="anonymous"></script>
+
+<!-- Highlight.js -->
+<link rel="stylesheet"
+      href="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.2.0/build/styles/default.min.css">
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.2.0/build/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+
+</head>
+<body>
+  <div class="container-projects sansserif">
+		<div class = "navbar">
+      <div class ="navbarleft">
+				<img id="nav-icon" src = "/static/images/wheel_custom.png">
+				<div class="nav-name">Gavin Leavitt</div>
+			</div>
+      <div id="interactiveBarRight" class="navbarright">
+        <a class= "menu-option" href = "/">Home</a>
+				<a class= "menu-option" href = "/#goto-proj">Projects</a>
+        <a class= "menu-option" href = "/about">About</a>
+        <a class= "menu-option" href = "/resume">Resume</a>
+        <a class= "menu-option" href = "/contact">Contact</a>
+				<a href = "javascript:void(0);" class="menu-icon" onclick="navBarFunction()" onmouseover="menuHover();" onmouseout="menuUnhover();">
+						<img id="menu-icon-img" src="/static/images/menu-icon-gray.svg" style="width:35px;height:35px">
+				</a>
+			</div>
+		</div>
+		<div class="project-content">
+			<div class="title">Resume</div>
+			<div class="separatorbar-title"></div>
+			<div class="resume-download">
+				<a href="/static/documents/GavinL_Web_Resume.pdf" style="text-decoration:none;"><h4 style="margin-top:10px;font-size:16px;">Download Resume PDF</h4></a>
+			</div>
+			<div class="resume-content">
+				<div class="experience-education">
+					<h3>Professional Experience</h3>
+					<div class="resume-entry">
+						<a href="https://www.cityofsalinas.org/"><img src="/static/images/SalinasLogo-updated_cropped.png"></a>
+						<span><h4>GIS Technician</h4></span>
+						<div class="resume-employ-dates">
+							<span class="resume-text">
+									<h5>City of Salinas</h5>
+							</span>
+							<span class="resume-text">
+								Jan 2017 – July 2020
+							</span>
+						</div>
+						<div>
+							<ul>
+								<li>Handled city employee, contractor, and public requests for spatial data, maps, and web applications using a variety of formats including, shapefiles, KMLs, file and enterprise </li>
+								<li>Built out the city’s sanitary sewer and storm drain system GIS datasets using historic engineering plans</li>
+								<li>Published and consumed ArcGIS for Server WFS, WMS, Geoprocessing Services, and Feature Services</li>
+								<li>Built Esri Web Maps, Applications, and Operations Dashboards to improve employee workflows, asset management, incident response, and project tracking</li>
+								<li>Developed and deployed a web application for estimating affected areas and spill volumes for sanitary sewer gravity main breaks </li>
+							</ul>
+						</div>
+					</div>
+					<div class="resume-entry">
+						<a href="https://www.mbari.org/"><img src="static/images/mbari_cropped.svg"></a>
+						<span><h4>Research Assistant</h4></span>
+						<div class="resume-employ-dates">
+							<span class="resume-text">
+								<h5>Monterey Bay Aquarium Research Institute</h5>
+							</span>
+							<span class="resume-text">
+							Jun – November 2016
+							</span>
+						</div>
+						<div>
+							<ul>
+								<li>Processed all marine benthic sediment samples collected during a deep sea ecology research project</li>
+								<li>Identified and sorted marine organisms suspended within marine sediment by broad taxonomic groupings for further species level identification </li>
+								<li>Practiced safe lab procedures to dye samples stored within ethanol and formaldehyde</li>
+							</ul>
+						</div>
+					</div>
+					<div class="resume-entry">
+						<a href="https://seafloor.otterlabs.org/index.html"><img src="/static/images/csumb_SFML.png"></a>
+						<span><h4>Student Research Assistant</h4></span>
+						<div class="resume-employ-dates">
+							<span class="resume-text">
+									<h5>California State University Monterey Bay Seafloor Mapping Lab</h5>
+							</span>
+							<span class="resume-text">
+								October 2015 – August 2016
+							</span>
+						</div>
+						<div>
+							<ul>
+								<li>Generated clean bathymetric data products for California state agencies and university researchers</li>
+								<li>Collected and processed data for shallow areas within the San Francisco Bay estuary as part of the California Seafloor Mapping Program</li>
+								<li>Deckhand and hydrographic assistant during field data collection onboard small research vessels </li>
+								<li>Operated and maintained data collection equipment and logs</li>
+								<li>Assisted in general maintenance of research vessels and equipment</li>
+								<li>Mapped and measured seasonal variability of coastal dunes using handheld Trimble GPS units</li>
+							</ul>
+						</div>
+					</div>
+					<span id="#education-volunteer-section"><h3>Education</h3></span>
+					<div class="resume-entry">
+						<a href="https://csumb.edu/"><img src="static/images/csumb_round_cropped.png"></a>
+						<span><h4>M.S. Applied Marine and Watershed Science</h4></span>
+						<div class="resume-employ-dates">
+							<div class="resume-text">
+									California State University Monterey Bay
+							</div>
+							<div class="resume-text">
+								2015 – August 2017
+							</div>
+						</div>
+					</div>
+					<div class="resume-entry">
+						<a href="https://csumb.edu/"><img src="static/images/csumb_round_cropped.png"></a>
+						<span><h4>B.S. Marine Science</h4></span>
+						<div class="resume-employ-dates">
+							<div class="resume-text">
+									California State University Monterey Bay
+							</div>
+							<div class="resume-text">
+								2011 – January 2015
+							</div>
+						</div>
+					</div>
+					<span id="#education-volunteer-section"><h3>Volunteer Work</h3></span>
+					<div class="resume-entry">
+						<a href="https://www.montereybayaquarium.org/"><img src="static/images/Monterey_Bay_Aquarium_Logo.svg"></a>
+						<span><h4>Volunteer Guide</h4></span>
+						<div class="resume-employ-dates">
+							<span class="resume-text">
+									<h5>Monterey Bay Aquarium</h5>
+							</span>
+							<span class="resume-text">
+								October 2014 – November 2018
+							</span>
+						</div>
+						<div>
+							<ul>
+								<li>Interpreted aquarium attractions for guests, explained environmental and ecological processes, conveyed marine conservation messages, and answered marine science questions</li>
+								<li>Assisted in training new volunteers on best practices and interpretative techniques</li>
+							</ul>
+						</div>
+					</div>
+				</div>
+			<div class="skills">
+				<h3>Technical Skills</h3>
+				<div class="skill-categories">
+					<h4 style="margin-top:0px;">Geospatial Information Systems</h4>
+						<div class="skill-div">
+							<div class="skill-icon-text">
+								<img src="static/images/ArcGIS-Pro.png">
+								<span>ArcGIS Pro</span>
+							</div>
+							<div class="skill-icon-text">
+								<img src="static/images/ArcGIS-Online.jpg">
+								<span>ArcGIS Online</span>
+							</div>
+							<div class="skill-icon-text">
+								<img src="static/images/ArcGIS-Enterprise.png">
+								<span>ArcGIS for Server</span>
+							</div>
+							<div class="skill-icon-text">
+								<img src="static/images/arcmap_transparent.png">
+								<span>ArcMap</span>
+							</div>
+							<div class="skill-icon-text">
+								<img src="static/images/qgis_icon.svg">
+								<span>QGIS</span>
+							</div>
+					</div>
+					<h4>Scripting, Automation, Statistics</h4>
+						<div class="skill-div">
+							<div class="skill-icon-text">
+								<img src="static/images/Python-logo.svg">
+								<span>Python/ArcPy</span>
+							</div>
+							<div class="skill-icon-text">
+								<img src="static/images/Rlogo.svg">
+								<span>R</span>
+							</div>
+					</div>
+					<h4>Database Querying & Management</h4>
+						<div class="skill-div">
+							<div class="skill-icon-text">
+								<img src="static/images/PostgreSQL_logo.3colors.svg">
+								<span>PostgreSQL/PostGIS</span>
+							</div>
+							<div class="skill-icon-text">
+								<img src="static/images/sqla_logo.png" style="max-width:200px;">
+								<span>Python SQLAlchemy ORM</span>
+							</div>
+						</div>
+					<h4>Website Development</h4>
+						<div class="skill-div">
+							<div class="skill-icon-text">
+								<img src="static/images/HTML5 Logo.svg">
+								<span>HTML5</span>
+							</div>
+							<div class="skill-icon-text">
+								<img src="static/images/CSS3_logo_and_wordmark.svg">
+								<span>CSS3</span>
+							</div>
+							<div class="skill-icon-text">
+								<img src="static/images/JavaScript-logo.png">
+								<span>JavaScript</span>
+							</div>
+							<div class="skill-icon-text">
+								<img src="static/images/flask-icon.png">
+								<span>Python Flask</span>
+							</div>
+						</div>
+					<h4>UAV Operator</h4>
+						<div class="skill-div">
+							<div class="skill-icon-text">
+								<img src="static/images/drone.svg">
+								<span>Part 107 Pilot</span>
+							</div>
+						</div>
+					</div>
+			</div>
+		</div>
+	</div>
+		<div class="footer" style="grid-row:3/4">
+			<p>© 2020 Gavin Leavitt | Contact: <span id="emailaddr"></span>
+			<br>Images, maps, and webpages created by Gavin Leavitt unless otherwise noted.
+			<br>Icons made by <a href="https://www.flaticon.com/authors/roundicons" title="Roundicons">Roundicons</a>,  <a href="https://www.flaticon.com/authors/freepik" title="Freepik">Freepik</a> from <a href="https://www.flaticon.com/" title="Flaticon"> www.flaticon.com</a> and modified by Gavin Leavitt.
+			</p>
+			<div class="social-media">
+				<div class="social-icon">
+					<a href="https://www.github.com/gavleavitt" target="_blank" rel="external" class="fab fa-github">
+					</a>
+				</div>
+				<div class="social-icon">
+					<a href="https://www.facebook.com/gavin.leavitt.7/" target="_blank" rel="external" class="fab fa-facebook">
+					</a>
+				</div>
+				<div class="social-icon">
+					<a href="https://www.linkedin.com/in/gavin-leavitt-326973165/" target="_blank" rel="external" class="fab fa-linkedin">
+					</a>
+				</div>
+			</div>
+		</div>
+	</div>
+	<script>
+	var email = "gav" + "lea" + "web" + "@g" + "mail" + ".com";
+	document.getElementById("emailaddr").innerHTML = "<a href='mailto:" + email + "'>" + email + "</a>"
+	window.onscroll = function(){closeMenu()};
+	</script>
