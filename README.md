@@ -1,6 +1,6 @@
 # Live GPS Tracking Dashboard and other web pages.
 
-**The URL to this application is not posted due to outstanding issues, it will be posted once I resolve these issues and register a domain.**
+The Santa Barbara County Ocean Water Quality map can be found **[here.](http://flasktrackingdashboard-env.eba-icgpdrng.us-west-1.elasticbeanstalk.com/SBCOceanWaterQuality)**
 
 This project uses Flask to serve a variety of web pages, including a live GPS Tracking Dashboard, water quality Leaflet map, and will be built out to contain other web pages.
 
@@ -76,6 +76,8 @@ When a change is detected the location marker is moved to the new location and n
 
 # Santa Barbara Water Quality Reports
 
+The Santa Barbara County Ocean Water Quality map can be found **[here.](http://flasktrackingdashboard-env.eba-icgpdrng.us-west-1.elasticbeanstalk.com/SBCOceanWaterQuality)**
+
 The Santa Barbara County Health Department posts Ocean Water Test results to their Ocean Water Monitoring Program webpage:
 https://www.countyofsb.org/phd/oceanwatermonitoring
 
@@ -87,7 +89,6 @@ This PDF has a static name and download link with dynamic content that is update
 My script located in this [repo](https://github.com/gavleavitt/Water_Quality_PDF_Parsing) processes the PDF and sends the data to the Postgres AWS RDS. This script currently runs on a schedule on my local machine.
 
 ## Santa Barbara Water Quality Leaflet - Frontend
-Located at /SBCOceanWaterQuality
 
 Displays a Leaflet map with the Santa Barbara County beaches mapped out. The beach icons reflect the most recently reported status of the beach and popups contain  test report data. 
 On page load Flask queries the postgres AWS RDS (populated by the previously mentioned script) to find the most recent water quality report for each beach and passes this information as a geojson feature collection to the HTML document. 
