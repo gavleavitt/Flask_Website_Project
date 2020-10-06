@@ -1,0 +1,59 @@
+"""
+This init file is opened by MTB_API, it creates the Flask application and sets configuration settings for the app and database connection.
+It also sets up the imports for files required by the application.
+
+Creates application object as an instance of class Flask, given the name of the module which called it,
+in this case it will be "application"
+
+The application package is defined by the application directory and this init file.
+
+See:
+https://blog.miguelgrinberg.com/post/the-flask-mega-tutorial-part-i-hello-world
+
+@Author: Gavin Leavitt
+
+"""
+from flask import Flask
+from flask_sqlalchemy import SQLAlchemy
+# from flask_migrate import Migrate
+from application import script_config as dbconfig
+import os
+import atexit
+import time
+from apscheduler.schedulers.background import BackgroundScheduler
+from pytz import utc
+
+
+# Create flask application, I believe "application" has to be used to work properly on AWS EB
+application = app = Flask(__name__)
+
+# Get environmental variables for AWS RDS connection 
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get("DBCON")
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+# Set timezone used by time, set as environmential variable 
+# os.environ['TZ'] = 'America/Los_Angeles'
+# try:
+#     time.tzset()
+# except:
+#     print("Can't set timezone, on a Windows machine")
+
+# Set up Flask-SQLAlchemy database connection with the Flask app. 
+db = SQLAlchemy(app)
+# Setup Flask migrate connection with the application and database 
+# migrate = Migrate(app, db)
+
+# Imports from the application flask object have to be after flask application is initialized to avoid circular imports
+from application import routes, api_routes, models, parsePDF
+
+sched = BackgroundScheduler(daemon=True, timezone=utc)
+# Trigger every day at 9:30 am
+# sched.add_job(parsePDF.pdfjob, trigger='cron', hour='9', minute='30')
+# sched.add_job(parsePDF.pdfjob, trigger='cron', hour='15', minute='37')
+# Trigger at 4:30 pm UTC, 9:30 PST
+sched.add_job(parsePDF.pdfjob, trigger='cron', hour='16', minute='30')
+# Trigger every minute
+# sched.add_job(parsePDF.pdfjob, 'cron', minute='*')
+sched.start()
+
+# Shutdown your cron thread if the web process is stopped
+atexit.register(lambda: sched.shutdown(wait=False))

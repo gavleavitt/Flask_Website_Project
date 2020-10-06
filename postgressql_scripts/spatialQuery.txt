@@ -1,6 +1,0 @@
-SELECT location
-FROM "POI"
-WHERE ST_Intersects(
-        geom,
-        ST_GeometryFromText('POINT(-121.83590 36.61819)', 4326)
-        );

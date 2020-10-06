@@ -1,6 +1,0 @@
-CREATE TABLE gpspath(
-	Id serial PRIMARY KEY,
-	gpstime	timestamp with time zone,
-	distance real,
-	geom geometry(LINESTRING,4326)
-)

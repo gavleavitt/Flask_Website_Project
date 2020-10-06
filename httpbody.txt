@@ -1,4 +1,0 @@
-example:
-{"locations":[{"type":"Feature","geometry":{"type":"Point","coordinates":["%LAT","%LON"]},"properties":{"timestamp":"%TIME","horizontal_accuracy":"%ACC"}}]}
-testing:
-{"Longitude":"%LON","Latitude":"%LAT","Satellites":"%SAT","Altitude":"%ALT","Speed":"%SPD","Accuracy":"%ACC","Direction":"%DIR","Provider":"%PROV","Timestamp":"%TIMESTAMP","TIME_UTC":"%TIME","Date":"%DATE","Start_timestamp":"%STARTTIMESTAMP","Battery":"%BATT","Android_ID":"%AID","Serial":"%SER","Profile":"%PROFILE","hdop":"%HDOP","vdop":"%VDOP","pdop":"%PDOP","Dist_Travelled":"%DIST","Activity":"%ACT"}
