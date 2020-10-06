@@ -47,21 +47,6 @@ class gpstracks(db.Model):
             res_dict[i] = res_dict[i].isoformat()
         return res_dict
 
-
-class gpstracks(db.Model):
-    __tablename__ = 'gpstracks'
-
-    id = db.Column(db.Integer, primary_key=True)
-    timestamp_epoch = db.Column(db.DateTime())
-    timeutc = db.Column(db.DateTime())
-    date = db.Column(db.Date())
-    startstamp = db.Column(db.DateTime())
-    gpsid = db.Column(db.Integer())
-    androidid = db.Column(db.String(30))
-    serial = db.Column(db.String(30))
-    profile = db.Column(db.String(30))
-    geom = db.Column(Geometry('Linestring', 4326, from_text='ST_GeomFromEWKT', name='geometry'))
-
 class gpsdatmodel(db.Model):
     __tablename__ = 'gpsapidata'
 

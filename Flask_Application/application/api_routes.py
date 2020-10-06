@@ -47,7 +47,7 @@ def handle_gps():
             # Check if there has been movement, if so add to new object dictionary, otherwise no entry will be made
             if trackrecord["activity"] == "Yes":
                 newObjDict["track"] = trackrecord["model"]
-            #Add new gps record object to new objects dictionary
+            # Add new gps record object to new objects dictionary
             newObjDict["gpspoint"] = OBG.newgpsrecord(data,trackrecord["activity"])
             print(newObjDict["gpspoint"].__dict__)
             # Iterate over new objdict, can allow building out so many things can be commited to db
@@ -78,9 +78,6 @@ def get_pointgeojson():
     Currently this is hard coded to return only the most recent point.
     
     Requires at least viewer authentication
-      
-    ##TODO:
-    Build to return as many points as requested using query strings.
 
     Returns
     -------
@@ -99,9 +96,6 @@ def get_trackgeojson():
     Handles HTTP GET requests of GPS tracks, this is hard coded in the DB query helper function to only query the records for the same day.
     
     Requires at least viewer authentication.
-    
-    ##TODO:
-    Build to return as many tracks as requested using query strings.
 
     Returns
     -------

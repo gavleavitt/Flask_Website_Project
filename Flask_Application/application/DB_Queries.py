@@ -9,11 +9,11 @@ Created on Mon May 25 17:40:53 2020
 
 
 """
-from application import application, models, db
+from application import models, db
 import pytz
 from application.models import gpsdatmodel, gpstracks, AOI, CaliforniaPlaces, CACounty, waterQuality, waterQualityMD5, beaches, stateStandards
 from application import functions as func
-from application import script_config as dbconfig
+# from application import script_config as dbconfig
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import text, distinct
 from application.models import gpsdatmodel as gpsdat

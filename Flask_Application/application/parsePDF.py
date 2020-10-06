@@ -11,7 +11,7 @@ from urllib.request import urlretrieve
 from application import app, errorEmail, GoogleDrive
 from application import DB_Queries_PDF as DBQ_PDF
 import os
-
+from application import logger
 
 beachList = ['Carpinteria State Beach', 'Summerland Beach', 'Hammond\'s', 'Butterfly Beach',
              'East Beach @ Sycamore Creek',
@@ -75,16 +75,20 @@ def pdfUpdate():
 def handlePDFStatus(pdfstatus, pdfLoc, hashedtext, pdfDict, pdfName, currentTime, beachList):
     if pdfstatus == "Exists":
         print("Already processed this pdf, removing local pdf and quitting!")
+        logger.debug("Already processed PDF, removing local PDF")
         try:
             os.remove(pdfLoc)
         except:
             print("Failed to delete file!")
+            logger.debug("Failed to remove local PDF")
         quit()
     else:
         try:
             GoogleDrive.addtoGDrive(pdfLoc, pdfName)
         except Exception as e:
             print("Google Drive upload threw an error, emailing exception")
+            logger.debug("Google drive upload failed, trying to send email report")
+            logger.debug(e)
             errorEmail.senderroremail(script="addtoGDrive", exceptiontype=e.__class__.__name__, body=e)
         print("File uploaded to Google Drive, removing local PDF")
         os.remove(pdfLoc)
@@ -315,12 +319,18 @@ def pdfjob():
     -------
     Nothing
     """
+
+    logger.debug("PDF job issued, downloading and parsing PDF")
     try:
         parsePDF()
+        logger.debug("Successfully parsed a new PDF!")
     except SystemExit:
+        logger.debug("Ended ParsePDF early since file has already been processed")
         print("Ended ParsePDF job early")
     except Exception as e:
         print("Parse PDF threw an error, emailing exception")
+        logger.error("Parse PDF threw an error")
+        logger.error(e)
         errorEmail.senderroremail(script="ParsePDF", exceptiontype=e.__class__.__name__, body=e)
 
 

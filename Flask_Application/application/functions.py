@@ -15,7 +15,7 @@ from geojson import Point, Feature, FeatureCollection, LineString, dumps
 from application import DB_Queries as DBQ
 from application import script_config as dbconfig
 # from geoalchemy2.shape import to_shape
-from flask.json import jsonify
+# from flask.json import jsonify
 # from shapely.geometry import mapping
 
 def string_to_none(x):

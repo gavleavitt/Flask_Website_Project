@@ -16,16 +16,32 @@ https://blog.miguelgrinberg.com/post/the-flask-mega-tutorial-part-i-hello-world
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 # from flask_migrate import Migrate
-from application import script_config as dbconfig
+# from application import script_config as dbconfig
 import os
 import atexit
 import time
 from apscheduler.schedulers.background import BackgroundScheduler
 from pytz import utc
+import logging
+from logging.handlers import RotatingFileHandler
 
+# setup logger
+logger = logging.getLogger(__name__)
+formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
+logger.setLevel(logging.DEBUG)
+if "B:\\" in os.getcwd():
+    dirname = os.path.dirname(__file__)
+    handler = RotatingFileHandler(os.path.join(dirname, '../logs/application.log'), maxBytes=1024, backupCount=5)
+else:
+    handler = RotatingFileHandler('/opt/python/log/application.log', maxBytes=1024, backupCount=5)
+handler.setFormatter(formatter)
 
 # Create flask application, I believe "application" has to be used to work properly on AWS EB
 application = app = Flask(__name__)
+# Attach handler to application and handler
+application.logger.addHandler(handler)
+
+logger.debug("Python Flask debugger active!")
 
 # Get environmental variables for AWS RDS connection 
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get("DBCON")
@@ -46,14 +62,20 @@ db = SQLAlchemy(app)
 from application import routes, api_routes, models, parsePDF
 
 sched = BackgroundScheduler(daemon=True, timezone=utc)
-# Trigger every day at 9:30 am
-# sched.add_job(parsePDF.pdfjob, trigger='cron', hour='9', minute='30')
-# sched.add_job(parsePDF.pdfjob, trigger='cron', hour='15', minute='37')
-# Trigger at 4:30 pm UTC, 9:30 PST
-sched.add_job(parsePDF.pdfjob, trigger='cron', hour='16', minute='30')
-# Trigger every minute
-# sched.add_job(parsePDF.pdfjob, 'cron', minute='*')
-sched.start()
+
+try:
+    # Trigger every day at 9:30 am
+    # sched.add_job(parsePDF.pdfjob, trigger='cron', hour='9', minute='30')
+    # sched.add_job(parsePDF.pdfjob, trigger='cron', hour='15', minute='37')
+    # Trigger at 4:30 pm UTC, 9:30 PST
+    sched.add_job(parsePDF.pdfjob, trigger='cron', hour='16', minute='30')
+    # Trigger every minute
+    # sched.add_job(parsePDF.pdfjob, 'cron', minute='*')
+    sched.start()
+    logger.debug("Scheduled task created")
+except Exception as e:
+    logger.error("Failed to create parse pdfjob")
+    logger.error(e)
 
 # Shutdown your cron thread if the web process is stopped
 atexit.register(lambda: sched.shutdown(wait=False))
