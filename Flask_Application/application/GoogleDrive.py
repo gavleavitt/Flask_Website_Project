@@ -2,6 +2,7 @@ from pydrive.auth import GoogleAuth
 from pydrive.drive import GoogleDrive
 import os
 from application import app, errorEmail
+from application import logger
 
 def addtoGDrive(pdfloc, pdfname):
     """
@@ -30,15 +31,17 @@ def addtoGDrive(pdfloc, pdfname):
         # gauth.CommandLineAuth()
         # Establish connection with Google Drive API
         drive = GoogleDrive(gauth)
-
         newfile = drive.CreateFile({"title": pdfname,
                                     'mimeType': 'application/pdf',
                                     'parents': [{'id': "1GRunRWB7SKmH3I0wWbtyJ_UOCDiHGAxO"}]})
         newfile.SetContentFile(pdfloc)
         newfile.Upload()
         print("File uploaded to Google Drive!")
+        logger.debug(f"File {pdfname} uploaded to Google Drive!")
     except Exception as e:
         print("GoogleDrive upload threw an error, emailing exception")
+        logger.error("Failed to upload to Google Drive account")
+        logger.error(e)
         errorEmail.senderroremail(script="GoogleDrive", exceptiontype=e.__class__.__name__, body=e)
 
 

@@ -1,6 +1,7 @@
 import smtplib, ssl, os, email
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+from application import logger
 
 port = 465  # For SSL
 # Get email settings from environmental variables
@@ -23,6 +24,7 @@ def senderroremail(script, exceptiontype, body):
     Print statement.
     """
     try:
+        logger.debug("Trying to send error email")
         # Create a secure SSL context
         context = ssl.create_default_context()
         # create connection to gmail smtplib server
@@ -38,7 +40,9 @@ def senderroremail(script, exceptiontype, body):
             message.attach(MIMEText(body, "plain"))
             # Send email
             server.sendmail(emailaddr, emailtoaddr, message.as_string())
-            print("Message has been sent!")
+            # print("Message has been sent!")
     except Exception as e:
-        print("The following exception was thrown when trying to email error report")
-        print(e)
+        logger.debug("Failed to send error email")
+        logger.error(e)
+        # print("The following exception was thrown when trying to email error report")
+        # print(e)
