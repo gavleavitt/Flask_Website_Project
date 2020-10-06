@@ -1,4 +1,9 @@
-# Live GPS Tracking Dashboard and other web pages.
+# Website and Projects
+
+You can view my website and project descriptions **[here.](https://leavittmapping.com)**
+
+
+## Live GPS Tracking Dashboard and other web pages.
 
 The Santa Barbara County Ocean Water Quality map can be found **[here.](http://flasktrackingdashboard-env.eba-icgpdrng.us-west-1.elasticbeanstalk.com/SBCOceanWaterQuality)**
 
@@ -95,11 +100,6 @@ On page load Flask queries the postgres AWS RDS (populated by the previously men
 
 #TODO:
 
-Register a domain to make a friendly domain name to share website publically and to enable HTTPS. 
-
-Integrate PDF parsing script into this Flask application using the APScheduler library. 
-
-Build a GIS/mapping portfolio page to display and describe projects, also include an About section
 
 Build a script to use the Strava API to download new activities, including spatial data, and add to database 
 
