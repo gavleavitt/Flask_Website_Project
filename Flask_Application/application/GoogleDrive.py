@@ -1,7 +1,7 @@
 from pydrive.auth import GoogleAuth
 from pydrive.drive import GoogleDrive
 import os
-from application import app, errorEmail
+from application import app, errorEmail, application
 from application import logger
 
 def addtoGDrive(pdfloc, pdfname):
@@ -37,11 +37,11 @@ def addtoGDrive(pdfloc, pdfname):
         newfile.SetContentFile(pdfloc)
         newfile.Upload()
         print("File uploaded to Google Drive!")
-        logger.debug(f"File {pdfname} uploaded to Google Drive!")
+        application.logger.debug(f"File {pdfname} uploaded to Google Drive!")
     except Exception as e:
         print("GoogleDrive upload threw an error, emailing exception")
-        logger.error("Failed to upload to Google Drive account")
-        logger.error(e)
+        application.logger.error("Failed to upload to Google Drive account")
+        application.logger.error(e)
         errorEmail.senderroremail(script="GoogleDrive", exceptiontype=e.__class__.__name__, body=e)
 
 
