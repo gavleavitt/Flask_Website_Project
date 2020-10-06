@@ -41,7 +41,7 @@ application = app = Flask(__name__)
 # Attach handler to application and handler
 application.logger.addHandler(handler)
 
-logger.debug("Python Flask debugger active!")
+application.logger.debug("Python Flask debugger active!")
 
 # Get environmental variables for AWS RDS connection 
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get("DBCON")
@@ -72,10 +72,10 @@ try:
     # Trigger every minute
     # sched.add_job(parsePDF.pdfjob, 'cron', minute='*')
     sched.start()
-    logger.debug("Scheduled task created")
+    application.logger.debug("Scheduled task created")
 except Exception as e:
-    logger.error("Failed to create parse pdfjob")
-    logger.error(e)
+    application.logger.error("Failed to create parse pdfjob")
+    application.logger.error(e)
 
 # Shutdown your cron thread if the web process is stopped
 atexit.register(lambda: sched.shutdown(wait=False))
