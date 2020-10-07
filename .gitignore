@@ -27,3 +27,5 @@ settings.yaml
 *.pdf
 query_testing
 logs/
+.platform
+.ebextensions

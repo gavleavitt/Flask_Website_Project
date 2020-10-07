@@ -33,7 +33,8 @@ if "B:\\" in os.getcwd():
     dirname = os.path.dirname(__file__)
     handler = RotatingFileHandler(os.path.join(dirname, '../logs/application.log'), maxBytes=1024, backupCount=5)
 else:
-    handler = RotatingFileHandler('/opt/python/log/application.log', maxBytes=1024, backupCount=5)
+    # see https://stackoverflow.com/a/60549321
+    handler = RotatingFileHandler('/tmp/application.log', maxBytes=1024, backupCount=5)
 handler.setFormatter(formatter)
 
 # Create flask application, I believe "application" has to be used to work properly on AWS EB
