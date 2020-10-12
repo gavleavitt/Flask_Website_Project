@@ -29,3 +29,4 @@ query_testing
 logs/
 .platform
 .ebextensions
+*.pickle
