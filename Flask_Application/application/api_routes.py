@@ -10,14 +10,17 @@ Created on Fri May 22 17:45:44 2020
 
 @author: Gavin Leavitt
 """
-from application import app, application, models, db
+from application import app, application, models, db, StravaWebHook, logger
 from application import functions as func
 from application import DB_Queries as DBQ
 from application import objectgeneration as OBG
 from application.authentication import auth
-from flask import request
+from flask import request, Response
 from flask import jsonify
 import sys
+from application import script_config
+from application import stravaAuth
+import os
 
 
 # @app.route establishes the URL within the domain
@@ -38,9 +41,9 @@ def handle_gps():
     """
     if request.method == 'POST':
         if request.is_json:
-            print("Hit server with POST request and valid json mime type!",file=sys.stdout)
+            print("Hit server with POST request and valid json mime type!", file=sys.stdout)
             data = request.get_json()
-            print("Request data has been fetched!",file=sys.stdout)            
+            print("Request data has been fetched!", file=sys.stdout)
             # Create a new dict to hold new objects that will be added to PostGresSQL
             newObjDict = {}
             trackrecord = OBG.gpstrackobj(data)
@@ -48,7 +51,7 @@ def handle_gps():
             if trackrecord["activity"] == "Yes":
                 newObjDict["track"] = trackrecord["model"]
             # Add new gps record object to new objects dictionary
-            newObjDict["gpspoint"] = OBG.newgpsrecord(data,trackrecord["activity"])
+            newObjDict["gpspoint"] = OBG.newgpsrecord(data, trackrecord["activity"])
             print(newObjDict["gpspoint"].__dict__)
             # Iterate over new objdict, can allow building out so many things can be commited to db
             # This allows for empty models to be skipped
@@ -58,7 +61,7 @@ def handle_gps():
             # Add new objects to session and commit them
             db.session.add_all(newObjs)
             db.session.commit()
-            print("Data added and committed to postgres!",file=sys.stdout)
+            print("Data added and committed to postgres!", file=sys.stdout)
             # Return a json success code
             resp = jsonify(success=True)
             return resp
@@ -89,6 +92,7 @@ def get_pointgeojson():
     result = DBQ.getFeatCollection(reclimit=1, datatype="gpspoints")
     return result
 
+
 @app.route("/api/v0.1/gettracks", methods=['GET'])
 @auth.login_required(role='viewer')
 def get_trackgeojson():
@@ -107,3 +111,131 @@ def get_trackgeojson():
     result = DBQ.getFeatCollection(reclimit="all", datatype="gpstracks")
     return result
 
+
+@app.route(script_config.strava_create_sub_url, methods=['GET'])
+@auth.login_required(role='admin')
+def handle_Create_Strava_Sub():
+    """
+    URL to handle creation of new webhook subscription. Must visited by user who has already provided OAuth access.
+    Requires admin level access to visit.
+
+    Consider for future development:
+    Have page prompt user for OAuth access, process Oauth creds, then create new webhook subscription including new user
+    Maybe use Flask-Login to keep track of who is logged in and Oauth credentials.
+
+    Returns
+    -------
+    String. String containing new webhook subscription ID.
+    """
+    try:
+        # Get application access credentials
+        client = stravaAuth.gettoken()
+        application.logger.debug("Client loaded with tokens!")
+        # Handle webhook subscription and response
+        response = StravaWebHook.create_Strava_Webhook(client)
+        return f"Creation of new strava webhook subscription succeeded, new sub id is {response}!"
+    except Exception as e:
+        return f"Creation of new strava webhook subscription failed with the error {e}"
+
+
+@app.route(script_config.strava_callback_url, methods=['GET', 'POST'])
+def handle_sub_callback():
+    """
+    Handles requests to Strava subscription callback URL.
+
+    GET:
+        Webhoook Subscription Creation Process:
+            CallbackURL is sent a GET request containing a challenge code. This code is sent back to requester to verify
+            the callback.
+
+             The initial request to create a new webhook subscription, called by visiting URL containing
+             handle_Create_Strava_Sub(), is then provided with verification creation and the new subscription ID.
+    POST:
+        Webhook subscription update message. Sent when a activity on a subscribed account is created, updated, or deleted,
+        or when a privacy related profile setting is changed.
+
+        All update messages are inputted into Postgres.
+
+        Currently, only activity creation events are handled, additional development is needed to handle other events.
+
+    Returns
+    -------
+    GET request:
+        JSON, echoed Strava challenge text.
+    POST request:
+        Success code if data are successfully added to Postgres/PostGIS. Strava must receive a 200 code in response to
+        POST.
+    """
+    application.logger.debug("Got a callback request!")
+    # Get application access credentials
+    client = stravaAuth.gettoken()
+    # Get request as part of new subscription creation process
+    if request.method == 'GET':
+        application.logger.debug("Got a GET callback request from Strava to verify webhook!")
+        # Extract challenge of verification token
+        callBackContent = request.args.get("hub.challenge")
+        callBackVerifyToken = request.args.get("hub.verify_token")
+        # Form callback response as dict
+        callBackResponse = {"hub.challenge": callBackContent}
+        # Check if tokens match, i.e. if GET request is from Strava
+        if callBackVerifyToken == os.getenv('STRAVA_VERIFY_TOKEN'):
+            try:
+                application.logger.debug(f"Strava callback verification succeeded, responding with the challenge code"
+                                         f" message {callBackResponse}")
+                # Return challenge code as dict. Using Flask API automatically converts it to JSON with HTTP 200 success
+                # code
+                return callBackResponse
+            except Exception as e:
+                application.logger.error(f"Strava callback verification failed with the error {e}")
+                return 500
+        else:
+            application.logger.error(f"Strava verification token doesn't match!")
+            raise ValueError('Strava token verification failed.')
+            return 500
+    # POST request containing webhook subscription message
+    elif request.method == 'POST':
+        application.logger.debug("New activity incoming! Got a POST callback request from Strava")
+        try:
+            # Convert JSON body to dict
+            callbackContent = request.get_json()
+            application.logger.debug(f"Update content is {callbackContent}")
+            application.logger.debug(f"Update content dir is {dir(callbackContent)}")
+            # Call function to handle update message and new activity
+            StravaWebHook.handle_sub_update(client, callbackContent)
+            application.logger.debug("Inserted webhook update and activity details into postgres!")
+            # return success code, Strava expects this code
+            return 200
+        except Exception as e:
+            application.logger.error(f"Strava subscription update failed with the error {e}")
+            return 500
+
+@app.route(script_config.strava_list_subs_url, methods=['GET'])
+@auth.login_required(role='admin')
+def liststravasubs():
+    """
+    Lists application webhook subscriptions. Manually visited, requires admin level access.
+
+    Returns
+    -------
+    String. Message with webhook subscription IDs.
+    """
+    # Get application access credentials
+    client = stravaAuth.gettoken()
+    subIDs = StravaWebHook.listStravaSubIds(client)
+    return f"Webhook subscriptions IDs are {subIDs}"
+
+@app.route(script_config.strava_delete_subs_url, methods=['GET'])
+@auth.login_required(role='admin')
+def deletestravasubs():
+    """
+    Deletes application webhook subscriptions. Manually visited, requires admin level access.
+
+    Returns
+    -------
+    String. Message with deleted webhook subscription IDs.
+
+    """
+    # Get application access credentials
+    client = stravaAuth.gettoken()
+    subIDs = StravaWebHook.deleteStravaSubIds(client)
+    return f"Deleted webhook subscriptions with the IDs: {subIDs}"

@@ -92,7 +92,8 @@ class gpsdatmodel(db.Model):
         for i in removedictlist:
             res_dict.pop(i, None)
         for i in dateCol:
-            res_dict[i] = res_dict[i].isoformat()
+            if type(res_dict[i]) is not "str":
+                res_dict[i] = res_dict[i].isoformat()
         return res_dict
 
 class User(db.Model):
@@ -209,6 +210,7 @@ class AOI(db.Model):
     geom = db.Column(Geometry('MULTIPOLYGON', 4326), index=True)
     location = db.Column(db.String(80))
     desc = db.Column(db.String(80))
+    privacy = db.Column(db.String(50))
 
 class Roads(db.Model):
     __tablename__ = 'roads'

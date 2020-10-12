@@ -9,10 +9,8 @@ from application import application, app
 from flask import render_template
 from application import functions as func
 from application import DB_Queries as DBQ
-from application import parsePDF
-from application import errorEmail
-from application import GoogleDrive
-from application import Stravadownload
+from application import getStravaActivities
+from application import DB_Queries_Strava
 @app.route("/")
 def index():
     return render_template("public/index.html")
@@ -57,6 +55,7 @@ def waterQual():
     standards = DBQ.getStandards()
     return render_template("public/maps/Water_Qual_Map.html", beachgeojson=beachqual, standards=standards,
                            recentdate=recentrec)
+
 
 
 @app.route("/projects/sbcoceanquality")
@@ -107,6 +106,17 @@ def dashboardsmaps():
 @app.route("/contact")
 def contact():
     return render_template("public/contactme.html")
+
+
+# @app.route("/maps/stravaactivities")
+# def stravaprojmap():
+#     activityData = DB_Queries_Strava.getStravaActGeoJSON(20)
+#     print("attempting to return template!")
+#     return render_template("public/maps/Strava_Map.html", stravaGeoJSON=activityData)
+#     # return render_template("public/maps/Strava_Map.html")
+# @app.route("/downloadstravaact")
+# def downloadStravaAct():
+#     return getStravaActivities.processActs(1)
 
 # @app.route("/sendemail")
 # def email():
