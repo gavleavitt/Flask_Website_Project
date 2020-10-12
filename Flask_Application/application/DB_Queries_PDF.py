@@ -3,6 +3,8 @@ from sqlalchemy.orm import sessionmaker
 # from settings import dbcon
 from application.models_PDF import beaches, waterQualityMD5, stateStandards, waterQuality
 import os
+from datetime import datetime
+from application import application
 
 engine = create_engine(os.environ.get("DBCON"))
 Session = sessionmaker(bind=engine)
@@ -55,7 +57,7 @@ def getNullBeaches(pdfDate):
         nullbeaches.append(i.beach_rel.BeachName)
     return nullbeaches
 
-def insmd5(MD5, pdfDate, pdfName, insDate):
+def insmd5(MD5, pdfDate, pdfName):
     """
     Add water quality md5 and other information to postgres database. After committing, call on the primary key, id,
     to get the persisted, auto-incremented, id. The record must be committed before this value is assigned.
@@ -65,7 +67,9 @@ def insmd5(MD5, pdfDate, pdfName, insDate):
     :param insDate:
     :return:
     """
-    newrec = waterQualityMD5(md5=MD5, pdfdate=pdfDate, pdfName=pdfName, insdate=insDate)
+    application.logger.debug(f"Inserting new md5 hash using the following details: md5:{MD5}, pdfdate:{pdfDate}",
+                             f" pdfname:{pdfName}, insdate:{datetime.now()}")
+    newrec = waterQualityMD5(md5=MD5, pdfdate=pdfDate, pdfName=pdfName, insdate=datetime.now())
     session.add(newrec)
     session.commit()
     newId = newrec.id

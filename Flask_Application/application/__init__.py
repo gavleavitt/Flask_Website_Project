@@ -31,10 +31,12 @@ formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
 logger.setLevel(logging.DEBUG)
 if "B:\\" in os.getcwd():
     dirname = os.path.dirname(__file__)
-    handler = RotatingFileHandler(os.path.join(dirname, '../logs/application.log'), maxBytes=1024, backupCount=5)
+    # handler = RotatingFileHandler(os.path.join(dirname, '../logs/application.log'), maxBytes=1024, backupCount=5)
+    handler = logging.FileHandler(os.path.join(dirname, '../logs/application.log'))
 else:
     # see https://stackoverflow.com/a/60549321
-    handler = RotatingFileHandler('/tmp/application.log', maxBytes=1024, backupCount=5)
+    # handler = RotatingFileHandler('/tmp/application.log', maxBytes=1024, backupCount=5)
+    handler = logging.FileHandler('/tmp/application.log')
 handler.setFormatter(formatter)
 
 # Create flask application, I believe "application" has to be used to work properly on AWS EB
@@ -60,7 +62,7 @@ db = SQLAlchemy(app)
 # migrate = Migrate(app, db)
 
 # Imports from the application flask object have to be after flask application is initialized to avoid circular imports
-from application import routes, api_routes, models, parsePDF
+from application import routes, api_routes, models, parsePDF, StravaWebHook
 
 sched = BackgroundScheduler(daemon=True, timezone=utc)
 

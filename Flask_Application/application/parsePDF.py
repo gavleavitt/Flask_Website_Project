@@ -72,28 +72,30 @@ def pdfUpdate():
     pass
 
 
-def handlePDFStatus(pdfstatus, pdfLoc, hashedtext, pdfDict, pdfName, currentTime, beachList):
+def handlePDFStatus(pdfstatus, pdfLoc, hashedtext, pdfDict, pdfName, beachList):
     if pdfstatus == "Exists":
-        print("Already processed this pdf, removing local pdf and quitting!")
+        # print("Already processed this pdf, removing local pdf and quitting!")
         application.logger.debug("Already processed PDF, removing local PDF")
         try:
             os.remove(pdfLoc)
         except:
-            print("Failed to delete file!")
+            # print("Failed to delete file!")
             application.logger.debug("Failed to remove local PDF")
         quit()
     else:
         try:
             GoogleDrive.addtoGDrive(pdfLoc, pdfName)
+            application.logger.debug("PDF uploaded to Google Drive")
         except Exception as e:
-            print("Google Drive upload threw an error, emailing exception")
+            # print("Google Drive upload threw an error, emailing exception")
             application.logger.debug("Google drive upload failed, trying to send email report")
             application.logger.debug(e)
             errorEmail.senderroremail(script="addtoGDrive", exceptiontype=e.__class__.__name__, body=e)
-        print("File uploaded to Google Drive, removing local PDF")
+        # print("Finished with local PDF, removing it from system")
         os.remove(pdfLoc)
     if checkresamp(pdfDict['cleanedtext']) == True:
-        print("This PDF contains re-sampled results")
+        # print("This PDF contains re-sampled results")
+        application.logger.debug("PDF contains re-sampled results, generating resample dict")
         beachDict = genReSampleDict(pdfDict['cleanedtext'], hashedtext, pdfDict['pdfDate'])
     else:
         # Generate beach dictionary
@@ -102,8 +104,10 @@ def handlePDFStatus(pdfstatus, pdfLoc, hashedtext, pdfDict, pdfName, currentTime
         beachDict = populateDict(pdfDict['cleanedtext'], beachDict, "No")
         # If the new PDF contains updates but not re-sample data
         if pdfstatus == "Update":
-            print("This is a PDF filling in missing water quality results, with no re-sampling")
+            # print("This is a PDF filling in missing water quality results, with no re-sampling")
+            application.logger.debug("PDF is updating missing water quality results, with no re-sampling")
             # Get the beaches with null values that are being updated
+            application.logger.debug(f"Update PDF, getting null beaches with the date {pdfDict['pdfDate']}")
             nullbeaches = DBQ_PDF.getNullBeaches(pdfDict['pdfDate'])
             # Check if the key, beachname, is in the null beach list, if not delete it from the beach results dict
             # Delete any keys with None records for water quality, even if they were already null, its possible
@@ -115,9 +119,12 @@ def handlePDFStatus(pdfstatus, pdfLoc, hashedtext, pdfDict, pdfName, currentTime
                     del beachDict[beachkey]
     # return beachDict
     # Get the md5 hash for the new pdf
-    hashid = DBQ_PDF.insmd5(hashedtext, pdfDict['pdfDate'], pdfName, currentTime)
+    application.logger.debug("Getting hash id")
+    hashid = DBQ_PDF.insmd5(hashedtext, pdfDict['pdfDate'], pdfName)
+    application.logger.debug(f"Hash id is {hashid}, inserting into postgres")
     # Insert records into postgres, using the beachDict
     DBQ_PDF.insertWaterQual(beachDict, hashid)
+    application.logger.debug("New water record has been inserted into postgres!")
     return beachDict
 
 
@@ -296,16 +303,18 @@ def parsePDF():
     # Kick off script by downloading PDF
     print("Starting to parse PDF")
     downloadPDF(downloadURL, pdfDest)
+    application.logger.debug("Downloaded PDF!")
     # Get pdf details
     pdfDict = getPDFContents(pdfLoc)
+    application.logger.debug("PDF contents have been extracted")
     # Hash text of pdf document
     hashedtext = md5hash(pdfDict['text'])
     # Check if md5 hash is already in postgres
     pdfstatus = DBQ_PDF.checkmd5(hashedtext, pdfDict['pdfDate'])
+    application.logger.debug(f"PDF md5 has been checked, PDF status is {pdfstatus}")
     # Handle the results of the md5 hash check and control generation of dictionaries and interactions with postgres
     # handlePDFStatus(pdfstatus, pdfLoc, hashedtext, pdfDict, pdfName, currentTime, beachList)
-    currentTime = datetime.now()
-    handlePDFStatus(pdfstatus, pdfLoc, hashedtext, pdfDict, pdfName, currentTime, beachList)
+    handlePDFStatus(pdfstatus, pdfLoc, hashedtext, pdfDict, pdfName, beachList)
     print("All done processing PDF!")
 
 def pdfjob():
@@ -323,7 +332,7 @@ def pdfjob():
     application.logger.debug("PDF job issued, downloading and parsing PDF")
     try:
         parsePDF()
-        logger.debug("Successfully parsed a new PDF!")
+        application.logger.debug("Successfully parsed a new PDF!")
     except SystemExit:
         logger.debug("Ended ParsePDF early since file has already been processed")
         print("Ended ParsePDF job early")
