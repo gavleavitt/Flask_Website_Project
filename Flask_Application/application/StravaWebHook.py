@@ -79,6 +79,8 @@ def handle_sub_update(client, updateContent):
                     application.logger.debug("Inserting activity details")
                     # Insert activity details into Postgres/PostGIS
                     DQS.insertAct(activity)
+                    # Calculate masked activities and insert into Postgres masked table
+                    DQS.maskandInsertAct(activity.actId)
                 except Exception as e:
                     application.logger.error(f"Handling and inserting new webhook activity failed with the error {e}")
                     errorEmail.senderroremail(script="Webhook Activity Update", exceptiontype=e.__class__.__name__, body=e)

@@ -91,9 +91,9 @@ class gpsdatmodel(db.Model):
         res_dict = self.__dict__
         for i in removedictlist:
             res_dict.pop(i, None)
-        for i in dateCol:
-            if type(res_dict[i]) is not "str":
-                res_dict[i] = res_dict[i].isoformat()
+        for v in dateCol:
+            if type(res_dict[v]) is not "str":
+                res_dict[v] = res_dict[v].isoformat()
         return res_dict
 
 class User(db.Model):
@@ -111,21 +111,21 @@ class Roles(db.Model):
     user = db.Column(db.String())
     roles = db.Column(db.String())
 
-
-class AllStravaActivity(db.Model):
-    __tablename__ = 'All_Strava_Activities'
-
-    id = db.Column(db.Integer, primary_key=True, server_default=db.FetchedValue())
-    geom = db.Column(Geometry('MULTILINESTRING', 4326, from_text='ST_GeomFromEWKT', name='geometry'), index=True)
-    ActName = db.Column(db.String)
-    Date = db.Column(db.Date)
-    Filename = db.Column(db.String)
-    ActType = db.Column(db.String)
-    Bike = db.Column(db.String)
-    Elapsed_Ti = db.Column(db.Integer)
-    Distance = db.Column(db.Float(53))
-    layer = db.Column(db.String)
-    path = db.Column(db.String)
+# Old table, not used anymore
+# class AllStravaActivity(db.Model):
+#     __tablename__ = 'All_Strava_Activities'
+#
+#     id = db.Column(db.Integer, primary_key=True, server_default=db.FetchedValue())
+#     geom = db.Column(Geometry('MULTILINESTRING', 4326, from_text='ST_GeomFromEWKT', name='geometry'), index=True)
+#     ActName = db.Column(db.String)
+#     Date = db.Column(db.Date)
+#     Filename = db.Column(db.String)
+#     ActType = db.Column(db.String)
+#     Bike = db.Column(db.String)
+#     Elapsed_Ti = db.Column(db.Integer)
+#     Distance = db.Column(db.Float(53))
+#     layer = db.Column(db.String)
+#     path = db.Column(db.String)
 
 
 

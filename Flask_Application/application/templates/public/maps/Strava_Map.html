@@ -193,11 +193,12 @@
 		var map = L.map('map',
 			{layers: [osm]}).setView([34.41,-119.86],12);
 		var strava_data = {{stravaGeoJSON|tojson}};
-
+		console.log(strava_data)
 		var lineStyle = {
 			"color": "#ff7800",
-			"weight": 3,
-			"opacity": 0.5
+			"weight": 2,
+			"opacity": 0.5,
+			"fillColor": "black"
 		};
 
 		strava_activities = L.geoJSON(strava_data,{
