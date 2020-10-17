@@ -11,6 +11,8 @@ from application import functions as func
 from application import DB_Queries as DBQ
 from application import getStravaActivities
 from application import DB_Queries_Strava
+from application.authentication import auth
+
 @app.route("/")
 def index():
     return render_template("public/index.html")
@@ -108,32 +110,11 @@ def contact():
     return render_template("public/contactme.html")
 
 
-# @app.route("/maps/stravaactivities")
+# @app.route("/maps/stravamap")
 # def stravaprojmap():
-#     activityData = DB_Queries_Strava.getStravaActGeoJSON(20)
+#     # activityData = DB_Queries_Strava.getStravaActGeoJSON(20)
+#     activityData = DB_Queries_Strava.simplifyandMaskActivities(30)
 #     print("attempting to return template!")
 #     return render_template("public/maps/Strava_Map.html", stravaGeoJSON=activityData)
 #     # return render_template("public/maps/Strava_Map.html")
-# @app.route("/downloadstravaact")
-# def downloadStravaAct():
-#     return getStravaActivities.processActs(1)
 
-# @app.route("/sendemail")
-# def email():
-#     errorEmail.senderroremail()
-#     return("Email sent!")
-# @app.route("/uploadpdf")
-# def upload():
-#     GoogleDrive. addtoGDrive(r"G:\My Drive\Projects\test_documents\Ocean_Water_Quality_Report_testing_20201002.pdf",
-#                               "Ocean_Water_Quality_Report_testing_20201002.pdf")
-#     return("uploaded!")
-# @app.route("/testdownload")
-# def testdownload():
-#     parsePDF.parsePDF()
-#     return ("Ran test download!")
-#
-# @app.route("/auth/strava")
-# def authstrava():
-#     client = Stravadownload.stravaAuth()
-#     res = Stravadownload.getatth(client)
-#     print("res")

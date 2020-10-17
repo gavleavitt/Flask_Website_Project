@@ -1,11 +1,11 @@
 from sqlalchemy import create_engine, or_
 from sqlalchemy.orm import sessionmaker
 # from settings import dbcon
-from application.models_Strava import athletes, sub_update, strava_activities
+from application.models_Strava import athletes, sub_update, strava_activities, strava_activities_masked
 from application.models import AOI
 import os
 from datetime import datetime
-from application import application, errorEmail
+from application import application, errorEmail, models_Strava
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import func as sqlfunc
 import geojson
@@ -18,6 +18,12 @@ session = Session()
 
 def createTable(tableModel):
     Base = declarative_base()
+    tableObjects = [tableModel.__table__]
+    Base.metadata.create_all(engine, tables=tableObjects)
+
+def createMaskedStravaTable():
+    Base = declarative_base()
+    tableModel = models_Strava.strava_activities_masked
     tableObjects = [tableModel.__table__]
     Base.metadata.create_all(engine, tables=tableObjects)
 
@@ -129,27 +135,182 @@ def insertAct(actDict):
     session.commit()
     application.logger.debug(f"New webhook update for activity {actDict['actId']} has been added to Postgres!")
 
-# def getStravaActGeoJSON(actLimit):
-#
-#     private_aoi = session.query(AOI.geom).filter(AOI.privacy=="Yes").as_scalar()
-#     query = session.query(sqlfunc.ST_Difference(strava_activities.geom, private_aoi))
-#                           #                       ()),
-#                           # strava_activities).order_by(strava_activities.id.desc()).limit(actLimit)
-#     # use https://postgis.net/docs/ST_Difference.html
-#     # query = session.query(sqlfunc.ST_AsGeoJSON(strava_activities.geom),
-#     #                       strava_activities).order_by(strava_activities.id.desc()).limit(actLimit)
-#     features = []
-#     for row in query:
-#         # Build a dictionary of the attribute information
-#         prop_dict = row[1].builddict()
-#         # Take ST_AsGeoJSON() result and load as geojson object
-#         geojson_geom = geojson.loads(row[0])
-#         # print(row[0])
-#         # geojson_geom = LineString(row[0])
-#         # Build the feature and add to feature list
-#         features.append(Feature(geometry=geojson_geom, properties=prop_dict))
-#     # Build the feature collection result
-#     feature_collection = FeatureCollection(features)
-#     # print(feature_collection)
-#     print("Feature collection generated!")
-#     return feature_collection
+def getStravaActGeoJSON(actLimit):
+
+
+    query = session.query(sqlfunc.ST_AsGeoJSON(strava_activities.geom).order_by(strava_activities.id.desc())).limit(5)
+    features = []
+    for row in query:
+        # Build a dictionary of the attribute information
+        # prop_dict = row[1].builddict()
+        # Take ST_AsGeoJSON() result and load as geojson object
+        geojson_geom = geojson.loads(row[0])
+        # print(row.__dict__())
+        # print(type(row))
+        # row_str = str(row).replace("MULTILINESTRING", "").replace("(","").replace(")","").replace("(","").replace("'","").replace("-","-")
+        # print(row_str)
+        # geom = LineString(row_str)
+        # print(row[0])
+        # geojson_geom = LineString(row[0])
+        # Build the feature and add to feature list
+        # features.append(Feature(geometry=geojson_geom, properties=prop_dict))
+        features.append(Feature(geometry=geojson_geom))
+    # Build the feature collection result
+    feature_collection = FeatureCollection(features)
+    # print(feature_collection)
+    print("Feature collection generated!")
+    return feature_collection
+
+def maskandInsertAct(actId):
+    """
+
+    Parameters
+    ----------
+    actId
+
+    Returns
+    -------
+
+    """
+
+    # Smoothing tolerence, in meters.
+    smooth = 3
+    # Projection srid to use for simplify, UTM 10N
+    proj = 32610
+    # Privacy geometries CTE
+    private_aoi = session.query((AOI.geom).label("priv_aoi")).filter(AOI.privacy == "Yes").cte("privacy_aoi")
+
+    # CTE query to query the geometry of new actID
+    strava_geom = session.query((strava_activities.geom).label("trans_geom"),
+                                (strava_activities.actID.label("strava_id"))).filter(
+        strava_activities.actID == actId).cte("simp_cte")
+
+
+    # Query first uses ST_Difference to split the linestrings by their intersections with the AOI polygons, I don't
+    # entirely understand what this function does since it doesn't appear to follow the official description of
+    # returning just geom B-A, it appears to return B-A and A. Next geom A is removed using a filter based on
+    # ST_Intersects, which removes geom A, including areas with no intersection with geom B, I don't understand why
+    # this combination of functions removes geom A that doesn't intersect geom B, however these data will be selected
+    # again later.
+    # Next the filtered data are transformed into UTM 10N (srid 32610) such that the data are in meters, not degrees,
+    # and passed into ST_SimplifyPreserveTopology. This smooths data within the smoothing tolerance without breaking
+    # any topology, the tolerance is in the geometry's units which makes more sense in meters. After smoothing the data
+    # are transformed back into WGS 1984 (srid 4326) then returned as EWKT to be inserted into new table.
+    maskedQuery = session.query(strava_geom.c.strava_id, sqlfunc.ST_AsEWKT(sqlfunc.ST_Multi(sqlfunc.ST_Transform(
+        sqlfunc.ST_SimplifyPreserveTopology(
+            sqlfunc.ST_Transform(sqlfunc.ST_Difference(strava_geom.c.trans_geom, private_aoi.c.priv_aoi), proj),
+            smooth), 4326)))).filter(sqlfunc.ST_Intersects(strava_geom.c.trans_geom, private_aoi.c.priv_aoi))
+    # Iterate over masked query result, add results to Postgres, should only ever be 1 empty at a time
+    queryLen = 0
+    for row in maskedQuery:
+        insert = strava_activities_masked(actID=row[0], geom=row[1])
+        # print(f"Activity ID {row[0]} had an intersections with a privacy AOI and has been added to the Postgres masked table!")
+        session.add(insert)
+        application.logger.debug(f"Activity ID {row[0]} had an intersection with a privacy AOI, masked linestring has been added to session")
+        queryLen += 1
+    # Check if masked query returned anything, if return is empty then the activity didn't intersect a privacy zone
+    # Perform a separate query without ST_Difference or ST_Intersects
+    if queryLen == 0:
+        nonIntersectQuery = session.query(strava_activities.actID,
+                                          sqlfunc.ST_AsEWKT(sqlfunc.ST_Multi(sqlfunc.ST_Transform(
+                                              sqlfunc.ST_SimplifyPreserveTopology(
+                                                  sqlfunc.ST_Transform(strava_activities.geom, proj), smooth),
+                                              4326)))).filter(
+            strava_activities.actID == actId)
+        for row in nonIntersectQuery:
+            insert = strava_activities_masked(actID=row[0], geom=row[1])
+            session.add(insert)
+            application.logger.debug(
+                f"Activity ID {row[0]} had no intersections with a privacy AOI, linestring has been added to session")
+    session.commit()
+    application.logger.debug(
+        f"Activity ID {actId} has been committed to Postgres")
+
+def simplifyandMaskAllActivities():
+    """
+
+
+    Calculate difference, keep only different sections
+    Do a separate query to select everything that didn't have an intersection with privacy areas.
+    Use collect to combine these datasets
+    create a new table with both datasets
+    remain activity ID throughout the process to be used for joining attribute data
+    Convert to UTM 10N 32610
+    Returns
+    -------
+    """
+    print("creating queries")
+    # Smoothing tolerence, in meters.
+    smooth = 3
+    proj = 32610
+    # get all act IDs from original database
+    strava_IDs = session.query(strava_activities.actID)
+    allID = []
+    for i in strava_IDs:
+        allID.append(i.actID)
+    # print(f"Length of all query is: {len(allID)}")
+    # Privacy geometries CTE
+    private_aoi = session.query((AOI.geom).label("priv_aoi")).filter(AOI.privacy == "Yes").cte("privacy_aoi")
+
+    # CTE query to query the geometries and act IDs of all records in original table
+    strava_simp = session.query((strava_activities.geom).label("trans_geom"),
+        (strava_activities.actID.label("strava_id"))).cte("simp_cte")
+
+    # Query first uses ST_Difference to split the linestrings by their intersections with the AOI polygons, I don't
+    # entirely understand what this function does since it doesn't appear to follow the official description of
+    # returning just geom B-A, it appears to return B-A and A. Next geom A is removed using a filter based on
+    # ST_Intersects, which removes geom A, including areas with no intersection with geom B, I don't understand why
+    # this combination of functions removes geom A that doesn't intersect geom B, however these data will be selected
+    # again later.
+    # Next the filtered data are transformed into UTM 10N (srid 32610) such that the data are in meters, not degrees,
+    # and passed into ST_SimplifyPreserveTopology. This smooths data within the smoothing tolerance without breaking
+    # any topology, the tolerance is in the geometry's units which makes more sense in meters. After smoothing the data
+    # are transformed back into WGS 1984 (srid 4326).
+    # Activity IDs are also queried to keep track of which records were used in this process
+    maskedQuery = session.query(strava_simp.c.strava_id,
+                                sqlfunc.ST_AsEWKT(sqlfunc.ST_Multi(sqlfunc.ST_Transform(sqlfunc.ST_SimplifyPreserveTopology(sqlfunc.ST_Transform(sqlfunc.ST_Difference(
+            strava_simp.c.trans_geom, private_aoi.c.priv_aoi),proj),smooth),4326))))\
+        .filter(sqlfunc.ST_Intersects(strava_simp.c.trans_geom, private_aoi.c.priv_aoi))
+
+    allFeatures = []
+    differenceIds = []
+    print("Working on masked query")
+    for row in maskedQuery:
+        # print(f"working on {row[0]}")
+        differenceIds.append(row.strava_id)
+        allFeatures.append([row[0], row[1]])
+        # geojson_geom = geojson.loads(row[1])
+        # features.append(Feature(geometry=geojson_geom))
+    # print(f"Len of differenceIDs list is {len(differenceIds)}")
+    # print(differenceIds)
+    nonIntersectqueryList = list(set(allID)-set(differenceIds))
+    # print(f"Length of non-intersecting list is {len(nonIntersectqueryList)}")
+    # print(nonIntersectqueryList)
+    # print(queryList)
+    # print(f"Length of all feature list with only intersecting linestrings is {len(allFeatures)}")
+    # Query geoms in nonIntersectqueryList
+    print("Finished masked query, working on non-intersect query")
+    nonIntersectQuery = session.query(strava_activities.actID, sqlfunc.ST_AsEWKT(sqlfunc.ST_Multi(sqlfunc.ST_Transform(
+        sqlfunc.ST_SimplifyPreserveTopology(sqlfunc.ST_Transform(strava_activities.geom, proj), smooth), 4326)))).filter(
+        strava_activities.actID.in_(nonIntersectqueryList))
+    # print(nonIntersectQuery)
+    for row in nonIntersectQuery:
+        # print(f"working on non-intersecting actID {row[0]}")
+        # differenceIds.append(row.strava_id)
+        allFeatures.append([row[0], row[1]])
+
+    # print(f"Length of all feature list with all linestrings added is {len(allFeatures)}")
+    print("Non-intersect query complete, adding all features to session")
+    for item in allFeatures:
+        # print(type(item[1]))
+        # print(len(item[1]))
+        # print(item[1])
+        # print(f"working on {item[0]}")
+        insert = strava_activities_masked(actID=item[0], geom=item[1])
+        session.add(insert)
+        # print(f"Activity {item[0]} has been added to session!")
+    print("All sessions added, committing!")
+    session.commit()
+    print("All entries committed to database!")
+    # feature_collection = FeatureCollection(features)
+    # return feature_collection

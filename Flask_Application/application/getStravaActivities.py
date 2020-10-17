@@ -52,7 +52,8 @@ def getFullDetails(client, actId):
 
     Returns
     -------
-    Dict. Full tabular and coordinate information formatted to be inserted into Postgres/PostGIS.
+    Dict. Full ta
+    lar and coordinate information formatted to be inserted into Postgres/PostGIS.
     """
 
     # Set logger to suppress debug errors, these messages aren't important and pollute the console
@@ -116,6 +117,7 @@ def processActs(days):
         try:
             actDict = getFullDetails(client, actId)
             DB_Queries_Strava.insertAct(actDict)
+            DB_Queries_Strava.maskandInsertAct(actId)
         except Exception as e:
             print(f"Strava download/insert failed with the error {e}")
             application.logger.error(f"Strava activity {actId} failed to parse properly!")

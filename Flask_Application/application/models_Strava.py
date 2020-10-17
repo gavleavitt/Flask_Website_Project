@@ -76,7 +76,18 @@ class strava_activities(Base):
         for i in removedictlist:
             res_dict.pop(i, None)
         for v in dateCol:
-            res_dict[v] = res_dict[v].isoformat()
+            if not isinstance(res_dict[v], str):
+                res_dict[v] = res_dict[v].isoformat()
         for h in durCol:
-            res_dict[h] = res_dict[h].seconds
+            if not isinstance(res_dict[h], int):
+                res_dict[h] = res_dict[h].seconds
         return res_dict
+
+
+class strava_activities_masked(Base):
+    __tablename__ = "strava_activities_masked"
+    id = Column(Integer, primary_key=True)
+    actID = Column(BigInteger, ForeignKey("strava_activities.actID"))
+    # geom = Column(Geometry(geometry_type='MULTILINESTRING', srid=4326, from_text = 'ST_GeomFromWKB', name='geometry'))
+    geom = Column(Geometry(geometry_type='MULTILINESTRING', srid=4326,  from_text = 'ST_GeomFromEWKT', name='geometry'), index=True)
+    beach_rel = relationship(strava_activities, backref="strava_activities_masked")
