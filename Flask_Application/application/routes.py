@@ -110,11 +110,9 @@ def contact():
     return render_template("public/contactme.html")
 
 
-# @app.route("/maps/stravamap")
-# def stravaprojmap():
-#     # activityData = DB_Queries_Strava.getStravaActGeoJSON(20)
-#     activityData = DB_Queries_Strava.simplifyandMaskActivities(30)
-#     print("attempting to return template!")
-#     return render_template("public/maps/Strava_Map.html", stravaGeoJSON=activityData)
-#     # return render_template("public/maps/Strava_Map.html")
+@app.route("/maps/stravamap")
+def stravaprojmap():
+    # activityData = DB_Queries_Strava.getStravaActGeoJSON(20)
+    # activityData = DB_Queries_Strava.getStravaMaskedActGeoJSON(30)
+    return render_template("public/maps/Strava_Map.html")
 

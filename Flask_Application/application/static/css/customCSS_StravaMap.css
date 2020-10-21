@@ -1,0 +1,416 @@
+:root{
+  --backgroundwhite: #fcfcfc;
+  --titlebackground: #f7f7f7;
+}
+body {
+  background-color:var(--backgroundwhite:);
+  height: 98%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+html{
+  height: 100%;
+}
+
+.container {
+  display: grid;
+  width:100%;
+  height:100%;
+  grid-template-columns: 1fr;
+  grid-template-rows: 0.05fr 0.95fr;
+  grid-gap: 0.4rem;
+}
+
+.sansserif {
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.name-border{
+  border-bottom-width: 2px;
+  border-bottom-style: solid;
+  border-bottom-color: #000;
+}
+
+#map{
+    position: relative;
+    top: 0px;
+    left: 0px;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+}
+
+.leaflet-popup-content{
+  font-size: 14px;
+}
+
+.detail-panel-col{
+  background-color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+
+.detail-context{
+  color:white;
+}
+
+.teal-text{
+  color:#20ebf5;
+  font-size: 1.5rem;
+}
+
+.detail-text{
+  color:#5ac73e;
+  /* text-shadow: 1px 1px 4px #5ac73e; */
+}
+.detail-text-important{
+  color:#FF073A;
+  /* text-shadow: 1px 1px 4px #5ac73e; */
+}
+.item {
+  /*background-color: #719ef0;*/
+  box-shadow: 0 5px 10px rgba(0,0,0,0.19), 0 3px 3px rgba(0,0,0,0.23);
+  color: #fff; /*Text color */
+  border-radius: 3px;
+  border: 2px solid #171717;
+}
+
+.detail-panel{
+  display: grid;
+  width:100%;
+  height:100%;
+  grid-template-columns: repeat(2,1fr);
+  grid-template-rows: repeat(3,1fr);
+  grid-gap: 0.5rem;
+  border: 0;
+  border-radius: 0;
+}
+
+.titlediv{
+  display:flex;
+  align-items: center;
+  background-color: #f7f7f7;
+  display: grid;
+  grid-template-columns: 0.33fr 0.33fr 0.33fr;
+  grid-template-rows: 1fr;
+  grid-row: 1/1;
+  grid-column: 1/3;
+
+}
+
+.popupbuttontext{
+  /* text-align: right; */
+  grid-row: 1/1;
+  grid-column: 3/4;
+  font-size: 14px;
+  font-weight: bold;
+  /* padding-left: 0.8rem;
+  padding-top:0.8rem;
+  padding-bottom:0.8rem; */
+  padding-right:1.5rem;
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.titletext{
+  color:#000;
+  float:left;
+  font-weight: bold;
+  grid-row: 1/1;
+  grid-column: 1/1;
+  font-size: 16px;
+  padding-left: 0.4rem;
+  justify-content: flex-start;
+  /* padding-top:0.4rem;
+  padding-bottom:0.4rem; */
+}
+
+.map-panel{
+ grid-row: 2/4;
+ grid-column: 1/3;
+}
+
+.detail-panel{
+  grid-row: 2/4;
+  grid-column: 2/3;
+}
+
+.detail-1{
+  grid-row: 1/1;
+  grid-column: 1/1;
+}
+
+.detail-2{
+  display: grid;
+
+}
+
+.icon-activity{
+  width: 5vw;
+  height: 5vw;
+}
+
+.icon-battery{
+  width: 7vw;
+  height: 7vw;
+}
+
+
+.leaflet-control-layers{
+/*
+  background: #2b3940;
+  color: #20ebf5;
+  */
+  text-align: left;
+  align-items: left;
+  justify-content: left;
+
+}
+/*
+.leaflet-bar a:hover{
+  background-color: #2b3940;
+  border-bottom: #282a2b;
+}
+*/
+.text-icon-panel{
+  display: grid;
+  width:100%;
+  height:100%;
+  grid-template-columns: auto;
+  grid-template-rows: 60% 0%;
+  grid-gap: 0.5rem;
+  border: 0;
+  border-radius: 0;
+}
+
+.div-span-margin{
+  margin-top: 10%;
+  margin-bottom: 10%;
+}
+
+.div-span-nomargin{
+  margin-top: 0%;
+  margin-bottom: 0%;
+}
+
+.infolegend{
+  width: 140px;
+  height: 200px;
+  /* line-height: 20px; */
+  /* opacity: 0.8; */
+  background-color: #FFF;
+  border: 2px solid black;
+  text-align: left;
+}
+
+.legendicon{
+  height: 50px;
+  width: 50px;
+  margin-left: 8px;
+  margin-right: 10px;
+  margin-top: 4px;
+  display: inline-block;
+  vertical-align: middle;
+  /*
+  position: relative;
+  top: 12px;
+  left: 10px;
+  */
+}
+
+.legendtext{
+  color: #303030;
+  font-size: 18px;
+  text-align: left;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.legendheader{
+  color: #303030;
+  font-size: 18px;
+  text-align: center;
+}
+
+.spanbotbord{
+  border-bottom:#7b9798 solid 2px;
+}
+
+
+
+/* Modal CSS from https://www.w3schools.com/howto/howto_css_modals.asp */
+/* The Modal (background) */
+.modal {
+  display: none; /* Hidden by default */
+  position: fixed; /* Stay in place */
+  z-index: 2; /* Sit on top */
+  padding-top: 100px; /* Location of the box */
+  left: 0;
+  top: 0;
+  width: 100%; /* Full width */
+  height: 100%; /* Full height */
+  overflow: auto; /* Enable scroll if needed */
+  background-color: rgb(0,0,0); /* Fallback color */
+  background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+  /* border-radius: 30px;
+  border: 2px solid #888; */
+}
+
+/* Modal Content */
+.modal-content-container {
+  background-color: var(--titlebackground);
+  color: #161616;
+  /* display: grid; */
+  /* grid-template-rows: 32px 1fr; */
+  margin: auto;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  padding-left: 25px;
+  padding-right: 25px;
+  border: 2px solid #000;
+  border-radius: 20px;
+  /* width: 60%; */
+  font-size: 16px;
+  overflow-y: auto;
+  max-height: 80%;
+  max-width: 80%;
+
+  /* box-sizing: border-box; */
+}
+
+/* The Close Button */
+.close {
+  /* grid-row: 1/1; */
+  color: #aaaaaa;
+  font-size: 32px;
+  font-weight: bold;
+  margin-top: -10px;
+  /* text-align: right; */
+  /* position: sticky; */
+  /* position: -webkit-sticky; */
+  position: fixed;
+  right: 10%;
+  transform: translateX(40%);
+  /* background-color: var(--titlebackground); */
+  /* opacity: 95%; */
+}
+
+.modal-text{
+  /* grid-row: 2/2; */
+  margin-top: 10px;
+}
+
+.close:hover,
+.close:focus {
+  color: #000;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+
+.headerbtn{
+  border: none;
+  font-size: 18px;
+  background-color: var(--titlebackground);
+  padding: none;
+  cursor: pointer;
+}
+
+
+.filter-btn-group{
+  display: flex;
+  flex-direction: row;
+  grid-column: 2/3;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.filterbtn{
+  padding: 5px 24px;
+  border-radius: 5%;
+  margin-left: 3px;
+  margin-right: 3px;
+  color: White;
+  border: 2px solid black;
+  opacity: 80%;
+  font-weight: bold;
+}
+
+#all{
+  background-color: gray;
+}
+
+#mtb{
+  background-color: #a30b00;
+}
+
+#road-rides{
+  background-color: #0914b0;
+}
+
+#runs{
+  background-color: #17ba0b;
+}
+
+#walks{
+  background-color: #ff7800;
+}
+
+.filterbtn:hover{
+  background-color: #383838;
+  opacity: 30%;
+}
+
+
+.headerbtn:hover,
+.headerbtn:focus{
+  color: #1d27ff;
+}
+
+.map-home{
+  color:#000;
+  font-size: 18px;
+  margin-right: 10px;
+  font-weight: normal;
+}
+
+.home-link{
+  color:inherit;
+  text-decoration: none;
+}
+
+.home-link:hover{
+  color: #1d27ff;
+}
+
+/*
+.leaflet-bar a:hover {
+    background-color: #20ebf5;
+}
+*/
+/*
+.leaflet-control-layers-toggle{
+  background-image: url(images/layers.png);
+  background-color: blue;
+}
+*/
+/*
+.leaflet-bar a{
+    background-color: #2b3940;
+    color: #20ebf5;
+}
+*/
+/*
+.leaflet-bar.leaflet-ruler.leaflet-control{
+  background-color: #2b3940;
+  color: #20ebf5;
+}
+*/

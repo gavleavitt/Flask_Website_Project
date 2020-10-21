@@ -24,6 +24,9 @@ def senderroremail(script, exceptiontype, body):
     -------
     Print statement.
     """
+    # Convert error message and exception type to strings
+    body = str(body)
+    exceptiontype = str(exceptiontype)
     try:
         application.logger.debug("Trying to send error email")
         # Create a secure SSL context
@@ -32,6 +35,7 @@ def senderroremail(script, exceptiontype, body):
         with smtplib.SMTP_SSL("smtp.gmail.com", port, context=context) as server:
             # login to server
             server.login(emailaddr, emailpassword)
+            application.logger.debug("Logged into SMTP server")
             # Create a multipart message and set headers
             message = MIMEMultipart()
             message["from"] = emailaddr
@@ -40,6 +44,7 @@ def senderroremail(script, exceptiontype, body):
             # Add body to email
             message.attach(MIMEText(body, "plain"))
             # Send email
+            application.logger.debug("Issuing command to send formatted email")
             server.sendmail(emailaddr, emailtoaddr, message.as_string())
             # print("Message has been sent!")
     except Exception as e:

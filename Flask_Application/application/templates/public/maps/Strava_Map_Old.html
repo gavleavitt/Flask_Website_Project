@@ -47,16 +47,11 @@
 	<!-- Custom local javascript functions -->
 	<script src="{{ url_for('static', filename='js/customfunctions.js') }}"></script>
 	<!-- Custom CSS -->
-	<link rel="stylesheet" href="{{ url_for('static', filename='css/customCSS_StravaMap.css') }}">
+	<link rel="stylesheet" href="{{ url_for('static', filename='css/customCSS_beaches.css') }}">
 	<!-- Search CSS-->
 	<link rel="stylesheet" href="{{ url_for('static', filename='css/leaflet-search.src.css') }}">
 	<!-- Search JS -->
 	<script src="{{ url_for('static', filename='js/leaflet-search.src.js') }}"></script>
-	<!-- Spin JS -->
-	<script src="{{ url_for('static', filename='js/spin/dist/spin.min.js') }}"></script>
-	<!-- leaflet spin JS -->
-	<script src="{{ url_for('static', filename='js/leaflet.spin.min.js') }}"></script>
-
 
 	<!-- Favicon links -->
 	<link rel="apple-touch-icon" sizes="180x180" href="/static/images/apple-touch-icon.png">
@@ -86,20 +81,6 @@
 	<div class="container sansserif">
 		<div class="item titlediv">
 			<div id = "Title" class="titletext">Strava Activities
-			</div>
-			<div class="filter-btn-group">
-				<!-- <button class="filterbtn" onclick="filterAll()" id="all">All</button>
-				<button class="filterbtn" onclick="filterMTB()" id="mtb">Mountain Biking</button>
-				<button class="filterbtn" onclick="filterRoad()" id="road-rides">Road Rides</button>
-				<button class="filterbtn" onclick="filterWalk()" id="runs">Runs</button>
-				<button class="filterbtn" onclick="filterRun()" id="walks">Walks</button> -->
-
-				<button class="filterbtn" onclick="actFilter('All')" id="all">All</button>
-				<button class="filterbtn" onclick="actFilter('MTB')" id="mtb">Mountain Biking</button>
-				<button class="filterbtn" onclick="actFilter('Road')" id="road-rides">Road Rides</button>
-				<button class="filterbtn" onclick="actFilter('Walk')" id="runs">Runs</button>
-				<button class="filterbtn" onclick="actFilter('Run')" id="walks">Walks</button>
-
 			</div>
 			<!-- See this for basic popup box: https://html-online.com/articles/simple-popup-box/ -->
 			<!-- https://www.w3schools.com/howto/howto_css_modals.asp -->
@@ -159,8 +140,8 @@
 			</div> -->
 		</div>
 	  <div class="item map-panel detail-panel-col">
-			<div id='map'>
-			</div>
+			<div id='map'></div>
+		</div>
 	</div>
 
 	<!-- Set the url root -->
@@ -211,161 +192,24 @@
 		// intilize map with basemap:
 		var map = L.map('map',
 			{layers: [osm]}).setView([34.41,-119.86],12);
-		var actlimit = "1000"
-		// var baseurl = "www.leavittmapping.com/api/v0.1/stravaroutes?"
-		var baseurl = "/api/v0.1/stravaroutes?"
+		// var strava_data = {{stravaGeoJSON|tojson}};
+		// console.log(strava_data)
+		var actlimit = "500"
+		var baseurl = "www.leavittmapping.com/api/v0.1/stravaroutes?"
 		var query = baseurl + "actlimit=" + actlimit
-		var walk_lineStyle = {
+		strava_activities = L.geoJSON(query, {
+			style: lineStyle
+		}).addTo(map);
+		var lineStyle = {
 			"color": "#ff7800",
 			"weight": 2,
 			"opacity": 0.5,
 			"fillColor": "black"
 		};
-		var run_lineStyle = {
-			"color": "#17ba0b",
-			"weight": 2,
-			"opacity": 0.5,
-			"fillColor": "black"
-		};
-		var road_lineStyle = {
-			"color": "#0914b0",
-			"weight": 2,
-			"opacity": 0.5,
-			"fillColor": "black"
-		};
-		var mtb_lineStyle = {
-			"color": "#a30b00",
-			"weight": 2,
-			"opacity": 0.5,
-			"fillColor": "black"
-		};
-		map.spin(true);
-// 		var strava_activities = $.getJSON(query, function(data) {
-//     L.geoJson(data, {
-//         style: lineStyle,
-// 				onEachFeature: function(feature,layer){
-// 					layer.bindPopup(
-// 						"<div class='spanbotbord'><b>" + feature.properties.name + "</b></div>" +
-// 						 // "<div><b><a href=https://www.strava.com/activities/" + feature.properties.actID + ">Strava Activity Page</a></b></div>" +
-//  					 	"<div><b>Type: " + feature.properties.type + "</b></div>" +
-// 						"<div><b>Date (PST): " + feature.properties.startDate + "</b></div>" +
-// 						"<div><b>Duration: " + convertDuration(feature.properties.elapsed_time) + "</b></div>" +
-// 						"<div><b>Distance (Miles): " + (feature.properties.distance * 0.000621371).toFixed(1) + "</b></div>" +
-// 						"<div><b>Elevation gain (Feet): " + (feature.properties.total_elevation_gain * 3.28084).toFixed(1) + "</b></div>" +
-// 						"<div><b>Calories burned: " + feature.properties.calories + "</b></div>" +
-// 						"<div><b>Average speed: " + (feature.properties.average_speed * 2.23694).toFixed(1) + "</b></div>" +
-// 						"<div><b>Activity ID: " + feature.properties.actID + "</b></div>" +
-// 						geartext(feature.properties.gear_name) +
-// 						privatecheck(feature.properties.private, feature.properties.actID)
-// 					)
-// 				}
-//     }).addTo(map);
-// })
-// .done(function() {
-//   map.spin(false);
-// });
 
-var walk = L.layerGroup();
-var run = L.layerGroup();
-var mtb = L.layerGroup();
-var roadride = L.layerGroup();
-
-var strava_activities = $.getJSON(query, function(data) {
-	walk_act = L.geoJson(data, {
-	    style: walk_lineStyle,
-			onEachFeature: function(feature,layer){
-				layer.bindPopup(
-					"<div class='spanbotbord'><b>" + feature.properties.name + "</b></div>" +
-					 // "<div><b><a href=https://www.strava.com/activities/" + feature.properties.actID + ">Strava Activity Page</a></b></div>" +
-					 	"<div><b>Type: " + feature.properties.type + "</b></div>" +
-					"<div><b>Date (PST): " + feature.properties.startDate + "</b></div>" +
-					"<div><b>Duration: " + convertDuration(feature.properties.elapsed_time) + "</b></div>" +
-					"<div><b>Distance (Miles): " + (feature.properties.distance * 0.000621371).toFixed(1) + "</b></div>" +
-					"<div><b>Elevation gain (Feet): " + (feature.properties.total_elevation_gain * 3.28084).toFixed(1) + "</b></div>" +
-					"<div><b>Calories burned: " + feature.properties.calories + "</b></div>" +
-					"<div><b>Average speed (mph): " + (feature.properties.average_speed * 2.23694).toFixed(1) + "</b></div>" +
-					"<div><b>Activity ID: " + feature.properties.actID + "</b></div>" +
-					privatecheck(feature.properties.private, feature.properties.actID)
-				)
-			},
-			filter: function(feature, layer){
-				return feature.properties.type == "Walk";
-			}
-	}).addTo(map);
-	run_act = L.geoJson(data, {
-	    style: run_lineStyle,
-			onEachFeature: function(feature,layer){
-				layer.bindPopup(
-					"<div class='spanbotbord'><b>" + feature.properties.name + "</b></div>" +
-					 // "<div><b><a href=https://www.strava.com/activities/" + feature.properties.actID + ">Strava Activity Page</a></b></div>" +
-					 	"<div><b>Type: " + feature.properties.type + "</b></div>" +
-					"<div><b>Date (PST): " + feature.properties.startDate + "</b></div>" +
-					"<div><b>Duration: " + convertDuration(feature.properties.elapsed_time) + "</b></div>" +
-					"<div><b>Distance (Miles): " + (feature.properties.distance * 0.000621371).toFixed(1) + "</b></div>" +
-					"<div><b>Elevation gain (Feet): " + (feature.properties.total_elevation_gain * 3.28084).toFixed(1) + "</b></div>" +
-					"<div><b>Calories burned: " + feature.properties.calories + "</b></div>" +
-					"<div><b>Average speed (mph): " + (feature.properties.average_speed * 2.23694).toFixed(1) + "</b></div>" +
-					"<div><b>Activity ID: " + feature.properties.actID + "</b></div>" +
-					privatecheck(feature.properties.private, feature.properties.actID)
-				)
-			},
-			filter: function(feature, layer){
-				return feature.properties.type == "Run";
-			}
-	}).addTo(map);
-	road_act = L.geoJson(data, {
-			style: road_lineStyle,
-			onEachFeature: function(feature,layer){
-				layer.bindPopup(
-					"<div class='spanbotbord'><b>" + feature.properties.name + "</b></div>" +
-					 // "<div><b><a href=https://www.strava.com/activities/" + feature.properties.actID + ">Strava Activity Page</a></b></div>" +
-						"<div><b>Type: " + feature.properties.type + "</b></div>" +
-					"<div><b>Date (PST): " + feature.properties.startDate + "</b></div>" +
-					"<div><b>Duration: " + convertDuration(feature.properties.elapsed_time) + "</b></div>" +
-					"<div><b>Distance (Miles): " + (feature.properties.distance * 0.000621371).toFixed(1) + "</b></div>" +
-					"<div><b>Elevation gain (Feet): " + (feature.properties.total_elevation_gain * 3.28084).toFixed(1) + "</b></div>" +
-					"<div><b>Calories burned: " + feature.properties.calories + "</b></div>" +
-					"<div><b>Average speed (mph): " + (feature.properties.average_speed * 2.23694).toFixed(1) + "</b></div>" +
-					geartext(feature.properties.gear_name) +
-					"<div><b>Activity ID: " + feature.properties.actID + "</b></div>" +
-					privatecheck(feature.properties.private, feature.properties.actID)
-				)
-			},
-			filter: function(feature, layer){
-				return feature.properties.type_extended == "Road Cycling";
-			}
-	}).addTo(map);
-	mtb_act = L.geoJson(data, {
-			style: mtb_lineStyle,
-			onEachFeature: function(feature,layer){
-				layer.bindPopup(
-					"<div class='spanbotbord'><b>" + feature.properties.name + "</b></div>" +
-					 // "<div><b><a href=https://www.strava.com/activities/" + feature.properties.actID + ">Strava Activity Page</a></b></div>" +
-						"<div><b>Type: " + feature.properties.type + "</b></div>" +
-					"<div><b>Date (PST): " + feature.properties.startDate + "</b></div>" +
-					"<div><b>Duration: " + convertDuration(feature.properties.elapsed_time) + "</b></div>" +
-					"<div><b>Distance (Miles): " + (feature.properties.distance * 0.000621371).toFixed(1) + "</b></div>" +
-					"<div><b>Elevation gain (Feet): " + (feature.properties.total_elevation_gain * 3.28084).toFixed(1) + "</b></div>" +
-					"<div><b>Calories burned: " + feature.properties.calories + "</b></div>" +
-					"<div><b>Average speed (mph): " + (feature.properties.average_speed * 2.23694).toFixed(1) + "</b></div>" +
-					geartext(feature.properties.gear_name) +
-					"<div><b>Activity ID: " + feature.properties.actID + "</b></div>" +
-					privatecheck(feature.properties.private, feature.properties.actID)
-				)
-			},
-			filter: function(feature, layer){
-				return feature.properties.type_extended == "Mountain Bike";
-			}
-	}).addTo(map);
-})
-.done(function() {
-	map.spin(false);
-});
-
-// see http://duspviz.mit.edu/web-map-workshop/leaflet-javascript-interactions/
-// https://stackoverflow.com/questions/37023790/leaflet-create-layers-from-geojson-properties
-// see https://gis.stackexchange.com/questions/343298/dividing-geojson-into-two-separate-layers-in-leaflet
-
-</script>
+		// strava_activities = L.geoJSON(strava_data,{
+		// 	style: lineStyle
+		// }).addTo(map);
+	</script>
 </body>
 </html>
