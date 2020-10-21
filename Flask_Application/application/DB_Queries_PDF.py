@@ -6,9 +6,12 @@ import os
 from datetime import datetime
 from application import application
 
-engine = create_engine(os.environ.get("DBCON"))
-Session = sessionmaker(bind=engine)
-session = Session()
+
+def createSession():
+    engine = create_engine(os.environ.get("DBCON"))
+    Session = sessionmaker(bind=engine)
+    session = Session()
+    return session
 
 def checkmd5(hash, pdfDate):
     """
@@ -24,10 +27,14 @@ def checkmd5(hash, pdfDate):
         "Update" - Hash is not in Postgres but other hashes exist for th PDF result week
     """
     # Query Postgres with pdfDate of newly downloaded PDF
+    session = createSession()
+    application.logger.debug(f"Querying water quality MD5 hashes with the date {pdfDate}")
     query = session.query(waterQualityMD5).filter(waterQualityMD5.pdfdate == pdfDate).all()
     hashList = []
+    application.logger.debug(f"Iterating ")
     for i in query:
         hashList.append(i.md5)
+    session.close()
     if hash in hashList:
         return "Exists"
     elif len(hashList) == 0:
@@ -46,6 +53,7 @@ def getNullBeaches(pdfDate):
     :return: List[Strings,]
         Names of beaches with null test results
     """
+    session = createSession()
     query = session.query(waterQuality) \
         .join(waterQualityMD5) \
         .join(beaches) \
@@ -56,6 +64,7 @@ def getNullBeaches(pdfDate):
     for i in query:
         nullbeaches.append(i.beach_rel.BeachName)
     return nullbeaches
+    session.close()
 
 def insmd5(MD5, pdfDate, pdfName):
     """
@@ -67,6 +76,7 @@ def insmd5(MD5, pdfDate, pdfName):
     :param insDate:
     :return:
     """
+    session = createSession()
     application.logger.debug(f"Inserting new md5 hash using the following details: md5:{MD5}, pdfdate:{pdfDate}",
                              f" pdfname:{pdfName}, insdate:{datetime.now()}")
     newrec = waterQualityMD5(md5=MD5, pdfdate=pdfDate, pdfName=pdfName, insdate=datetime.now())
@@ -92,6 +102,7 @@ def insertWaterQual(beachDict, md5_fk):
     -------
     Print statement.
     """
+    session = createSession()
     inslist = []
     for key in beachDict.keys():
         inslist.append(

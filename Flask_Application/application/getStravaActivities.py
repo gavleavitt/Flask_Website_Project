@@ -4,14 +4,14 @@ from application import app, stravaAuth, DB_Queries_Strava, application
 import geojson
 import logging
 import time
-remove_keys = ['guid', 'external_id', 'athlete',
+remove_keys = ['guid', 'external_id', 'athlete'
                'location_city', 'location_state', 'location_country',
                'kudos_count', 'comment_count',
-               'athlete_count', 'photo_count', 'total_photo_count', 'map', 'trainer', 'commute', 'manual',
+               'athlete_count', 'photo_count', 'total_photo_count', 'map', 'trainer', 'commute',
                'gear', 'device_watts', 'has_kudoed', 'best_efforts',
                'segment_efforts', 'splits_metric', 'splits_standard', 'weighted_average_watts',
                'suffer_score', 'has_heartrate', 'average_heartrate', 'max_heartrate', 'average_cadence',
-               'average_temp', 'device_name', 'embed_token', 'trainer',
+               'average_temp', 'embed_token', 'trainer',
                'photos', 'instagram_primary_photo', 'partner_logo_url', 'partner_brand_tag', 'from_accepted_tag',
                'segment_leaderboard_opt_out', 'highlighted_kudosers', 'laps']
 
@@ -64,18 +64,21 @@ def getFullDetails(client, actId):
     # get activity details as a dictionary
     act = client.get_activity(actId).to_dict()
     # Get starttime and conver to datetime object
-    starttime = datetime.fromisoformat(act['start_date'])
+    # starttime = datetime.fromisoformat(act['start_date'])
     # get the activity stream details for the activity id
     stream = client.get_activity_streams(actId, types=types)
+    # get athlete ID
+    athId = client.get_athlete().id
     latlng = stream['latlng'].data
     time = stream['time'].data
     linestringdat = []
     wktList = []
     # Iterate over time and latlng streams, combining them into a list containing sublists with lat, lng, UTC time
     for i in range(0, len(latlng)):
-        # create new entry, swapping the lat, lon to lon, lat then append time as datetime UTC (time is provded as time
+        # create new entry, swapping the lat, lon to lon, lat then append time as datetime UTC (time is provided as time
         # since start of the activity and is converted to datetime)
-        newEntry = [latlng[i][1], latlng[i][0], (starttime + timedelta(seconds=time[i])).timestamp()]
+        # newEntry = [latlng[i][1], latlng[i][0], (starttime + timedelta(seconds=time[i])).timestamp()]
+        newEntry = [latlng[i][1], latlng[i][0], time[i]]
         # append data as list
         linestringdat.append(newEntry)
         # Take newEntry list and create a string with a space delimiter between list items, add to list of wkt
@@ -89,7 +92,17 @@ def getFullDetails(client, actId):
     act['geom'] = linestringdat
     act['actId'] = actId
     act['geom_wkt'] = wktstr
+    # add athlete id to dict
+    act['athlete_id'] = athId
+    # extend type to detect road ride vs mtb
+    act['type_extended'] = None
+    #
+    if act['gear_id'] in ["b4317610", "b2066194"]:
+        act['type_extended'] = "Mountain Bike"
+    elif act['gear_id'] == "b5970935":
+        act['type_extended'] = "Road Cycling"
     # Iterate over dict keys, removing unnecessary keys
+
     for key in list(act.keys()):
         if key in remove_keys:
             del (act[key])
@@ -112,16 +125,29 @@ def processActs(days):
     """
     client = stravaAuth.gettoken()
     listIds = getListIds(client, days)
+    count = 0
+    print(f"Length of ID list is {len(listIds)}")
+    waittime = 960
     for actId in listIds:
-        print(f"Working on activity {actId}")
-        try:
-            actDict = getFullDetails(client, actId)
-            DB_Queries_Strava.insertAct(actDict)
-            DB_Queries_Strava.maskandInsertAct(actId)
-        except Exception as e:
-            print(f"Strava download/insert failed with the error {e}")
-            application.logger.error(f"Strava activity {actId} failed to parse properly!")
-            application.logger.error(e)
+        for attempt in range(3):
+            try:
+                print(f"\nWorking on activity {actId}")
+                actDict = getFullDetails(client, actId)
+                if actDict['manual'] == "true":
+                    application.logger.error(f"Activity {actId} is a manual entry, attempting to break loop to skip")
+                    break
+                else:
+                    DB_Queries_Strava.insertAct(actDict)
+                    DB_Queries_Strava.maskandInsertAct(actId)
+            except Exception as e:
+                # print(f"Strava download/insert failed with the error {e}")
+                application.logger.error(f"Strava activity {actId} failed to parse properly, possible API"
+                                         f"timeout, waiting {waittime} seconds to try again.")
+                application.logger.error(e)
+                time.sleep(waittime)
+            else:
+                break
         print(f"Finished working on activity {actId}")
-        time.sleep(1)
+        count += 1
+        print(f"{count} out of {len(listIds)} activities processed")
     return f"Success, finished working on ActIDs {listIds}"

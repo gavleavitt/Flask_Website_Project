@@ -61,33 +61,30 @@ def handle_sub_update(client, updateContent):
     application.logger.debug(f"Update model is {update}")
     application.logger.debug(f"Update model dir is {dir(update)}")
     # Iterate over update model, should only be 1 object
-    for i in update:
-        application.logger.debug(f"Update content is {i}")
-        application.logger.debug(f"Update dir content is {dir(i)}")
-        # Verify that info is from Strava and has correct content, and
-        if update.owner_id in DQS.getAthleteList() and update.subscription_id in DQS.getSubIdList():
-            application.logger.debug("Sub update from Strava appears valid")
-            # Insert subscription update message details into Postgres
-            DQS.insertSubUpdate(i)
-            # Verify that the update is a activity creation event
-            if i.aspect_type == "create" and i.object_type == "activity":
-                application.logger.debug("This is a activity create event, inserting update event data")
-                try:
-                    application.logger.debug("Getting full activity details")
-                    # Get activity details for newly created activity
-                    activity = getStravaActivities.getFullDetails(client, i.object_id)
-                    application.logger.debug("Inserting activity details")
-                    # Insert activity details into Postgres/PostGIS
-                    DQS.insertAct(activity)
-                    # Calculate masked activities and insert into Postgres masked table
-                    DQS.maskandInsertAct(activity.actId)
-                except Exception as e:
-                    application.logger.error(f"Handling and inserting new webhook activity failed with the error {e}")
-                    errorEmail.senderroremail(script="Webhook Activity Update", exceptiontype=e.__class__.__name__, body=e)
-            else:
-                # Write logic to handle update and delete events
-                application.logger.debug("Sub update message contains an update or delete event, skipping request")
-                pass
+    # Verify that info is from Strava and has correct content, and
+    if update.owner_id in DQS.getAthleteList() and update.subscription_id in DQS.getSubIdList():
+        application.logger.debug("Sub update from Strava appears valid")
+        # Insert subscription update message details into Postgres
+        DQS.insertSubUpdate(update)
+        # Verify that the update is a activity creation event
+        if update.aspect_type == "create" and update.object_type == "activity":
+            application.logger.debug("This is a activity create event, inserting update event data")
+            try:
+                application.logger.debug("Getting full activity details")
+                # Get activity details for newly created activity
+                activity = getStravaActivities.getFullDetails(client, update.object_id)
+                application.logger.debug("Inserting activity details")
+                # Insert activity details into Postgres/PostGIS
+                DQS.insertAct(activity)
+                # Calculate masked activities and insert into Postgres masked table
+                DQS.maskandInsertAct(activity["actId"])
+            except Exception as e:
+                application.logger.error(f"Handling and inserting new webhook activity failed with the error {e}")
+                errorEmail.senderroremail(script="Webhook Activity Update", exceptiontype=e.__class__.__name__, body=e)
+        else:
+            # Write logic to handle update and delete events
+            application.logger.debug("Sub update message contains an update or delete event, skipping request")
+            pass
 def listStravaSubIds(client):
     """
     Lists webhook subscriptions registered with Strava, response is provided by Strava.

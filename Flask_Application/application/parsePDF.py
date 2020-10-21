@@ -310,6 +310,7 @@ def parsePDF():
     # Hash text of pdf document
     hashedtext = md5hash(pdfDict['text'])
     # Check if md5 hash is already in postgres
+    application.logger.debug("Checking PDF MD5 hash value against Postgres")
     pdfstatus = DBQ_PDF.checkmd5(hashedtext, pdfDict['pdfDate'])
     application.logger.debug(f"PDF md5 has been checked, PDF status is {pdfstatus}")
     # Handle the results of the md5 hash check and control generation of dictionaries and interactions with postgres
@@ -337,7 +338,7 @@ def pdfjob():
         logger.debug("Ended ParsePDF early since file has already been processed")
         print("Ended ParsePDF job early")
     except Exception as e:
-        print("Parse PDF threw an error, emailing exception")
+        # print("Parse PDF threw an error, emailing exception")
         application.logger.error("Parse PDF threw an error")
         application.logger.error(e)
         errorEmail.senderroremail(script="ParsePDF", exceptiontype=e.__class__.__name__, body=e)

@@ -62,7 +62,7 @@ db = SQLAlchemy(app)
 # migrate = Migrate(app, db)
 
 # Imports from the application flask object have to be after flask application is initialized to avoid circular imports
-from application import routes, api_routes, models, parsePDF, StravaWebHook
+from application import routes, api_routes, models, parsePDF, StravaWebHook, TestingandDevelopmentRoutes
 
 sched = BackgroundScheduler(daemon=True, timezone=utc)
 

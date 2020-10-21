@@ -23,14 +23,18 @@ def addtoGDrive(pdfloc, pdfname):
         # Change location for client_secrets.json, application.py sits one level above this file and the file isnt
         # called properly when this function is called, but the file needs to stay in that location such that
         # quickstart.py can be called directly in the server's terminal
-        GoogleAuth.DEFAULT_SETTINGS['client_config_file'] = os.path.join(app.root_path, 'client_secrets.json')
-        # Authenticate with OAuth, , must visit URL and input value.
+
+        application.logger.debug("Attempting to authenticate with Google Drive API through saved OAuth  credentials")
+        GoogleAuth.DEFAULT_SETTINGS['client_config_file'] = os.path.join(app.root_path, 'credentials.json')
+        # Authenticate with OAuth, , must visit URL and input value when first authenticating
+        # yaml file contains settings find json file and to refresh access token
         gauth = GoogleAuth(settings_file=os.path.join(app.root_path, 'settings.yaml'))
         # Use command line to auth, must connect to host, visit URL, login/auth with Google, then paste provided text into
         # terminal
         # gauth.CommandLineAuth()
         # Establish connection with Google Drive API
         drive = GoogleDrive(gauth)
+        application.logger.debug("Connected to Google Drive account")
         newfile = drive.CreateFile({"title": pdfname,
                                     'mimeType': 'application/pdf',
                                     'parents': [{'id': "1GRunRWB7SKmH3I0wWbtyJ_UOCDiHGAxO"}]})

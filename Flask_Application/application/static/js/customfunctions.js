@@ -216,7 +216,7 @@ function closeMenu(){
   if (menu.className = ("navbarright responsive")){
     menu.className = "navbarright";
   }
-}
+};
 
 /* Toggle between adding and removing the "responsive" class to navbarright when the user clicks on the icon */
 function navBarFunction() {
@@ -226,4 +226,61 @@ function navBarFunction() {
   } else {
     x.className = "navbarright";
   }
-}
+};
+
+function privatecheck(privacy, actID) {
+  if (privacy == "true"){
+    res = "<div><b>Private Activity</b></div>"
+  } else {
+    res = "<div><b><a href=https://www.strava.com/activities/" + actID + ">Strava Activity Page</a></b></div>"
+  }
+  return res
+};
+
+function convertDuration(seconds){
+  var date = new Date(null);
+  date.setSeconds(seconds);
+  var result = date.toISOString().substr(11, 8);
+  return result
+};
+
+function geartext(gearname) {
+  if (gearname){
+    res = "<div><b>Bike: " + gearname + "</b></div>"
+    return res
+  }
+};
+
+function actFilter(act){
+
+  if(act=="All"){
+    map.addLayer(run_act);
+    map.addLayer(walk_act);
+    map.addLayer(road_act);
+    map.addLayer(mtb_act);
+  } else if (act == "MTB") {
+    map.removeLayer(run_act);
+    map.removeLayer(walk_act);
+    map.removeLayer(road_act);
+  }
+};
+
+// function filterall(){
+//
+// };
+//
+// function filterMTB(){
+//
+// };
+//
+// function filterRoad(){
+//
+// };
+//
+// function filterWalk(){
+//
+// };
+//
+// function filterRun(){
+//
+// };

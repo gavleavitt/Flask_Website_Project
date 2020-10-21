@@ -1,7 +1,7 @@
 from sqlalchemy import create_engine, or_
 from sqlalchemy.orm import sessionmaker
 # from settings import dbcon
-from application.models_Strava import athletes, sub_update, strava_activities, strava_activities_masked
+from application.models_Strava import athletes, sub_update, strava_activities, strava_activities_masked, strava_gear
 from application.models import AOI
 import os
 from datetime import datetime
@@ -11,21 +11,12 @@ from sqlalchemy import func as sqlfunc
 import geojson
 from geojson import Point, Feature, FeatureCollection, LineString
 
-engine = create_engine(os.environ.get("DBCON"))
-Session = sessionmaker(bind=engine)
-session = Session()
+def createSession():
+    engine = create_engine(os.environ.get("DBCON"))
+    Session = sessionmaker(bind=engine)
+    session = Session()
+    return session
 
-
-def createTable(tableModel):
-    Base = declarative_base()
-    tableObjects = [tableModel.__table__]
-    Base.metadata.create_all(engine, tables=tableObjects)
-
-def createMaskedStravaTable():
-    Base = declarative_base()
-    tableModel = models_Strava.strava_activities_masked
-    tableObjects = [tableModel.__table__]
-    Base.metadata.create_all(engine, tables=tableObjects)
 
 def updateSubId(subId):
     """
@@ -43,10 +34,11 @@ def updateSubId(subId):
     Nothing
 
     """
-
+    session = createSession()
     try:
         session.query(athletes).update({athletes.sub_id: subId})
         session.commit()
+        session.close()
     except Exception as e:
         application.logger.debug(f"Update Strava athlete sub Id failed with the exception: {e}")
         errorEmail.senderroremail(script="addtoGDrive", exceptiontype=e.__class__.__name__, body=e)
@@ -59,10 +51,12 @@ def getAthleteList():
     -------
     List. Athlete IDs (int) stored in database.
     """
+    session = createSession()
     query = session.query(athletes).all()
     athleteList = []
     for i in query:
         athleteList.append(i.athlete_id)
+    session.close()
     return athleteList
 
 def getSubIdList():
@@ -72,10 +66,12 @@ def getSubIdList():
     -------
     List. Subscription webhook IDs (Int) stored in database.
     """
+    session = createSession()
     query = session.query(athletes).all()
     subIdList = []
     for i in query:
         subIdList.append(i.sub_id)
+    session.close()
     return subIdList
 
 def insertSubUpdate(content):
@@ -98,11 +94,16 @@ def insertSubUpdate(content):
         application.logger.debug(f"Title of new activity is {title}")
     else:
         title = None
-    insert = sub_update(aspect=content.aspect, event_time=content.event_time, object_id=content.object_id,
+    session = createSession()
+    print(content.event_time)
+    print(dir(content.event_time))
+    print(content.event_time.timestamp)
+    insert = sub_update(aspect=content.aspect_type, event_time=content.event_time.timestamp, object_id=content.object_id,
                         object_type=content.object_type, owner_id=content.owner_id, subscription_id=content.subscription_id,
                         update_title = title)
     session.add(insert)
     session.commit()
+    session.close()
     application.logger.debug(f"New webhook update has been added to Postgres!")
 
 def insertAct(actDict):
@@ -130,35 +131,56 @@ def insertAct(actDict):
                                average_speed = actDict['average_speed'], max_speed = actDict['max_speed'],
                                average_watts = actDict['average_watts'], kilojoules = actDict['kilojoules'],
                                description = actDict['description'], workout_type = actDict['workout_type'],
-                               calories = actDict['calories'], geom = actDict['geom_wkt'])
+                               calories = actDict['calories'], device_name = actDict['device_name'],
+                               manual = actDict['manual'], athlete_id=actDict['athlete_id'],
+                               type_extended = actDict['type_extended'], geom = actDict['geom_wkt'])
+    session = createSession()
     session.add(insert)
     session.commit()
+    session.close()
     application.logger.debug(f"New webhook update for activity {actDict['actId']} has been added to Postgres!")
 
-def getStravaActGeoJSON(actLimit):
-
-
-    query = session.query(sqlfunc.ST_AsGeoJSON(strava_activities.geom).order_by(strava_activities.id.desc())).limit(5)
+def getStravaMaskedActGeoJSON(actLimit):
+    session = createSession()
+    query = session.query(sqlfunc.ST_AsGeoJSON(strava_activities_masked.geom, 5).label("geom"),
+                          strava_activities.name,
+                          strava_activities.actID,
+                          strava_activities.type,
+                          strava_activities.distance,
+                          strava_activities.private,
+                          strava_activities.calories,
+                          strava_activities.start_date,
+                          strava_activities.elapsed_time,
+                          strava_activities.start_date_local,
+                          strava_activities.total_elevation_gain,
+                          strava_activities.average_speed,
+                          strava_activities.max_speed,
+                          strava_activities.type_extended,
+                          strava_gear.gear_name)\
+        .join(strava_activities_masked.act_rel)\
+        .join(strava_activities.gear_rel, isouter=True)\
+        .order_by(strava_activities.start_date.desc())\
+        .limit(actLimit)
     features = []
+    print("Iterating over query!")
     for row in query:
         # Build a dictionary of the attribute information
-        # prop_dict = row[1].builddict()
+        prop_dict = {"name": row.name, "actID": row.actID, "type": row.type, "distance": row.distance,
+                     "private": row.private, "calories": row.calories, "startDate": row.start_date_local.isoformat(),
+                     "elapsed_time": row.elapsed_time.seconds, "total_elevation_gain":row.total_elevation_gain,
+                     "average_speed":row.average_speed,"max_speed":row.max_speed, "gear_name":row.gear_name,
+                     "type_extended":row.type_extended}
         # Take ST_AsGeoJSON() result and load as geojson object
-        geojson_geom = geojson.loads(row[0])
-        # print(row.__dict__())
-        # print(type(row))
-        # row_str = str(row).replace("MULTILINESTRING", "").replace("(","").replace(")","").replace("(","").replace("'","").replace("-","-")
-        # print(row_str)
-        # geom = LineString(row_str)
         # print(row[0])
+        geojson_geom = geojson.loads(row[0])
+        # geom = LineString(row_str)
         # geojson_geom = LineString(row[0])
         # Build the feature and add to feature list
-        # features.append(Feature(geometry=geojson_geom, properties=prop_dict))
-        features.append(Feature(geometry=geojson_geom))
+        features.append(Feature(geometry=geojson_geom, properties=prop_dict))
     # Build the feature collection result
     feature_collection = FeatureCollection(features)
     # print(feature_collection)
-    print("Feature collection generated!")
+    session.close()
     return feature_collection
 
 def maskandInsertAct(actId):
@@ -172,7 +194,7 @@ def maskandInsertAct(actId):
     -------
 
     """
-
+    session = createSession()
     # Smoothing tolerence, in meters.
     smooth = 3
     # Projection srid to use for simplify, UTM 10N
@@ -223,6 +245,7 @@ def maskandInsertAct(actId):
             application.logger.debug(
                 f"Activity ID {row[0]} had no intersections with a privacy AOI, linestring has been added to session")
     session.commit()
+    session.close()
     application.logger.debug(
         f"Activity ID {actId} has been committed to Postgres")
 
@@ -239,6 +262,7 @@ def simplifyandMaskAllActivities():
     Returns
     -------
     """
+    session = createSession()
     print("creating queries")
     # Smoothing tolerence, in meters.
     smooth = 3
@@ -311,6 +335,7 @@ def simplifyandMaskAllActivities():
         # print(f"Activity {item[0]} has been added to session!")
     print("All sessions added, committing!")
     session.commit()
+    session.close()
     print("All entries committed to database!")
     # feature_collection = FeatureCollection(features)
     # return feature_collection
