@@ -251,36 +251,166 @@ function geartext(gearname) {
   }
 };
 
-function actFilter(act){
+function filterActType(addLayer){
+  // actLayerGroup.clearLayers();
+  actLayerGroup.addLayer(addLayer);
+};
 
+
+function actFilter(act){
   if(act=="All"){
-    map.addLayer(run_act);
-    map.addLayer(walk_act);
-    map.addLayer(road_act);
-    map.addLayer(mtb_act);
+    actLayerGroup.clearLayers()
+    actLayerGroup.addLayer(run_act)
+    actLayerGroup.addLayer(walk_act)
+    actLayerGroup.addLayer(road_act)
+    actLayerGroup.addLayer(mtb_act)
   } else if (act == "MTB") {
-    map.removeLayer(run_act);
-    map.removeLayer(walk_act);
-    map.removeLayer(road_act);
+    filterActType(mtb_act)
+  } else if (act == "Road") {
+    filterActType(road_act)
+  } else if (act == "Walk") {
+    filterActType(walk_act)
+  } else if (act == "Run") {
+    filterActType(run_act)
   }
 };
 
-// function filterall(){
+// Button coloring and filter behavior, allows user to single and multi-select as well add and remove all
+// layers with the "All" button.
+// This function is loaded asynchronously after the document has loaded in the activity geojson data
+function loadActiveListener() {
+  // get div that contains the filter buttons
+  var group = document.getElementById("act-filter-group");
+  // get all buttons within group
+  var btns = group.getElementsByClassName("filterbtn");
+  // Iterate over buttons in group adding an click event listener to each
+  for (var i = 0; i < btns.length; i++) {
+    btns[i].addEventListener("click", function(obj) {
+      //get active buttons, exluding the All button, this is used to determine if multi-selection is occurring
+      active = document.querySelectorAll('.active:not(#All)')
+      // Check to see if button click target is the "All" button and if any other buttons are also flagged as active,
+      // if so remove the active class from these buttons (reverting them to disabled opacity) and set the All button
+      // to active and add all activity layers to display
+      if ((obj.target.id == "All") && (active.length > 0)) {
+        // iterate over buttons flagged as active
+        for (var h = 0; h < active.length; h++) {
+          // remove active class from buttons, reverting them to disabled opacity
+          active[h].className = active[h].className.replace(" active", "");
+        }
+        // call function to add all activity layers to display
+        actFilter("All")
+        // set "All" button to active
+        this.className += " active";
+      // Check if user click target is a button flagged as active
+      } else if (obj.target.className.includes("active")) {
+        // Remove active class from button, reverting it to the disabled opacity
+        this.className = this.className.replace(" active","");
+        // If the target was the All button, clear all layers from display
+        if (obj.target.id == "All"){
+          actLayerGroup.clearLayers()
+        // if user clicks an active button that is not All, remove just that layer from display
+        } else {
+          actLayerGroup.removeLayer(layerGroupDict[obj.target.id]);
+        }
+      // Check if user click target is NOT the "All" button, but the "All" button is flagged as active
+      // Used to determine if a user is selecting activity button when the "All" button is active
+      } else if ((!(obj.target.id.includes("All"))) && (document.getElementById("All").className.includes("active"))) {
+          // Remove the active flag from the "All" button, reverting to disabled opacity
+          document.getElementById("All").className = document.getElementById("All").className.replace(" active", "");
+          // Set the target button to active
+          this.className += " active";
+          // Remove all activity layers
+          actLayerGroup.clearLayers();
+          // Add the activity layer associated with the button clicker by the user
+          actFilter(obj.target.id);
+      // Last chase, user is multi-selecting activities, i.e. "All" is disabled and at least one other activity
+      // is flagged as active
+      } else {
+        // Set this activity to active, in addition to other active buttons
+        this.className += " active";
+        // Add the layer associated with the button clicker by the user.
+        // This is added in addition to other active layers
+        actFilter(obj.target.id);
+      }
+    });
+  }
+}
+
 //
-// };
+// function loadActiveListener() {
+//   var group = document.getElementById("act-filter-group");
+//   var btns = group.getElementsByClassName("filterbtn");
+//   for (var i = 0; i < btns.length; i++) {
+//     btns[i].addEventListener("click", function(obj) {
+//       //get active buttons, exluding the All button
+//       active = document.querySelectorAll('.active:not(#All)')
 //
-// function filterMTB(){
-//
-// };
-//
-// function filterRoad(){
-//
-// };
-//
-// function filterWalk(){
-//
-// };
-//
-// function filterRun(){
-//
-// };
+//       // Check to see if button target is the all button and if any other buttons are active,
+//       // if so remove the active class and set the All button to active
+//       if ((obj.target.id == "All") && (active.length > 0)) {
+//         console.log("Clicked all with other buttons active!")
+//         for (var h = 0; h < active.length; h++) {
+//           active[h].className = active[h].className.replace("active", "");
+//         }
+//         actFilter("All")
+//       }
+//       if (obj.target.className.includes("active")) {
+//         this.className = this.className.replace(" active","");
+//         if(obj.target.id == "All"){
+//           actLayerGroup.clearLayers()
+//         } else {
+//           actLayerGroup.removeLayer(layerGroupDict[obj.target.id]);
+//         }
+//       } else {
+//         if ((!(obj.target.id.includes("All"))) && (document.getElementById("All").className.includes("active"))) {
+//           document.getElementById("All").className = document.getElementById("All").className.replace(" active", "");
+//         }
+//         this.className += " active";
+//         actFilter(obj.target.id);
+//       }
+//     });
+//   }
+// }
+
+
+//Works and allows toggling single layers!
+// function loadActiveListener(){
+//   var group = document.getElementById("act-filter-group");
+//   var btns = group.getElementsByClassName("filterbtn");
+//   for (var i = 0; i < btns.length; i++) {
+//     btns[i].addEventListener("click", function(obj) {
+//       if (obj.target.className.includes("active")){
+//         this.className = this.className.replace(" active","");
+//         if(obj.target.id == "All"){
+//           actLayerGroup.clearLayers()
+//         } else {
+//           actLayerGroup.removeLayer(layerGroupDict[obj.target.id]);
+//         }
+//       } else {
+//         var current = document.getElementsByClassName("active");
+//         if (current.length > 0){
+//           current[0].className = current[0].className.replace(" active", "");
+//         }
+//         this.className += " active";
+//     }
+//     });
+//   }
+// }
+
+
+// Add active class to the current button (highlight it)
+// Taken from https://www.w3schools.com/howto/tryit.asp?filename=tryhow_js_active_element
+//Works!
+// function loadActiveListener(){
+//   var group = document.getElementById("act-filter-group");
+//   var btns = group.getElementsByClassName("filterbtn");
+//   for (var i = 0; i < btns.length; i++) {
+//     btns[i].addEventListener("click", function() {
+// // Current active elements
+//       var current = document.getElementsByClassName("active");
+// // Set current active to inactive
+//       current[0].className = current[0].className.replace(" active", "");
+//       this.className += " active";
+//     });
+//   }
+// }
