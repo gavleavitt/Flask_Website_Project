@@ -340,35 +340,38 @@ html{
   margin-right: 3px;
   color: White;
   border: 2px solid black;
-  opacity: 80%;
+  opacity: 30%;
   font-weight: bold;
 }
 
-#all{
-  background-color: gray;
+#All{
+  background-color: #3d3d3d;
 }
 
-#mtb{
-  background-color: #a30b00;
+#MTB{
+  background-color: #e41a1c;
 }
 
-#road-rides{
-  background-color: #0914b0;
+#Road{
+  background-color: #377eb8;
 }
 
-#runs{
-  background-color: #17ba0b;
+#Run{
+  background-color: #a65628;
 }
 
-#walks{
-  background-color: #ff7800;
+#Walk{
+  background-color: #984ea3;
 }
 
 .filterbtn:hover{
   background-color: #383838;
-  opacity: 30%;
+  opacity: 90%;
 }
 
+.active{
+  opacity: 90%
+}
 
 .headerbtn:hover,
 .headerbtn:focus{

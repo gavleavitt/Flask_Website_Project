@@ -45,9 +45,9 @@
 	<!-- leaflet Ajax JS-->
 	<script src="{{ url_for('static', filename='js/leaflet.ajax.min.js') }}"></script>
 	<!-- Custom local javascript functions -->
-	<script src="{{ url_for('static', filename='js/customfunctions.js') }}"></script>
+	<script src="{{ url_for('static', filename='js/strava_map_customfunctions.js') }}"></script>
 	<!-- Custom CSS -->
-	<link rel="stylesheet" href="{{ url_for('static', filename='css/customCSS_StravaMap.css') }}">
+	<link rel="stylesheet" href="{{ url_for('static', filename='css/strava_map_customCSS.css') }}">
 	<!-- Search CSS-->
 	<link rel="stylesheet" href="{{ url_for('static', filename='css/leaflet-search.src.css') }}">
 	<!-- Search JS -->
@@ -85,21 +85,27 @@
 	</div> -->
 	<div class="container sansserif">
 		<div class="item titlediv">
-			<div id = "Title" class="titletext">Strava Activities
+			<div id = "Title" class="titletext">Strava Activities</div>
+			<div class="filter-btn-group" id="act-filter-group">
+				<!-- <button class="filterbtn active" onclick="actFilter('All')" id="All">All</button>
+				<button class="filterbtn" onclick="actFilter('MTB')" id="MTB">Mountain Biking</button>
+				<button class="filterbtn" onclick="actFilter('Road')" id="Road">Road Rides</button>
+				<button class="filterbtn" onclick="actFilter('Walk')" id="Walk">Walks</button>
+				<button class="filterbtn" onclick="actFilter('Run')" id="Run">Runs</button> -->
+
+				<button class="filterbtn active" onclick="actFilter('All')" id="All">Clear All</button>
+				<button class="filterbtn" id="MTB">Mountain Biking</button>
+				<button class="filterbtn" id="Road">Road Rides</button>
+				<button class="filterbtn" id="Walk">Walks</button>
+				<button class="filterbtn" id="Run">Runs</button>
+
+				<!-- <button class="filterbtn active" onclick="actFilter('All')" id="all">All</button>
+				<button class="filterbtn" id="mtb">Mountain Biking</button>
+				<button class="filterbtn" id="road-rides">Road Rides</button>
+				<button class="filterbtn" id="runs">Walks</button>
+				<button class="filterbtn" id="walks">Runs</button> -->
 			</div>
-			<div class="filter-btn-group">
-				<!-- <button class="filterbtn" onclick="filterAll()" id="all">All</button>
-				<button class="filterbtn" onclick="filterMTB()" id="mtb">Mountain Biking</button>
-				<button class="filterbtn" onclick="filterRoad()" id="road-rides">Road Rides</button>
-				<button class="filterbtn" onclick="filterWalk()" id="runs">Runs</button>
-				<button class="filterbtn" onclick="filterRun()" id="walks">Walks</button> -->
-
-				<button class="filterbtn" onclick="actFilter('All')" id="all">All</button>
-				<button class="filterbtn" onclick="actFilter('MTB')" id="mtb">Mountain Biking</button>
-				<button class="filterbtn" onclick="actFilter('Road')" id="road-rides">Road Rides</button>
-				<button class="filterbtn" onclick="actFilter('Walk')" id="runs">Runs</button>
-				<button class="filterbtn" onclick="actFilter('Run')" id="walks">Walks</button>
-
+			<div class="time-filter-btn-group">
 			</div>
 			<!-- See this for basic popup box: https://html-online.com/articles/simple-popup-box/ -->
 			<!-- https://www.w3schools.com/howto/howto_css_modals.asp -->
@@ -197,9 +203,8 @@
 		// Open modal when window loads
 		window.onload = function(){
 			modal.style.display = "block";
+			oadActivityListener();
 		}
-
-
 		//Set email address using Javascript, harder for crawlers to grab
 		var email = "gav" + "lea" + "web" + "@g" + "mail" + ".com";
 		document.getElementById("emailaddr").innerHTML = "<a href='mailto:" + email + "'>" + email + "</a>"
@@ -215,31 +220,33 @@
 		// var baseurl = "www.leavittmapping.com/api/v0.1/stravaroutes?"
 		var baseurl = "/api/v0.1/stravaroutes?"
 		var query = baseurl + "actlimit=" + actlimit
-		var walk_lineStyle = {
-			"color": "#ff7800",
+		var mtb_lineStyle = {
+			"color": "#e41a1c",
 			"weight": 2,
-			"opacity": 0.5,
-			"fillColor": "black"
-		};
-		var run_lineStyle = {
-			"color": "#17ba0b",
-			"weight": 2,
-			"opacity": 0.5,
+			"opacity": 0.7,
 			"fillColor": "black"
 		};
 		var road_lineStyle = {
-			"color": "#0914b0",
+			"color": "#377eb8",
 			"weight": 2,
-			"opacity": 0.5,
+			"opacity": 0.7,
 			"fillColor": "black"
 		};
-		var mtb_lineStyle = {
-			"color": "#a30b00",
+		var run_lineStyle = {
+			"color": "#a65628",
 			"weight": 2,
-			"opacity": 0.5,
+			"opacity": 0.7,
 			"fillColor": "black"
 		};
-		map.spin(true);
+		var walk_lineStyle = {
+				"color": "#984ea3",
+				"weight": 2,
+				"opacity": 0.7,
+				"fillColor": "black"
+		};
+
+
+			map.spin(true);
 // 		var strava_activities = $.getJSON(query, function(data) {
 //     L.geoJson(data, {
 //         style: lineStyle,
@@ -265,11 +272,11 @@
 //   map.spin(false);
 // });
 
-var walk = L.layerGroup();
-var run = L.layerGroup();
-var mtb = L.layerGroup();
-var roadride = L.layerGroup();
-
+// var walk = L.layerGroup();
+// var run = L.layerGroup();
+// var mtb = L.layerGroup();
+// var roadride = L.layerGroup();
+// var actLayerGroup = L.layerGroup();
 var strava_activities = $.getJSON(query, function(data) {
 	walk_act = L.geoJson(data, {
 	    style: walk_lineStyle,
@@ -291,7 +298,8 @@ var strava_activities = $.getJSON(query, function(data) {
 			filter: function(feature, layer){
 				return feature.properties.type == "Walk";
 			}
-	}).addTo(map);
+	// }).addTo(map);
+	})
 	run_act = L.geoJson(data, {
 	    style: run_lineStyle,
 			onEachFeature: function(feature,layer){
@@ -312,7 +320,8 @@ var strava_activities = $.getJSON(query, function(data) {
 			filter: function(feature, layer){
 				return feature.properties.type == "Run";
 			}
-	}).addTo(map);
+	// }).addTo(map);
+	})
 	road_act = L.geoJson(data, {
 			style: road_lineStyle,
 			onEachFeature: function(feature,layer){
@@ -334,7 +343,8 @@ var strava_activities = $.getJSON(query, function(data) {
 			filter: function(feature, layer){
 				return feature.properties.type_extended == "Road Cycling";
 			}
-	}).addTo(map);
+	// }).addTo(map);
+	})
 	mtb_act = L.geoJson(data, {
 			style: mtb_lineStyle,
 			onEachFeature: function(feature,layer){
@@ -356,9 +366,17 @@ var strava_activities = $.getJSON(query, function(data) {
 			filter: function(feature, layer){
 				return feature.properties.type_extended == "Mountain Bike";
 			}
-	}).addTo(map);
+	// }).addTo(map);
+	})
 })
 .done(function() {
+	actLayerGroup = L.layerGroup([mtb_act,road_act,run_act,walk_act]).addTo(map);
+	layerGroupDict = {
+		"MTB": mtb_act,
+		"Road":road_act,
+		"Walk":walk_act,
+		"Run":run_act
+	};
 	map.spin(false);
 });
 

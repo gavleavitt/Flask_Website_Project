@@ -300,6 +300,10 @@ def parsePDF():
     -------
     Print Statement
     """
+    # set PDF name
+    pdfName = f"Ocean_Water_Quality_Report_{datetime.now().strftime('%Y%m%d')}.pdf"
+    pdfLoc = pdfDest = os.path.join(app.root_path, 'static', 'documents', 'Water_Qual_PDFs', pdfName)
+    downloadURL = "http://countyofsb.org/uploadedFiles/phd/PROGRAMS/EHS/Ocean%20Water%20Weekly%20Results.pdf"
     # Kick off script by downloading PDF
     print("Starting to parse PDF")
     downloadPDF(downloadURL, pdfDest)
@@ -342,30 +346,3 @@ def pdfjob():
         application.logger.error("Parse PDF threw an error")
         application.logger.error(e)
         errorEmail.senderroremail(script="ParsePDF", exceptiontype=e.__class__.__name__, body=e)
-
-
-
-
-
-pdfName = f"Ocean_Water_Quality_Report_{datetime.now().strftime('%Y%m%d')}.pdf"
-#  pdfLoc = pdfDest = r"G:\My Drive\Projects\Water_Quality\pdf" + pdfName
-pdfLoc = pdfDest = os.path.join(app.root_path, 'static', 'documents', 'Water_Qual_PDFs', pdfName)
-downloadURL = "http://countyofsb.org/uploadedFiles/phd/PROGRAMS/EHS/Ocean%20Water%20Weekly%20Results.pdf"
-
-
-# Testing variables
-# pdfName = r"Ocean_Water_Quality_Report_20200814.pdf"
-# pdfLoc = r"G:\My Drive\Projects\Water_Quality\pdf\\" + pdfName
-
-# # Kick off script by downloading PDF
-# downloadPDF(downloadURL, pdfDest)
-# # Get pdf details
-# pdfDict = getPDFContents(pdfLoc)
-# # Hash text of pdf document
-# hashedtext = md5hash(pdfDict['text'])
-# # Check if md5 hash is already in postgres
-# pdfstatus = DBQ_PDF.checkmd5(hashedtext, pdfDict['pdfDate'])
-# # Handle the results of the md5 hash check and control generation of dictionaries and interactions with postgres
-# #handlePDFStatus(pdfstatus, pdfLoc, hashedtext, pdfDict, pdfName, currentTime, beachList)
-# handlePDF = handlePDFStatus(pdfstatus, pdfLoc, hashedtext, pdfDict, pdfName, currentTime, beachList)
-# print("All done processing PDF!")
