@@ -9,14 +9,14 @@ Created on Mon May 25 17:40:53 2020
 
 
 """
-from application import models, db
+from application import models_tracker, db
 import pytz
-from application.models import gpsdatmodel, gpstracks, AOI, CaliforniaPlaces, CACounty, waterQuality, waterQualityMD5, beaches, stateStandards
+from application.models_tracker import gpsdatmodel, gpstracks, AOI, CaliforniaPlaces, CACounty
 from application import functions as func
 # from application import script_config as dbconfig
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import text, distinct
-from application.models import gpsdatmodel as gpsdat
+from application.models_tracker import gpsdatmodel as gpsdat
 from sqlalchemy import func as sqlfunc
 from datetime import datetime
 from flask.json import jsonify
@@ -47,7 +47,7 @@ def AOI_I_Q(geomdat):
 
     """
     #SQLAlchemy and GeoAlchemy SQL query
-    query = db.session.query(models.AOI).filter(models.AOI.geom.ST_Intersects(geomdat))
+    query = db.session.query(models_tracker.AOI).filter(models_tracker.AOI.geom.ST_Intersects(geomdat))
     #Get the size of the result, used for building out the string result.
     query_count = 0
     for i in query:
@@ -386,7 +386,7 @@ def gethashpass(username):
     
     A dictionary is returned to maintain connection between username supplied and password.
     """
-    query = db.session.query(models.User.hashpass).filter(models.User.user==username).all()
+    query = db.session.query(models_tracker.User.hashpass).filter(models_tracker.User.user == username).all()
     res_dict = {}
     for row in query:
         res_dict[username] = row.hashpass
@@ -413,7 +413,7 @@ def getroles(username):
         All roles need to be returned.
     None if empty results, user not in database.
     """
-    query = db.session.query(models.Roles.roles).filter(models.Roles.user==username).all()
+    query = db.session.query(models_tracker.Roles.roles).filter(models_tracker.Roles.user == username).all()
     res = ()
     #Add query object results to tuple
     for row in query:
@@ -490,44 +490,19 @@ def getpathpointrecords(datetoday):
     else:
         return None
 
-def getStandards():
-    """
-    Get the state health standards for ocean water quality tests. 
-
-    Returns
-    -------
-    recDict : Dictionary
-        Dict of State health standards, with the standard name as the keys and values as values.
-
-    """
-    records = db.session.query(stateStandards).all()
-    recDict = {}
-    for i in records:
-        recDict[i.Name] = i.StandardMPN        
-    return recDict
-    
-def getBeachWaterQual():
-    """
-    Queries Postgres AWS RDS to return the most recent water quality report data for each beach that is tested in SB 
-    County.
-    
-    Data are spread across tables with mapped relationships. 
-    
-    This query joins the relevant tables and uses "distinct" on the waterQuality beach ID field, selecting only one
-    record per beach, then "order_by" is used on the joined MD5 table to grab only the most recent record per beach.
-    
-    :return: List:
-        Nested lists containing SQL Alchemy query results: 
-            3 query result objects:
-                waterQuality, waterqualityMD5 beaches
-            1 string: 
-                geometry type of associated beach 
-            2 floats: 
-                x and y coordinates of the associated beach  
-    """
-    records = db.session.query(waterQuality, waterQualityMD5, beaches, sqlfunc.ST_GeometryType(beaches.geom), sqlfunc.st_x(beaches.geom), sqlfunc.st_y(beaches.geom)) \
-        .join(waterQualityMD5) \
-        .join(beaches) \
-        .distinct(waterQuality.beach_id)\
-        .order_by(waterQuality.beach_id,  waterQualityMD5.insdate.desc()).all()
-    return records
+# def getStandards():
+#     """
+#     Get the state health standards for ocean water quality tests.
+#
+#     Returns
+#     -------
+#     recDict : Dictionary
+#         Dict of State health standards, with the standard name as the keys and values as values.
+#
+#     """
+#     records = db.session.query(stateStandards).all()
+#     recDict = {}
+#     for i in records:
+#         recDict[i.Name] = i.StandardMPN
+#     return recDict
+#

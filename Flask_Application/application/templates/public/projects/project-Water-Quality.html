@@ -46,8 +46,12 @@
   <div class="container-projects sansserif">
 		<div class = "navbar">
       <div class ="navbarleft">
-				<img id="nav-icon" src = "/static/images/wheel_custom.png">
-				<div class="nav-name">Gavin Leavitt</div>
+				<a href = "/">
+					<div class="icon-home-link">
+						<img id="nav-icon" src = "/static/images/wheel_custom.png">
+						<div class="nav-name">Gavin Leavitt</div>
+					</div>
+				</a>
 			</div>
       <div id="interactiveBarRight" class="navbarright">
         <a class= "menu-option" href = "/">Home</a>
@@ -63,7 +67,7 @@
 		<div class="project-content">
 			<div class="title">Santa Barbara County Ocean Water Quality</div>
 			<div class="separatorbar-title"></div>
-			<iframe src="/maps/sbcoceanwaterquality" style="border-radius:10px;"></iframe>
+			<iframe id="iframe1" src="/maps/sbcoceanwaterquality" style="border-radius:10px;"></iframe>
 			<div class="fullsize-link">
 				<a href="/maps/sbcoceanwaterquality" target="_blank">View fullpage map</a>
 			</div>
@@ -75,25 +79,18 @@
 				This is a personal project which uses a Leaflet map to display ocean water test results provided by the <a href=https://countyofsb.org/phd/oceanwatermonitoring/>Santa Barbara County Public Health Department’s Ocean Water Monitoring Program</a>. The county tests beaches at least weekly and may issue warnings or close beaches if targeted bacterial counts exceed state standards. These targeted bacterial groups are indicators of fecal water contamination and elevated levels beyond state standards may present health hazards to ocean users. If a beach exceeds the standards, warnings will be posted or the beach will be closed then re-sampled at intervals until it is within acceptable standards and restrictions can be lifted.
 			</p>
 			<p>
-				Water quality reports are posted as PDFs to the <a href=https://www.countyofsb.org/phd/oceanwatermonitoring/>Ocean Water Monitoring page</a> and result data are not otherwise
-				accessible on the internet. I saw this as an opportunity to expand my Python, database, and web design skills. I designed a workflow and web map to display these data in an
-				easily usable and mobile friendly format. My python scripts download and process these PDFs before inserting the test result data into a Postgres database. My Flask web
-				application then uses these data to populate a Leaflet map. You can see these scripts on my GitHub Repos, <a href=https://www.github.com/gavleavitt/Water_Quality_PDF_Parsing>PDF Parsing</a>
-				and <a href=https://www.github.com/gavleavitt/Flask_Website_Project>Flask Web Application</a>.
+				Water quality reports are posted as PDFs to the <a href=https://www.countyofsb.org/phd/oceanwatermonitoring/>Ocean Water Monitoring page</a>. Test result data are not otherwise accessible on the internet. I saw this as an opportunity to expand my Python, database management, and web design skills. I designed a workflow and web map to display these data in an easily usable and mobile friendly format. Report PDFs are downloaded, test result details are extracted, and data are inserted into a Postgres database. These data are then served to a Leaflet map which displays the most recent test results.
 			</p>
 			<h3>PDF Processing</h3>
 				<p>
-					The first step is to download the PDF, which is a relatively simple task since the county’s test result PDF download URL is static. However, since URL is static, there is no way to
-					determine if a new PDF report has been released without opening it and reading the contents. My solution is to download the PDF daily, calculate the MD5 hash of the contents,
+					The first step is to download the PDF, which is a relatively simple task since the county’s test result PDF download URL is static. However, since URL is static, there is no way to determine if a new PDF report has been released without opening it and reading the contents. My solution is to download the PDF daily, calculate the MD5 hash of the contents,
 					and check if that PDF has already been processed in the past, if so the PDF is deleted, if its new then the hash is stored and the PDF contents are parsed.
 				</p>
 				<p>
-					Extracting PDF contents was a bit of a challenge. The PDFs are machine generated, i.e. exported for a Word Document, so OCR isn’t needed, but I had a hard time finding a python library
-					that extracted the contents correctly. After trying a couple libraries, I came across the <a href=https://www.github.com/jsvine/pdfplumber>pdfplumber</a> library that not only extracted
-					the contents well, but also had the ability to pull out the data table content as a separate object.
+					Extracting PDF contents was a bit of a challenge. The PDFs are machine generated, i.e. exported from a Word Document, so OCR isn’t needed, but I had a hard time finding a python library that extracted the contents correctly. After trying a couple libraries, I came across the <a href=https://www.github.com/jsvine/pdfplumber>pdfplumber</a> library that not only extracted the contents well, but also had the ability to detect and pull out the data table content as a separate object.
 				</p>
 				<p>
-					In this example, you can see a beach with an exceedance and two beaches missing results. The second image shows the PDF from later in the week with re-sampling and data fill amendments.
+					In this example, you can see a beach with an exceedance and two beaches missing results. The second image shows the PDF report from later in the week with re-sampling and data fill amendments.
 					<div class="centered-imgs">
 						<a href="/static/images/PDF_Ex_Exceed_highlight_comp.png" target="_blank">
 							<img src="/static/images/PDF_Ex_Exceed_highlight_comp.png" style="box-shadow: 5px 6px 8px #888;border-radius:10px;">
@@ -104,29 +101,17 @@
 					</div>
 				</p>
 				<p>
-					Now I was finally getting somewhere and had data to work with. However, I quickly
-					ran into another problem, equality checks kept failing for beach names and data didn’t come through as expected. After research and many print statements, I
-					finally discovered that I was having Unicode issues. The strings provided by pdfplumber contained non-breaking spaces, new-line notations,
-					and different dashes that were not standard keyboard keys, as well as other characters/notations. Fortunately, there’s a
-					<a href=https://www.docs.python.org/3/library/unicodedata.html#unicodedata.normalize>normalization function</a> to handle most of these issues.
+					Now I was finally getting somewhere and had data to work with. However, I quickly ran into another problem, equality checks kept failing for beach names and data didn’t come through as expected. After some research and many print statements, I finally discovered that I was having Unicode issues. The strings provided by pdfplumber contained non-breaking spaces, new-line notations, and dash characters that were not standard keyboard keys, as well as other characters/notations. Fortunately, there’s a <a href=https://www.docs.python.org/3/library/unicodedata.html#unicodedata.normalize>normalization function</a> to handle most of these issues.
 				</p>
 				<p>
-					Then begun the slow process of parsing out the beach information, which is provided by pdfplumber as nested lists. Completely filled in PDFs without exceedances are relatively simple
-					to process, however special care had to be given to cases where a PDF contains empty values or amended results, such as re-sampled or filled in values. This is the primary reason for
-					daily downloads and checks of PDFs. If a PDF contains amendments, then only those amended values are added to the database.
+					Then begun the slow process of parsing out the beach information, which is provided by pdfplumber as nested lists. Completely filled in PDFs without exceedances are relatively simple to process, however special care had to be given to cases where a PDF contains empty values or amended results, such as re-sampled or filled in values. This is the primary reason for daily downloads and checks of PDFs. If a PDF contains amendments, then only those amended values are added to the database.
 				</p>
 				<p>
-					Since this script has to be ran at intervals, I looked into
-					running it as a scheduled task on my Linux based Elastic Beanstalk server. However, I quickly became confused by cron jobs, web server environments, worker environments, SQS queues,
-					and if they work within my free-tier instance. For now the script runs on my local machine, however I would like to integrate it into my Flask Application and may consider using the
-					Python <a href=https://apscheduler.readthedocs.io/en/stable/>APScheduler</a> library to run it as a task on the web server without having to figure out how to create cron jobs
-					and worker environments.
+					Since this script has to be ran at intervals, I decided to use the Python <a href=https://apscheduler.readthedocs.io/en/stable/>APScheduler</a> library to schedule download tasks instead of creating a cron job on the server. This was a much simpler solution than figuring how to create Linux cron jobs on AWS.
 				</p>
-			<h3>Data Storage</h3>
+			<h3>Data Storage - Postgres</h3>
 				<p>
-					Now that the data are extracted and processed, they need to be stored. I had already built a Postgres/PostGIS database on AWS RDS for my <a href=””>Mobile Livetracker</a> so I
-					expanded it to include these data. I did not leverage database relationships in my previous project, so I took the time to build multiple tables with foreign key relationships to
-					familiarize myself with this aspect of database design.
+					Now that the data are extracted and processed, they need to be stored. I had already built a Postgres/PostGIS database on AWS RDS for my <a href=/projects/livetrackingdashboard>Mobile Livetracker</a> so I expanded it to include these data. I did not leverage database relationships in my previous project, so I took the time to build multiple tables with foreign key relationships to familiarize myself with this essential aspect of database design.
 				</p>
 				<p>
 					Here is a quick visualization of the simple schema:
@@ -136,14 +121,59 @@
 					</a>
 					</p>
 				</p>
+			<h3>Storing PDF Reports</h3>
+			<p>
+				Since the server is processing the PDFs, I needed an easy way to store and review PDFs that didn't involve connecting directly to the server through SSH. During development and testing I was storing PDFs in a Google Drive File Stream folder. I decided to continue storing PDFs in this folder from the server using the Google Drive API.
+			</p>
+			<p>
+				The Python library <a href=https://pythonhosted.org/PyDrive/>PyDrive</a> simplified this process greatly. To authenticate  the application and grant access to my Google Drive account using OAuth2.0, I followed the PyDrive guide <a href=https://pythonhosted.org/PyDrive/quickstart.html>here</a> on a localhost version of the application. However, instead of using the local web server method, I used command line authentication. I did this in case I ever need to re-authenticate my application on the web server instead of on localhost. I am not sure if that will ever be required since it appears that authentication and granting of access only needs to occurr once, even if its on localhost, as long as the correct settings are used and the the credentials file/details are accessible by the application.
+			</p>
+			<p>
+				Code to authenticate with Google Drive API, establish connection to API, and to upload a PDF to a specific folder using its ID:
+				<pre><code>
+from pydrive.auth import GoogleAuth
+from pydrive.drive import GoogleDrive
+# Change default location for client_secrets.json
+GoogleAuth.DEFAULT_SETTINGS['client_config_file'] = os.path.join(app.root_path, 'credentials.json')
+# Create authenticated GoogleDrive instance using settings from the setting.yaml file to auto-authenticate with saved
+# credentials
+gauth = GoogleAuth(settings_file=os.path.join(app.root_path, 'settings.yaml'))
+# Establish connection with Google Drive API
+drive = GoogleDrive(gauth)
+# Create a new GoogleDriveFile instance with a PDF mimetype in the water quality PDF folder using the parent folder's ID
+newfile = drive.CreateFile({"title": pdfname,
+                            'mimeType': 'application/pdf',
+                            'parents': [{'id': "1GRunRWB7SKmH3I0wWbtyJ_UOCDiHGAxO"}]})
+# Read file and set the content of the new file instance
+newfile.SetContentFile(pdfloc)
+# Upload the file to Google Drive
+newfile.Upload()
+			</code></pre>
+			</p>
+			<p>
+				To enable auto-authentication on a remote machine I used the <a href = https://pythonhosted.org/PyDrive/oauth.html>setting.yaml remote method</a> with the following settings:
+<pre><code>
+client_config_backend: settings
+client_config:
+  client_id: [ID]
+  client_secret: [Secret]
+save_credentials: True
+save_credentials_backend: file
+save_credentials_file: application/credentials.json
+
+get_refresh_token: True
+
+oauth_scope:
+  - https://www.googleapis.com/auth/drive
+</code></pre>
+			</p>
+			<p>
+				Storing the files in my Google Drive account is primarily for QAQCing any issues with the application and to retain records since the County doesn't provide historic reports on its website. These PDFs are not publically available, however in the future I would like to expand this web application and work with AWS S3 buckets to serve out these historic reports as downloadable files.
+			</p>
 			<h3>Serving up Data for Leaflet</h3>
 				<p>
-				Now it’s time to query that data I worked so hard to get into the database. For simplicity, I decided to serve out just the most recent results for each beach. Then Flask templates and
-				expressions are used to pass the data into the HTML document to be accessed by JavaScript and Leaflet. This process provided me with major two hurdles, querying and accessing data from
-				related records and getting the data into proper GeoJSON format for Leaflet. I had a hard time finding solid examples of how to setup SQLAlchemy models for foreign key relationships and
-				how to query and extract information from them. Fortunately, this
-				<a href=https://www.stackoverflow.com/questions/44069023/sqlalchemy-show-only-latest-result-if-a-join-returns-multiple-results>post</a> contained example code and I could use to
-				get just the newest record per beach, based on related tables.
+				Now it’s time to query that data I worked so hard to get into the database. For simplicity, I decided to serve out just the most recent results for each beach. Flask templates and expressions are used to pass the data into the HTML document to be accessed by JavaScript and Leaflet. This process provided me with major two hurdles, querying and accessing data from
+				related records and getting the data into proper GeoJSON format for Leaflet. I had a hard time finding solid examples of how to setup SQLAlchemy models for foreign key relationships and how to query and extract information from them. Fortunately, this <a href=https://www.stackoverflow.com/questions/44069023/sqlalchemy-show-only-latest-result-if-a-join-returns-multiple-results>post</a> contained example code on how to query the newest record per beach based on data from related tables.
 				</p>
 				<p>
 					Python SQLAlchemy Foreign Key Relationships:
@@ -168,7 +198,7 @@ class waterQuality(db.Model):
 				<p>
 					Python function to get water quality results per beach:
 					<pre><code class="python">
-records = db.session.query(waterQuality, waterQualityMD5, beaches, \
+records = session.query(waterQuality, waterQualityMD5, beaches, \
 		sqlfunc.ST_GeometryType(beaches.geom), sqlfunc.st_x(beaches.geom), \
 		sqlfunc.st_y(beaches.geom)) \
     .join(waterQualityMD5) \
@@ -215,11 +245,10 @@ return featCollect
 </pre></code></div>
 			<h3>Leaflet</h3>
 			<p>
-				Finally, it’s time to display the data with a responsive web map. Loading and displaying the data in Leaflet with custom markers and legend is relatively easy. The beach open status
-				property is used to determine which icon to display and up-to-date beach information is available in a popup. To facilitate navigating beaches I
-				used <a href=https://www.github.com/stefanocudini/leaflet-search>Leaflet Search</a></span> to allow searching of beaches. I also included a modal that opens on page load, and is openable with a
-				button, so users can read about the map and data limitations. The final step was to make the map mobile friendly. A viewport tag to size content down on mobile screens allows all
-				popup information to be clearly visible and not in conflict with other map elements. JavaScript event listeners further reduce clutter by closing popups on user actions.
+				Finally, it’s time to display the data with a responsive web map. Loading and displaying the data in Leaflet with a legend and markers is relatively easy. The beach open status
+				property is used to determine which icon to display for each beach and up-to-date beach details are available as pop-ups. To facilitate navigating through the beaches dataset, I
+				used the <a href=https://www.github.com/stefanocudini/leaflet-search>Leaflet Search</a></span> plugin to enable auto-completion searching of beaches by name. I also included a modal that opens on page load, and is openable with a
+				button, so users can read about the map and data limitations. The final step was to make the map mobile friendly. A viewport tag to size content down on mobile screens allows all content and pop-up information to be clearly visible and not in conflict with other map elements. JavaScript event listeners further reduce clutter by closing pop-ups and windows on user actions.
 			</p>
 			<p> JavaScript Listeners:
 				<pre><code class="javascript">
@@ -235,11 +264,7 @@ searchControl.on('search:expanded', function(e) {
 			</p>
 			<h2>Final Thoughts</h2>
 			<p>
-			This was a fun project that allowed me to expand and refine many of my coding and web development skills while generating a product that’s useful for beach-goers. My next goal for this
-			map is to add expandable graphs to the beach pop-ups that show the histories of the respective test results. While I currently only have test result data going back to the start of this project, as time goes on I will expand the
-
-			 to the information popups that show the histories of the . This will become increasing appealing and valuable as I collect and
-			store result data over time.
+			This was a fun project that allowed me to expand and refine many of my coding and web development skills while generating a product that’s useful for beach-goers. My next goal for this map is to add expandable graphs to the beach pop-up windows that show the histories of the respective test result along with the ability to download histroic report PDFs.
 			</p>
 		</div>
 		<div class="footer" style="grid-row:3/4">
@@ -268,4 +293,7 @@ searchControl.on('search:expanded', function(e) {
 	var email = "gav" + "lea" + "web" + "@g" + "mail" + ".com";
 	document.getElementById("emailaddr").innerHTML = "<a href='mailto:" + email + "'>" + email + "</a>"
 	window.onscroll = function(){closeMenu()};
+	window.onload = function (){
+		document.getElementById("iframe1").contentWindow.document.getElementsByClassName("home-link")[0].remove();
+	};
 	</script>

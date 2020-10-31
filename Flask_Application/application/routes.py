@@ -9,6 +9,7 @@ from application import application, app
 from flask import render_template
 from application import functions as func
 from application import DB_Queries as DBQ
+from application import DB_Queries_WaterQual
 from application import getStravaActivities
 from application import DB_Queries_Strava
 from application.authentication import auth
@@ -54,7 +55,7 @@ def waterQual():
     beachresults = func.handleBeaches()
     beachqual = beachresults["waterqual"]
     recentrec = beachresults["recent"]
-    standards = DBQ.getStandards()
+    standards = DB_Queries_WaterQual.getStandards()
     return render_template("public/maps/Water_Qual_Map.html", beachgeojson=beachqual, standards=standards,
                            recentdate=recentrec)
 

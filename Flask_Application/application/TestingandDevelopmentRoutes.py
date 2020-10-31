@@ -1,9 +1,9 @@
-from application import app, application, models, db, StravaWebHook, logger, DB_Queries_Strava, getStravaActivities
+from application import app, application, models_tracker, db, StravaWebHook, logger, DB_Queries_Strava, getStravaActivities
 from application import functions as func
 from application import DB_Queries as DBQ
 from application.models_Strava import athletes, sub_update, strava_activities, strava_activities_masked
 from application import DB_Queries_Strava as DQS
-from application import objectgeneration as OBG
+from application import objectgeneration_tracker as OBG
 from application.authentication import auth
 from flask import request, Response
 from flask import jsonify
@@ -61,7 +61,7 @@ from sqlalchemy import create_engine, or_
 #     """
 #     client = stravaAuth.gettoken()
 #     # ID of activity to download and insert into Postgres tables
-#     actid = 4217956841
+#     actid = 4256748538
 #     activity = getStravaActivities.getFullDetails(client, actid)
 #     # Insert activity details into Postgres/PostGIS
 #     DQS.insertAct(activity)

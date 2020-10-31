@@ -20,25 +20,29 @@ def addtoGDrive(pdfloc, pdfname):
     Print statement
     """
     try:
-        # Change location for client_secrets.json, application.py sits one level above this file and the file isnt
-        # called properly when this function is called, but the file needs to stay in that location such that
-        # quickstart.py can be called directly in the server's terminal
-
         application.logger.debug("Attempting to authenticate with Google Drive API through saved OAuth  credentials")
+        # Change location for client_secrets.json, application.py sits one level above this file and the file isn't
+        # called properly when this function is called, but the file needs to stay in that location such that
+        # quickstart.py can be called directly if needed
         GoogleAuth.DEFAULT_SETTINGS['client_config_file'] = os.path.join(app.root_path, 'credentials.json')
-        # Authenticate with OAuth, , must visit URL and input value when first authenticating
-        # yaml file contains settings find json file and to refresh access token
-        gauth = GoogleAuth(settings_file=os.path.join(app.root_path, 'settings.yaml'))
         # Use command line to auth, must connect to host, visit URL, login/auth with Google, then paste provided text into
         # terminal
         # gauth.CommandLineAuth()
+
+        # Create authenticated GoogleDrive instance using settings from the setting.yaml file to auto-authenticate with saved
+        # credentials
+        gauth = GoogleAuth(settings_file=os.path.join(app.root_path, 'settings.yaml'))
+
         # Establish connection with Google Drive API
         drive = GoogleDrive(gauth)
         application.logger.debug("Connected to Google Drive account")
+        # Create a new GoogleDriveFile instance with a PDF mimetype in the water quality PDF folder using the parent folder's ID
         newfile = drive.CreateFile({"title": pdfname,
                                     'mimeType': 'application/pdf',
                                     'parents': [{'id': "1GRunRWB7SKmH3I0wWbtyJ_UOCDiHGAxO"}]})
+        # Read file and set the content of the new file instance
         newfile.SetContentFile(pdfloc)
+        # Upload the file to Google Drive
         newfile.Upload()
         print("File uploaded to Google Drive!")
         application.logger.debug(f"File {pdfname} uploaded to Google Drive!")

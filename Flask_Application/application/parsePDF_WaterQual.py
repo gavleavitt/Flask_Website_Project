@@ -8,8 +8,8 @@ from datetime import datetime
 import hashlib
 from urllib.parse import quote
 from urllib.request import urlretrieve
-from application import app, errorEmail, GoogleDrive, application
-from application import DB_Queries_PDF as DBQ_PDF
+from application import app, errorEmail, GoogleDrive_WaterQual, application
+from application import DB_Queries_WaterQual as DBQ_PDF
 import os
 from application import logger
 
@@ -84,7 +84,7 @@ def handlePDFStatus(pdfstatus, pdfLoc, hashedtext, pdfDict, pdfName, beachList):
         quit()
     else:
         try:
-            GoogleDrive.addtoGDrive(pdfLoc, pdfName)
+            GoogleDrive_WaterQual.addtoGDrive(pdfLoc, pdfName)
             application.logger.debug("PDF uploaded to Google Drive")
         except Exception as e:
             # print("Google Drive upload threw an error, emailing exception")

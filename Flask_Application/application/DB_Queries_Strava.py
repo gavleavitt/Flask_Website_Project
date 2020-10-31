@@ -2,7 +2,7 @@ from sqlalchemy import create_engine, or_
 from sqlalchemy.orm import sessionmaker
 # from settings import dbcon
 from application.models_Strava import athletes, sub_update, strava_activities, strava_activities_masked, strava_gear
-from application.models import AOI
+from application.models_tracker import AOI
 import os
 from datetime import datetime
 from application import application, errorEmail, models_Strava
@@ -95,10 +95,10 @@ def insertSubUpdate(content):
     else:
         title = None
     session = createSession()
-    print(content.event_time)
-    print(dir(content.event_time))
-    print(content.event_time.timestamp)
-    insert = sub_update(aspect=content.aspect_type, event_time=content.event_time.timestamp, object_id=content.object_id,
+    # print(content.event_time)
+    # print(dir(content.event_time))
+    # print(content.event_time.timestamp)
+    insert = sub_update(aspect=content.aspect_type, event_time=datetime.fromtimestamp(content.event_time.timestamp), object_id=content.object_id,
                         object_type=content.object_type, owner_id=content.owner_id, subscription_id=content.subscription_id,
                         update_title = title)
     session.add(insert)

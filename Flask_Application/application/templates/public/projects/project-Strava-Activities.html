@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Strava Activities Project</title>
+
+	<!--jquery adds "$." functionality-->
+	<!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script> -->
+
+	<!-- Custom local javascript functions -->
+	<script src="{{ url_for('static', filename='js/customfunctions.js') }}"></script>
+	<!-- Custom CSS -->
+	<link rel="stylesheet" href="{{ url_for('static', filename='css/customCSS_main.css') }}">
+	<!-- Set favicon -->
+
+	<!-- Favicon links -->
+	<link rel="apple-touch-icon" sizes="180x180" href="/static/images/apple-touch-icon.png">
+	<link rel="icon" type="image/png" sizes="32x32" href="/static/images/favicon-32x32.png">
+	<link rel="icon" type="image/png" sizes="16x16" href="/static/images/favicon-16x16.png">
+	<link rel="manifest" href="/static/images//site.webmanifest">
+	<link rel="mask-icon" href="/static/images//safari-pinned-tab.svg" color="#5bbad5">
+	<meta name="msapplication-TileColor" content="#da532c">
+	<meta name="theme-color" content="#ffffff">
+
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Lato:wght@700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@700&display=swap" rel="stylesheet">
+<link href='https://fonts.googleapis.com/css?family=Quicksand' rel='stylesheet'>
+<link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300&display=swap" rel="stylesheet">
+
+<!-- Font Awesome Social media icons -->
+<!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/brands.min.css"> -->
+
+<!-- Font Awesome Kit -->
+<script src="https://kit.fontawesome.com/fd8b0845f1.js" crossorigin="anonymous"></script>
+
+<!-- Highlight.js -->
+<link rel="stylesheet"
+      href="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.2.0/build/styles/default.min.css">
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.2.0/build/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+
+</head>
+<body>
+  <div class="container-projects sansserif">
+		<div class = "navbar">
+      <div class ="navbarleft">
+				<a href = "/">
+					<div class="icon-home-link">
+						<img id="nav-icon" src = "/static/images/wheel_custom.png">
+						<div class="nav-name">Gavin Leavitt</div>
+					</div>
+				</a>
+			</div>
+      <div id="interactiveBarRight" class="navbarright">
+        <a class= "menu-option" href = "/">Home</a>
+				<a class= "menu-option" href = "/#goto-proj">Projects</a>
+        <a class= "menu-option" href = "/about">About</a>
+        <a class= "menu-option" href = "/resume">Resume</a>
+        <a class= "menu-option" href = "/contact">Contact</a>
+				<a href = "javascript:void(0);" class="menu-icon" onclick="navBarFunction()" onmouseover="menuHover();" onmouseout="menuUnhover();">
+						<img id="menu-icon-img" src="/static/images/menu-icon-gray.svg" style="width:35px;height:35px">
+				</a>
+			</div>
+		</div>
+		<div class="project-content">
+			<div class="title">Strava Activities Project</div>
+			<div class="separatorbar-title"></div>
+			<iframe src="/maps/stravamap" style="border-radius:10px;"></iframe>
+			<div class="fullsize-link">
+				<a href="/maps/sbcoceanwaterquality" target="_blank">View fullpage map</a>
+			</div>
+			<div class="separatorbar-title"></div>
+			<h2>
+				Summary
+			</h2>
+			<p>
+				This map displays my up-to-date Strava activities, which can be filtered by activity type and date. Additional activity details are available in pop-up windows.
+			</p>
+			<p>
+				The data displayed here have been queried from the Strava API and added to a personal Postgres/PostGIS database. All my activites are present in this dataset. Historic data were bulk downloaded and new Strava activity uploads are automatically downloaded from the Strava API based on webhook subscription updates. Activity details and activity stream data (GPS coordinates) are queried and processed to obfuscate private locations and simplify data.
+			</p>
+			<h3>Accessing Activities on Strava API - stravalib</h3>
+				<p>
+					The Python library <a href=https://pythonhosted.org/stravalib/>stravalib</a> provides useful functions to query the Strava API and parse results into Python objects. Instead of using the library's documentation for authentication, I ended up following<a href=https://medium.com/analytics-vidhya/accessing-user-data-via-the-strava-api-using-stravalib-d5bee7fdde17> this guide</a> on Medium Analytics Vidhya which was clearer and provided example code for refreshing the access token. This tutorial allowed me to authenticate and grant access to my Strava account once on my localhost then deploy the application to my AWS webserver without having to manually authenticate again.
+				</p>
+				<p>
+					This process uses the Pickle file created in the one-time authentication and is called for requests to the Strava API:
+					<pre><code>
+from application.stravalib.client import Client
+import os
+import time
+import pickle
+
+def gettoken():
+  # Build empty stravalib client instance
+  client = Client()
+  # Load access token from the Pickle file
+  with open(os.path.join(app.root_path, 'access_token.pickle'), 'rb') as f:
+      access_token = pickle.load(f)
+  # Check if access token has expired
+  if time.time() > access_token['expires_at']:
+      # Use client ID, secret, and refresh token to generate a new access token with Strava API
+      refresh_response = client.refresh_access_token(client_id=os.getenv("STRAVA_CLIENT_ID"),
+                                                     client_secret=os.getenv("STRAVA_CLIENT_SECRET"),
+                                                     refresh_token=access_token['refresh_token'])
+      # Open Pickle file and update with new access token
+      with open(os.path.join(app.root_path, 'access_token.pickle'), 'wb') as f:
+          pickle.dump(refresh_response, f)
+      # Set new access token in client instance
+      client.access_token = refresh_response['access_token']
+      # Set refresh token in client instance
+      client.refresh_token = refresh_response['refresh_token']
+      # Set access token expiration time for client instance
+      client.token_expires_at = refresh_response['expires_at']
+  # Access token is still valid, set token in client instance
+  else:
+      client.access_token = access_token['access_token']
+      client.refresh_token = access_token['refresh_token']
+      client.token_expires_at = access_token['expires_at']
+  return client
+					</pre></code>
+				</p>
+				<p>
+					Now that I have full scope access to my account through the Strava API I can begin downloading activities. The API, and stravalib, offer a few different ways to download activities.
+					<ul>
+						<li>
+							<b>List Athlete Activities</b>, client.get_activities() using the after argument in stravalib, provides a list of activities after the argument date. However, this does not contain full activity details, only certain summary information is returned.
+						</li>
+						<li>
+						 	<b>Get Activity</b>, client.get_activities() using a activity ID argument in stravalib, provides full activity details. However, the polyline coordinate information is <a href = https://developers.strava.com/docs/>encoded</a>following the <a href=https://developers.google.com/maps/documentation/utilities/polylinealgorithm>Google Encoded Polyline Algorithm Format</a>.
+						 <li>
+						 	<b>Get Activity Streams</b>, client.get_activity_streams() in stravalib, allows access to the plain text recorded sensor data for a activity. This option provides access to a variety of sensors on your phone and external connected devices.
+					 </li>
+					</ul>
+					There are also options to access routes, segments, efforts, and other account details.
+				</p>
+				<p>
+					My first goal was to download all my historic activities on Strava and add them to a Postgres/PostGIS database. Considering the API methods available, I decided on the following approach:
+				</p>
+				<p>
+					Use the <b>List Athlete Activities</b> after date method, set to before I started using Strava, to return the activity IDs for all my recorded activities, then generate a list using these IDs.
+					<pre><code>
+def getListIds(client, days):
+    """
+    Gets a list of all Strava Activity IDs since (days) ago from Strava API.
+
+    Parameters
+    ----------
+    client. Stravalib model client object. Contains access token to strava API for the user.
+    days. Int. How many days to look back, queries all activities since this calculated date.
+
+    Returns
+    -------
+    List. List of int IDs of all strava activities for the user.
+    """
+    # use current datetime and timedelta to calculate previous datetime
+    after = datetime.today() - timedelta(days=days)
+    # after = datetime(year=2019, month=8, day=1)
+    actList = []
+    # Get all activities since after time and add to list
+    acts = client.get_activities(after=after)
+    for i in acts:
+        actList.append(i.id)
+    return actList
+					</pre></code>
+				</p>
+				<p>
+					Iterate over activity ID list, passing each activity ID into <b>Get Activity</b> and <b>Get Activity Streams</b>. Parse results by structuring data, removing uninteresting/null details, calculating ancillary data, and combining GPS coordinate and time, provided as time since start of activity, into a PostGIS <a href=https://postgis.net/docs/ST_GeomFromEWKT.html>EWKT</a> LINESTRINGM format. Finally, insert these data into Postgres.
+					<pre><code>
+def getFullDetails(client, actId):
+    """
+    Gets the full details of Strava activities using get_activity() to query flat data and get_activity_streams() to get
+    GPS coordinates and times. Coordinates are formatted to be inserted in PostGIS following ST_GeomFromEWKT.
+
+    Parameters
+    ----------
+    client. Stravalib model client object. Contains access token to strava API for the user.
+    actId. Int. Activity ID.
+
+    Returns
+    -------
+    Dict. Activity and coordinate information formatted to be inserted into Postgres/PostGIS.
+    """
+
+    # Set logger to suppress debug errors, these messages aren't important and pollute the console
+    Log = logging.getLogger()
+    Log.setLevel('ERROR')
+    # Stream data to get from activity streams
+    types = ['time', 'latlng']
+    # Get activity details as a dictionary
+    act = client.get_activity(actId).to_dict()
+    # Get starttime and convert to datetime object
+    # starttime = datetime.fromisoformat(act['start_date'])
+    # Get the activity stream details for the activity id
+    stream = client.get_activity_streams(actId, types=types)
+    # Get athlete ID directly from API call, instead of digging into the nested result provided by get_activity
+    athId = client.get_athlete().id
+    # Extract latlng and time information from activity stream
+    latlng = stream['latlng'].data
+    time = stream['time'].data
+    linestringdat = []
+    wktList = []
+    # Iterate over time and latlng streams, combining them into a list containing sublists with lat, lng, time
+    for i in range(0, len(latlng)):
+        # Create new entry, swapping (lat, lon) to (lon, lat) then append time, provided as time since start of activity
+        ## as datetime UTC (time is provided as time
+        ## since start of the activity and is converted to datetime)
+        # newEntry = [latlng[i][1], latlng[i][0], (starttime + timedelta(seconds=time[i])).timestamp()]
+        newEntry = [latlng[i][1], latlng[i][0], time[i]]
+        # Append data as nested list
+        linestringdat.append(newEntry)
+        # Take newEntry list and create a string with a space delimiter between list items, add to list of wkt
+        # This formats data to be friendly with geoalchemy ST_GeomFromEWKT
+        wktList.append(" ".join(str(v) for v in newEntry))
+        # print(wktList)
+    # Format entire list to be friendly with geoalchemy ST_GeomFromEWKT
+    sep = ", "
+    wktstr = f"SRID=4326;LINESTRINGM({sep.join(wktList)})"
+    # Add lat, lng, time as geom key to dict
+    act['geom'] = linestringdat
+    act['actId'] = actId
+    act['geom_wkt'] = wktstr
+    # Add athlete id to dict
+    act['athlete_id'] = athId
+    # Extend type to detect road ride vs mtb
+    act['type_extended'] = None
+    # Calculate type of riding activity, using GearIDs
+    if act['gear_id'] in ["b4317610", "b2066194"]:
+        act['type_extended'] = "Mountain Bike"
+    elif act['gear_id'] == "b5970935":
+        act['type_extended'] = "Road Cycling"
+    # List of dictionary keys to remove, these are null or uninteresting
+    remove_keys = ['guid', 'external_id', 'athlete'
+                                          'location_city', 'location_state', 'location_country',
+                   'kudos_count', 'comment_count',
+                   'athlete_count', 'photo_count', 'total_photo_count', 'map', 'trainer', 'commute',
+                   'gear', 'device_watts', 'has_kudoed', 'best_efforts',
+                   'segment_efforts', 'splits_metric', 'splits_standard', 'weighted_average_watts',
+                   'suffer_score', 'has_heartrate', 'average_heartrate', 'max_heartrate', 'average_cadence',
+                   'average_temp', 'embed_token', 'trainer',
+                   'photos', 'instagram_primary_photo', 'partner_logo_url', 'partner_brand_tag', 'from_accepted_tag',
+                   'segment_leaderboard_opt_out', 'highlighted_kudosers', 'laps']
+    # Iterate over dict keys, removing unnecessary/unwanted keys
+    for key in list(act.keys()):
+        if key in remove_keys:
+            del (act[key])
+    return act
+					</pre></code>
+				</p>
+			<h3>Obfuscating Sensitive Locations - SQLAlchemy/GeoAlchemy2</h3>
+				<p>
+					Now I have the details and coordinates of every Strava activity on my account stored in my Postgres database, ready to be served to a Leaflet application. This creates another problem however, since I stored the full coordinate information for each activity, any personal locations such as my home and homes of friends and family will be visible if I share the data publically. Strava's solution to this issue is to allow users to create privacy zones, which are used to remove any sections of publically visible activities that start or end within the zones. This solution is bypassed in my dataset since I queried the full coordinates of my activities using full scope access.
+				</p>
+				<p>
+				</p>
+					To maintain my privacy, I decided to create my own privacy zones in QGIS and store them within my database. A second, public friendly dataset, was generated using SQLAlchemy and GeoAlchemy2 PostGIS functions which removed all sections that crossed these privacy areas. I also simplified the data to reduce the amount of data needing to be served. This process provided to be very difficult as the documentation of functions provided by PostGIS did not clearly/accurately describe returned data. In particular the <a href=>ST_Difference</a>
+				</p>
+				<p>
+					In this example, you can see a beach with an exceedance and two beaches missing results. The second image shows the PDF from later in the week with re-sampling and data fill amendments.
+					<div class="centered-imgs">
+						<a href="/static/images/PDF_Ex_Exceed_highlight_comp.png" target="_blank">
+							<img src="/static/images/PDF_Ex_Exceed_highlight_comp.png" style="box-shadow: 5px 6px 8px #888;border-radius:10px;">
+						</a>
+						<a href="/static/images/PDF_Ex_Resample_highlight_comp.png"  target="_blank">
+							<img src="/static/images/PDF_Ex_Resample_highlight_comp.png" style="box-shadow: 5px 6px 8px #888;border-radius:10px;">
+						</a>
+					</div>
+				</p>
+				<p>
+					Now I was finally getting somewhere and had data to work with. However, I quickly
+					ran into another problem, equality checks kept failing for beach names and data didn’t come through as expected. After research and many print statements, I
+					finally discovered that I was having Unicode issues. The strings provided by pdfplumber contained non-breaking spaces, new-line notations,
+					and different dashes that were not standard keyboard keys, as well as other characters/notations. Fortunately, there’s a
+					<a href=https://www.docs.python.org/3/library/unicodedata.html#unicodedata.normalize>normalization function</a> to handle most of these issues.
+				</p>
+				<p>
+					Then begun the slow process of parsing out the beach information, which is provided by pdfplumber as nested lists. Completely filled in PDFs without exceedances are relatively simple
+					to process, however special care had to be given to cases where a PDF contains empty values or amended results, such as re-sampled or filled in values. This is the primary reason for
+					daily downloads and checks of PDFs. If a PDF contains amendments, then only those amended values are added to the database.
+				</p>
+				<p>
+					Since this script has to be ran at intervals, I looked into
+					running it as a scheduled task on my Linux based Elastic Beanstalk server. However, I quickly became confused by cron jobs, web server environments, worker environments, SQS queues,
+					and if they work within my free-tier instance. For now the script runs on my local machine, however I would like to integrate it into my Flask Application and may consider using the
+					Python <a href=https://apscheduler.readthedocs.io/en/stable/>APScheduler</a> library to run it as a task on the web server without having to figure out how to create cron jobs
+					and worker environments.
+				</p>
+			<h3>Data Storage - PostgreSQL/PostGIS</h3>
+				<p>
+					Now that the data are extracted and processed, they need to be stored. I had already built a Postgres/PostGIS database on AWS RDS for my <a href=””>Mobile Livetracker</a> so I
+					expanded it to include these data. I did not leverage database relationships in my previous project, so I took the time to build multiple tables with foreign key relationships to
+					familiarize myself with this aspect of database design.
+				</p>
+				<p>
+					Here is a quick visualization of the simple schema:
+					<p>
+					<a href="/static/images/Water_Quality_Diagram_Cropped_comp.png"  target="_blank">
+						<img src="/static/images/Water_Quality_Diagram_Cropped_comp.png" style="box-shadow: 5px 6px 8px #888;border-radius:10px;">
+					</a>
+					</p>
+				</p>
+			<h3>Serving up Data for Leaflet</h3>
+				<p>
+				Now it’s time to query that data I worked so hard to get into the database. For simplicity, I decided to serve out just the most recent results for each beach. Then Flask templates and
+				expressions are used to pass the data into the HTML document to be accessed by JavaScript and Leaflet. This process provided me with major two hurdles, querying and accessing data from
+				related records and getting the data into proper GeoJSON format for Leaflet. I had a hard time finding solid examples of how to setup SQLAlchemy models for foreign key relationships and
+				how to query and extract information from them. Fortunately, this
+				<a href=https://www.stackoverflow.com/questions/44069023/sqlalchemy-show-only-latest-result-if-a-join-returns-multiple-results>post</a> contained example code and I could use to
+				get just the newest record per beach, based on related tables.
+				</p>
+				<p>
+					Python SQLAlchemy Foreign Key Relationships:
+					<pre><code class="python">
+class waterQuality(db.Model):
+  __tablename__ = "Water_Quality"
+
+  id = Column(Integer, primary_key=True)
+  TotColi = Column(Integer)
+  FecColi = Column(Integer)
+  Entero = Column(Integer)
+  ExceedsRatio = Column(String)
+  BeachStatus = Column(String)
+  beach_id = Column(Integer, ForeignKey("Beaches.id"))
+  md5_id = Column(Integer, ForeignKey("water_qual_md5.id"))
+  resample = Column(String)
+
+  beach_rel = relationship(beaches, backref="Water_Quality")
+  hash_rel = relationship(waterQualityMD5, backref="Water_Quality")
+				</code></pre>
+				</p>
+				<p>
+					Python function to get water quality results per beach:
+					<pre><code class="python">
+records = db.session.query(waterQuality, waterQualityMD5, beaches, \
+		sqlfunc.ST_GeometryType(beaches.geom), sqlfunc.st_x(beaches.geom), \
+		sqlfunc.st_y(beaches.geom)) \
+    .join(waterQualityMD5) \
+    .join(beaches) \
+    .distinct(waterQuality.beach_id)\
+    .order_by(waterQuality.beach_id,  waterQualityMD5.insdate.desc()).all()
+return records
+					</code></pre>
+				</p>
+				<p>
+				Working with GeoJSON data was difficult, as I wanted to avoid manually formatting the structure of the data. While I had a method developed for my Livetracker, I wanted a more direct
+				method for generating feature collections. Fortunately the <a href=https://www.pypi.org/project/geojson/ rel="external">GeoJSON</a> library worked perfectly and had solid example code. Working with the
+				well-known binary (WKB) representation of coordinates, provided when using select queries against PostgreSQL/PostGIS, was also challenging. However, the
+				<a href=https://www.geoalchemy-2.readthedocs.io/en/latest/> Geo-Alchemy2</a> library contains PostGIS query functions to query coordinates directly, avoiding the need to convert text from binary.
+				</p>
+				<p>
+					Python function to generate a Feature Collection result:
+				<div><pre><code class="python">
+resultDict = {}
+for i, item in enumerate(records):
+	beachname = (item.waterQuality.beach_rel.BeachName)
+	resultDict[beachname] = {}
+	resultDict[beachname]['FecColi'] = item.waterQuality.FecColi
+	resultDict[beachname]['TotColi'] = item.waterQuality.TotColi
+	resultDict[beachname]['Entero'] = item.waterQuality.Entero
+	resultDict[beachname]['ExceedsRatio'] = item.waterQuality.ExceedsRatio
+	resultDict[beachname]['BeachStatus'] = (item.waterQuality.BeachStatus).rstrip()
+	resultDict[beachname]['resample'] = (item.waterQuality.resample).rstrip()
+	resultDict[beachname]['insDate'] = (item.waterQuality.hash_rel.insdate).strftime("%Y-%m-%d")
+	resultDict[beachname]['pdfDate'] = (item.waterQuality.hash_rel.pdfdate).strftime("%Y-%m-%d")
+	resultDict[beachname]['GeomType'] = (records[i][-3]).split("ST_")[1]
+	resultDict[beachname]['Lon'] = round(records[i][-2], 5)
+	resultDict[beachname]['Lat'] = round(records[i][-1], 5)
+	resultDict[beachname]['Name'] = (item.waterQuality.beach_rel.BeachName).rstrip()
+featList = []
+for key in resultDict.keys():
+		# Point takes items as long, lat. Point must have (())
+		beachPoint = Point((resultDict[key]['Lon'], resultDict[key]['Lat']))
+		feature = Feature(geometry=beachPoint, properties=resultDict[key])
+		featList.append(feature)
+
+featCollect = FeatureCollection(featList)
+return featCollect
+</pre></code></div>
+			<h3>Leaflet</h3>
+			<p>
+				Finally, it’s time to display the data with a responsive web map. Loading and displaying the data in Leaflet with custom markers and legend is relatively easy. The beach open status
+				property is used to determine which icon to display and up-to-date beach information is available in a popup. To facilitate navigating beaches I
+				used <a href=https://www.github.com/stefanocudini/leaflet-search>Leaflet Search</a></span> to allow searching of beaches. I also included a modal that opens on page load, and is openable with a
+				button, so users can read about the map and data limitations. The final step was to make the map mobile friendly. A viewport tag to size content down on mobile screens allows all
+				popup information to be clearly visible and not in conflict with other map elements. JavaScript event listeners further reduce clutter by closing popups on user actions.
+			</p>
+			<p> JavaScript Listeners:
+				<pre><code class="javascript">
+searchControl.on('search:locationfound', function(e) {
+	if(e.layer._popup)
+		e.layer.openPopup();
+});
+
+searchControl.on('search:expanded', function(e) {
+	map.closePopup()
+});
+				</pre></code>
+			</p>
+			<h2>Final Thoughts</h2>
+			<p>
+			This was a fun project that allowed me to expand and refine many of my coding and web development skills while generating a product that’s useful for beach-goers. My next goal for this
+			map is to add expandable graphs to the beach pop-ups that show the histories of the respective test results. While I currently only have test result data going back to the start of this project, as time goes on I will expand the
+
+			 to the information popups that show the histories of the . This will become increasing appealing and valuable as I collect and
+			store result data over time.
+			</p>
+		</div>
+		<div class="footer" style="grid-row:3/4">
+			<p>© 2020 Gavin Leavitt | Contact: <span id="emailaddr"></span>
+			<br>Images, maps, and webpages created by Gavin Leavitt unless otherwise noted.
+			<br>Icons made by <a href="https://www.flaticon.com/authors/roundicons" title="Roundicons">Roundicons</a>,  <a href="https://www.flaticon.com/authors/freepik" title="Freepik">Freepik</a> from <a href="https://www.flaticon.com/" title="Flaticon"> www.flaticon.com</a> and modified by Gavin Leavitt.
+			</p>
+			<div class="social-media">
+				<div class="social-icon">
+					<a href="https://www.github.com/gavleavitt" target="_blank" rel="external" class="fab fa-github">
+					</a>
+				</div>
+				<div class="social-icon">
+					<a href="https://www.facebook.com/gavin.leavitt.7/" target="_blank" rel="external" class="fab fa-facebook">
+					</a>
+				</div>
+				<div class="social-icon">
+					<a href="https://www.linkedin.com/in/gavin-leavitt-326973165/" target="_blank" rel="external" class="fab fa-linkedin">
+					</a>
+				</div>
+			</div>
+		</div>
+		</div>
+	</div>
+	<script>
+	var email = "gav" + "lea" + "web" + "@g" + "mail" + ".com";
+	document.getElementById("emailaddr").innerHTML = "<a href='mailto:" + email + "'>" + email + "</a>"
+	window.onscroll = function(){closeMenu()};
+	</script>

@@ -14,6 +14,7 @@ import datetime
 from geojson import Point, Feature, FeatureCollection, LineString, dumps
 from application import DB_Queries as DBQ
 from application import script_config as dbconfig
+from application import DB_Queries_WaterQual
 # from geoalchemy2.shape import to_shape
 # from flask.json import jsonify
 # from shapely.geometry import mapping
@@ -227,7 +228,7 @@ def handleBeaches():
         
     """
     # Call database query to get most recent test results
-    beach_results = DBQ.getBeachWaterQual()
+    beach_results = DB_Queries_WaterQual.getBeachWaterQual()
     # geojson_dump = dumps(waterQualGeoJSON(beach_results))
     mostrecent = recentrecord(beach_results)
     # Format results into geojson
