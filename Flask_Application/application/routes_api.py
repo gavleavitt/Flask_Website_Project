@@ -10,11 +10,11 @@ Created on Fri May 22 17:45:44 2020
 
 @author: Gavin Leavitt
 """
-from application import app, application, models, db, StravaWebHook, logger, DB_Queries_Strava, getStravaActivities
+from application import app, application, models_tracker, db, StravaWebHook, logger, DB_Queries_Strava, getStravaActivities
 from application import functions as func
 from application import DB_Queries as DBQ
 from application import DB_Queries_Strava as DQS
-from application import objectgeneration as OBG
+from application import objectgeneration_tracker as OBG
 from application.authentication import auth
 from flask import request, Response
 from flask import jsonify
@@ -166,26 +166,27 @@ def handle_sub_callback():
                 return callBackResponse
             except Exception as e:
                 application.logger.error(f"Strava callback verification failed with the error {e}")
-                return 500
+                return Response(status=500)
         else:
             application.logger.error(f"Strava verification token doesn't match!")
             raise ValueError('Strava token verification failed.')
-            return 500
+            return Response(status=500)
     # POST request containing webhook subscription message
     elif request.method == 'POST':
         application.logger.debug("New activity incoming! Got a POST callback request from Strava")
         try:
             # Convert JSON body to dict
             callbackContent = request.get_json()
-            application.logger.debug(f"Update content is {callbackContent}")
-            application.logger.debug(f"Update content dir is {dir(callbackContent)}")
+            # application.logger.debug(f"Update content is {callbackContent}")
+            # application.logger.debug(f"Update content dir is {dir(callbackContent)}")
             # Call function to handle update message and new activity
             StravaWebHook.handle_sub_update(client, callbackContent)
             application.logger.debug("Inserted webhook update and activity details into postgres tables!")
             # return success code, Strava expects this code
+            return Response(status=200)
         except Exception as e:
             application.logger.error(f"Strava subscription update failed with the error {e}")
-            return 500
+            return Response(status=500)
 
 @app.route("/api/v0.1/stravaroutes", methods=['GET'])
 def stravaActAPI():

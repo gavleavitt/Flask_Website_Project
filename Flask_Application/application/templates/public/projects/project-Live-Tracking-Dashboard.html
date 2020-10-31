@@ -46,8 +46,12 @@
   <div class="container-projects sansserif">
 		<div class = "navbar">
       <div class ="navbarleft">
-				<img id="nav-icon" src = "/static/images/wheel_custom.png">
-				<div class="nav-name">Gavin Leavitt</div>
+				<a href = "/">
+					<div class="icon-home-link">
+						<img id="nav-icon" src = "/static/images/wheel_custom.png">
+						<div class="nav-name">Gavin Leavitt</div>
+					</div>
+				</a>
 			</div>
       <div id="interactiveBarRight" class="navbarright">
         <a class= "menu-option" href = "/">Home</a>
@@ -76,14 +80,14 @@
 			</p>
 			<p>
 				The mobile application logs location and
-				other phone details through HTTP POST requests to a personal Flask server. Upon receiving these requests, the server's python scripts parse the incoming information and perform spatial queries against a <a href=https://aws.amazon.com/rds/>Amazon Relation Database Service (RDS)</a> PostgresSQL/PostGIS
+				other phone details through HTTP POST requests to a personal Flask web server. Upon receiving these requests, the server's python scripts parse the incoming information and perform spatial queries against a <a href=https://aws.amazon.com/rds/>Amazon Relation Database Service (RDS)</a> PostgresSQL/PostGIS
 				database to determine nearby features before inserting the data into the database.
 			</p>
 			<p>
-				These results are updated in near real-time on the dashboard as data are inserted into the database. This is accomplished using by JavaScript functions to poll a Flask API connected to the database for changes, when changes are detected details on the page are automatically updated, without requiring a page refresh.
+				These results are updated in near real-time on the dashboard as data are inserted into the database. This is accomplished using by JavaScript functions to poll a Flask API connected to the database for changes, when changes are detected details on the page are automatically updated without requiring a page refresh.
 			</p>
 			<p>
-				This workflow only works for Android, as the mobile application is Android only, and currently only tracks one user, myself. As this map and associated API display sensitive location information, access is restricted to close family and friends through HTTP authentication and links to the application are not shared here.
+				This workflow only works for Android, as the mobile application is Android only, and currently only tracks one user, myself. As this map and associated API display sensitive location information, access is restricted to close family and friends through HTTP authentication.
 			</p>
 			<p>
 				This project is viewable in my <a href=https://github.com/gavleavitt/Flask_Website_Project>Flask Project Github Repo</a>, but note that the scripts and functions are integrated within the larger project for my Flask website.
@@ -96,8 +100,7 @@
 				</div>
 			<h3>Location Data Collection - GPSLogger for Android</h3>
 				<p>
-					GPSLogger was chosen for this project due to its ability to send information to a custom URL as HTTP POST requests as the data are
-					collected. Another useful feature is its ability to queue requests when a mobile or Wi-Fi data connection is unavailable, and send the requests in logged order once a connection is reestablished.
+					GPSLogger was chosen for this project due to its ability to send information to a custom URL as HTTP POST requests in realtime. Another useful feature is its ability to queue requests when a mobile or Wi-Fi data connection is unavailable, and send the requests in logged order once a connection is reestablished.
 				</p>
 				<p>
 					GPSLogger is configured with default settings besides the following:

@@ -226,42 +226,42 @@ class Roads(db.Model):
     name = db.Column(db.String(80))
     surface = db.Column(db.String(80))
 
-class beaches(db.Model):
-    __tablename__ = 'Beaches'
+# class beaches(db.Model):
+#     __tablename__ = 'Beaches'
+#
+#     id = Column(Integer, primary_key=True)
+#     BeachName = Column(String)
+#     geom = Column(Geometry('POINT', 4326, from_text='ST_GeomFromEWKT', name='geometry'))
 
-    id = Column(Integer, primary_key=True)
-    BeachName = Column(String)
-    geom = Column(Geometry('POINT', 4326, from_text='ST_GeomFromEWKT', name='geometry'))
-
-class waterQualityMD5(db.Model):
-    __tablename__ = 'water_qual_md5'
-
-    id = Column(Integer, primary_key=True)
-    pdfdate = Column(Date)
-    insdate = Column(Date)
-    md5 = Column(String)
-    pdfName = Column(String)
-
-
-class stateStandards(db.Model):
-    __tablename__ = "StateStandards"
-
-    id = db.Column(Integer, primary_key=True)
-    Name = Column(String)
-    StandardMPN = Column(String)
-
-class waterQuality(db.Model):
-    __tablename__ = "Water_Quality"
-
-    id = Column(Integer, primary_key=True)
-    TotColi = Column(Integer)
-    FecColi = Column(Integer)
-    Entero = Column(Integer)
-    ExceedsRatio = Column(String)
-    BeachStatus = Column(String)
-    beach_id = Column(Integer, ForeignKey("Beaches.id"))
-    md5_id = Column(Integer, ForeignKey("water_qual_md5.id"))
-    resample = Column(String)
-
-    beach_rel = relationship(beaches, backref="Water_Quality")
-    hash_rel = relationship(waterQualityMD5, backref="Water_Quality")
+# class waterQualityMD5(db.Model):
+#     __tablename__ = 'water_qual_md5'
+#
+#     id = Column(Integer, primary_key=True)
+#     pdfdate = Column(Date)
+#     insdate = Column(Date)
+#     md5 = Column(String)
+#     pdfName = Column(String)
+#
+#
+# class stateStandards(db.Model):
+#     __tablename__ = "StateStandards"
+#
+#     id = db.Column(Integer, primary_key=True)
+#     Name = Column(String)
+#     StandardMPN = Column(String)
+#
+# class waterQuality(db.Model):
+#     __tablename__ = "Water_Quality"
+#
+#     id = Column(Integer, primary_key=True)
+#     TotColi = Column(Integer)
+#     FecColi = Column(Integer)
+#     Entero = Column(Integer)
+#     ExceedsRatio = Column(String)
+#     BeachStatus = Column(String)
+#     beach_id = Column(Integer, ForeignKey("Beaches.id"))
+#     md5_id = Column(Integer, ForeignKey("water_qual_md5.id"))
+#     resample = Column(String)
+#
+#     beach_rel = relationship(beaches, backref="Water_Quality")
+#     hash_rel = relationship(waterQualityMD5, backref="Water_Quality")

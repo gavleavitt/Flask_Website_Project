@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<!-- <meta name="viewport" content="width=device-width, initial-scale=1"> -->
-	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="viewport" content="width=device-width, initial-scale=0.7">
 	<title>Strava Activity Map</title>
 	<!-- CDN files-->
 	<!-- Leaflet css-->
@@ -91,13 +91,25 @@
 	</div> -->
 	<div class="container sansserif">
 		<div class="item titlediv">
-			<div id = "Title" class="titletext">Strava Activity Viewer</div>
+			<div id = "Title" class="titletext">Strava Activities</div>
 			<div class="filter-btn-group" id="act-filter-group">
-				<button class="filterbtn active-btn" onclick="actFilter('All')" id="All">Clear All</button>
+				<!-- <button class="filterbtn active" onclick="actFilter('All')" id="All">All</button>
+				<button class="filterbtn" onclick="actFilter('MTB')" id="MTB">Mountain Biking</button>
+				<button class="filterbtn" onclick="actFilter('Road')" id="Road">Road Rides</button>
+				<button class="filterbtn" onclick="actFilter('Walk')" id="Walk">Walks</button>
+				<button class="filterbtn" onclick="actFilter('Run')" id="Run">Runs</button> -->
+
+				<button class="filterbtn active" onclick="actFilter('All')" id="All">Clear All</button>
 				<button class="filterbtn" id="MTB">Mountain Biking</button>
 				<button class="filterbtn" id="Road">Road Rides</button>
 				<button class="filterbtn" id="Walk">Walks</button>
 				<button class="filterbtn" id="Run">Runs</button>
+
+				<!-- <button class="filterbtn active" onclick="actFilter('All')" id="all">All</button>
+				<button class="filterbtn" id="mtb">Mountain Biking</button>
+				<button class="filterbtn" id="road-rides">Road Rides</button>
+				<button class="filterbtn" id="runs">Walks</button>
+				<button class="filterbtn" id="walks">Runs</button> -->
 			</div>
 			<div id="reportrange">
 			    <i class="fa fa-calendar"></i>&nbsp;
@@ -118,22 +130,41 @@
 					<div class="modal-text">
 						<p style="margin-top:0px;"><b>Map Details</b>
 						<br>
-							This map displays my up-to-date Strava activities, which can be filtered by activity type and date. Additional activity details are available in pop-up windows.
+						This map shows the most recent ocean water quality test results for beaches in Santa Barbara County.
+						</p>
+						<p>These tests are conducted by the Santa Barbara County Public Health Department Ocean Water Monitoring Program and are posted as PDFs to
+						the agency's <a href=https://www.countyofsb.org/phd/oceanwatermonitoring/>website</a>. Beach status is given in respect to test results <b>only</b> and not to any
+						other factors that may warrant beach closures, please follow all official postings and signage.
+						</p>
+						<p>The data displayed on this map, accessible by clicking a beach icon or by searching for a beach using the magnifying glass icon,
+						originate from these report PDFs. The County releases these reports at least weekly but may release them more frequently*. This site checks daily
+						for updated information and updates records accordingly.
+						</p>
+						<p><b>Disclaimer</b>
+						<br>
+						This is an unofficial personal project and I have no affiliation with any Santa Barbara county public agencies. All provided data should be used for <b>reference</b> only,
+						I hold no responsibility for the accuracy of these data or any decisions made based on information provided here. Use good judgement and respect any
+						instructions, directives, and posted signage provided by the Santa Barbara County Public Health Department or any local authority.
+						</p>
+						<p><b>Activate Development Notes and Data Limitations</b>
+						<br>
+						This website is still undergoing active development and is prone to changes and downtime without notice. I have tried my best to ensure that displayed data reflect the
+						newest data available from the county, however I cannot guarantee this will always be true. Time lag exists between when the county posts new reports, usually mornings,
+						and when my site checks for updates, which is around noon each day, any County releases later in the day won't be reflected until the next day. Also, due to the active
+						development of the scripts that process the PDFs, certain County postings may not be handled by the script properly, requiring me to fix any bugs, which may take some time.
 						</p>
 						<p>
-							The data displayed here have been queried from the Strava API and added to a personal Postgres/PostGIS database. All my activites are present in this dataset. Historic data were bulk downloaded and new Strava activity uploads are automatically downloaded from the Strava API based on webhook subscription updates. Activity details and activity stream data (GPS coordinates) are queried and processed to obfuscate private locations and simplify data.
-						</p>
-						<p>
-						Visit the <a href=#>project page</a> for this map to see a full process description.
+						*Amended reports may be released more frequently when a beach exceeds state health standards, requiring additional testing, or when individual beach results are still
+						pending on initial weekly report release.
 						</p>
 						<p><b>Contact Me</b>
 						<br>
 						If you have any questions, feature suggestions, comments, or notice any errors/bugs feel free to email me at <span id="emailaddr"></span>
 						</p>
 						<p>
-							You can see my other projects under the <a href=/#goto-proj>projects</a> section of this site.
+							You can see my other projects under my <a href=/#goto-proj>projects</a> section and you can see a description on how I made this map <a href=/projects/sbcoceanquality>here</a>.
 						</p>
-						<p>You can visit my GitHub repo for this project and others <a href=https://github.com/gavleavitt/Flask_Website_Project target="_blank">here</a>.
+						<p>You can visit the GitHub repo for the PDF processing script <a href=https://github.com/gavleavitt/Water_Quality_PDF_Parsing target="_blank">here</a> and the repo for the website/Leaflet application <a href=https://github.com/gavleavitt/Flask_Website_Project target="_blank">here</a>.
 						</p>
 					</div>
 			 </div>
@@ -203,7 +234,7 @@
 	           'Last 30 Days': [moment().subtract(29, 'days'), moment()],
 	           'This Month': [moment().startOf('month'), moment().endOf('month')],
 						 'This Year': [moment().startOf('year'), moment().endOf('year')],
-						 'All Time': [moment('2014-01-01'), moment().endOf('year')]
+						 'All': [moment('2014-01-01'), moment().endOf('year')]
 	           // 'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
 	        }
 	    }, cb);
@@ -218,9 +249,7 @@
 			// console.log(picker.startDate.format())
 			userStart = picker.startDate.format()
 			userEnd = picker.endDate.format()
-			// timefiltergeojson(picker.startDate.format(), picker.endDate.format())
-			filteredGroup.clearLayers()
-			addActiveLayers(picker.startDate.format(), picker.endDate.format())
+			filtergeojson(picker.startDate.format(), picker.endDate.format())
 		});
 
 
@@ -240,75 +269,79 @@
 		var baseurl = "/api/v0.1/stravaroutes?"
 		var query = baseurl + "actlimit=" + actlimit
 
+		var mtb_lineStyle = {
+			"color": "#e41a1c",
+			"weight": 2,
+			"opacity": 0.7,
+			"fillColor": "black"
+		};
+		var road_lineStyle = {
+			"color": "#377eb8",
+			"weight": 2,
+			"opacity": 0.7,
+			"fillColor": "black"
+		};
+		var run_lineStyle = {
+			"color": "#a65628",
+			"weight": 2,
+			"opacity": 0.7,
+			"fillColor": "black"
+		};
+		var walk_lineStyle = {
+				"color": "#984ea3",
+				"weight": 2,
+				"opacity": 0.7,
+				"fillColor": "black"
+		};
+
 
 		map.spin(true);
 
 		var strava_activities = $.getJSON(query, function(data) {
-			orgActivities = L.geoJson(data, {
-			    style: actStyle,
-					onEachFeature: onEachFeatureAct
+			walk_act = L.geoJson(data, {
+			    style: walk_lineStyle,
+					onEachFeature: onEachFeatureAct,
+					filter: function(feature, layer){
+						return feature.properties.type == "Walk";
+					}
+			// }).addTo(map);
+			})
+			run_act = L.geoJson(data, {
+			    style: run_lineStyle,
+					onEachFeature: onEachFeatureAct,
+					filter: function(feature, layer){
+						return feature.properties.type == "Run";
+					}
+			// }).addTo(map);
+			})
+			road_act = L.geoJson(data, {
+					style: road_lineStyle,
+					onEachFeature: onEachFeatureAct,
+					filter: function(feature, layer){
+						return feature.properties.type_extended == "Road Cycling";
+					}
+			// }).addTo(map);
+			})
+			mtb_act = L.geoJson(data, {
+					style: mtb_lineStyle,
+					onEachFeature: onEachFeatureAct,
+					filter: function(feature, layer){
+						return feature.properties.type_extended == "Mountain Bike";
+					}
+			// }).addTo(map);
 			})
 		})
 		.done(function() {
-			// actLayerGroup = L.layerGroup([mtb_act,road_act,run_act,walk_act])
-			// actLayerGroupfiltered = L.layerGroup([mtb_act,road_act,run_act,walk_act]).addTo(map);
-			// layerGroupDict = {
-			// 	"MTB": mtb_act,
-			// 	"Road":road_act,
-			// 	"Walk":walk_act,
-			// 	"Run":run_act
-			// };
-			originalGroup = L.layerGroup([orgActivities])
-			filteredGroup = L.layerGroup([orgActivities]).addTo(map);
+			actLayerGroup = L.layerGroup([mtb_act,road_act,run_act,walk_act])
+			actLayerGroupfiltered = L.layerGroup([mtb_act,road_act,run_act,walk_act]).addTo(map);
+			layerGroupDict = {
+				"MTB": mtb_act,
+				"Road":road_act,
+				"Walk":walk_act,
+				"Run":run_act
+			};
 			map.spin(false);
 		});
-
-
-		// var strava_activities = $.getJSON(query, function(data) {
-		// 	walk_act = L.geoJson(data, {
-		// 	    style: walk_lineStyle,
-		// 			onEachFeature: onEachFeatureAct,
-		// 			filter: function(feature, layer){
-		// 				return feature.properties.type == "Walk";
-		// 			}
-		// 	// }).addTo(map);
-		// 	})
-		// 	run_act = L.geoJson(data, {
-		// 	    style: run_lineStyle,
-		// 			onEachFeature: onEachFeatureAct,
-		// 			filter: function(feature, layer){
-		// 				return feature.properties.type == "Run";
-		// 			}
-		// 	// }).addTo(map);
-		// 	})
-		// 	road_act = L.geoJson(data, {
-		// 			style: road_lineStyle,
-		// 			onEachFeature: onEachFeatureAct,
-		// 			filter: function(feature, layer){
-		// 				return feature.properties.type_extended == "Road Cycling";
-		// 			}
-		// 	// }).addTo(map);
-		// 	})
-		// 	mtb_act = L.geoJson(data, {
-		// 			style: mtb_lineStyle,
-		// 			onEachFeature: onEachFeatureAct,
-		// 			filter: function(feature, layer){
-		// 				return feature.properties.type_extended == "Mountain Bike";
-		// 			}
-		// 	// }).addTo(map);
-		// 	})
-		// })
-		// .done(function() {
-		// 	actLayerGroup = L.layerGroup([mtb_act,road_act,run_act,walk_act])
-		// 	actLayerGroupfiltered = L.layerGroup([mtb_act,road_act,run_act,walk_act]).addTo(map);
-		// 	layerGroupDict = {
-		// 		"MTB": mtb_act,
-		// 		"Road":road_act,
-		// 		"Walk":walk_act,
-		// 		"Run":run_act
-		// 	};
-		// 	map.spin(false);
-		// });
 
 // see http://duspviz.mit.edu/web-map-workshop/leaflet-javascript-interactions/
 // https://stackoverflow.com/questions/37023790/leaflet-create-layers-from-geojson-properties

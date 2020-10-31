@@ -1,11 +1,11 @@
 from sqlalchemy import create_engine, or_
 from sqlalchemy.orm import sessionmaker
 # from settings import dbcon
-from application.models_PDF import beaches, waterQualityMD5, stateStandards, waterQuality
+from application.models_WaterQual import beaches, waterQualityMD5, stateStandards, waterQuality
 import os
 from datetime import datetime
 from application import application
-
+from sqlalchemy import func as sqlfunc
 
 def createSession():
     engine = create_engine(os.environ.get("DBCON"))
@@ -116,3 +116,50 @@ def insertWaterQual(beachDict, md5_fk):
     session.commit()
     session.close()
     print("Data added to water quality table!")
+
+
+def getBeachWaterQual():
+    """
+    Queries Postgres AWS RDS to return the most recent water quality report data for each beach that is tested in SB
+    County.
+
+    Data are spread across tables with mapped relationships.
+
+    This query joins the relevant tables and uses "distinct" on the waterQuality beach ID field, selecting only one
+    record per beach, then "order_by" is used on the joined MD5 table to grab only the most recent record per beach.
+
+    :return: List:
+        Nested lists containing SQL Alchemy query results:
+            3 query result objects:
+                waterQuality, waterqualityMD5 beaches
+            1 string:
+                geometry type of associated beach
+            2 floats:
+                x and y coordinates of the associated beach
+    """
+    session = createSession()
+    records = session.query(waterQuality, waterQualityMD5, beaches, sqlfunc.ST_GeometryType(beaches.geom),
+                               sqlfunc.st_x(beaches.geom), sqlfunc.st_y(beaches.geom)) \
+        .join(waterQualityMD5) \
+        .join(beaches) \
+        .distinct(waterQuality.beach_id) \
+        .order_by(waterQuality.beach_id, waterQualityMD5.insdate.desc()).all()
+    return records
+
+
+def getStandards():
+    """
+    Get the state health standards for ocean water quality tests.
+
+    Returns
+    -------
+    recDict : Dictionary
+        Dict of State health standards, with the standard name as the keys and values as values.
+
+    """
+    session = createSession()
+    records = session.query(stateStandards).all()
+    recDict = {}
+    for i in records:
+        recDict[i.Name] = i.StandardMPN
+    return recDict

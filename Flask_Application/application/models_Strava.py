@@ -28,7 +28,7 @@ class sub_update(Base):
     id = Column(Integer, primary_key=True)
     aspect = Column(String)
     event_time = Column(DateTime)
-    object_id = Column(Integer)
+    object_id = Column(BigInteger)
     object_type = Column(String)
     owner_id = Column(Integer)
     subscription_id = Column(Integer)

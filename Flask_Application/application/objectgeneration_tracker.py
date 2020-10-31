@@ -9,7 +9,7 @@ Created on Mon Jun 22 19:29:11 2020
 @author: Gavin Leavitt
 """
 
-from application import app, models, db
+from application import app, models_tracker, db
 from application import functions as func
 from application import script_config as dbconfig
 
@@ -35,9 +35,9 @@ def gpstrackobj(data):
     tracks = func.handletracks(coordinates, times["Date"], data['Provider'])
     print(f"!! tracks result is: {tracks}")
     if tracks["activity"] == "Yes":
-        model = models.gpstracks(timestamp_epoch= times['timestamp_e'],timeutc=data['Time_UTC'],date=times["Date"],
-                                 startstamp=times['timestart'],androidid=data['Android_ID'],serial=data['Serial'],
-                                 profile=data['Profile'],length=tracks['length'], gpsid=None, geom=tracks['Linestring'])
+        model = models_tracker.gpstracks(timestamp_epoch= times['timestamp_e'], timeutc=data['Time_UTC'], date=times["Date"],
+                                         startstamp=times['timestart'], androidid=data['Android_ID'], serial=data['Serial'],
+                                         profile=data['Profile'], length=tracks['length'], gpsid=None, geom=tracks['Linestring'])
     else:
         model = None
     return {"model":model,"activity":tracks["activity"]}
@@ -63,14 +63,14 @@ def newgpsrecord(data,actStatus):
     geomdat = (f"SRID={dbconfig.settings['srid']};POINT({data['Longitude']} {data['Latitude']})")
     querydat = func.queries(geomdat)
     times = func.converttime(data['Timestamp'],data['Start_timestamp'])
-    model = models.gpsdatmodel(lat=data['Latitude'], lon=data['Longitude'], satellites=int(data['Satellites']),
-        altitude=float(data['Altitude']), speed=float(data['Speed']),accuracy=data['Accuracy'].split(".")[0],
-        direction=data['Direction'].split(".")[0], provider=data['Provider'],
-        timestamp_epoch= times['timestamp_e'], timeutc=data['Time_UTC'],date=times['Date'], startstamp=times['timestart'],
-        battery=data['Battery'].split(".")[0], androidid=data['Android_ID'],serial=data['Serial'], profile=data['Profile'].replace("+"," "),
-        hhop=func.string_to_none((data['hdop'])), vdop=func.string_to_none((data['vdop'])), pdop=func.string_to_none((data['pdop'])),
-        activity = actStatus,travelled=data['Dist_Travelled'].split(".")[0],
-        AOI = querydat['AOI'], city = querydat['city'], county = querydat['county'], nearestroad = querydat['road'], dist_nearestroad = querydat['dist_road'],
-        nearesttrail = querydat['trail'], dist_nearesttrail = querydat['dist_trail'],
-        geom=geomdat)
+    model = models_tracker.gpsdatmodel(lat=data['Latitude'], lon=data['Longitude'], satellites=int(data['Satellites']),
+                                       altitude=float(data['Altitude']), speed=float(data['Speed']), accuracy=data['Accuracy'].split(".")[0],
+                                       direction=data['Direction'].split(".")[0], provider=data['Provider'],
+                                       timestamp_epoch= times['timestamp_e'], timeutc=data['Time_UTC'], date=times['Date'], startstamp=times['timestart'],
+                                       battery=data['Battery'].split(".")[0], androidid=data['Android_ID'], serial=data['Serial'], profile=data['Profile'].replace("+"," "),
+                                       hhop=func.string_to_none((data['hdop'])), vdop=func.string_to_none((data['vdop'])), pdop=func.string_to_none((data['pdop'])),
+                                       activity = actStatus, travelled=data['Dist_Travelled'].split(".")[0],
+                                       AOI = querydat['AOI'], city = querydat['city'], county = querydat['county'], nearestroad = querydat['road'], dist_nearestroad = querydat['dist_road'],
+                                       nearesttrail = querydat['trail'], dist_nearesttrail = querydat['dist_trail'],
+                                       geom=geomdat)
     return model

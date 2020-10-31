@@ -62,7 +62,7 @@ db = SQLAlchemy(app)
 # migrate = Migrate(app, db)
 
 # Imports from the application flask object have to be after flask application is initialized to avoid circular imports
-from application import routes, api_routes, models, parsePDF, StravaWebHook, TestingandDevelopmentRoutes
+from application import routes, routes_api, models_tracker, parsePDF_WaterQual, StravaWebHook, TestingandDevelopmentRoutes
 
 sched = BackgroundScheduler(daemon=True, timezone=utc)
 
@@ -71,7 +71,7 @@ try:
     # sched.add_job(parsePDF.pdfjob, trigger='cron', hour='9', minute='30')
     # sched.add_job(parsePDF.pdfjob, trigger='cron', hour='15', minute='37')
     # Trigger at 4:30 pm UTC, 9:30 PST
-    sched.add_job(parsePDF.pdfjob, trigger='cron', hour='16', minute='30')
+    sched.add_job(parsePDF_WaterQual.pdfjob, trigger='cron', hour='16', minute='30')
     # Trigger every minute
     # sched.add_job(parsePDF.pdfjob, 'cron', minute='*')
     sched.start()

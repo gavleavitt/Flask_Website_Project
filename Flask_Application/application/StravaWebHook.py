@@ -60,6 +60,10 @@ def handle_sub_update(client, updateContent):
     update = client.handle_subscription_update(updateContent)
     application.logger.debug(f"Update model is {update}")
     application.logger.debug(f"Update model dir is {dir(update)}")
+    try:
+        application.logger.debug(f"Update event time dir is {dir(update.event_time)}")
+    except:
+        pass
     # Iterate over update model, should only be 1 object
     # Verify that info is from Strava and has correct content, and
     if update.owner_id in DQS.getAthleteList() and update.subscription_id in DQS.getSubIdList():
