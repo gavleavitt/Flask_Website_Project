@@ -45,9 +45,9 @@
 	<!-- leaflet Ajax JS-->
 	<script src="{{ url_for('static', filename='js/leaflet.ajax.min.js') }}"></script>
 	<!-- Custom local javascript functions -->
-	<script src="{{ url_for('static', filename='js/customfunctions.js') }}"></script>
+	<script src="{{ url_for('static', filename='js/customfunctions_WaterQuality.js') }}"></script>
 	<!-- Custom CSS -->
-	<link rel="stylesheet" href="{{ url_for('static', filename='css/customCSS_beaches.css') }}">
+	<link rel="stylesheet" href="{{ url_for('static', filename='css/customCSS_WaterQuality.css') }}">
 	<!-- Search CSS-->
 	<link rel="stylesheet" href="{{ url_for('static', filename='css/leaflet-search.src.css') }}">
 	<!-- Search JS -->
@@ -180,6 +180,11 @@
 			modal.style.display = "block";
 		}
 
+		// see https://github.com/Leaflet/Leaflet/issues/4811
+		// calculatues window size, used for determining if the user's screen is small
+		const windowWidth = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
+		const windowHeight = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight;
+		const windowArea = windowWidth * windowHeight;
 
 		//Set email address using Javascript, harder for crawlers to grab
 		var email = "gav" + "lea" + "web" + "@g" + "mail" + ".com";
@@ -201,12 +206,14 @@
 		// intilize map with basemap:
 		var map = L.map('map',
 			{layers: [osm]}).setView([34.41,-119.86],12);
+		// Load JSON data from Flask Jinja template
 		var waterquality_geojson = {{beachgeojson|tojson}}
 		var standards = {{standards|tojson}}
-		//Add flaticon attribution
+		// Add flaticon attribution
 		map.attributionControl.addAttribution("Icons made by <a href='https://www.flaticon.com/authors/freepik' title='Freepik'>Freepik</a> taken from <a href='https://www.flaticon.com/' title='Flaticon'> www.flaticon.com</a> and edited by Gavin Leavitt")
+		// Add beach report records as geoJSON to map
 		beachreports = L.geoJSON(waterquality_geojson, {
-			//Create custom icons for each point, depending on its open status
+		// Create custom icons for each point, depending on its open status
 			pointToLayer: function(feature, latlng){
 				if (feature.properties.BeachStatus == "Open"){
 					var beach_icon = L.icon({
@@ -224,9 +231,10 @@
 						iconSize: [50, 50]
 					});
 				}
+				// Add marker for each beach
 				return L.marker(latlng,{icon: beach_icon});
 			},
-			//Populate popup window text for each feature
+			// Populate popup window text for each feature
 			onEachFeature: function(feature,layer){
 				layer.bindPopup(
 					'<div class="spanbotbord"><b>' + feature.properties.Name + '</b></div>' +
@@ -240,18 +248,45 @@
 					'<br><span><b>*</b>Results are given as MPN (most probable number), an approximation of bacteria per 100 ml of water.<span>' +
 					'<br><span><b>**</b>State Health Standards are enclosed with parentheses, (), as MPN.</span>'
 				)
+				// see https://github.com/Leaflet/Leaflet/issues/4811
+				// Query Leaflet control/UI elements
+				// leaflet-top elements
+				const leafletTopElements = document.querySelectorAll('div.leaflet-top');
+				// leaflet-bottom elements
+				const leafletBottomElements = document.querySelectorAll('div.leaflet-bottom');
+				// Pop-up control for small screen sizes
+				if (windowArea < 315000 ) {
+						// Hide leaflet controls when pop-up opens
+						layer.on('popupopen', function() {
+								leafletTopElements.forEach(function(element) {
+										element.style.opacity = 0;
+								});
+
+								leafletBottomElements.forEach(function(element) {
+										element.style.opacity = 0;
+								});
+						});
+						// Display Leaflet controls when pop-up closes
+						layer.on('popupclose', function() {
+								leafletTopElements.forEach(function(element) {
+										element.style.opacity = 1;
+								});
+
+								leafletBottomElements.forEach(function(element) {
+										element.style.opacity = 1;
+								});
+						});
+				}
 			}
 		}).addTo(map);
 
-		//var server_livepts = $SCRIPT_ROOT + '/api/v0.1/getgeojson'
-		//var server_tracks = $SCRIPT_ROOT + '/api/v0.1/gettracks'
-		// Basemaps dictionary
+		// Basemaps dictionary used for layer control
 		var basemaps = {
 			"<span>Streets Night (Vector)</span>": streetsnight,
 			"<span>Imagery (Raster)</span>": imageryesri,
 			"<span>OSM (Vector)</span>": osm
 		};
-		//Styling for text of layers
+		// Styling for text of layers
 		var layers = {
 			"<span><b>Beaches</b></span>":beachreports
 		}
@@ -292,11 +327,6 @@
 		//These will be added to the legend object using .onAdd when the container is added to the DOM
 		legend.onAdd = function (map) {
 	    var div = L.DomUtil.create('div', 'infolegend');
-			//div.innerHTML = "<span class='legendtext'><b>Beach Status</b><br>Open<img src='static/images/beach_open.svg' class='legendicon' width='20' height='20'/></span>";
-			// div.innerHTML = "<span class='legendheader spanbotbord'><b>Beach Status</b><span>"
-			// div.innerHTML += "<br><img src='static/images/beach_open.svg' class='legendicon'><span class='legendtext'><b>Open</b></span>";
-			// div.innerHTML += "<br><img src='static/images/beach_warning.svg' class='legendicon'><span class='legendtext'><b>Warning</b></span>";
-			// div.innerHTML += "<br><img src='static/images/beach_closed.svg' class='legendicon'><span class='legendtext'><b>Closed</b></span>";
 			div.innerHTML =  "<div class='legendheader spanbotbord'><b>Beach Status</b><span>"
 			div.innerHTML += "<div><img src='../static/images/beach_open.svg'    class='legendicon'><span class='legendtext'>Open</span></div>";
 			div.innerHTML += "<div><img src='../static/images/beach_warning.svg' class='legendicon'><span class='legendtext'>Warning</span></div>";
@@ -305,9 +335,10 @@
 		};
 		// Add legend to map
 		legend.addTo(map);
-
+		// set variable for the date of the most recent set of records
 		var recentrecord = {{recentdate|tojson}}
-		document.getElementById("Title").innerHTML += "<span style='font-size: 12px;'>(Last updated " + recentrecord + ")<span>"
+		// Set last updated text using the most recent record date
+		document.getElementById("Title").innerHTML += "<div id='last-updated'>(Last updated " + recentrecord + ")</div>"
 	</script>
 </body>
 </html>

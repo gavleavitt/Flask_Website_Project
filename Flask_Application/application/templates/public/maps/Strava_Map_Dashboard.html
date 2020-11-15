@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<!-- <meta name="viewport" content="width=device-width, initial-scale=1"> -->
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Strava Activity Map</title>
+	<!-- CDN files-->
+	<!-- Leaflet css-->
+	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css"/>
+	<!-- Other imports! -->
+	<!-- leaflet Javascript-->
+	<script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js"></script>
+	<!--jquery adds "$." functionality-->
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+	<!-- Load Esri Leaflet from CDN, stable -->
+	<script src="https://unpkg.com/esri-leaflet@2.4.0/dist/esri-leaflet.js"
+	integrity="sha512-kq0i5Xvdq0ii3v+eRLDpa++uaYPlTuFaOYrfQ0Zdjmms/laOwIvLMAxh7cj1eTqqGG47ssAcTY4hjkWydGt6Eg=="
+	crossorigin=""></script>
+	<!-- Esri Leaflet and Esri Leaflet Vector, experimential -->
+	<script src="https://unpkg.com/esri-leaflet/dist/esri-leaflet.js"></script>
+	<script src="https://unpkg.com/esri-leaflet-vector/dist/esri-leaflet-vector.js"></script>
+	<!-- Esri vector tiles relies on maxbo gl -->
+	<link rel="stylesheet" href="https://unpkg.com/mapbox-gl/dist/mapbox-gl.css"/>
+	<script src="https://unpkg.com/mapbox-gl/dist/mapbox-gl.js"></script>
+
+	<!-- load the latest release from the cdn automatically -->
+	<script src="https://unpkg.com/esri-leaflet-vector/dist/esri-leaflet-vector-debug.js"></script>
+
+	<!-- Leaflet Omnivore -->
+	<script src='//api.tiles.mapbox.com/mapbox.js/plugins/leaflet-omnivore/v0.3.1/leaflet-omnivore.min.js'></script>
+
+	<!-- Leaflet Table CSS -->
+	<!-- <link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.3/leaflet.css" /> -->
+	<!-- Leaflet Table JS -->
+	<!-- <script src="http://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.3/leaflet.js"></script> -->
+
+	<!-- Locate Control, geolocation -->
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"/>
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet.locatecontrol@0.72.0/dist/L.Control.Locate.min.css" />
+	<script src="https://cdn.jsdelivr.net/npm/leaflet.locatecontrol@0.72.0/dist/L.Control.Locate.min.js" charset="utf-8"></script>
+
+	<!-- Date range picker -->
+	<script type="text/javascript" src="https://cdn.jsdelivr.net/jquery/latest/jquery.min.js"></script>
+	<script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+	<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+	<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+
+
+	<!-- Local static files-->
+	<!-- leaflet Mouset Position JS-->
+	<!-- leaflet Ajax JS-->
+	<script src="{{ url_for('static', filename='js/leaflet.ajax.js') }}"></script>
+	<!-- leaflet Ajax JS-->
+	<script src="{{ url_for('static', filename='js/leaflet.ajax.min.js') }}"></script>
+	<!-- Custom local javascript functions -->
+	<script src="{{ url_for('static', filename='js/customfunctions_StravaMap.js') }}"></script>
+	<!-- Custom CSS -->
+	<link rel="stylesheet" href="{{ url_for('static', filename='css/customCSS_strava_map.css') }}">
+	<!-- Search CSS-->
+	<link rel="stylesheet" href="{{ url_for('static', filename='css/leaflet-search.src.css') }}">
+	<!-- Search JS -->
+	<script src="{{ url_for('static', filename='js/leaflet-search.src.js') }}"></script>
+	<!-- Spin JS -->
+	<script src="{{ url_for('static', filename='js/spin/dist/spin.min.js') }}"></script>
+	<!-- leaflet spin JS -->
+	<script src="{{ url_for('static', filename='js/leaflet.spin.min.js') }}"></script>
+
+
+	<!-- Favicon links -->
+	<link rel="apple-touch-icon" sizes="180x180" href="/static/images/apple-touch-icon.png">
+	<link rel="icon" type="image/png" sizes="32x32" href="/static/images//favicon-32x32.png">
+	<link rel="icon" type="image/png" sizes="16x16" href="/static/images/favicon-16x16.png">
+	<link rel="manifest" href="/static/images//site.webmanifest">
+	<link rel="mask-icon" href="/static/images//safari-pinned-tab.svg" color="#5bbad5">
+	<meta name="msapplication-TileColor" content="#da532c">
+	<meta name="theme-color" content="#ffffff">
+
+	<style>
+	/*
+		body {
+				 padding: 0;
+				 margin: 0;
+		 }
+		 */
+	 </style>
+</head>
+<body>
+	<div class="container sansserif">
+		<div class="item titlediv">
+			<div id = "Title" class="titletext">Strava Activity Viewer</div>
+			<div class="filter-btn-group" id="act-filter-group">
+				<button class="filterbtn active-btn" onclick="actFilter('All')" id="All">Remove<br>Layers</button>
+				<button class="filterbtn" id="MTB">Mountain<br>Biking</button>
+				<button class="filterbtn" id="Road">Road<br>Rides</button>
+				<button class="filterbtn" id="Walk">Walks</button>
+				<button class="filterbtn" id="Run">Runs</button>
+			</div>
+			<div class="calendarSelect">
+				<div id="reportrange">
+				    <i class="fa fa-calendar"></i>&nbsp;
+				    <span id="display-date"></span> <i class="fa fa-caret-down"></i>
+				</div>
+				<!-- <button id="reset" onclick="resetAll()">Reset All</button> -->
+		</div>
+			<!-- See this for basic popup box: https://html-online.com/articles/simple-popup-box/ -->
+			<!-- https://www.w3schools.com/howto/howto_css_modals.asp -->
+			<div class="popupbuttontext">
+				<div class="map-home"><a class="home-link" href="/">Home</a></div>
+				<button class="headerbtn" id="btn">Map Details</button>
+			</div>
+			<!-- Modal -->
+			<!-- The Modal -->
+			<div id="myModal" class="modal">
+			  <div class="modal-content-container">
+			    <!-- <div class="close">&times;</div> -->
+					<div class="close">&times;</div>
+					<div class="modal-text">
+						<p style="margin-top:0px;"><b>Map Details</b>
+						<br>
+							This map displays my up-to-date Strava activities, which can be filtered by activity type and date. Additional activity details are available in pop-up windows.
+						</p>
+						<p>
+							The data displayed here have been queried from the Strava API and added to a personal Postgres/PostGIS database. All my activites are present in this dataset. Historic data were bulk downloaded and new Strava activity uploads are automatically downloaded from the Strava API based on webhook subscription updates. Activity details and activity stream data (GPS coordinates) are queried and processed to obfuscate private locations and simplify data.
+						</p>
+						<p>
+						Visit the <a href=#>project page</a> for this map to see a full process description.
+						</p>
+						<p><b>Contact Me</b>
+						<br>
+						If you have any questions, feature suggestions, comments, or notice any errors/bugs feel free to email me at <span id="emailaddr"></span>
+						</p>
+						<p>
+							You can see my other projects under the <a href=/#goto-proj>projects</a> section of this site.
+						</p>
+						<p>You can visit my GitHub repo for this project and others <a href=https://github.com/gavleavitt/Flask_Website_Project target="_blank">here</a>.
+						</p>
+					</div>
+			 </div>
+		 </div>
+			<!-- <div class="popupbuttontext"> Map Details
+			</div> -->
+		</div>
+	  <div class="item map-panel detail-panel-col">
+			<div id='map'>
+			</div>
+	</div>
+	<script>
+		// Modal from https://www.w3schools.com/howto/tryit.asp?filename=tryhow_css_modal
+		// Get the modal
+
+		var modal = document.getElementById("myModal");
+
+		// Get the button that opens the modal
+		var btn = document.getElementById("btn");
+
+		// Get the <span> element that closes the modal
+		var span = document.getElementsByClassName("close")[0];
+
+		// When the user clicks the button, open the modal
+		btn.onclick = function() {
+		  modal.style.display = "block";
+		}
+
+		// When the user clicks on <span> (x), close the modal
+		span.onclick = function() {
+		  modal.style.display = "none";
+		}
+
+		// When the user clicks anywhere outside of the modal, close it
+		window.onclick = function(event) {
+		  if (event.target == modal) {
+		    modal.style.display = "none";
+		  }
+		}
+		// Open modal when window loads
+		window.onload = function(){
+			modal.style.display = "block";
+			loadActivityListener();
+		}
+
+		// Set default start and end times of date range picker
+		var start = moment('2014-01-01');
+		var end = moment();
+
+		// daterangepicker taken from  https://www.daterangepicker.com/
+		$(function() {
+
+	    // var start = moment().subtract(29, 'days');
+			// var start = moment('2014-01-01');
+	    // var end = moment();
+
+			// Set format of dates
+	    function cb(start, end) {
+	        $('#reportrange span').html(start.format('MMMM D, YYYY') + ' - ' + end.format('MMMM D, YYYY'));
+	    }
+
+	    $('#reportrange').daterangepicker({
+	        startDate: start,
+	        endDate: end,
+					// Show year/month dropdown options when using custom range
+					"showDropdowns": true,
+					// Minimum date that can be selected, no records before this time
+					"minDate":"01/01/2014",
+					// Maximum date that can be selected, set to current day
+					"maxDate": String(moment().format('MM/DD/YYYY')),
+					// "maxYear":"11/18/2020",
+					"opens": "center",
+					// Stops input from auto updating, no entirely sure what this means but leaving it enabled caused odd/annoying behavior
+					// "autoUpdateInput": false,
+					"autoUpdateInput": true,
+					// Unlink start and end calendars so they don't show the same year/month changed. Leaving it on true creates confusion on whether or not the date was selected properly
+					"linkedCalendars": false,
+					// Set preset date ranges to select from
+					ranges: {
+						'All Time (default)': [moment('2014-01-01'), moment().endOf('year')],
+	          'Today': [moment(), moment()],
+	          'Last 7 Days': [moment().subtract(6, 'days'), moment()],
+	          'Last 30 Days': [moment().subtract(29, 'days'), moment()],
+	          'This Month': [moment().startOf('month'), moment().endOf('month')],
+						'This Year': [moment().startOf('year'), moment().endOf('year')]
+	           // 'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+	        }
+	    }, cb);
+			// Initlizes something, not sure
+	    cb(start, end);
+
+		});
+
+		// Callback function that fires when user uses picker, filters activity display
+		$("#reportrange").on('apply.daterangepicker', function(ev, picker) {
+			// Formats data in a proper date format
+			userStart = picker.startDate.format()
+			userEnd = picker.endDate.format()
+			// clear existing layers
+			filteredGroup.clearLayers()
+			// Re-add active layers with new daterange filter applied
+			addActiveLayers(picker.startDate.format(), picker.endDate.format())
+		});
+
+		//Set email address using Javascript, harder for crawlers to grab
+		var email = "gav" + "lea" + "web" + "@g" + "mail" + ".com";
+		document.getElementById("emailaddr").innerHTML = "<a href='mailto:" + email + "'>" + email + "</a>"
+		// Make basemaps
+		var streetsnight = L.esri.Vector.basemap('StreetsNight');
+		var imageryesri = L.esri.basemapLayer('Imagery');
+		var osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+			 attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'})
+		// intilize map with basemap:
+		var map = L.map('map',
+			{layers: [osm]}).setView([34.41,-119.86],12);
+		var actlimit = "1000"
+
+		jsonDataURL = "/static/json/publicActivities.json"
+
+		//Loading spinner
+		map.spin(true);
+
+
+
+		// Add control to map
+		// map.addControl(searchControl);
+
+		// see http://bl.ocks.org/marcellobenigno/9b09c24850def14250141dfe89f9a296
+		// see https://docs.mapbox.com/mapbox.js/example/v1.0.0/omnivore-kml-tooltip/
+		// Create a empty geoJSON with style and popup settings.
+		var orgActivities = L.geoJson(null, {
+	    style: actStyle,
+			onEachFeature: onEachFeatureAct
+		});
+
+		// Use Leaflet omnivore to import/process topoJSON data. This function passes the loaded data into a existing empty geoJSON layer.
+		var originalTopoData = omnivore.topojson(jsonDataURL, null, orgActivities)
+		.on('ready', function() {
+			// After data have loaded, create a original group layer containing all data, this won't be filtered/changed and is kept to hold original data
+			originalGroup = L.layerGroup([orgActivities]);
+			// Create new raw geoJSON dataset using the original, un-aletered, geoJSON layer as dump source.
+			// There may be a better method than this, but I believe that L.geoJSON can only take raw geoJSON data, not an existing geoJSON layer.
+			// This requires a dump of geoJSON data into a new variable since the raw geoJSON data doesn't get stored automatically, its converted into a geoJSON layer.
+			// This may cause performance issues on some browsers/devices since this is effectively storing another copy of the data in addition to what's being displayed
+			rawGeoJSON = orgActivities.toGeoJSON()
+			// Create a filtered group layer and add to map, this layer group will be changed using filters
+			filteredGroup = L.layerGroup([orgActivities]).addTo(map);
+			// create Leafet search for loaded geoJSON data
+			createSearchControl(filteredGroup);
+			map.spin(false);
+		})
+		.on('error', function() {
+			alert("Data failed to load, please try again later.")
+		})
+
+
+</script>
+</body>
+</html>

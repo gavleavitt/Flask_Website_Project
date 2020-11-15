@@ -10,7 +10,8 @@ emailpassword = os.environ.get("EMAILPASS")
 emailaddr = os.environ.get("EMAILADDR")
 emailtoaddr = os.environ.get("EMAILTOADDR")
 
-def senderroremail(script, exceptiontype, body):
+
+def sendErrorEmail(script, exceptiontype, body):
     """
     Called from try/except blocks, sends an email over smtp with exception details. Sender and receiver details are
     pulled from environmental variables.

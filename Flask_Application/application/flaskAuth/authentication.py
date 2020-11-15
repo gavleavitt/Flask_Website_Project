@@ -8,13 +8,21 @@ Created on Fri May 29 13:32:44 2020
 @author: Gavin Leavitt
 """
 from werkzeug.security import generate_password_hash, check_password_hash
-from application import DB_Queries as DBQ
 from flask_httpauth import HTTPBasicAuth
-
+from sqlalchemy import create_engine, text
+from sqlalchemy.orm import sessionmaker
+import os
+from application.flaskAuth.modelsAuth import Roles, User
+from application import Session
 # Sets up auth object, is modified by decorators further down the script and called when a 
 # user attempts to authenticate when visiting a route.
 auth = HTTPBasicAuth()
 
+# def createSession():
+#     engine = create_engine(os.environ.get("DBCON"))
+#     Session = sessionmaker(bind=engine)
+#     session = Session()
+#     return session
 
 @auth.get_user_roles
 def get_user_roles(username):
@@ -33,7 +41,7 @@ def get_user_roles(username):
         List of strings containing the roles of the provided username, if any.
 
     """
-    roles = DBQ.getroles(username)
+    roles = getroles(username)
     # If roles contains values return it, otherwise return nothing, which will cause the role check to fail,
     # blocking access to the resource
     if roles != None:
@@ -66,11 +74,78 @@ def verify_password(username, password):
         denying access to the resource. 
 
     """
-    hashpass = DBQ.gethashpass(username)
+    hashPass = getHashPass(username)
     # The != None expression may not be needed, the second if statement will not be entered
     # unless the username and password combo are right, a user will not be given any info if just
     # the username is correct and password is incorrect
-    if (hashpass != None):
-        if username in hashpass.keys() and check_password_hash(
-                hashpass[username], password):
+    if (hashPass != None):
+        if username in hashPass.keys() and check_password_hash(
+                hashPass[username], password):
             return username
+
+def getroles(username):
+    """
+    Queries PostgreSQL database for user roles using username supplied by Flask HTTP Basic Auth.
+
+    Parses roles into a list.
+
+    Parameters
+    ----------
+    username : String
+        Username as provided by user in the auth prompt.
+
+    Returns
+    -------
+    res : List
+        List of strings containing user roles.
+        All roles need to be returned.
+    None if empty results, user not in database.
+    """
+    session = Session()
+    query = session.query(Roles.roles).filter(Roles.user == username).all()
+    res = ()
+    # Add query object results to tuple
+    for row in query:
+        res += row
+    if len(res) == 0:
+        res = None
+    # Roles are stored as comma seperated strings
+    # Convert result tuple into a list of strings split by commas
+    else:
+        res = list(res)
+        res = res[0].split(",")
+    session.close()
+    return res
+
+
+def getHashPass(username):
+    """
+    Get the hashed password from PostgreSQL database using the username supplied by HTTP Basic Auth.
+
+    Parameters
+    ----------
+    username : String
+        Username as provided by user in the auth prompt.
+
+    Returns
+    -------
+    res_dict : dictionary
+        keys:
+            username (string, parameter)
+         value:
+            hashed password (string)
+            None (if no matching user in table)
+
+    A dictionary is returned to maintain connection between username supplied and password.
+    """
+    session = Session()
+    query = session.query(User.hashpass).filter(User.user == username).all()
+    res_dict = {}
+    for row in query:
+        res_dict[username] = row.hashpass
+    session.close()
+    if len(res_dict) == 0:
+        return None
+    else:
+        return res_dict
+

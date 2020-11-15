@@ -69,24 +69,41 @@
 			<div class="separatorbar-title"></div>
 			<iframe src="/maps/stravamap" style="border-radius:10px;"></iframe>
 			<div class="fullsize-link">
-				<a href="/maps/sbcoceanwaterquality" target="_blank">View fullpage map</a>
+				<a href="/maps/stravamap" target="_blank">View fullpage map</a>
 			</div>
 			<div class="separatorbar-title"></div>
-			<h2>
-				Summary
-			</h2>
-			<p>
-				This map displays my up-to-date Strava activities, which can be filtered by activity type and date. Additional activity details are available in pop-up windows.
-			</p>
-			<p>
-				The data displayed here have been queried from the Strava API and added to a personal Postgres/PostGIS database. All my activites are present in this dataset. Historic data were bulk downloaded and new Strava activity uploads are automatically downloaded from the Strava API based on webhook subscription updates. Activity details and activity stream data (GPS coordinates) are queried and processed to obfuscate private locations and simplify data.
-			</p>
-			<h3>Accessing Activities on Strava API - stravalib</h3>
+			<span id="strava-summary" class="goto"></span>
+			<h2><a href=#strava-summary>Summary</a></h2>
 				<p>
-					The Python library <a href=https://pythonhosted.org/stravalib/>stravalib</a> provides useful functions to query the Strava API and parse results into Python objects. Instead of using the library's documentation for authentication, I ended up following<a href=https://medium.com/analytics-vidhya/accessing-user-data-via-the-strava-api-using-stravalib-d5bee7fdde17> this guide</a> on Medium Analytics Vidhya which was clearer and provided example code for refreshing the access token. This tutorial allowed me to authenticate and grant access to my Strava account once on my localhost then deploy the application to my AWS webserver without having to manually authenticate again.
+					This map displays my up-to-date Strava activities, which can be filtered by activity type and date. Additional activity details are available in pop-up windows.
+				</p>
+				<p style="border-bottom: 2px solid var(--bluecol); padding-bottom:10px;">
+					The data displayed here have been queried from the Strava API and added to a personal Postgres/PostGIS database. All my activities are present in this dataset. Historic data were bulk downloaded and new Strava activity uploads are automatically downloaded from the Strava API based on webhook subscription updates. Activity details and activity stream data (GPS coordinates) are queried and processed to obfuscate private locations and simplify data. Data are stored on the server in the TopoJSON format to drastically reduce file transfer size.
+				</p>
+				<div class="toc-container">
+					<p class="toc-title">Project Description Contents</p>
+					<ol class="toc-list">
+					  <li><a href="#access-activities-stravalib">Access Activities on Strava API - stravalib</a>
+					  <!-- <ul>
+					    <li><a href="#First_Sub_Point_1">1.1 First Sub Point 1</a></li>
+					    <li><a href="#First_Sub_Point_2">1.2 First Sub Point 2</a></li>
+					  </ul> -->
+					</li>
+					<li><a href="#obfuscate-location-geoalchemy">Obfuscate Sensitive Locations - SQLAlchemy/GeoAlchemy2</a></li>
+					<li><a href="#get-new-activities-webhook">Get New Activities - Strava API Webhook</a></li>
+					<li><a href="#prepare-leaflet-topojson">Prepare Data for Leaflet - TopoJSON</a></li>
+					<li><a href="#dynamically-filter-activities">Filter Activities Dynamically</a></li>
+					<li><a href="#date-filtering-picker">Date Filtering - Date Range Picker</a></li>
+
+					</ol>
+				</div>
+			<span id="access-activities-stravalib" class="goto"></span>
+			<h3><a href=#access-activities-stravalib>Access Activities on Strava API - stravalib</a></h3>
+				<p>
+					The Python library <a href=https://pythonhosted.org/stravalib/>stravalib</a> provides useful functions to query the Strava API and parse results into Python objects. Instead of using the library's documentation for authentication, I ended up following<a href=https://medium.com/analytics-vidhya/accessing-user-data-via-the-strava-api-using-stravalib-d5bee7fdde17> this guide</a> on Medium Analytics Vidhya which was clearer and provided example code for refreshing the access token. This tutorial allowed me to authenticate and grant access to my Strava account once on my localhost testing application then deploy the application to my AWS webserver without having to manually authenticate again.
 				</p>
 				<p>
-					This process uses the Pickle file created in the one-time authentication and is called for requests to the Strava API:
+					This process uses the Pickle file created in the one-time authentication and is called for all requests to the Strava API:
 					<pre><code>
 from application.stravalib.client import Client
 import os
@@ -94,46 +111,48 @@ import time
 import pickle
 
 def gettoken():
-  # Build empty stravalib client instance
-  client = Client()
-  # Load access token from the Pickle file
-  with open(os.path.join(app.root_path, 'access_token.pickle'), 'rb') as f:
-      access_token = pickle.load(f)
-  # Check if access token has expired
-  if time.time() > access_token['expires_at']:
-      # Use client ID, secret, and refresh token to generate a new access token with Strava API
-      refresh_response = client.refresh_access_token(client_id=os.getenv("STRAVA_CLIENT_ID"),
-                                                     client_secret=os.getenv("STRAVA_CLIENT_SECRET"),
-                                                     refresh_token=access_token['refresh_token'])
-      # Open Pickle file and update with new access token
-      with open(os.path.join(app.root_path, 'access_token.pickle'), 'wb') as f:
-          pickle.dump(refresh_response, f)
-      # Set new access token in client instance
-      client.access_token = refresh_response['access_token']
-      # Set refresh token in client instance
-      client.refresh_token = refresh_response['refresh_token']
-      # Set access token expiration time for client instance
-      client.token_expires_at = refresh_response['expires_at']
-  # Access token is still valid, set token in client instance
-  else:
-      client.access_token = access_token['access_token']
-      client.refresh_token = access_token['refresh_token']
-      client.token_expires_at = access_token['expires_at']
-  return client
+	# Build empty stravalib client instance
+	client = Client()
+	# Load access token from the Pickle file
+	with open(os.path.join(app.root_path, 'access_token.pickle'), 'rb') as f:
+	    access_token = pickle.load(f)
+	# Check if access token has expired
+	if time.time() > access_token['expires_at']:
+	    # Use client ID, secret, and refresh token to generate a new access token with Strava API
+	    refresh_response = client.refresh_access_token(client_id=os.getenv("STRAVA_CLIENT_ID"),
+	                                                   client_secret=os.getenv("STRAVA_CLIENT_SECRET"),
+	                                                   refresh_token=access_token['refresh_token'])
+	    # Open Pickle file and update with new access token
+	    with open(os.path.join(app.root_path, 'access_token.pickle'), 'wb') as f:
+	        pickle.dump(refresh_response, f)
+	    # Set new access token in client instance
+	    client.access_token = refresh_response['access_token']
+	    # Set refresh token in client instance
+	    client.refresh_token = refresh_response['refresh_token']
+	    # Set access token expiration time for client instance
+	    client.token_expires_at = refresh_response['expires_at']
+	# Access token is still valid, set token in client instance
+	else:
+	    client.access_token = access_token['access_token']
+	    client.refresh_token = access_token['refresh_token']
+	    client.token_expires_at = access_token['expires_at']
+	return client
 					</pre></code>
 				</p>
 				<p>
 					Now that I have full scope access to my account through the Strava API I can begin downloading activities. The API, and stravalib, offer a few different ways to download activities.
 					<ul>
 						<li>
-							<b>List Athlete Activities</b>, client.get_activities() using the after argument in stravalib, provides a list of activities after the argument date. However, this does not contain full activity details, only certain summary information is returned.
+							<b>List Athlete Activities.</b> client.get_activities() using the after argument, provides a list of activities after the argument date. However, this does not contain full activity details, only certain summary information is returned.
 						</li>
 						<li>
-						 	<b>Get Activity</b>, client.get_activities() using a activity ID argument in stravalib, provides full activity details. However, the polyline coordinate information is <a href = https://developers.strava.com/docs/>encoded</a>following the <a href=https://developers.google.com/maps/documentation/utilities/polylinealgorithm>Google Encoded Polyline Algorithm Format</a>.
+						 	<b>Get Activity.</b> client.get_activities() using a activity ID argument, provides full activity details. However, the polyline coordinate information is <a href = https://developers.strava.com/docs/>encoded</a> following the <a href=https://developers.google.com/maps/documentation/utilities/polylinealgorithm>Google Encoded Polyline Algorithm Format</a>.
 						 <li>
-						 	<b>Get Activity Streams</b>, client.get_activity_streams() in stravalib, allows access to the plain text recorded sensor data for a activity. This option provides access to a variety of sensors on your phone and external connected devices.
+						 	<b>Get Activity Streams.</b> client.get_activity_streams(), allows access to the plain text recorded sensor data for a activity. This option provides access to a variety of sensors on your phone and external connected devices.
 					 </li>
 					</ul>
+				</p>
+				<p>
 					There are also options to access routes, segments, efforts, and other account details.
 				</p>
 				<p>
@@ -143,261 +162,893 @@ def gettoken():
 					Use the <b>List Athlete Activities</b> after date method, set to before I started using Strava, to return the activity IDs for all my recorded activities, then generate a list using these IDs.
 					<pre><code>
 def getListIds(client, days):
-    """
-    Gets a list of all Strava Activity IDs since (days) ago from Strava API.
+  """
+  Gets a list of all Strava Activity IDs since (days) ago from Strava API.
 
-    Parameters
-    ----------
-    client. Stravalib model client object. Contains access token to strava API for the user.
-    days. Int. How many days to look back, queries all activities since this calculated date.
+  Parameters
+  ----------
+  client. Stravalib model client object. Contains access token to strava API for the user.
+  days. Int. How many days to look back, queries all activities since this calculated date.
 
-    Returns
-    -------
-    List. List of int IDs of all strava activities for the user.
-    """
-    # use current datetime and timedelta to calculate previous datetime
-    after = datetime.today() - timedelta(days=days)
-    # after = datetime(year=2019, month=8, day=1)
-    actList = []
-    # Get all activities since after time and add to list
-    acts = client.get_activities(after=after)
-    for i in acts:
-        actList.append(i.id)
-    return actList
+  Returns
+  -------
+  List. List of int IDs of all strava activities for the user.
+  """
+  # use current datetime and timedelta to calculate previous datetime
+  after = datetime.today() - timedelta(days=days)
+  # after = datetime(year=2019, month=8, day=1)
+  actList = []
+  # Get all activities since after time and add to list
+  acts = client.get_activities(after=after)
+  for i in acts:
+      actList.append(i.id)
+  return actList
 					</pre></code>
 				</p>
-				<p>
-					Iterate over activity ID list, passing each activity ID into <b>Get Activity</b> and <b>Get Activity Streams</b>. Parse results by structuring data, removing uninteresting/null details, calculating ancillary data, and combining GPS coordinate and time, provided as time since start of activity, into a PostGIS <a href=https://postgis.net/docs/ST_GeomFromEWKT.html>EWKT</a> LINESTRINGM format. Finally, insert these data into Postgres.
+				<p id="getFullDetails">
+					Iterate over activity ID list, passing each activity ID into <b>Get Activity</b> and <b>Get Activity Streams</b>. Parse results by structuring data, removing uninteresting/null details, calculating ancillary data, and combining GPS coordinate and time, provided as time since start of activity, into a PostGIS <a href=https://postgis.net/docs/ST_GeomFromEWKT.html>EWKT</a> LINESTRINGM format.
 					<pre><code>
 def getFullDetails(client, actId):
-    """
-    Gets the full details of Strava activities using get_activity() to query flat data and get_activity_streams() to get
-    GPS coordinates and times. Coordinates are formatted to be inserted in PostGIS following ST_GeomFromEWKT.
+  """
+  Gets the full details of Strava activities using get_activity() to query flat data and get_activity_streams() to get
+  GPS coordinates and times. Coordinates are formatted to be inserted in PostGIS following ST_GeomFromEWKT.
 
-    Parameters
-    ----------
-    client. Stravalib model client object. Contains access token to strava API for the user.
-    actId. Int. Activity ID.
+  Parameters
+  ----------
+  client. Stravalib model client object. Contains access token to strava API for the user.
+  actId. Int. Activity ID.
 
-    Returns
-    -------
-    Dict. Activity and coordinate information formatted to be inserted into Postgres/PostGIS.
-    """
+  Returns
+  -------
+  Dict. Activity and coordinate information formatted to be inserted into Postgres/PostGIS.
+  """
 
-    # Set logger to suppress debug errors, these messages aren't important and pollute the console
-    Log = logging.getLogger()
-    Log.setLevel('ERROR')
-    # Stream data to get from activity streams
-    types = ['time', 'latlng']
-    # Get activity details as a dictionary
-    act = client.get_activity(actId).to_dict()
-    # Get starttime and convert to datetime object
-    # starttime = datetime.fromisoformat(act['start_date'])
-    # Get the activity stream details for the activity id
-    stream = client.get_activity_streams(actId, types=types)
-    # Get athlete ID directly from API call, instead of digging into the nested result provided by get_activity
-    athId = client.get_athlete().id
-    # Extract latlng and time information from activity stream
-    latlng = stream['latlng'].data
-    time = stream['time'].data
-    linestringdat = []
-    wktList = []
-    # Iterate over time and latlng streams, combining them into a list containing sublists with lat, lng, time
-    for i in range(0, len(latlng)):
-        # Create new entry, swapping (lat, lon) to (lon, lat) then append time, provided as time since start of activity
-        ## as datetime UTC (time is provided as time
-        ## since start of the activity and is converted to datetime)
-        # newEntry = [latlng[i][1], latlng[i][0], (starttime + timedelta(seconds=time[i])).timestamp()]
-        newEntry = [latlng[i][1], latlng[i][0], time[i]]
-        # Append data as nested list
-        linestringdat.append(newEntry)
-        # Take newEntry list and create a string with a space delimiter between list items, add to list of wkt
-        # This formats data to be friendly with geoalchemy ST_GeomFromEWKT
-        wktList.append(" ".join(str(v) for v in newEntry))
-        # print(wktList)
-    # Format entire list to be friendly with geoalchemy ST_GeomFromEWKT
-    sep = ", "
-    wktstr = f"SRID=4326;LINESTRINGM({sep.join(wktList)})"
-    # Add lat, lng, time as geom key to dict
-    act['geom'] = linestringdat
-    act['actId'] = actId
-    act['geom_wkt'] = wktstr
-    # Add athlete id to dict
-    act['athlete_id'] = athId
-    # Extend type to detect road ride vs mtb
-    act['type_extended'] = None
-    # Calculate type of riding activity, using GearIDs
-    if act['gear_id'] in ["b4317610", "b2066194"]:
-        act['type_extended'] = "Mountain Bike"
-    elif act['gear_id'] == "b5970935":
-        act['type_extended'] = "Road Cycling"
-    # List of dictionary keys to remove, these are null or uninteresting
-    remove_keys = ['guid', 'external_id', 'athlete'
-                                          'location_city', 'location_state', 'location_country',
-                   'kudos_count', 'comment_count',
-                   'athlete_count', 'photo_count', 'total_photo_count', 'map', 'trainer', 'commute',
-                   'gear', 'device_watts', 'has_kudoed', 'best_efforts',
-                   'segment_efforts', 'splits_metric', 'splits_standard', 'weighted_average_watts',
-                   'suffer_score', 'has_heartrate', 'average_heartrate', 'max_heartrate', 'average_cadence',
-                   'average_temp', 'embed_token', 'trainer',
-                   'photos', 'instagram_primary_photo', 'partner_logo_url', 'partner_brand_tag', 'from_accepted_tag',
-                   'segment_leaderboard_opt_out', 'highlighted_kudosers', 'laps']
-    # Iterate over dict keys, removing unnecessary/unwanted keys
-    for key in list(act.keys()):
-        if key in remove_keys:
-            del (act[key])
-    return act
+  # Set logger to suppress debug errors, these messages aren't important and pollute the console
+  Log = logging.getLogger()
+  Log.setLevel('ERROR')
+  # Stream data to get from activity streams
+  types = ['time', 'latlng']
+  # Get activity details as a dictionary
+  act = client.get_activity(actId).to_dict()
+  # Get starttime and convert to datetime object
+  # starttime = datetime.fromisoformat(act['start_date'])
+  # Get the activity stream details for the activity id
+  stream = client.get_activity_streams(actId, types=types)
+  # Get athlete ID directly from API call, instead of digging into the nested result provided by get_activity
+  athId = client.get_athlete().id
+  # Extract latlng and time information from activity stream
+  latlng = stream['latlng'].data
+  time = stream['time'].data
+  linestringdat = []
+  wktList = []
+  # Iterate over time and latlng streams, combining them into a list containing sublists with lat, lng, time
+  for i in range(0, len(latlng)):
+      # Create new entry, swapping (lat, lon) to (lon, lat) then append time, provided as seconds since start of activity
+      newEntry = [latlng[i][1], latlng[i][0], time[i]]
+      # Append data as nested list
+      linestringdat.append(newEntry)
+      # Take newEntry list and create a string with a space delimiter between list items, add to list of wkt
+      # This formats data to be friendly with geoalchemy ST_GeomFromEWKT
+      wktList.append(" ".join(str(v) for v in newEntry))
+      # print(wktList)
+  # Format entire list to be friendly with geoalchemy ST_GeomFromEWKT
+  sep = ", "
+  wktstr = f"SRID=4326;LINESTRINGM({sep.join(wktList)})"
+  # Add lat, lng, time as geom key to dict
+  act['geom'] = linestringdat
+  act['actId'] = actId
+  act['geom_wkt'] = wktstr
+  # Add athlete id to dict
+  act['athlete_id'] = athId
+  # Extend type to detect road ride vs mtb
+  act['type_extended'] = None
+  # Calculate type of riding activity, using GearIDs
+  if act['gear_id'] in ["b4317610", "b2066194"]:
+      act['type_extended'] = "Mountain Bike"
+  elif act['gear_id'] == "b5970935":
+      act['type_extended'] = "Road Cycling"
+  # List of dictionary keys to remove, these are null or uninteresting
+  remove_keys = ['guid', 'external_id', 'athlete''location_city',
+								'location_state', 'location_country','kudos_count', 'comment_count',
+                 'athlete_count', 'photo_count', 'total_photo_count', 'map', 'trainer', 'commute',
+                 'gear', 'device_watts', 'has_kudoed', 'best_efforts',
+                 'segment_efforts', 'splits_metric', 'splits_standard', 'weighted_average_watts',
+                 'suffer_score', 'has_heartrate', 'average_heartrate', 'max_heartrate', 'average_cadence',
+                 'average_temp', 'embed_token', 'trainer',
+                 'photos', 'instagram_primary_photo', 'partner_logo_url', 'partner_brand_tag', 'from_accepted_tag',
+                 'segment_leaderboard_opt_out', 'highlighted_kudosers', 'laps']
+  # Iterate over dict keys, removing unnecessary/unwanted keys
+  for key in list(act.keys()):
+      if key in remove_keys:
+          del (act[key])
+  return act
 					</pre></code>
 				</p>
-			<h3>Obfuscating Sensitive Locations - SQLAlchemy/GeoAlchemy2</h3>
 				<p>
-					Now I have the details and coordinates of every Strava activity on my account stored in my Postgres database, ready to be served to a Leaflet application. This creates another problem however, since I stored the full coordinate information for each activity, any personal locations such as my home and homes of friends and family will be visible if I share the data publically. Strava's solution to this issue is to allow users to create privacy zones, which are used to remove any sections of publically visible activities that start or end within the zones. This solution is bypassed in my dataset since I queried the full coordinates of my activities using full scope access.
-				</p>
-				<p>
-				</p>
-					To maintain my privacy, I decided to create my own privacy zones in QGIS and store them within my database. A second, public friendly dataset, was generated using SQLAlchemy and GeoAlchemy2 PostGIS functions which removed all sections that crossed these privacy areas. I also simplified the data to reduce the amount of data needing to be served. This process provided to be very difficult as the documentation of functions provided by PostGIS did not clearly/accurately describe returned data. In particular the <a href=>ST_Difference</a>
-				</p>
-				<p>
-					In this example, you can see a beach with an exceedance and two beaches missing results. The second image shows the PDF from later in the week with re-sampling and data fill amendments.
-					<div class="centered-imgs">
-						<a href="/static/images/PDF_Ex_Exceed_highlight_comp.png" target="_blank">
-							<img src="/static/images/PDF_Ex_Exceed_highlight_comp.png" style="box-shadow: 5px 6px 8px #888;border-radius:10px;">
-						</a>
-						<a href="/static/images/PDF_Ex_Resample_highlight_comp.png"  target="_blank">
-							<img src="/static/images/PDF_Ex_Resample_highlight_comp.png" style="box-shadow: 5px 6px 8px #888;border-radius:10px;">
-						</a>
-					</div>
-				</p>
-				<p>
-					Now I was finally getting somewhere and had data to work with. However, I quickly
-					ran into another problem, equality checks kept failing for beach names and data didn’t come through as expected. After research and many print statements, I
-					finally discovered that I was having Unicode issues. The strings provided by pdfplumber contained non-breaking spaces, new-line notations,
-					and different dashes that were not standard keyboard keys, as well as other characters/notations. Fortunately, there’s a
-					<a href=https://www.docs.python.org/3/library/unicodedata.html#unicodedata.normalize>normalization function</a> to handle most of these issues.
-				</p>
-				<p>
-					Then begun the slow process of parsing out the beach information, which is provided by pdfplumber as nested lists. Completely filled in PDFs without exceedances are relatively simple
-					to process, however special care had to be given to cases where a PDF contains empty values or amended results, such as re-sampled or filled in values. This is the primary reason for
-					daily downloads and checks of PDFs. If a PDF contains amendments, then only those amended values are added to the database.
-				</p>
-				<p>
-					Since this script has to be ran at intervals, I looked into
-					running it as a scheduled task on my Linux based Elastic Beanstalk server. However, I quickly became confused by cron jobs, web server environments, worker environments, SQS queues,
-					and if they work within my free-tier instance. For now the script runs on my local machine, however I would like to integrate it into my Flask Application and may consider using the
-					Python <a href=https://apscheduler.readthedocs.io/en/stable/>APScheduler</a> library to run it as a task on the web server without having to figure out how to create cron jobs
-					and worker environments.
-				</p>
-			<h3>Data Storage - PostgreSQL/PostGIS</h3>
-				<p>
-					Now that the data are extracted and processed, they need to be stored. I had already built a Postgres/PostGIS database on AWS RDS for my <a href=””>Mobile Livetracker</a> so I
-					expanded it to include these data. I did not leverage database relationships in my previous project, so I took the time to build multiple tables with foreign key relationships to
-					familiarize myself with this aspect of database design.
-				</p>
-				<p>
-					Here is a quick visualization of the simple schema:
-					<p>
-					<a href="/static/images/Water_Quality_Diagram_Cropped_comp.png"  target="_blank">
-						<img src="/static/images/Water_Quality_Diagram_Cropped_comp.png" style="box-shadow: 5px 6px 8px #888;border-radius:10px;">
-					</a>
-					</p>
-				</p>
-			<h3>Serving up Data for Leaflet</h3>
-				<p>
-				Now it’s time to query that data I worked so hard to get into the database. For simplicity, I decided to serve out just the most recent results for each beach. Then Flask templates and
-				expressions are used to pass the data into the HTML document to be accessed by JavaScript and Leaflet. This process provided me with major two hurdles, querying and accessing data from
-				related records and getting the data into proper GeoJSON format for Leaflet. I had a hard time finding solid examples of how to setup SQLAlchemy models for foreign key relationships and
-				how to query and extract information from them. Fortunately, this
-				<a href=https://www.stackoverflow.com/questions/44069023/sqlalchemy-show-only-latest-result-if-a-join-returns-multiple-results>post</a> contained example code and I could use to
-				get just the newest record per beach, based on related tables.
-				</p>
-				<p>
-					Python SQLAlchemy Foreign Key Relationships:
-					<pre><code class="python">
-class waterQuality(db.Model):
-  __tablename__ = "Water_Quality"
+					Finally, insert these data into Postgres:
+					<pre><code>
+def insertPrivateAct(actDict):
+	"""
+	Inserts new activity, POSTed by Strava webhook update or by manually triggering process activity event route.
 
-  id = Column(Integer, primary_key=True)
-  TotColi = Column(Integer)
-  FecColi = Column(Integer)
-  Entero = Column(Integer)
-  ExceedsRatio = Column(String)
-  BeachStatus = Column(String)
-  beach_id = Column(Integer, ForeignKey("Beaches.id"))
-  md5_id = Column(Integer, ForeignKey("water_qual_md5.id"))
-  resample = Column(String)
+	Parameters
+	----------
+	actDict. Dict. Generated by StravaWebHook.handle_sub_update() or by getStravaActivities.processActs().
 
-  beach_rel = relationship(beaches, backref="Water_Quality")
-  hash_rel = relationship(waterQualityMD5, backref="Water_Quality")
-				</code></pre>
+	Returns
+	-------
+	Nothing. Data are inserted into Postgres/PostGIS.
+	"""
+	insert = strava_activities(actID=actDict['actId'], upload_id=actDict['upload_id'], name=actDict['name'],
+	                           distance=actDict['distance'], moving_time=actDict['moving_time'],
+	                           elapsed_time=actDict['elapsed_time'],
+	                           total_elevation_gain=actDict['total_elevation_gain'],
+	                           elev_high=actDict['elev_high'], elev_low=actDict['elev_low'], type=actDict['type'],
+	                           start_date=actDict['start_date'], start_date_local=actDict['start_date_local'],
+	                           timezone=actDict['timezone'], utc_offset=actDict['utc_offset'],
+	                           start_latlng=actDict['start_latlng'], end_latlng=actDict['end_latlng'],
+	                           start_latitude=actDict['start_latitude'], start_longitude=actDict['start_longitude'],
+	                           achievement_count=actDict['achievement_count'], pr_count=actDict['pr_count'],
+	                           private=actDict['private'], gear_id=actDict['gear_id'],
+	                           average_speed=actDict['average_speed'], max_speed=actDict['max_speed'],
+	                           average_watts=actDict['average_watts'], kilojoules=actDict['kilojoules'],
+	                           description=actDict['description'], workout_type=actDict['workout_type'],
+	                           calories=actDict['calories'], device_name=actDict['device_name'],
+	                           manual=actDict['manual'], athlete_id=actDict['athlete_id'],
+	                           type_extended=actDict['type_extended'], geom=actDict['geom_wkt'])
+	session = Session()
+	session.add(insert)
+	session.commit()
+	session.close()
+					</pre></code>
+				</p>
+			<span id="obfuscate-location-geoalchemy" class="goto"></span>
+			<h3><a href=#obfuscate-location-geoalchemy>Obfuscate Sensitive Locations - SQLAlchemy/GeoAlchemy2</a></h3>
+				<p>
+					Now I have the details and coordinates of every Strava activity on my account stored in my Postgres database ready to be served to a Leaflet application. This creates another problem however, since I stored the full coordinate information for each activity, any personal locations such as my home and homes of friends and family will be visible if I share the data publically. Strava's solution to this issue is to allow users to create privacy zones, which are used to remove any sections of publically visible activities that start or end within the zones. This solution is bypassed in my dataset since I queried the full coordinates of my activities using full scope access.
 				</p>
 				<p>
-					Python function to get water quality results per beach:
-					<pre><code class="python">
-records = db.session.query(waterQuality, waterQualityMD5, beaches, \
-		sqlfunc.ST_GeometryType(beaches.geom), sqlfunc.st_x(beaches.geom), \
-		sqlfunc.st_y(beaches.geom)) \
-    .join(waterQualityMD5) \
-    .join(beaches) \
-    .distinct(waterQuality.beach_id)\
-    .order_by(waterQuality.beach_id,  waterQualityMD5.insdate.desc()).all()
-return records
-					</code></pre>
+					To maintain my privacy, I decided to create my own privacy zones in QGIS and store them within my database. A second, public friendly dataset, was generated using SQLAlchemy and GeoAlchemy2 PostGIS functions which removed all sections that crossed these privacy areas.
+					Also, since the dataset from Strava contains a coordinate vertex about every second of recorded time, I simplified the data to reduce the overall number of vertices.
 				</p>
 				<p>
-				Working with GeoJSON data was difficult, as I wanted to avoid manually formatting the structure of the data. While I had a method developed for my Livetracker, I wanted a more direct
-				method for generating feature collections. Fortunately the <a href=https://www.pypi.org/project/geojson/ rel="external">GeoJSON</a> library worked perfectly and had solid example code. Working with the
-				well-known binary (WKB) representation of coordinates, provided when using select queries against PostgreSQL/PostGIS, was also challenging. However, the
-				<a href=https://www.geoalchemy-2.readthedocs.io/en/latest/> Geo-Alchemy2</a> library contains PostGIS query functions to query coordinates directly, avoiding the need to convert text from binary.
+					Here you can see the SQLAlchemy ORM expressions used to initially populate the public friendly table:
+					<pre><code>
+# import GeoAlchemy2 and extended SQLAlchemy functions
+from sqlalchemy import func as sqlfunc
+# import session factory
+from application Session
+# Table holding all geometry and attribute data from Strava API
+import strava_activities
+# Table holding masked, public friendly, data
+import strava_activities_masked
+
+def processActivitiesPublic(recordID):
+	"""
+	Processes Strava activity by simplifying geometry and removing private areas. This prepares the activity to be
+	shared publicly on a Leaflet map. These functions greatly reduce the number of vertices, reducing JSON file size,
+	and process the data to be topoJSON friendly, preventing geometries from failing to be converted.
+	Parameters
+	----------
+	recordID. Int. Strava activity record ID.
+
+	Returns
+	-------
+	Nothing. Data are processed and committed to PostgresSQL/PostGIS database.
+	"""
+
+	# Create database session
+	session = Session()
+	simplifyFactor = 15
+	geometricProj = 32610
+	webSRID = 4326
+	gridSnap = 3
+	collectionExtract = 3
+	# Create CTE to query privacy zone polygons, combine them, extract polygons, and transform to geometricProj
+	privacy_cte = session.query(sqlfunc.ST_Transform(sqlfunc.ST_CollectionExtract(sqlfunc.ST_Collect(AOI.geom),
+		 collectionExtract), geometricProj).label("priv_aoi")).filter(AOI.privacy == "Yes").cte("privacy_aoi")
+
+	# Processes all records in the strava_activities table, used for initial masked table setup only
+privacyClipQuery = session.query(strava_activities.actID, sqlfunc.ST_AsEWKB(
+		sqlfunc.ST_Transform(
+				sqlfunc.ST_MakeValid(
+						sqlfunc.ST_Multi(
+								sqlfunc.ST_Simplify(
+										sqlfunc.ST_SnapToGrid(
+												sqlfunc.ST_Difference(
+														sqlfunc.ST_SnapToGrid(sqlfunc.ST_Transform(
+																strava_activities.geom, geometricProj), nonNodedSnap), privacy_cte.c.priv_aoi)
+												, gridSnap),
+										simplifyFactor),
+										)), webSRID)))
+	for i in privacyClipQuery:
+	   session.add(strava_activities_masked(actID=i[0], geom=i[1]))
+	session.commit()
+	session.close()
+					</pre></code>
 				</p>
 				<p>
-					Python function to generate a Feature Collection result:
-				<div><pre><code class="python">
-resultDict = {}
-for i, item in enumerate(records):
-	beachname = (item.waterQuality.beach_rel.BeachName)
-	resultDict[beachname] = {}
-	resultDict[beachname]['FecColi'] = item.waterQuality.FecColi
-	resultDict[beachname]['TotColi'] = item.waterQuality.TotColi
-	resultDict[beachname]['Entero'] = item.waterQuality.Entero
-	resultDict[beachname]['ExceedsRatio'] = item.waterQuality.ExceedsRatio
-	resultDict[beachname]['BeachStatus'] = (item.waterQuality.BeachStatus).rstrip()
-	resultDict[beachname]['resample'] = (item.waterQuality.resample).rstrip()
-	resultDict[beachname]['insDate'] = (item.waterQuality.hash_rel.insdate).strftime("%Y-%m-%d")
-	resultDict[beachname]['pdfDate'] = (item.waterQuality.hash_rel.pdfdate).strftime("%Y-%m-%d")
-	resultDict[beachname]['GeomType'] = (records[i][-3]).split("ST_")[1]
-	resultDict[beachname]['Lon'] = round(records[i][-2], 5)
-	resultDict[beachname]['Lat'] = round(records[i][-1], 5)
-	resultDict[beachname]['Name'] = (item.waterQuality.beach_rel.BeachName).rstrip()
-featList = []
-for key in resultDict.keys():
-		# Point takes items as long, lat. Point must have (())
-		beachPoint = Point((resultDict[key]['Lon'], resultDict[key]['Lat']))
-		feature = Feature(geometry=beachPoint, properties=resultDict[key])
-		featList.append(feature)
+					The above ORM select query is equivalent to the following PostgreSQL/PostGIS SQL select query:
+					<pre><code>
+WITH privacy_cte as
+(
+   SELECT
+      ST_Transform(ST_CollectionExtract(ST_Collect("AOI".geom), 3), 32610) as priv_aoi
+   FROM
+      "AOI"
+   where
+      "AOI".privacy = 'Yes'
+)
+SELECT
+   strava_activities."actID",
+   ST_AsEWKB(ST_Transform(ST_MakeValid(ST_Multi(ST_Simplify(ST_SnapToGrid(ST_Difference(ST_SnapToGrid(ST_Transform(strava_activities.geom, 32610), 0.0001), privacy_cte.priv_aoi), 5), 15))), 4326))
+FROM
+   strava_activities,
+   privacy_cte;
+					</pre></code>
+				</p>
+				<p>
+					This query does the following:
+					<ol class="strava-list">
+						<li>
+							<b>Create a common table expression (CTE) to select privacy zones geometry.</b> This CTE is used to create a
+			        single multi-part polygon containing all privacy zones. This ensures that ST_Difference only calculates the
+			        difference between each activity and the privacy zones only once. If the privacy zones are not combined, then
+			        the difference between each privacy zone record and the activity would be calculated, resulting in duplicated
+			        results.
+							<ol class="strava-list">
+								<li>
+									<b>Select AOI polygons flagged as privacy zones.</b>
+								</li>
+								<li>
+									<b>Combine polygons into a single multi-part polygon contained inside a geometry collection <a href=https://postgis.net/docs/ST_Collect.html>(ST_Collect)</a>.</b>
+								</li>
+								<li>
+									<b>Extract multi-polygon from geometry collection <a href=https://postgis.net/docs/ST_CollectionExtract.html>(ST_CollectionExtract)</a>.</b> Even though this collection only contains the multi-polygon, it still needs to be extracted.
+								</li>
+								<li>
+									<b>Tranform geometry to the projected coordinate system geometricProj <a href=https://postgis.net/docs/ST_Transform.html>(ST_Transform)</a>.</b> Using a projected coordinate allows for faster geometric calculations and allows for meters to be used in
+					        PostGIS function parameters, which use the geometry's unit system.
+								</li>
+							</ol>
+						</li>
+						<li>
+							<b>Select strava_activities activity linestring geometry based on Record ID and transform <a href=https://postgis.net/docs/ST_Transform.html>(ST_Transform)</a> to
+				      geometricProj.</b>
+						</ii>
+						<li>
+							<b>Snap activity linestrings to a 0.0001m grid <a href=https://postgis.net/docs/ST_SnapToGrid.html>(ST_SnapToGrid, variant 3)</a>.</b> This solves a non-node intersection error when running ST_Difference. See <a href= https://gis.stackexchange.com/q/50399>this StackExchange thread</a> for an explanation for this problem and solution
+						</li>
+						<li>
+							<b>Calculate difference <a href=https://postgis.net/docs/ST_Difference.html>(ST_Difference)</a> between activity linestring and privacy zone CTE result.</b> ST_Difference
+							subtracts geometry B from A, removing the vertices from A that are within B and segments that touch B.
+						</li>
+						<li>
+							<b><a href=https://postgis.net/docs/ST_SnapToGrid.html>Snap activity linestring vertices to a 5m grid(ST_SnapToGrid, variant 3)</a></b>. This removes some messy areas by
+        				combining and removing excess vertices while also reducing resulting geometry memory/file size. This also solves
+        				geometric errors when exporting data to a topoJSON format. However, resulting linestring geometries have a
+        				step-shaped appearance resembling the grid.
+						</li>
+						<li>
+						<b>Simplify activity linestring with a 15m tolerance <a href=https://postgis.net/docs/ST_Simplify.html>(ST_Simplify)</a>.</b> This further removes messy areas and bends in
+        			the linestring by removing vertices to create longer straight line segments. This provides large reductions in
+        			resulting geometry memory/file sizes and mitigates the step-shaped results created by ST_SnapToGrid.
+						</li>
+						<li>
+							<b>Convert linestrings to multi-linestrings <a href=https://postgis.net/docs/ST_Multi.html>(ST_Multi)</a>.</b> Geometries in the strava_activities table are stored as
+        			linestrings since activity data provided by Strava are contiguous and don't need to be stored in a multi-part
+        			format. However, ST_Difference may create multi-linestrings that must be stored as such, so all geometries
+        			are converted to this format.
+						</li>
+						<li>
+							<b>Fix any invalid activity linestring geometries <a href=https://postgis.net/docs/ST_MakeValid.html>(ST_MakeValid)</a> that were generated during prior processing.</b>
+						</li>
+						<li>
+							<b>Transform activity linestring geometry <a href=https://postgis.net/docs/ST_Transform.html>(ST_Transform)</a> back into WGS 1984, SRID 4326.</b> WGS 1984 is best for database storage
+        			and required for display in Leaflet.
+						</li>
+						<li>
+							<b>Convert linestring geometry representation to Extended Well Known Binary <a href=https://postgis.net/docs/ST_AsEWKB.html>(ST_AsEWKB)</a>.</b> This ensures that data can be
+        			be easily inserted into the strava_activities_masked table.
+						</li>
+						<li>
+							 <b>Query Activity ID of strava_activities record.</b> Will be inserted as a foreign in strava_activities_masked table.</b>
+						</li>
+					</ol>
+			<span id="get-new-activities-webhook" class="goto"></span>
+			<h3><a href=#get-new-activities-webhook>Get New Activities - Strava API Webhook</a></h3>
+				<p>
+					In order to keep my stored data up-to-date I created a <a href=https://developers.strava.com/docs/webhooks/>Strava webhook subscription</a> using stravalib. This enables my server to receive updates from the Strava API whenever I add a new activity, without needing to poll the API for changes. Note that a update is sent whenever a new activity is added, an exsiting activity's title, type, or privacy is changed, or if the account revokes access to the application. As this is my own account, I am only interested in new activities, so only these updates will be used. Also note that new activity updates include activity IDs only, its my server's responsibility to call the API for any further details.
+				</p>
+				<p>
+			 		While stravalib has <a href=https://pythonhosted.org/stravalib/api.html#stravalib.client.Client.create_subscription>functions dedicated to webhooks</a>, they are minimally documented with no examples provided. Also, as of the time I started work on this project, the version of stravalib on PyPI, 0.10.2, did not support the newest version of the Strava API. Fortunately, the stravalib team has an updated version on their <a href=https://github.com/hozn/stravalib>Github page</a> which supports it.
+				</p>
+				<p>
+					Conceptual process of creating a new webhook subscription:
+				</p>
+				<img src="/static/images/Create_Subscription_Flowchart_Cropped_V2.png" style="width:500px;height:auto;max-width: 100%;box-shadow:none;">
+				<p>
+						The server issues a subscription creation POST request to the Strava API, containing the Client ID and Secret in additio to an optional user/server created verification token and a required callback URL configured to handle GET and POST requests. The verification token is used by the server to confirm that further setup requests are being sent by Strava. The creation request can be created in stravalib using the following:
+				</p>
+				<pre><code>
+def createStravaWebhook(client):
+	"""
+	Creates new Strava webhook subscription. Client information and client generated token are pulled from environmental
+	variables and the callback URL is set to a dedicated callback address on the application.
 
-featCollect = FeatureCollection(featList)
-return featCollect
-</pre></code></div>
-			<h3>Leaflet</h3>
-			<p>
-				Finally, it’s time to display the data with a responsive web map. Loading and displaying the data in Leaflet with custom markers and legend is relatively easy. The beach open status
-				property is used to determine which icon to display and up-to-date beach information is available in a popup. To facilitate navigating beaches I
-				used <a href=https://www.github.com/stefanocudini/leaflet-search>Leaflet Search</a></span> to allow searching of beaches. I also included a modal that opens on page load, and is openable with a
-				button, so users can read about the map and data limitations. The final step was to make the map mobile friendly. A viewport tag to size content down on mobile screens allows all
-				popup information to be clearly visible and not in conflict with other map elements. JavaScript event listeners further reduce clutter by closing popups on user actions.
-			</p>
-			<p> JavaScript Listeners:
-				<pre><code class="javascript">
-searchControl.on('search:locationfound', function(e) {
-	if(e.layer._popup)
-		e.layer.openPopup();
-});
+	If subscription is successful, a subscription ID will be provided by Strava and this ID will be inserted into
+	Postgres.
 
-searchControl.on('search:expanded', function(e) {
-	map.closePopup()
-});
+	Returns
+	-------
+	Integer. Strava subscription id
+	"""
+	try:
+	    # Kick off process to create new webhook
+			# Site Index uses Elastic Beanstalk base environment URL
+	    response = client.create_subscription(client_id=os.getenv("STRAVA_CLIENT_ID"),
+	                                          client_secret=os.getenv("STRAVA_CLIENT_SECRET"),
+	                                          callback_url=(
+	                                                      script_config.htttpSiteIndex + "/api/v0.1/stravasubcallback/"),
+	                                          verify_token=os.getenv("STRAVA_VERIFY_TOKEN"))
+	    # Update database with sub id
+	    DBQueriesStrava.updateSubId(response.id)
+	    return response.id
+	except Exception as e:
+	    # Something broke, log error
+	    application.logger.error(f"Create subscription function failed with the error {e}")
+				</pre></code>
+				<p>
+					The above script kicks off the process of creating a new webhook subscription, using Client information, a pre-generated verification token, and a full callback URL address. After the subscription has been successfully created, the callback functions are shown further below, the stravalib "create_subscription" function will issue a GET request to the Strava API to get the ID of the newly created subscription. This ID is used to update the subscription entry in my Postgres database and is used to verify thay webhook subscription updates are from Strava. Since I am the only athelete in the database and only a single subscription should be active ata time, this overwrites all subscription ID records:
+				</p>
+				<pre><code>
+def updateSubId(subId):
+	"""
+	Updates all athlete records with the new strava webhook subscription id.
+
+	Parameters
+	----------
+	subId: Integer. Provided by Strava following create subscription callback flow.
+
+	Returns
+	-------
+	Nothing
+	"""
+	session = Session()
+	try:
+	    session.query(athletes).update({athletes.sub_id: subId})
+	    session.commit()
+	    session.close()
+				</pre></code>
+				<p>
+					During initial setup a GET request is sent to the server's callback URL and after successful setup POST requests will be issued when specific account updates occurr. The following code is used to handle Strava API webhook subscription GET and POST requests:
+				</p>
+				<pre><code class="python">
+@app.route("/api/v0.1/stravacallbackurl", methods=['GET', 'POST'])
+def subCallback():
+  """
+  Strava subscription callback URL.
+
+  Returns
+  -------
+  GET request:
+      JSON, echoed Strava challenge text.
+  POST request:
+      Success code if data are successfully added to Postgres/PostGIS. Strava must receive a 200 code in response to
+      POST.
+  """
+	# Pass request into function
+  statusCode = handleSubCallback(request)
+  return Response(status=statusCode)
+
+def handleSubCallback(request):
+  """
+  Handles requests to Strava subscription callback URL.
+
+  GET:
+      Webhoook Subscription Creation Process:
+          CallbackURL is sent a GET request containing a challenge code. This code is sent back to requester to verify
+          the callback.
+
+           The initial request to create a new webhook subscription, called by visiting URL containing
+           handle_Create_Strava_Sub(), is then provided with verification creation and the new subscription ID.
+  POST:
+      Webhook subscription update message. Sent when a activity on a subscribed account is created, updated, or deleted,
+      or when a privacy related profile setting is changed.
+
+      All update messages are inputted into Postgres.
+
+      Currently, only activity creation events are handled, additional development is needed to handle other events.
+
+  Returns
+  -------
+  GET request:
+      JSON, echoed Strava challenge text.
+  POST request:
+      Success code if data are successfully added to Postgres/PostGIS. Strava must receive a 200 code in response to
+      POST.
+  """
+  # Get application access credentials
+  client = OAuthStrava.getAuth()
+  # Check if request is a GET callback request, part of webhook subscription process
+  if request.method == 'GET':
+      # Extract challenge and verification tokens
+      callBackContent = request.args.get("hub.challenge")
+      callBackVerifyToken = request.args.get("hub.verify_token")
+      # Form callback response as dict
+      callBackResponse = {"hub.challenge": callBackContent}
+      # Check if verification tokens match, i.e. if GET request is from Strava
+      if callBackVerifyToken == os.getenv('STRAVA_VERIFY_TOKEN'):
+          # Verification succeeded, return challenge code as dict
+          # Using Flask Response API automatically converts it to JSON with HTTP 200 success code
+          return callBackResponse
+			else:
+				# Verification failed, raise error
+				application.logger.error(f"Strava verification token doesn't match!")
+				raise ValueError('Strava token verification failed.')
+  # POST request containing webhook subscription update message, new activity or other change to Strava account
+  elif request.method == 'POST':
+      try:
+          # Convert JSON body to dict
+          callbackContent = request.get_json()
+          # Call function to handle update message and process new activity, if applicable
+          handleSubUpdate(client, callbackContent)
+          # return success code, Strava expects this code and will try to send 3 POST requests until a success code is received
+          return 200
+      except Exception as e:
+					# Failed to process properly, send a 500 code. Note that this will NOT stop Strava from sending up to 3 POST requests
+					application.logger.error(f"Strava subscription update failed with the error {e}")
+					return 500
+				</pre></code>
+				<p>
+					After the subscription has been created, the following code processes Strava subscription update messages by inserting them into Postgres and triggering activity processing (described <a href=#getFullDetails>above</a>), if applicable:
+				</p>
+				<pre><code>
+def handleSubUpdate(client, updateContent):
+  """
+  Handles Strava webhook subscription update. This function is called by a valid Strava POST request to the webhook subscription callback
+  URL.
+
+  Parameters
+  ----------
+  client. Stravalib model client object. Contains access token to strava API for the user.
+  updateContent. Dict. POST request JSON data formatted by Flask as a dict.
+
+  Returns
+  -------
+  Nothing. Data are inserted into Postgres/PostGIS.
+  """
+  # Parse update information into a model using stravalib
+  update = client.handle_subscription_update(updateContent)
+	# Verify that the athlete(s) and subscription ID contained in the message are in Postgres
+  if update.owner_id in DBQueriesStrava.getAthleteList() and update.subscription_id in \
+          DBQueriesStrava.getSubIdList():
+      # Insert subscription update message details into Postgres
+      DBQueriesStrava.insertSubUpdate(update)
+      # Verify that the update is a activity creation event
+      if update.aspect_type == "create" and update.object_type == "activity":
+          try:
+              # Get activity details for newly created activity
+              activity = getFullDetails(client, update.object_id)
+              # Insert original, non-masked, activity coordinates and attribute details into Postgres/PostGIS
+              insertPrivateAct(activity)
+              # Calculate masked, publicly sharable, activities and insert into Postgres masked table
+              processActivitiesPublic(activity["actId"])
+          except Exception as e:
+              application.logger.error(f"Handling and inserting new webhook activity failed with the error {e}")
+      else:
+          # Write logic to handle update and delete events
+          application.logger.debug("Sub update message contains an update or delete event, skipping request")
+          pass
+				</pre></code>
+				<p>
+					Insert subscription update details into Postgres:
+					<pre><code>
+def insertSubUpdate(content):
+	"""
+
+  Inserts Strava webhook subscription data into Postgres database. This information will be used to get full activity
+  information from another query.
+
+  Parameters
+  ----------
+  content. SubscriptionUpdate object of Strava webhook update generated by Stravalib
+
+  Returns
+  -------
+  Nothing. Updates database.
+  """
+  # Verify is activity title is in update data, if not set to None.
+  if "title" in content.updates.keys():
+      title = content.updates['title']
+  else:
+      title = None
+  session = Session()
+  insert = sub_update(aspect=content.aspect_type, event_time=datetime.fromtimestamp(content.event_time.timestamp),
+                      object_id=content.object_id, object_type=content.object_type, owner_id=content.owner_id,
+                      subscription_id=content.subscription_id,
+                      update_title=title)
+  session.add(insert)
+  session.commit()
+  session.close()
+					</pre></code>
+				</p>
+			<span id="prepare-leaflet-topojson" class="goto"></span>
+			<h3><a href=#prepare-leaflet-topojson>Prepare Data for Leaflet - TopoJSON</a></h3>
+				<p>
+					GeoJSON is a standard and convenient format for transferring geospatial data over the web, especially since its supported by Leaflet. However, its not very efficient in storing data, largely because it stores a full list of coordinates and contains unnecessary spacing. Currently, my masked GeoJSON dataset exports out to a 2.8 MB JSON file, which is a fairly large file to transfer on every page load. Fortunately, there's the <a href=https://github.com/topojson/topojson>TopoJSON</a> format that in addition to encoding a topology, which isn't useful for this multi-linestring dataset, stores coordiantes as deltas from an origin coordinate, resulting in a large reduction of stored information. Using the <a href=https://pypi.org/project/topojson/>Topojson Python library</a> allowed me to reduce the JSON filesize down to about 1.2 MB, still large but us under half the original filesize. While other encoding techniques are available, this format meets the project's needs since it not only reduces filesize and is easily usable in Leaflet, it also retains all attribute information which will be needed in the web map/viewer.
+				</p>
+				<p>
+					Process to generate TopoJSON:
+				<pre><code>
+import geoJSON
+import topojson as tp
+import os
+from application import session
+def createStravaPublicActTopoJSON():
+		# Create Postgres connection
+    session = Session()
+		# Query geom as GeoJSON and other attribute information
+    query = session.query(sqlfunc.ST_AsGeoJSON(strava_activities_masked.geom, 5),
+                          strava_activities.name,
+                          strava_activities.actID,
+                          strava_activities.type,
+                          strava_activities.distance,
+                          strava_activities.private,
+                          strava_activities.calories,
+                          strava_activities.start_date,
+                          strava_activities.elapsed_time,
+                          strava_activities.start_date_local,
+                          strava_activities.total_elevation_gain,
+                          strava_activities.average_speed,
+                          strava_activities.max_speed,
+                          strava_activities.type_extended,
+                          strava_gear.gear_name) \
+        .join(strava_activities_masked.act_rel) \
+        .join(strava_activities.gear_rel, isouter=True) \
+        .order_by(strava_activities.start_date.desc())
+    features = []
+    for row in query:
+        # Build a dictionary of the attribute information
+        propDict = {"name": row.name, "actID": row.actID, "type": row.type, "distance": round(row.distance),
+                    "private": row.private, "calories": round(row.calories),
+                    "startDate": row.start_date_local.isoformat(),
+                    "elapsed_time": row.elapsed_time.seconds, "total_elevation_gain": round(row.total_elevation_gain),
+                    "average_speed": round(row.average_speed, 1), "max_speed": row.max_speed, "gear_name": row.gear_name,
+                    "type_extended": row.type_extended}
+        # Take ST_AsGeoJSON() result and load as geojson object
+        geojsonGeom = geojson.loads(row[0])
+        # Build the feature and add to feature list
+        features.append(Feature(geometry=MultiLineString(geojsonGeom), properties=propDict))
+    session.close()
+    # Build the feature collection result
+    feature_collection = FeatureCollection(features)
+    # Set topojson filename and pathway
+    topojsonFileName = "topoJSONPublicActivities.json"
+    topojsonFullPath = os.path.join(application.root_path, 'static', 'json', topojsonFileName)
+    # Remove existing json if it exists
+    try:
+        os.remove(topojsonFullPath)
+    except:
+        pass
+    # Create local topoJSON file of geoJSON Feature Collection. Don't create a topology, doesn't matter for a polyline
+    # and prequantize the data, this reduces file size at the cost of processing time.
+    tp.Topology(feature_collection, topology=False, prequantize=True).to_json(topojsonFullPath)
 				</pre></code>
 			</p>
+			<p>
+				This script queries the masked activities as GeoJSON, loads and parses each record into a GeoJSON MultiLineString Feature, combines all records into a Geometry Collection, and finally creates a local TopoJSON file.
+			</p>
+			<p>
+				The data are stored in a pre-calculated TopoJSON file which is overwritten on server start or when a activity creation webhook subscription update is received. This increases server response time since the above function takes several seconds to run and it reduces AWS EC2 T2 credit costs since CPU time won't be spent calculating it on every page load. The Topology function is also very picky about incoming geometries and kept removing records without a explanation as to why, even though they passed PostGIS ST_MakeValid and ST_IsValid. All original, non-masked, GeoJSON records converted properly, I assume that ST_Difference caused geometries to break on conversion. The additional processing steps during masking, in particular ST_SnapToGrid, appeared to have resolved these issues. However, I assume they have need fine tuning to ensure that no geometries fail to be converted to TopoJSON.
+			</p>
+		<span id="load-topojson-omnivore" class="goto"></span>
+		<h3><a href=#load-topojson-omnivore>Load TopoJSON into Leaflet - Omnivore</a></h3>
+			<p>
+				Now its time to load the TopoJSON data into Leaflet so it can be filtered depending on activity type and time. Leaflet does not natively support this format, however, the plugin <a href=https://github.com/mapbox/leaflet-omnivore>Leaflet Omnivore</a> can convert it into a Leaflet geoJSON layer.
+			</p>
+			<p>
+				Omnivore requires a blank geoJSON, with styling and popup options set, to pass the formatted data into. Here you can see the process to create and populate the geoJSON layer then the data into a <a href=https://github.com/stefanocudini/leaflet-search>Leaflet Search</a> control widget:
+				<pre><code>
+// Create a empty geoJSON with style and popup settings.
+var orgActivities = L.geoJson(null, {
+	style: actStyle,
+	onEachFeature: onEachFeatureAct
+});
+
+// Populate popups using property information, distances come from server in meters and are //converted to feet/miles, link to public activities on Strava.
+function onEachFeatureAct(feature,layer) {
+	layer.bindPopup(
+	    &quot;&lt;div class='spanbotbord'&gt;&lt;b&gt;&quot; + feature.properties.name + &quot;&lt;/b&gt;&lt;/div&gt;&quot; +
+	    &quot;&lt;div&gt;&lt;b&gt;Type: &quot; + feature.properties.type + &quot;&lt;/b&gt;&lt;/div&gt;&quot; +
+	    &quot;&lt;div&gt;&lt;b&gt;Date (PST): &quot; + feature.properties.startDate + &quot;&lt;/b&gt;&lt;/div&gt;&quot; +
+	    &quot;&lt;div&gt;&lt;b&gt;Duration: &quot; + convertDuration(feature.properties.elapsed_time) + &quot;&lt;/b&gt;&lt;/div&gt;&quot; +
+	    &quot;&lt;div&gt;&lt;b&gt;Distance (Miles): &quot; + (feature.properties.distance * 0.000621371).toFixed(1) + &quot;&lt;/b&gt;&lt;/div&gt;&quot; +
+	    &quot;&lt;div&gt;&lt;b&gt;Elevation gain (Feet): &quot; + (feature.properties.total_elevation_gain * 3.28084).toFixed(1) + &quot;&lt;/b&gt;&lt;/div&gt;&quot; +
+	    &quot;&lt;div&gt;&lt;b&gt;Calories burned: &quot; + feature.properties.calories + &quot;&lt;/b&gt;&lt;/div&gt;&quot; +
+	    &quot;&lt;div&gt;&lt;b&gt;Average speed (mph): &quot; + (feature.properties.average_speed * 2.23694).toFixed(1) + &quot;&lt;/b&gt;&lt;/div&gt;&quot; +
+	    &quot;&lt;div&gt;&lt;b&gt;Activity ID: &quot; + feature.properties.actID + &quot;&lt;/b&gt;&lt;/div&gt;&quot; +
+	    privatecheck(feature.properties.private, feature.properties.actID)
+	  )
+	};
+// Style linestyles according to their properties.
+function actStyle(feature, layer) {
+  if (feature.properties.type == "Walk") {
+    return walk_lineStyle;
+  } else if (feature.properties.type == "Run") {
+    return run_lineStyle;
+  } else if ((feature.properties.type == "Ride") && (feature.properties.type_extended == "Road Cycling")) {
+    return road_lineStyle;
+  } else if ((feature.properties.type == "Ride") && (feature.properties.type_extended == "Mountain Bike")) {
+    return mtb_lineStyle;
+  }
+};
+				</pre></code>
+			</p>
+			<p>
+				Load topoJSON data asynchronously, pass data into empty geoJSON layer, and add layer into a Leaflet Search control:
+				<pre><code>
+var originalTopoData = omnivore.topojson(jsonDataURL, null, orgActivities)
+.on('ready', function() {
+	//Create a group layer containing all data, this won't be filtered/changed and is kept to hold original data
+	originalGroup = L.layerGroup([orgActivities]);
+	// Create new raw geoJSON dataset using the original, un-aletered, geoJSON layer as a dump source
+	rawGeoJSON = orgActivities.toGeoJSON()
+	// Create a filtered group layer and add to map, this layer group will be changed using filters
+	filteredGroup = L.layerGroup([orgActivities]).addTo(map);
+	// Create Leafet search for loaded geoJSON data
+	createSearchControl(filteredGroup);
+})
+.on('error', function() {
+	alert("Data failed to load, please try again later.")
+})
+
+// Create Leafet search option using layer group
+function createSearchControl(layerGroup) {
+  var searchControl = new L.Control.Search({
+    layer:layerGroup,
+    propertyName: 'name',
+    zoom:15,
+    marker:false,
+    autoCollapse:true,
+    initial:false,
+    // Set move to location to capture the full extend of the activity
+    moveToLocation: function(latlng, OBJECTID, map) {
+      var zoom = map.getBoundsZoom(latlng.layer.getBounds());
+      map.setView(latlng, zoom);
+    }
+  });
+				</pre></code>
+			</p>
+		<span id="dynamically-filter-activities" class="goto"></span>
+		<h3><a href=#dynamically-filter-activities>Filter Activities Dynamically</a></h3>
+			<p>
+				At this point the data are loaded, visible, and searchable on the map. Making the data filterable is not a straightforward process as Leaflet only applies the filter when <a href=https://leafletjs.com/reference-1.7.1.html#geojson-filter>dated are added</a> to the GeoJSON layer and cannot be re-applied to exsiting data. <a href=https://stackoverflow.com/a/50503888>One solution</a> is to add multiple layers, one for each property type and toggle them on and off. However, this won't work when applying dynamic date filters to the data.
+			</p>
+			<p>
+				My solution to this problem is to bring the original data into a GeoJSON layer using Omnivore, then dump the raw data into a stored global variable, as seen above. Then, whenever a type or date filter is applied, existing layers are removed and these original data are used to generate new filtered and styled GeoSJON layers using the following function:
+			</p>
+			<pre><code>
+// Applies filters to displayed geoJSON based on activity button and/or daterange selections.
+// Leaflet only applies filters when a geoJSON layer is initialized, these settings cannot be changed after a geoJSON layer is created.
+// In order to apply filters on the fly, new geoJSON layers need to be re-initialized using the original un-aletered data (rawGeoJSON) with new filters in place.
+function actFilter(actType, userStartDate = null, userEndDate = null){
+  if ((userStartDate == null) && (userEndDate == null)) {
+    // This function wasn't called by a change in the daterange selection. Use the default (includes all activities) or previously set daterange by selecting the displayed date range
+    // and setting that as the filter range
+    displayDate = document.getElementById("display-date").textContent.split(" - ");
+    userStartDate = moment(new Date(displayDate[0])).format().slice(0,10)
+    userEndDate = moment(new Date(displayDate[1])).format().slice(0,10)
+  }
+  if (actType=="All") {
+    // User selected the "All" button, clear existing layers and replace with all activities within the date range
+    filteredGroup.clearLayers()
+    filteredAct = L.geoJson(rawGeoJSON, {
+        style: actStyle,
+        onEachFeature: onEachFeatureAct,
+        filter: function(feature, layer) {
+          if (feature.properties.startDate.slice(0,10) >= userStartDate.slice(0,10) && (feature.properties.startDate.slice(0,10) <= userEndDate.slice(0,10))) return true
+        }
+    });
+  } else {
+    // User selected an activity type or changed the daterange selection, create a new geoJSON layer with new filters in place that are based on activity type and start and end dates
+    filteredAct = L.geoJson(rawGeoJSON, {
+        style: actStyle,
+        onEachFeature: onEachFeatureAct,
+  			filter: function(feature, layer) {
+          if (actType == "Walk") {
+            if ((feature.properties.type == "Walk") && (feature.properties.startDate.slice(0,10) >=     userStartDate.slice(0,10)) && (feature.properties.startDate.slice(0,10) <= userEndDate.slice(0,10))) return true
+          } else if (actType == "Run") {
+            if ((feature.properties.type == "Run") && (feature.properties.startDate.slice(0,10) >= userStartDate.slice(0,10)) && (feature.properties.startDate.slice(0,10) <= userEndDate.slice(0,10))) return true
+          } else if (actType == "MTB") {
+            if ((feature.properties.type_extended == "Mountain Bike") && (feature.properties.startDate.slice(0,10) >= userStartDate.slice(0,10)) && (feature.properties.startDate.slice(0,10) <= userEndDate.slice(0,10)))
+            return true
+          } else if (actType == "Road") {
+            if ((feature.properties.type_extended == "Road Cycling") && (feature.properties.startDate.slice(0,10) >= userStartDate.slice(0,10)) && (feature.properties.startDate.slice(0,10) <= userEndDate.slice(0,10)))
+            return true
+          }
+				}
+    });
+  }
+  // Add new layer to existing filtered group, which may be empty or contain additional geoJSON layers depending on user selections
+  filteredGroup.addLayer(filteredAct);
+	};
+			</pre></code>
+			<p>
+				The above function is called whenver the user changes the daterange selection or selects to add a new activity type to the display. This solution may not be the most efficient and may cause performance issues on some browsers/devices since data are duplicated and the browser needs to re-calculate the filters and styling on every selection.
+			</p>
+			<p>
+				Now lets create the activity selection/filter buttons:
+			</p>
+			<pre><code>
+&lt;div class=&quot;filter-btn-group&quot; id=&quot;act-filter-group&quot;&gt;
+	&lt;button class=&quot;filterbtn active-btn&quot; id=&quot;All&quot;&gt;Remove&lt;br&gt;Layers&lt;/button&gt;
+	&lt;button class=&quot;filterbtn&quot; id=&quot;MTB&quot;&gt;Mountain&lt;br&gt;Biking&lt;/button&gt;
+	&lt;button class=&quot;filterbtn&quot; id=&quot;Road&quot;&gt;Road&lt;br&gt;Rides&lt;/button&gt;
+	&lt;button class=&quot;filterbtn&quot; id=&quot;Walk&quot;&gt;Walks&lt;/button&gt;
+	&lt;button class=&quot;filterbtn&quot; id=&quot;Run&quot;&gt;Runs&lt;/button&gt;
+&lt;/div&gt;
+			</pre></code>
+			<p>
+ 				After the geoJSON data have loaded, the following function is used to add "click" event functions to each button, controlling button coloring and activity selection behavior:
+			</p>
+			<pre><code>
+				// Button coloring and filter behavior, allows user to single and multi-select as well add and remove all
+				// layers with the &quot;All&quot; button.
+				// This function is loaded asynchronously after the document has loaded in the activity geojson data
+				function loadActivityListener() {
+				  // get div that contains the filter buttons
+				  var group = document.getElementById(&quot;act-filter-group&quot;);
+				  // get all buttons within group
+				  var btns = group.getElementsByClassName(&quot;filterbtn&quot;);
+				  // Iterate over buttons in group adding an click event listener to each
+				  for (var i = 0; i &lt; btns.length; i++) {
+				    btns[i].addEventListener(&quot;click&quot;, function(obj) {
+				      //get active buttons, exluding the All button, this is used to determine if multi-selection is occurring
+				      active = document.querySelectorAll('.active-btn:not(#All)')
+				      // Check to see if button click target is the &quot;All&quot; button and if any other buttons are also flagged as active,
+				      // if so remove the active class from these buttons (reverting them to disabled opacity) and set the All button
+				      // to active and add all activity layers to display
+				      if ((obj.target.id == &quot;All&quot;) &amp;&amp; (active.length &gt; 0)) {
+				        console.log(&quot;case A&quot;)
+				        // iterate over buttons flagged as active
+				        for (var h = 0; h &lt; active.length; h++) {
+				          // remove active class from buttons, reverting them to disabled opacity
+				          active[h].className = active[h].className.replace(&quot; active-btn&quot;, &quot;&quot;);
+				        }
+				        // call function to add all activity layers to display
+				        actFilter(&quot;All&quot;)
+				        document.getElementById(&quot;All&quot;).innerHTML = &quot;Remove&lt;br&gt;Layers&quot;;
+				        // set &quot;All&quot; button to active
+				        this.className += &quot; active-btn&quot;;
+				        // change text of &quot;All&quot; to tell user that clicking it will remove all activity layers
+				        document.getElementById(&quot;All&quot;).innerHTML = &quot;Remove&lt;br&gt;Layers&quot;;
+				      // Check if user click target is a button flagged as active
+				      } else if (obj.target.className.includes(&quot;active-btn&quot;)) {
+				        console.log(&quot;case B&quot;)
+				        // Remove active class from button, reverting it to the disabled opacity
+				        this.className = this.className.replace(&quot; active-btn&quot;,&quot;&quot;);
+				        // If the target was the All button, clear all layers from display
+				        if (obj.target.id == &quot;All&quot;){
+				          // change text of &quot;All&quot; to tell user that clicking it will add all activity layers
+				          document.getElementById(&quot;All&quot;).innerHTML = &quot;&amp;nbsp;&amp;nbsp;&amp;nbsp;Add&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&lt;br&gt;Layers&quot;;
+				          filteredGroup.clearLayers()
+				        // if user clicks an active button that is not All, remove just that layer from display
+				        // A dictionary is used for lookup to select the correct layer using the target button's ID value
+				        } else {
+				          filteredGroup.clearLayers()
+				          // Add geojson data for all active buttons
+				          addActiveLayers()
+				          // document.getElementById(&quot;All&quot;).innerHTML = &quot;Remove&lt;br&gt;Layers&quot;;
+				          // filteredGroup.removeLayer(layerGroupDict[obj.target.id]);
+				        }
+				      // Check if user click target is NOT the &quot;All&quot; button, but the &quot;All&quot; button is flagged as active
+				      // Used to determine if a user is selecting activity button when the &quot;All&quot; button is active
+				      } else if ((!(obj.target.id.includes(&quot;All&quot;))) &amp;&amp; (document.getElementById(&quot;All&quot;).className.includes(&quot;active-btn&quot;))) {
+				          console.log(&quot;case C&quot;)
+				          // Remove the active flag from the &quot;All&quot; button, reverting to disabled opacity
+				          document.getElementById(&quot;All&quot;).className = document.getElementById(&quot;All&quot;).className.replace(&quot; active-btn&quot;, &quot;&quot;);
+				          // change text of &quot;All&quot; to tell user that clicking it will add all activity layers
+				          document.getElementById(&quot;All&quot;).innerHTML = &quot;&amp;nbsp;&amp;nbsp;&amp;nbsp;Add&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&lt;br&gt;Layers&quot;;
+				          // Set the target button to active
+				          this.className += &quot; active-btn&quot;;
+				          // Remove all activity layers
+				          filteredGroup.clearLayers();
+				          // Add the activity layer associated with the button clicker by the user
+				          // console.log(&quot;Generating a new geojson!&quot;)
+				          actFilter(obj.target.id);
+				      // Last chase, user is multi-selecting activities, i.e. &quot;All&quot; is disabled and at least one other activity
+				      // is flagged as active
+				      } else if ((obj.target.id == &quot;All&quot;) &amp;&amp; (active.length == 0)) {
+				        console.log(&quot;case D&quot;)
+				        document.getElementById(&quot;All&quot;).innerHTML = &quot;Add&lt;br&gt;Layers&quot;;
+				        this.className += &quot; active-btn&quot;;
+				      } else {
+				        console.log(&quot;case E&quot;)
+				        // Set this activity to active, in addition to other active buttons
+				        this.className += &quot; active-btn&quot;;
+				        // Add the layer associated with the button clicker by the user.
+				        // This is added in addition to other active layers
+				        // console.log(&quot;Multi-selecting!&quot;)
+				        actFilter(obj.target.id);
+				      }
+				    });
+				  }
+				};
+			</pre></code>
+			<p>
+				Next, we need code to iterate over all buttons flagged as active and add them to the display:
+			</p>
+			<pre><code>
+// Selects active buttons, excluding the "All" button, and interates over them rebuilding the associated geojson layers using the user selected dates.
+// Start and end dates are set to null for initialization of the dataset.
+// This function is called as a callback whenever the user changes the daterange selection or selects a activity filter button, maintaining previous date selections.
+function addActiveLayers(userStartDate = null, userEndDate = null) {
+  // If the "All" button is active, select all other activity buttons and set filters on all activities.
+  if (document.getElementById('All').className.includes("active") == true) {
+    active = document.querySelectorAll('.filterbtn:not(#All)');
+    for (var h = 0; h < active.length; h++) {
+      actFilter(active[h].id, userStartDate, userEndDate)
+    }
+  // "All" button is inactive, select all active buttons and filter their associated activity layers using user selected dates.
+  } else {
+    active = document.querySelectorAll('.active-btn:not(#All)');
+    for (var h = 0; h < active.length; h++) {
+      actFilter(active[h].id, userStartDate, userEndDate)
+    }
+  }
+};
+			</pre></code>
+			<span id="#date-filtering-picker" class="goto"></span>
+			<h3><a href=#date-filtering-picker>Date Filtering - Date Range Picker</a></h3>
+			<p>
+				At this point activities can be filtered by activity type and there are functions in place to filter by date ranges. All that's needed is a robust date/calendar picker. Dan Grossman's <a href=https://www.daterangepicker.com/>Date Range Picker</a> is perfect for this project since it allows preset ranges and calendar selections. HTML for the picker:
+			</p>
+			<pre><code>
+&lt;div class=&quot;calendarSelect&quot;&gt;
+	&lt;div id=&quot;reportrange&quot;&gt;
+		&lt;i class=&quot;fa fa-calendar&quot;&gt;&lt;/i&gt;&amp;nbsp;
+		&lt;span id=&quot;display-date&quot;&gt;&lt;/span&gt; &lt;i class=&quot;fa fa-caret-down&quot;&gt;&lt;/i&gt;
+	&lt;/div&gt;
+&lt;/div&gt;
+			</pre></code>
+			<p>
+				Javascript for picker with a callback to addActiveLayers:
+			</p>
+			<pre><code>
+$(function() {
+	// Set format of dates
+  function cb(start, end) {
+      $('#reportrange span').html(start.format('MMMM D, YYYY') + ' - ' + end.format('MMMM D, YYYY'));
+  }
+  $('#reportrange').daterangepicker({
+      startDate: start,
+      endDate: end,
+			// Show year/month dropdown options when using custom range
+			"showDropdowns": true,
+			// Minimum date that can be selected, no records before this time
+			"minDate":"01/01/2014",
+			// Maximum date that can be selected, set to current day
+			"maxDate": String(moment().format('MM/DD/YYYY')),
+			"opens": "center",
+			"autoUpdateInput": true,
+			// Unlink start and end calendars so they don't show the same year/month changed. Leaving it on true creates confusion on whether or not the date was selected properly
+			"linkedCalendars": false,
+			// Set preset date ranges to select from
+			ranges: {
+				'All Time (default)': [moment('2014-01-01'), moment().endOf('year')],
+        'Today': [moment(), moment()],
+        'Last 7 Days': [moment().subtract(6, 'days'), moment()],
+        'Last 30 Days': [moment().subtract(29, 'days'), moment()],
+        'This Month': [moment().startOf('month'), moment().endOf('month')],
+				'This Year': [moment().startOf('year'), moment().endOf('year')]
+      }
+  }, cb);
+	// Initializes
+  cb(start, end);
+
+});
+			</pre></code>
 			<h2>Final Thoughts</h2>
 			<p>
 			This was a fun project that allowed me to expand and refine many of my coding and web development skills while generating a product that’s useful for beach-goers. My next goal for this

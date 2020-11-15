@@ -1,35 +1,103 @@
-# open_pdf = PyPDF3.PdfFileReader(pdf_loc, 'rb')
-# p1 = open_pdf.getPage(0)
-# p1_text = p1.extractText()
-# import pandas as pd
+from sqlalchemy import create_engine, or_
+from sqlalchemy.orm import sessionmaker
+# from settings import dbcon
+from application.projects.water_quality.modelsWaterQual import beaches, waterQualityMD5, stateStandards, waterQuality
 import pdfplumber
 import unicodedata
 from datetime import datetime
 import hashlib
 from urllib.parse import quote
 from urllib.request import urlretrieve
-from application import app, errorEmail, GoogleDrive_WaterQual, application
-from application import DB_Queries_WaterQual as DBQ_PDF
+from application import app, errorEmail, application
+from application.projects.water_quality import GoogleDriveUploadWaterQuality
+from application.projects.water_quality import DBQueriesWaterQuality
 import os
 from application import logger
+from geojson import Point, Feature, FeatureCollection
 
-beachList = ['Carpinteria State Beach', 'Summerland Beach', 'Hammond\'s', 'Butterfly Beach',
-             'East Beach @ Sycamore Creek',
-             'East Beach @ Mission Creek', 'Leadbetter Beach', 'Arroyo Burro Beach', 'Hope Ranch Beach', 'Goleta Beach',
-             'Sands @ Coal Oil Point', 'El Capitan State Beach', 'Refugio State Beach', 'Guadalupe Dunes',
-             'Jalama Beach',
-             'Gaviota State Beach']
-beachfk = {'Carpinteria State Beach': 1, 'Summerland Beach': 2, 'Hammond\'s': 3, 'Butterfly Beach': 4,
-           'East Beach @ Sycamore Creek': 5, 'East Beach @ Mission Creek': 6, 'Leadbetter Beach': 7,
-           'Arroyo Burro Beach': 8, 'Hope Ranch Beach': 9, 'Goleta Beach': 10,
-           'Sands @ Coal Oil Point': 11, 'El Capitan State Beach': 12, 'Refugio State Beach': 13, 'Guadalupe Dunes': 14,
-           'Jalama Beach': 15,
-           'Gaviota State Beach': 16}
-col = ['Total Coliform Results (MPN*)', 'Total Coliform State Health Standard (MPN*)',
-       "Fecal Coliform Results (MPN*)", 'Fecal Coliform State Health Standard (MPN*)', 'Enterococcus Results (MPN*)',
-       'Enterococcus State Health Standard (MPN*)', 'Exceeds FC:TC ratio standard **', 'Beach Status', 'fk']
-resampcol = ['Total Coliform Results (MPN*)', "Fecal Coliform Results (MPN*)", 'Enterococcus Results (MPN*)']
-resampdict = {}
+
+# resampcol = ['Total Coliform Results (MPN*)', "Fecal Coliform Results (MPN*)", 'Enterococcus Results (MPN*)']
+
+def handleBeaches():
+    """
+    Handles calling database water quality queries and function to generate geojson results.
+
+    Returns
+    -------
+    geojson_res : geojson feature collection object
+        Water quality test results as a geojson feature collection object. This contains geometry and properties
+        of all queried records in a form that can be passed straight into Leaflet geojson.
+
+    """
+    # Call database query to get most recent test results
+    beachResults = DBQueriesWaterQuality.getBeachWaterQual()
+    # geojson_dump = dumps(waterQualGeoJSON(beach_results))
+    mostRecent = recentRecord(beachResults)
+    # Format results into geojson
+    geojsonResult = getWaterQualGeoJSON(beachResults)
+    return {"waterqual": geojsonResult, "recent": mostRecent}
+
+
+def recentRecord(records):
+    maxRec = 0
+    for i in records:
+        recdate = datetime.strptime(str(i.waterQuality.hash_rel.insdate), "%Y-%m-%d").timestamp()
+        if recdate > maxRec:
+            maxRec = recdate
+    return datetime.fromtimestamp(maxRec).strftime("%m-%d-%Y")
+
+
+def getWaterQualGeoJSON(records):
+    """
+    Processes water quality query results into a geojson Feature Collection.
+
+    Parameters
+    ----------
+    records : List
+        Nested lists containing SQL Alchemy query results:
+            3 query result objects:
+                waterQuality, waterqualityMD5 beaches
+            1 string:
+                geometry type of associated beach
+            2 floats:
+                x and y coordinates of the associated beach
+
+    Returns
+    -------
+    featCollect : Geojson feature collection object
+        Most recent water quality results per beach, one result per beach, as a geojson.
+
+    """
+    resultDict = {}
+    for i, item in enumerate(records):
+        # print(i.waterQuality.id, i.waterQuality.FecColi, i.waterQuality.beach_rel.BeachName, i.waterQuality.beach_rel.geom)
+        # print(i.waterQuality.id, i.waterQuality.FecColi, i.waterQuality.beach_rel.BeachName)
+        # print(item.waterQuality.beach_rel.BeachName, item.waterQuality.FecColi, test[i][-1], test[i][-2])
+        beachName = (item.waterQuality.beach_rel.BeachName)
+        resultDict[beachName] = {}
+        resultDict[beachName]['FecColi'] = item.waterQuality.FecColi
+        resultDict[beachName]['TotColi'] = item.waterQuality.TotColi
+        resultDict[beachName]['Entero'] = item.waterQuality.Entero
+        resultDict[beachName]['ExceedsRatio'] = item.waterQuality.ExceedsRatio
+        resultDict[beachName]['BeachStatus'] = item.waterQuality.BeachStatus.rstrip()
+        resultDict[beachName]['resample'] = item.waterQuality.resample.rstrip()
+        # resultDict[beachName]['insDate'] = item.waterQuality.hash_rel.insdate.strftime("%Y-%m-%d")
+        # resultDict[beachName]['pdfDate'] = item.waterQuality.hash_rel.pdfdate.strftime("%Y-%m-%d")
+        resultDict[beachName]['insDate'] = item.waterQuality.hash_rel.insdate.strftime("%m-%d-%Y")
+        resultDict[beachName]['pdfDate'] = item.waterQuality.hash_rel.pdfdate.strftime("%m-%d-%Y")
+        resultDict[beachName]['GeomType'] = (records[i][-3]).split("ST_")[1]
+        resultDict[beachName]['Lon'] = round(records[i][-2], 5)
+        resultDict[beachName]['Lat'] = round(records[i][-1], 5)
+        resultDict[beachName]['Name'] = item.waterQuality.beach_rel.BeachName.rstrip()
+    featList = []
+    for key in resultDict.keys():
+        # Point takes items as long, lat Point must have (())
+        beachPoint = Point((resultDict[key]['Lon'], resultDict[key]['Lat']))
+        feature = Feature(geometry=beachPoint, properties=resultDict[key])
+        featList.append(feature)
+
+    featCollect = FeatureCollection(featList)
+    return featCollect
 
 
 def downloadPDF(url, pdfDest):
@@ -64,16 +132,22 @@ def deletePDFQuit(pdfLoc):
     quit()
 
 
-def pdfUpdate():
+def handlePDFStatus(pdfStatus, pdfLoc, hashedText, pdfDict, pdfName):
     """
 
-    :return:
+    Parameters
+    ----------
+    pdfStatus
+    pdfLoc
+    hashedText
+    pdfDict
+    pdfName
+
+    Returns
+    -------
+
     """
-    pass
-
-
-def handlePDFStatus(pdfstatus, pdfLoc, hashedtext, pdfDict, pdfName, beachList):
-    if pdfstatus == "Exists":
+    if pdfStatus == "Exists":
         # print("Already processed this pdf, removing local pdf and quitting!")
         application.logger.debug("Already processed PDF, removing local PDF")
         try:
@@ -84,7 +158,7 @@ def handlePDFStatus(pdfstatus, pdfLoc, hashedtext, pdfDict, pdfName, beachList):
         quit()
     else:
         try:
-            GoogleDrive_WaterQual.addtoGDrive(pdfLoc, pdfName)
+            GoogleDriveUploadWaterQuality.addtoGDrive(pdfLoc, pdfName)
             application.logger.debug("PDF uploaded to Google Drive")
         except Exception as e:
             # print("Google Drive upload threw an error, emailing exception")
@@ -93,37 +167,37 @@ def handlePDFStatus(pdfstatus, pdfLoc, hashedtext, pdfDict, pdfName, beachList):
             errorEmail.senderroremail(script="addtoGDrive", exceptiontype=e.__class__.__name__, body=e)
         # print("Finished with local PDF, removing it from system")
         os.remove(pdfLoc)
-    if checkresamp(pdfDict['cleanedtext']) == True:
+    if checkResamp(pdfDict['cleanedtext']) == True:
         # print("This PDF contains re-sampled results")
         application.logger.debug("PDF contains re-sampled results, generating resample dict")
-        beachDict = genReSampleDict(pdfDict['cleanedtext'], hashedtext, pdfDict['pdfDate'])
+        beachDict = genReSampleDict(pdfDict['cleanedtext'], hashedText, pdfDict['pdfDate'])
     else:
         # Generate beach dictionary
-        beachDict = genDict(beachList, pdfDict['pdfDate'])
+        beachDict = genDict(pdfDict['pdfDate'])
         # Populate beach dictionary with results
         beachDict = populateDict(pdfDict['cleanedtext'], beachDict, "No")
         # If the new PDF contains updates but not re-sample data
-        if pdfstatus == "Update":
+        if pdfStatus == "Update":
             # print("This is a PDF filling in missing water quality results, with no re-sampling")
             application.logger.debug("PDF is updating missing water quality results, with no re-sampling")
             # Get the beaches with null values that are being updated
             application.logger.debug(f"Update PDF, getting null beaches with the date {pdfDict['pdfDate']}")
-            nullbeaches = DBQ_PDF.getNullBeaches(pdfDict['pdfDate'])
+            nullBeaches = DBQueriesWaterQuality.getNullBeaches(pdfDict['pdfDate'])
             # Check if the key, beachname, is in the null beach list, if not delete it from the beach results dict
             # Delete any keys with None records for water quality, even if they were already null, its possible
             # that a updated PDF will not fill in all beaches
-            for beachkey in list(beachDict.keys()):
-                if (beachkey not in nullbeaches) or (beachDict[beachkey]['Total Coliform Results (MPN*)'] is None):
+            for beachKey in list(beachDict.keys()):
+                if (beachKey not in nullBeaches) or (beachDict[beachKey]['Total Coliform Results (MPN*)'] is None):
                     # del nullbeaches[beachkey]
                     # print(f"Removing {beachDict[beachkey]} key from the beach dictionary")
-                    del beachDict[beachkey]
+                    del beachDict[beachKey]
     # return beachDict
     # Get the md5 hash for the new pdf
     application.logger.debug("Getting hash id")
-    hashid = DBQ_PDF.insmd5(hashedtext, pdfDict['pdfDate'], pdfName)
+    hashid = DBQueriesWaterQuality.insmd5(hashedText, pdfDict['pdfDate'], pdfName)
     application.logger.debug(f"Hash id is {hashid}, inserting into postgres")
     # Insert records into postgres, using the beachDict
-    DBQ_PDF.insertWaterQual(beachDict, hashid)
+    DBQueriesWaterQuality.insertWaterQual(beachDict, hashid)
     application.logger.debug("New water record has been inserted into postgres!")
     return beachDict
 
@@ -153,7 +227,7 @@ def cleanText(textList):
     return text
 
 
-def genDict(beachList, pdfDate):
+def genDict(pdfDate):
     """
     Generate a nested dictionary with beach names as keys at the upper level, and columns as keys at the
     nested level, values are set to '', except for the pdf date, so they can be filled in later.
@@ -161,14 +235,32 @@ def genDict(beachList, pdfDate):
     :param pdfDate:
     :return:
     """
-    print(f"Generating dictionary using the beachList:{beachList}")
+    beachList = ['Carpinteria State Beach', 'Summerland Beach', 'Hammond\'s', 'Butterfly Beach',
+                 'East Beach @ Sycamore Creek',
+                 'East Beach @ Mission Creek', 'Leadbetter Beach', 'Arroyo Burro Beach', 'Hope Ranch Beach',
+                 'Goleta Beach',
+                 'Sands @ Coal Oil Point', 'El Capitan State Beach', 'Refugio State Beach', 'Guadalupe Dunes',
+                 'Jalama Beach',
+                 'Gaviota State Beach']
+    beachFK = {'Carpinteria State Beach': 1, 'Summerland Beach': 2, 'Hammond\'s': 3, 'Butterfly Beach': 4,
+               'East Beach @ Sycamore Creek': 5, 'East Beach @ Mission Creek': 6, 'Leadbetter Beach': 7,
+               'Arroyo Burro Beach': 8, 'Hope Ranch Beach': 9, 'Goleta Beach': 10,
+               'Sands @ Coal Oil Point': 11, 'El Capitan State Beach': 12, 'Refugio State Beach': 13,
+               'Guadalupe Dunes': 14,
+               'Jalama Beach': 15,
+               'Gaviota State Beach': 16}
+    col = ['Total Coliform Results (MPN*)', 'Total Coliform State Health Standard (MPN*)',
+           "Fecal Coliform Results (MPN*)", 'Fecal Coliform State Health Standard (MPN*)',
+           'Enterococcus Results (MPN*)',
+           'Enterococcus State Health Standard (MPN*)', 'Exceeds FC:TC ratio standard **', 'Beach Status', 'fk']
+
     beachDict = {}
     for i in beachList:
         beachDict[i] = {}
         for c in col:
             beachDict[i][c] = ''
         beachDict[i]['Date'] = pdfDate
-        beachDict[i]['fk'] = beachfk[i]
+        beachDict[i]['fk'] = beachFK[i]
         beachDict[i]['resample'] = ''
     return beachDict
 
@@ -194,52 +286,51 @@ def genReSampleDict(tab, hashedtext, pdfDate):
     :return:
     """
     print("Generating beach dictionary with resampled and data fill-ins")
-    resampbeaches = []
-    combinedbeaches = []
+    resampBeaches = []
+    combinedBeaches = []
     resampTab = [tab[0]]
     newRecTab = [tab[0]]
     # Get list of null beaches
-    nullbeaches = DBQ_PDF.getNullBeaches(pdfDate)
-    print(f"Null beaches are {nullbeaches}")
+    nullBeaches = DBQueriesWaterQuality.getNullBeaches(pdfDate)
+    print(f"Null beaches are {nullBeaches}")
     # Iterate over all records in the table
     for row in range(1, len(tab)):
         # Check each beach name, index 0 in the nested list, to see if it contains "sample", meaning it was resampled
         if "sample" in tab[row][0]:
             # print(f"Testing {tab[row][0]}")
-            resamprow = tab[row]
-            resamprow[0] = resamprow[0].split(' Re')[0].rstrip(" ")
+            resampRow = tab[row]
+            resampRow[0] = resampRow[0].split(' Re')[0].rstrip(" ")
             # print(f"Adding {resamprow[0]} to resample beach list")
             # Add to resample beach list
-            resampbeaches.append(resamprow[0])
+            resampBeaches.append(resampRow[0])
             # Add to resample table
-            for item in resamprow[1:]:
+            for item in resampRow[1:]:
                 if " " in item:
-                    resamprow[resamprow.index(item)] = item.split(" ")[0]
-            resampTab.append(resamprow)
-        elif tab[row][0] in nullbeaches and tab[row][1] is not None:
+                    resampRow[resampRow.index(item)] = item.split(" ")[0]
+            resampTab.append(resampRow)
+        elif tab[row][0] in nullBeaches and tab[row][1] is not None:
             # print("This re-sample PDF is also filling in missing data")
             # Add beach name to the combined beaches list
             print(f"Adding the following beach to the combined beaches list {tab[row][0]} ")
             # print(f"Records to be appended are {tab[row]}")
-            combinedbeaches.append(tab[row][0])
+            combinedBeaches.append(tab[row][0])
             # Add table row to the new records list
             newRecTab.append(tab[row])
     # Combine the beach names
-    combinedbeaches = resampbeaches + combinedbeaches
+    combinedBeaches = resampBeaches + combinedBeaches
     # print(f"Combined beach names list is {combinedbeaches}")
     # Use the beach names to generate a template dictionary
-    combinedDict = genDict(combinedbeaches, pdfDate)
+    combinedDict = genDict(combinedBeaches)
     # print(f"Template re-sample dictionary is {combinedDict}")
     # print(f"Re-sample table is {resampTab}")
     # Populate the dictionary with the re-sample data
     combinedDict = populateDict(resampTab, combinedDict, "Yes")
     # Populate the dictionary with the new record data
     combinedDict = populateDict(newRecTab, combinedDict, "No")
-
     return combinedDict
 
 
-def checkresamp(tab):
+def checkResamp(tab):
     for sub_list in tab:
         if "sample" in sub_list[0]:
             return True
@@ -268,11 +359,22 @@ def getPDFContents(pdfLoc):
 
 def populateDict(tab, beachDict, resample):
     """
-    Table comes in as a list of lists.
-    :param tab:
-    :param pdfDate:
-    :return:
+
+    Parameters
+    ----------
+    tab
+    beachDict
+    resample
+
+    Returns
+    -------
+
     """
+    col = ['Total Coliform Results (MPN*)', 'Total Coliform State Health Standard (MPN*)',
+           "Fecal Coliform Results (MPN*)", 'Fecal Coliform State Health Standard (MPN*)',
+           'Enterococcus Results (MPN*)',
+           'Enterococcus State Health Standard (MPN*)', 'Exceeds FC:TC ratio standard **', 'Beach Status', 'fk']
+
     # Iterate over table skipping row one, which is column names, and use the row index number
     # print("Inside pop dict func")
     for row in range(1, len(tab)):
@@ -293,9 +395,10 @@ def populateDict(tab, beachDict, resample):
             beachDict[tab[row][0]]['resample'] = resample
     return beachDict
 
+
 def parsePDF():
     """
-    Kicks off process to parse the water quality PDF.
+    Kicks off process to parse water quality PDF.
     Returns
     -------
     Print Statement
@@ -312,15 +415,15 @@ def parsePDF():
     pdfDict = getPDFContents(pdfLoc)
     application.logger.debug("PDF contents have been extracted")
     # Hash text of pdf document
-    hashedtext = md5hash(pdfDict['text'])
+    hashedText = md5hash(pdfDict['text'])
     # Check if md5 hash is already in postgres
     application.logger.debug("Checking PDF MD5 hash value against Postgres")
-    pdfstatus = DBQ_PDF.checkmd5(hashedtext, pdfDict['pdfDate'])
+    pdfstatus = DBQueriesWaterQuality.checkmd5(hashedText, pdfDict['pdfDate'])
     application.logger.debug(f"PDF md5 has been checked, PDF status is {pdfstatus}")
     # Handle the results of the md5 hash check and control generation of dictionaries and interactions with postgres
-    # handlePDFStatus(pdfstatus, pdfLoc, hashedtext, pdfDict, pdfName, currentTime, beachList)
-    handlePDFStatus(pdfstatus, pdfLoc, hashedtext, pdfDict, pdfName, beachList)
+    handlePDFStatus(pdfstatus, pdfLoc, hashedText, pdfDict, pdfName)
     print("All done processing PDF!")
+
 
 def pdfjob():
     """

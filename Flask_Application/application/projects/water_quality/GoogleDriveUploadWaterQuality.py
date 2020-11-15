@@ -24,14 +24,15 @@ def addtoGDrive(pdfloc, pdfname):
         # Change location for client_secrets.json, application.py sits one level above this file and the file isn't
         # called properly when this function is called, but the file needs to stay in that location such that
         # quickstart.py can be called directly if needed
-        GoogleAuth.DEFAULT_SETTINGS['client_config_file'] = os.path.join(app.root_path, 'credentials.json')
-        # Use command line to auth, must connect to host, visit URL, login/auth with Google, then paste provided text into
-        # terminal
+        GoogleAuth.DEFAULT_SETTINGS['client_config_file'] = os.path.join(app.root_path, 'projects', 'water_quality',
+                                                                         'credentials.json')
+        # Use command line to auth, must connect to host, visit URL, login/auth with Google, then paste provided text
+        # into terminal
         # gauth.CommandLineAuth()
 
-        # Create authenticated GoogleDrive instance using settings from the setting.yaml file to auto-authenticate with saved
-        # credentials
-        gauth = GoogleAuth(settings_file=os.path.join(app.root_path, 'settings.yaml'))
+        # Create authenticated GoogleDrive instance using settings from the setting.yaml file to auto-authenticate with
+        # saved credentials
+        gauth = GoogleAuth(settings_file=os.path.join(app.root_path, 'projects', 'water_quality', 'settings.yaml'))
 
         # Establish connection with Google Drive API
         drive = GoogleDrive(gauth)
@@ -50,7 +51,7 @@ def addtoGDrive(pdfloc, pdfname):
         print("GoogleDrive upload threw an error, emailing exception")
         application.logger.error("Failed to upload to Google Drive account")
         application.logger.error(e)
-        errorEmail.senderroremail(script="GoogleDrive", exceptiontype=e.__class__.__name__, body=e)
+        errorEmail.sendErrorEmail(script="GoogleDrive", exceptiontype=e.__class__.__name__, body=e)
 
 
 # testing
