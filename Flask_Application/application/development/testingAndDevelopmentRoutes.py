@@ -1,19 +1,54 @@
-from application import app, application, models_tracker, db, StravaWebHook, logger, DB_Queries_Strava, getStravaActivities
-from application import functions as func
-from application import DB_Queries as DBQ
-from application.models_Strava import athletes, sub_update, strava_activities, strava_activities_masked
-from application import DB_Queries_Strava as DQS
-from application import objectgeneration_tracker as OBG
-from application.authentication import auth
-from flask import request, Response
+from application import app, application
+from flask import request, Response, render_template
 from flask import jsonify
 import sys
 from application import script_config
-from application import stravaAuth
 from sqlalchemy.ext.declarative import declarative_base
 import os
 from sqlalchemy import create_engine, or_
+from application import script_config
+from application.projects.location_tracker import DBQueriesTracker, objectGenerationTracker
+from application.flaskAuth.authentication import auth
+from application.projects.strava_activities import WebHookFunctionsStrava, DBQueriesStrava
 
+# @app.route("/admin/populatepublicactivitiesclip")
+# @auth.login_required(role='admin')
+# def poppublicactsclip():
+#     DBQueriesStrava.reverseClipMaskAll()
+#     return "All done!"
+
+
+# @app.route("/admin/populatepublicactivities")
+# @auth.login_required(role='admin')
+# def poppublicacts():
+#     DBQueriesStrava.processActivitiesPublic("All")
+#     return "All done!"
+# #
+# @app.route("/api/v0.1/stravaroutestopojson", methods=['GET'])
+# @auth.login_required(role='admin')
+# def stravaActAPITopoJSON():
+#     # actLimit = int(request.args.get("actlimit"))
+#     res = DBQueriesStrava.createStravaPublicActTopoJSON()
+#     return "Success!"
+#
+# @app.route("/api/v0.1/getinvalid", methods=['GET'])
+# @auth.login_required(role='admin')
+# def stravaActAPIInvalid():
+#     res = DBQueriesStrava.findInvalid()
+#     return "Success!"
+#
+# @app.route("/api/v0.1/fixinvalid", methods=['GET'])
+# @auth.login_required(role='admin')
+# def stravaActAPIFixInvalid():
+#     res = DBQueriesStrava.fixInvalid()
+#     return "Success!"
+#
+# @app.route("/maps/stravamaptesting")
+# @auth.login_required(role='admin')
+# def stravaprojmaptesting():
+#     # activityData = DB_Queries_Strava.getStravaActGeoJSON(20)
+#     # activityData = DB_Queries_Strava.getStravaMaskedActGeoJSON(30)
+#     return render_template("public/maps/Strava_Map_topo_test.html")
 
 # def createTable(tableModel):
 #     engine = create_engine(os.environ.get("DBCON"))

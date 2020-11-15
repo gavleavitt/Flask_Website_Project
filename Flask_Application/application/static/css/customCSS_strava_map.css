@@ -18,9 +18,10 @@ html{
   display: grid;
   width:100%;
   height:100%;
-  grid-template-columns: 1fr;
+  /* grid-template-columns: 0.7fr 0.3fr; */
+  grid-template-columns: 0.7fr 0.3fr;
   grid-template-rows: 0.05fr 0.95fr;
-  grid-gap: 0.4rem;
+  grid-gap: 10px;
 }
 
 .sansserif {
@@ -42,6 +43,14 @@ html{
     z-index: 1;
 }
 
+/* #strava-display-container {
+  grid-row: 2/4;
+  grid-column: 1/1;
+  display: grid;
+  grid-template-columns: 0.7fr 0.3fr;
+  grid-gap: 0.4rem;
+} */
+
 .leaflet-popup-content{
   font-size: 14px;
 }
@@ -57,7 +66,7 @@ html{
 }
 
 .detail-context{
-  color:white;
+  color:gray;
 }
 
 .teal-text{
@@ -88,8 +97,10 @@ html{
   grid-template-columns: repeat(2,1fr);
   grid-template-rows: repeat(3,1fr);
   grid-gap: 0.5rem;
-  border: 0;
-  border-radius: 0;
+  /* border: 0; */
+  /* border-radius: 0; */
+  grid-column: 2/3;
+  grid-row: 2/4;
 }
 
 .titlediv{
@@ -109,7 +120,7 @@ html{
   /* text-align: right; */
   grid-row: 1/3;
   grid-column: 3/4;
-  padding-right: 0.4rem;
+  padding-right: 1rem;
   /* padding-top:0.8rem;
   padding-bottom:0.8rem; */
   /* padding-right:1.5rem; */
@@ -126,7 +137,7 @@ html{
   grid-row: 1/3;
   grid-column: 1/1;
   font-size: 22px;
-  padding-left: 0.4rem;
+  padding-left: 1rem;
   justify-content: flex-start;
   margin-top: auto;
   margin-bottom: auto;
@@ -136,12 +147,7 @@ html{
 
 .map-panel{
  grid-row: 2/4;
- grid-column: 1/3;
-}
-
-.detail-panel{
-  grid-row: 2/4;
-  grid-column: 2/3;
+ grid-column: 1/2;
 }
 
 .detail-1{
@@ -188,8 +194,8 @@ html{
   grid-template-columns: auto;
   grid-template-rows: 60% 0%;
   grid-gap: 0.5rem;
-  border: 0;
-  border-radius: 0;
+  /* border: 0; */
+  /* border-radius: 0; */
 }
 
 .div-span-margin{
@@ -383,18 +389,8 @@ html{
   grid-column:  2/3;
 }
 
-.filterbtn:hover{
-  background-color: #383838;
-  opacity: 90%;
-}
-
 .active-btn{
   opacity: 90%
-}
-
-.headerbtn:hover,
-.headerbtn:focus{
-  color: #1d27ff;
 }
 
 .map-home{
@@ -408,46 +404,45 @@ html{
   text-decoration: none;
   font-size: 20px;
 }
-
 .home-link:hover{
   color: #1d27ff;
 }
 
-/*
-.leaflet-bar a:hover {
-    background-color: #20ebf5;
-}
-*/
-/*
-.leaflet-control-layers-toggle{
-  background-image: url(images/layers.png);
-  background-color: blue;
-}
-*/
-/*
-.leaflet-bar a{
-    background-color: #2b3940;
-    color: #20ebf5;
-}
-*/
-/*
-.leaflet-bar.leaflet-ruler.leaflet-control{
-  background-color: #2b3940;
-  color: #20ebf5;
-}
-*/
 
-@media screen and (max-width: 850px) {
-  .titletext{
-    font-size: 16px;
+.calendarSelect{
+  text-align: center;
+}
+
+#reset{
+  margin: auto;
+  margin-bottom: 3px;
+}
+
+/* See  https://medium.com/@mezoistvan/finally-a-css-only-solution-to-hover-on-touchscreens-c498af39c31c and https://hover-pointer-media-query.glitch.me/
+This targets only fine pointers (mouse) for hover behavior, this prevents the hover status from sticking on touchscreens
+*/
+@media(any-pointer: fine) {
+  .filterbtn:hover{
+    background-color: #383838;
+    opacity: 90%;
   }
-  .home-link{
-    font-size: 16px;
-  }
-  .headerbtn{
-    font-size: 16px;
+  .headerbtn:hover,
+  .headerbtn:focus{
+    color: #1d27ff;
   }
 }
+
+
+/* .filterbtn:hover{
+  background-color: #383838;
+  opacity: 90%;
+}
+
+
+.headerbtn:hover,
+.headerbtn:focus{
+  color: #1d27ff;
+} */
 
 @media screen and (max-width: 700px) {
   .titletext{
@@ -469,12 +464,18 @@ html{
     margin-right: 0px;
     padding-bottom: 16px;
   }
+  #reportrange{
+    text-align: center;
+  }
 }
 
 @media screen and (max-width: 420px) {
   .titletext{
     font-size: 16px;
     grid-row: 2/3;
+    text-align: center;
+    float: none;
+    padding: none;
   }
   .filter-btn-group{
     grid-column: 1/4;
@@ -483,5 +484,4 @@ html{
   .popupbuttontext{
     grid-row: 2/3;
   }
-
 }

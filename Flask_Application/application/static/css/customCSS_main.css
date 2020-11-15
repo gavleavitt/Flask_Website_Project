@@ -84,7 +84,8 @@ h1{
 
 h2{
   /* font-family: 'Quicksand', Helvetica, Arial; */
-  color: #0800ad;
+  /* color: #0800ad; */
+  color: #0c02e3;
   font-size: 28px;
 }
 
@@ -372,13 +373,6 @@ margin-left: 20px;
   margin-bottom: 0px;
 }
 
-.project-content h3{
-  margin-top: 0px;
-  margin-bottom: 25px;
-  font-size: 24px;
-  border-bottom: 2px solid var(--bluecol);
-  color: #070095;
-}
 
 .project-content h4{
   margin-top: 0px;
@@ -555,6 +549,63 @@ margin-bottom: 0px;
   display: block;
 }
 
+.goto{
+  margin-top: -50px;
+  padding-bottom: 50px;
+  height: 0px;
+  display: block;
+}
+
+/* h3 a, a:visited, a:active, a:visited:active, a:link{
+   color: var(--bluecol);
+   text-decoration: none;
+}
+
+h2 a, a:visited, a:active, a:visited:active, a:link{
+   color: var(--bluecol);
+   text-decoration: none;
+} */
+
+/* h3 a:link, a:visited {
+   color: inherit;
+}
+
+h2 a:link, a:visited {
+   color: inherit;
+}
+
+p a:link{
+   color: blue;
+}
+
+p a:visited{
+   color: purple;
+} */
+
+h3 a:visited, a:link{
+  color: #0c02e3;
+  text-decoration: none;
+}
+
+h2 a:visited, a:link{
+  color: #0c02e3;
+  text-decoration: none;
+}
+
+.project-content h3{
+  margin-top: 0px;
+  margin-bottom: 25px;
+  font-size: 24px;
+  border-bottom: 2px solid var(--bluecol);
+  /* color: #070095; */
+  /* color: var(--bluecol); */
+  color: #0c02e3;
+}
+
+.project-content h2{
+  border-bottom: 2px solid var(--bluecol);
+}
+
 .grid-item:hover{
     text-decoration: underline;
 }
@@ -723,6 +774,54 @@ box-shadow: 5px 10px 8px #888888;
   align-items: center;
 }
 
+.toc-container {
+    background: #f9f9f9 none repeat scroll 0 0;
+    border: 1px solid #aaa;
+    display: table;
+    /* font-size: 95%; */
+    font-size: 18px;
+    font-style: bold;
+    margin-bottom: 1em;
+    padding: 10px;
+    width: auto;
+}
+
+
+
+/* .toc-container a:link{
+  color: blue;
+}
+
+.toc-container a:visited{
+  color: purple;
+} */
+
+.toc-title {
+    font-weight: 700;
+    text-align: center;
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+
+.toc-list{
+  margin-bottom: 5px;
+  margin-top: 5px;
+}
+
+
+li {
+  font-size: 16px;
+
+}
+
+.toc-container li{
+padding-top:5px;
+padding-bottom: 5px;
+}
+
+/* #toc_container li, #toc_container ul, #toc_container ul li{
+    list-style: outside none none !important;
+} */
 
   /* Media queries for responsive behavior */
   /* When screen is small, hide navbar links and show menu icon */

@@ -1,17 +1,16 @@
 from sqlalchemy import create_engine, or_
 from sqlalchemy.orm import sessionmaker
-# from settings import dbcon
-from application.models_WaterQual import beaches, waterQualityMD5, stateStandards, waterQuality
+from application.projects.water_quality.modelsWaterQual import  beaches, waterQualityMD5, stateStandards, waterQuality
 import os
 from datetime import datetime
-from application import application
+from application import application, Session
 from sqlalchemy import func as sqlfunc
 
-def createSession():
-    engine = create_engine(os.environ.get("DBCON"))
-    Session = sessionmaker(bind=engine)
-    session = Session()
-    return session
+# def createSession():
+#     engine = create_engine(os.environ.get("DBCON"))
+#     Session = sessionmaker(bind=engine)
+#     session = Session()
+#     return session
 
 def checkmd5(hash, pdfDate):
     """
@@ -27,7 +26,7 @@ def checkmd5(hash, pdfDate):
         "Update" - Hash is not in Postgres but other hashes exist for th PDF result week
     """
     # Query Postgres with pdfDate of newly downloaded PDF
-    session = createSession()
+    session = Session()
     application.logger.debug(f"Querying water quality MD5 hashes with the date {pdfDate}")
     query = session.query(waterQualityMD5).filter(waterQualityMD5.pdfdate == pdfDate).all()
     hashList = []
@@ -53,7 +52,7 @@ def getNullBeaches(pdfDate):
     :return: List[Strings,]
         Names of beaches with null test results
     """
-    session = createSession()
+    session = Session()
     query = session.query(waterQuality) \
         .join(waterQualityMD5) \
         .join(beaches) \
@@ -76,7 +75,7 @@ def insmd5(MD5, pdfDate, pdfName):
     :param insDate:
     :return:
     """
-    session = createSession()
+    session = Session()
     application.logger.debug(f"Inserting new md5 hash using the following details: md5:{MD5}, pdfdate:{pdfDate}",
                              f" pdfname:{pdfName}, insdate:{datetime.now()}")
     newrec = waterQualityMD5(md5=MD5, pdfdate=pdfDate, pdfName=pdfName, insdate=datetime.now())
@@ -102,7 +101,7 @@ def insertWaterQual(beachDict, md5_fk):
     -------
     Print statement.
     """
-    session = createSession()
+    session = Session()
     inslist = []
     for key in beachDict.keys():
         inslist.append(
@@ -137,7 +136,7 @@ def getBeachWaterQual():
             2 floats:
                 x and y coordinates of the associated beach
     """
-    session = createSession()
+    session = Session()
     records = session.query(waterQuality, waterQualityMD5, beaches, sqlfunc.ST_GeometryType(beaches.geom),
                                sqlfunc.st_x(beaches.geom), sqlfunc.st_y(beaches.geom)) \
         .join(waterQualityMD5) \
@@ -157,7 +156,7 @@ def getStandards():
         Dict of State health standards, with the standard name as the keys and values as values.
 
     """
-    session = createSession()
+    session = Session()
     records = session.query(stateStandards).all()
     recDict = {}
     for i in records:

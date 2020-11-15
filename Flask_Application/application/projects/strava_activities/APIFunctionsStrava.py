@@ -1,7 +1,6 @@
-from datetime import datetime, timedelta, date
-from application.models_Strava import athletes, sub_update, strava_activities
-from application import app, stravaAuth, DB_Queries_Strava, application
-import geojson
+from datetime import datetime, timedelta
+from application.projects.strava_activities import OAuthStrava, DBQueriesStrava, APIFunctionsStrava
+from application import application
 import logging
 import time
 
@@ -60,7 +59,7 @@ def getFullDetails(client, actId):
     # Extract latlng and time information from activity stream
     latlng = stream['latlng'].data
     time = stream['time'].data
-    linestringdat = []
+    lineStringData = []
     wktList = []
     # Iterate over time and latlng streams, combining them into a list containing sublists with lat, lng, time
     for i in range(0, len(latlng)):
@@ -70,18 +69,18 @@ def getFullDetails(client, actId):
         # newEntry = [latlng[i][1], latlng[i][0], (starttime + timedelta(seconds=time[i])).timestamp()]
         newEntry = [latlng[i][1], latlng[i][0], time[i]]
         # Append data as nested list
-        linestringdat.append(newEntry)
+        lineStringData.append(newEntry)
         # Take newEntry list and create a string with a space delimiter between list items, add to list of wkt
         # This formats data to be friendly with geoalchemy ST_GeomFromEWKT
         wktList.append(" ".join(str(v) for v in newEntry))
         # print(wktList)
     # Format entire list to be friendly with geoalchemy ST_GeomFromEWKT
     sep = ", "
-    wktstr = f"SRID=4326;LINESTRINGM({sep.join(wktList)})"
+    wktStr = f"SRID=4326;LINESTRINGM({sep.join(wktList)})"
     # Add lat, lng, time as geom key to dict
-    act['geom'] = linestringdat
+    act['geom'] = lineStringData
     act['actId'] = actId
-    act['geom_wkt'] = wktstr
+    act['geom_wkt'] = wktStr
     # Add athlete id to dict
     act['athlete_id'] = athId
     # Extend type to detect road ride vs mtb
@@ -92,16 +91,14 @@ def getFullDetails(client, actId):
     elif act['gear_id'] == "b5970935":
         act['type_extended'] = "Road Cycling"
     # List of dictionary keys to remove, these are null or uninteresting
-    remove_keys = ['guid', 'external_id', 'athlete'
-                                          'location_city', 'location_state', 'location_country',
-                   'kudos_count', 'comment_count',
-                   'athlete_count', 'photo_count', 'total_photo_count', 'map', 'trainer', 'commute',
-                   'gear', 'device_watts', 'has_kudoed', 'best_efforts',
+    remove_keys = ['guid', 'external_id', 'athlete', 'location_city', 'location_state', 'location_country',
+                   'kudos_count', 'comment_count', 'athlete_count', 'photo_count', 'total_photo_count', 'map',
+                   'trainer', 'commute', 'gear', 'device_watts', 'has_kudoed', 'best_efforts',
                    'segment_efforts', 'splits_metric', 'splits_standard', 'weighted_average_watts',
                    'suffer_score', 'has_heartrate', 'average_heartrate', 'max_heartrate', 'average_cadence',
-                   'average_temp', 'embed_token', 'trainer',
-                   'photos', 'instagram_primary_photo', 'partner_logo_url', 'partner_brand_tag', 'from_accepted_tag',
-                   'segment_leaderboard_opt_out', 'highlighted_kudosers', 'laps']
+                   'average_temp', 'embed_token', 'trainer', 'photos', 'instagram_primary_photo', 'partner_logo_url',
+                   'partner_brand_tag', 'from_accepted_tag', 'segment_leaderboard_opt_out', 'highlighted_kudosers',
+                   'laps']
     # Iterate over dict keys, removing unnecessary/unwanted keys
     for key in list(act.keys()):
         if key in remove_keys:
@@ -123,11 +120,11 @@ def processActs(days):
     -------
     String. Provides details about which activities were processed.
     """
-    client = stravaAuth.gettoken()
+    client = OAuthStrava.getAuth()
     listIds = getListIds(client, days)
     count = 0
     print(f"Length of ID list is {len(listIds)}")
-    waittime = 960
+    waitTime = 960
     for actId in listIds:
         for attempt in range(3):
             try:
@@ -137,17 +134,21 @@ def processActs(days):
                     application.logger.error(f"Activity {actId} is a manual entry, attempting to break loop to skip")
                     break
                 else:
-                    DB_Queries_Strava.insertAct(actDict)
-                    DB_Queries_Strava.maskandInsertAct(actId)
+                    DBQueriesStrava.insertAct(actDict)
+                    DBQueriesStrava.maskandInsertAct(actId)
             except Exception as e:
                 # print(f"Strava download/insert failed with the error {e}")
                 application.logger.error(f"Strava activity {actId} failed to parse properly, possible API"
-                                         f"timeout, waiting {waittime} seconds to try again.")
+                                         f"timeout, waiting {waitTime} seconds to try again.")
                 application.logger.error(e)
-                time.sleep(waittime)
+                time.sleep(waitTime)
             else:
                 break
         print(f"Finished working on activity {actId}")
         count += 1
         print(f"{count} out of {len(listIds)} activities processed")
     return f"Success, finished working on ActIDs {listIds}"
+
+def getAthlete(client):
+    athlete = client.get_athlete()
+    return athlete

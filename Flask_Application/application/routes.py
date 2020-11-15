@@ -5,14 +5,9 @@ API routes accessed by scripts are not included in this module.
 @author: Gavin Leavitt
 """
 
-from application import application, app
+from application import app
 from flask import render_template
-from application import functions as func
-from application import DB_Queries as DBQ
-from application import DB_Queries_WaterQual
-from application import getStravaActivities
-from application import DB_Queries_Strava
-from application.authentication import auth
+from application.projects.water_quality import functionsWaterQual, DBQueriesWaterQuality
 
 @app.route("/")
 def index():
@@ -23,21 +18,25 @@ def index():
 def main():
     return render_template("public/index.html")
 
+@app.route("/resume")
+def resume():
+    return render_template("public/resume.html")
 
-@app.route("/dashboards/livetracker")
-def liveGPS():
-    """
-    This HTML document contains Javascript to poll other APIs in this application, allowing for dynamic 
-    data that updates automatically, so no data is passed through here.
+@app.route("/about")
+def about():
+    return render_template("public/aboutme.html")
 
-    Returns
-    -------
-    HTML webpage
-        Renders the live mobile GPS webpage and sends to the user.  
+@app.route("/contact")
+def contact():
+    return render_template("public/contactme.html")
 
-    """
-    return render_template("private/tracker_API.html")
+@app.route("/templatetesting")
+def template():
+    return render_template("public/projects/project-template.html")
 
+@app.route("/maps/stravamap")
+def stravaprojmap():
+    return render_template("public/maps/Strava_Map_TopoJSON.html")
 
 @app.route("/maps/sbcoceanwaterquality")
 def waterQual():
@@ -52,38 +51,33 @@ def waterQual():
        Leaflet webpage with the beaches and water quality reports passed in a variables.
 
     """
-    beachresults = func.handleBeaches()
+    beachresults = functionsWaterQual.handleBeaches()
     beachqual = beachresults["waterqual"]
     recentrec = beachresults["recent"]
-    standards = DB_Queries_WaterQual.getStandards()
+    standards = DBQueriesWaterQuality.getStandards()
     return render_template("public/maps/Water_Qual_Map.html", beachgeojson=beachqual, standards=standards,
                            recentdate=recentrec)
+@app.route("/dashboards/livetracker")
+def liveGPS():
+    """
+    This HTML document contains Javascript to poll other APIs in this application, allowing for dynamic
+    data that updates automatically, so no data is passed through here.
 
+    Returns
+    -------
+    HTML webpage
+        Renders the live mobile GPS webpage and sends to the user.
 
+    """
+    return render_template("private/livertracker_dashboard.html")
 
 @app.route("/projects/sbcoceanquality")
 def waterqualproj():
     return render_template("public/projects/project-Water-Quality.html")
 
-
 @app.route("/projects/livetrackingdashboard")
 def livetrackingdash():
     return render_template("public/projects/project-Live-Tracking-Dashboard.html")
-
-
-@app.route("/templatetesting")
-def template():
-    return render_template("public/projects/project-template.html")
-
-
-@app.route("/resume")
-def resume():
-    return render_template("public/resume.html")
-
-
-@app.route("/about")
-def about():
-    return render_template("public/aboutme.html")
 
 
 @app.route("/projects/sanitarysewertraceapp")
@@ -105,15 +99,11 @@ def streetlightpolepermitting():
 def dashboardsmaps():
     return render_template("public/projects/project-Operations-Dashboards-Maps.html")
 
+@app.route("/projects/stravamap")
+def stravaactivitymap():
+    return render_template("public/projects/project-Strava-Activities.html")
 
-@app.route("/contact")
-def contact():
-    return render_template("public/contactme.html")
 
 
-@app.route("/maps/stravamap")
-def stravaprojmap():
-    # activityData = DB_Queries_Strava.getStravaActGeoJSON(20)
-    # activityData = DB_Queries_Strava.getStravaMaskedActGeoJSON(30)
-    return render_template("public/maps/Strava_Map.html")
+
 

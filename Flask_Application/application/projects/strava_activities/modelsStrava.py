@@ -1,5 +1,5 @@
-from sqlalchemy import Column, String, Integer, Date, Boolean, ForeignKey, Float, Interval, BigInteger, DateTime
-from sqlalchemy.orm import relationship, backref
+from sqlalchemy import Column, String, Integer, ForeignKey, Float, Interval, BigInteger, DateTime
+from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
 from geoalchemy2 import Geometry
 
@@ -100,10 +100,27 @@ class strava_activities(Base):
 
 class strava_activities_masked(Base):
     __tablename__ = "strava_activities_masked"
+
     id = Column(Integer, primary_key=True)
     actID = Column(BigInteger, ForeignKey("strava_activities.actID"))
-    # geom = Column(Geometry(geometry_type='MULTILINESTRING', srid=4326, from_text = 'ST_GeomFromWKB', name='geometry'))
-    geom = Column(Geometry(geometry_type='MULTILINESTRING', srid=4326,  from_text = 'ST_GeomFromEWKT', name='geometry'))
-
+    # geom = Column(Geometry(geometry_type='MULTILINESTRING', srid=4326,  from_text = 'ST_GeomFromEWKT', name='geometry'))
+    geom = Column(Geometry(geometry_type='MULTILINESTRING', srid=4326,  from_text='ST_GeomFromEWKB', name='geometry'))
+    # geom = Column(Geometry(geometry_type='MULTILINESTRING', srid=4326, from_text='ST_GeomFromWKB', name='geometry'))
     act_rel = relationship(strava_activities, backref="strava_activities_masked")
+
+
+class privacy_clip_poly(Base):
+    __tablename__ = "privacy_clip"
+
+    id = Column(Integer, primary_key=True)
+    geom = Column(Geometry(geometry_type='MULTIPOLYGON', srid=4326, from_text='ST_GeomFromEWKB', name='geometry'))
+
+class AOI(Base):
+    __tablename__ = 'AOI'
+
+    id = Column(Integer, primary_key=True)
+    geom = Column(Geometry('MULTIPOLYGON', 4326), index=True)
+    location = Column(String(80))
+    desc = Column(String(80))
+    privacy = Column(String(50))
 
