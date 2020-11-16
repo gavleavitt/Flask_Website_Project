@@ -144,41 +144,29 @@
 		</div>
 		<div id='map' class="map-panel item"></div>
 		<div class="detail-panel">
-			<div class="item detail-1 detail-panel-col">
-				<div class="item detail-panel-col">
-					<div>
-						<span class="detail-context">Activity Count</span>
-						<span id="actCount" class="detail-text">Loading</span>
-					</div>
-				</div>
-				<div>
-					<span class="detail-context">Total Distance</span>
-					<span id="totalDist" class="detail-text">Loading</span>
-				</div>
+			<div class="item detail-panel-col">
+				<span class="detail-context">Activity Count</span>
+				<span id="actCount" class="detail-text">Loading</span>
 			</div>
 			<div class="item detail-panel-col">
-				<div>
-					<span class="detail-context">Total Elevation</span>
-					<span id="totalElev" class="detail-text">Loading</span>
-				</div>
+				<span class="detail-context">Total Distance</span>
+				<span id="totalDist" class="detail-text">Loading</span>
 			</div>
 			<div class="item detail-panel-col">
-				<div>
-					<span class="detail-context">Total Calories Burned</span>
-					<span id="totalCalories" class="detail-text">Loading</span>
-				</div>
+				<span class="detail-context">Total Elevation</span>
+				<span id="totalElev" class="detail-text">Loading</span>
 			</div>
 			<div class="item detail-panel-col">
-				<div>
-					<span class="detail-context">Total Time</span>
-					<span id="totalTime" class="detail-text">Loading</span>
-				</div>
+				<span class="detail-context">Total Calories Burned</span>
+				<span id="totalCalories" class="detail-text">Loading</span>
 			</div>
 			<div class="item detail-panel-col">
-				<div>
-					<span class="detail-context">Max Speed</span>
-					<span class="detail-text">Loading</span>
-				</div>
+				<span class="detail-context">Total Time</span>
+				<span id="totalTime" class="detail-text">Loading</span>
+			</div>
+			<div class="item detail-panel-col">
+				<span class="detail-context">Average Speed</span>
+				<span id="avgSpeed" class="detail-text">Loading</span>
 			</div>
 		</div>
 	<script>
@@ -292,6 +280,9 @@
 		//Loading spinner
 		map.spin(true);
 
+		// Dict to hold panel values
+	  var actDataDict = {"count":null, "dist":null, "elev":null, "calories":null, "time":null, "speed":null}
+
 		// see http://bl.ocks.org/marcellobenigno/9b09c24850def14250141dfe89f9a296
 		// see https://docs.mapbox.com/mapbox.js/example/v1.0.0/omnivore-kml-tooltip/
 		// Create a empty geoJSON with style and popup settings.
@@ -312,6 +303,16 @@
 			rawGeoJSON = orgActivities.toGeoJSON()
 			// Create a filtered group layer and add to map, this layer group will be changed using filters
 			filteredGroup = L.layerGroup([orgActivities]).addTo(map);
+			console.log(filteredGroup)
+			filteredGroup.eachLayer(function(layer) {
+				layerKeys = Object.keys(layer._layers)
+				for (i of layerKeys) {
+					attr = layer._layers[i].feature.properties
+					populateDict(attr,actDataDict, "False");
+					updateDataPanels(actDataDict);
+				}
+			});
+			// filteredGroup.eachLayer(function(layer)
 			// create Leafet search for loaded geoJSON data
 			createSearchControl(filteredGroup);
 			map.spin(false);
