@@ -58,6 +58,7 @@ html{
 .detail-panel-col{
   background-color: #fff;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   text-align: center;
@@ -66,7 +67,8 @@ html{
 }
 
 .detail-context{
-  color:gray;
+  color:black;
+  padding-bottom: 10px;
 }
 
 .teal-text{
@@ -75,7 +77,7 @@ html{
 }
 
 .detail-text{
-  color:#5ac73e;
+  color:red;
   /* text-shadow: 1px 1px 4px #5ac73e; */
 }
 .detail-text-important{
