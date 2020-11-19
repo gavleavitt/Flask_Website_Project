@@ -8,6 +8,7 @@ API routes accessed by scripts are not included in this module.
 from application import app
 from flask import render_template
 from application.projects.water_quality import functionsWaterQual, DBQueriesWaterQuality
+from application.flaskAuth.authentication import auth
 
 @app.route("/")
 def index():
@@ -58,6 +59,7 @@ def waterQual():
     return render_template("public/maps/Water_Qual_Map.html", beachgeojson=beachqual, standards=standards,
                            recentdate=recentrec)
 @app.route("/dashboards/livetracker")
+@auth.login_required(role='viewer')
 def liveGPS():
     """
     This HTML document contains Javascript to poll other APIs in this application, allowing for dynamic

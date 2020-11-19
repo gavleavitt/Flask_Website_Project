@@ -1,9 +1,11 @@
 :root{
-  --backgroundwhite: #fcfcfc;
-  --titlebackground: #f7f7f7;
+  /* --backgroundwhite: #fcfcfc; */
+  /* --titlebackground: #f7f7f7; */
+  --titlebackground: #dbdbdb;
 }
 body {
-  background-color:var(--backgroundwhite:);
+  /* background-color:var(--backgroundwhite:); */
+  background-color:var(--titlebackground);
   height: 98%;
   display: flex;
   justify-content: center;
@@ -56,7 +58,7 @@ html{
 }
 
 .detail-panel-col{
-  background-color: #fff;
+  background-color: var(--titlebackground);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -69,6 +71,12 @@ html{
 .detail-context{
   color:black;
   padding-bottom: 10px;
+  padding-top: 10px;
+}
+
+.detail-units{
+  color:black;
+  padding-top: 10px;
 }
 
 .teal-text{
@@ -78,6 +86,8 @@ html{
 
 .detail-text{
   color:red;
+  padding-bottom: 10px;
+  padding-top: 10px;
   /* text-shadow: 1px 1px 4px #5ac73e; */
 }
 .detail-text-important{
@@ -106,26 +116,20 @@ html{
 }
 
 .titlediv{
-  /* display:flex; */
   align-items: center;
-  background-color: #f7f7f7;
+  /* background-color: #f7f7f7; */
+  background-color: #dbdbdb;
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
-  /* grid-template-rows: 1fr 1fr; */
-  /* grid-template-rows: 0.5fr 0.5fr; */
   grid-row: 1/1;
   grid-column: 1/3;
 
 }
 
 .popupbuttontext{
-  /* text-align: right; */
   grid-row: 1/3;
   grid-column: 3/4;
   padding-right: 1rem;
-  /* padding-top:0.8rem;
-  padding-bottom:0.8rem; */
-  /* padding-right:1.5rem; */
   display: flex;
   flex-direction: row;
   justify-content: flex-end;
@@ -143,8 +147,6 @@ html{
   justify-content: flex-start;
   margin-top: auto;
   margin-bottom: auto;
-  /* padding-top:0.4rem;
-  padding-bottom:0.4rem; */
 }
 
 .map-panel{
