@@ -157,6 +157,8 @@ def createStravaPublicActTopoJSON():
                           strava_activities.calories,
                           strava_activities.start_date,
                           strava_activities.elapsed_time,
+                          strava_activities.moving_time,
+                          strava_activities.average_watts,
                           strava_activities.start_date_local,
                           strava_activities.total_elevation_gain,
                           strava_activities.average_speed,
@@ -174,7 +176,8 @@ def createStravaPublicActTopoJSON():
                     "startDate": row.start_date_local.isoformat(),
                     "elapsed_time": row.elapsed_time.seconds, "total_elevation_gain": round(row.total_elevation_gain),
                     "average_speed": round(row.average_speed, 1), "max_speed": row.max_speed, "gear_name": row.gear_name,
-                    "type_extended": row.type_extended}
+                    "type_extended": row.type_extended, "moving_time": row.moving_time.seconds,
+                    "average_watts":row.average_watts}
         # Take ST_AsGeoJSON() result and load as geojson object
         geojsonGeom = geojson.loads(row[0])
         # Build the feature and add to feature list
@@ -195,8 +198,10 @@ def createStravaPublicActTopoJSON():
         pass
     # Create local topoJSON file of geoJSON Feature Collection. Don't create a topology, doesn't matter for a polyline
     # and prequantize the data, this reduces file size at the cost of processing time.
-    tp.Topology(feature_collection, topology=False, prequantize=True).to_json(topojsonFullPath)
+    # prequantize 1e7 is used over default, 1e6, to avoid errors in which data were placed in the South Pacific Ocean
+    tp.Topology(feature_collection, topology=False, prequantize=10000000).to_json(topojsonFullPath)
     # with open(geojsonFullPath, 'w') as f:
+
     #     geojson.dump(feature_collection, f)
 
 

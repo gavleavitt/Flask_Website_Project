@@ -139,8 +139,6 @@
 					</div>
 			 </div>
 		 </div>
-			<!-- <div class="popupbuttontext"> Map Details
-			</div> -->
 		</div>
 		<div id='map' class="map-panel item"></div>
 		<div class="detail-panel">
@@ -161,12 +159,16 @@
 				<span id="totalCalories" class="detail-text">Loading</span>
 			</div>
 			<div class="item detail-panel-col">
-				<span class="detail-context">Total Time</span>
-				<span id="totalTime" class="detail-text">Loading</span>
+				<span class="detail-context">Moving Time</span>
+				<span id="movingTime" class="detail-text">Loading</span>
+				<!-- <span class="detail-context">Total Time</span>
+				<span id="totalTime" class="detail-text">Loading</span> -->
 			</div>
 			<div class="item detail-panel-col">
 				<span class="detail-context">Average Speed</span>
 				<span id="avgSpeed" class="detail-text">Loading</span>
+				<!-- <span class="detail-context">Max Speed</span>
+				<span id="maxSpeed" class="detail-text">Loading</span> -->
 			</div>
 		</div>
 	<script>
@@ -209,16 +211,10 @@
 
 		// daterangepicker taken from  https://www.daterangepicker.com/
 		$(function() {
-
-	    // var start = moment().subtract(29, 'days');
-			// var start = moment('2014-01-01');
-	    // var end = moment();
-
 			// Set format of dates
 	    function cb(start, end) {
 	        $('#reportrange span').html(start.format('MMMM D, YYYY') + ' - ' + end.format('MMMM D, YYYY'));
 	    }
-
 	    $('#reportrange').daterangepicker({
 	        startDate: start,
 	        endDate: end,
@@ -248,18 +244,17 @@
 	    }, cb);
 			// Initializes
 	    cb(start, end);
-
 		});
-
 		// Callback function that fires when user uses picker, filters activity display
 		$("#reportrange").on('apply.daterangepicker', function(ev, picker) {
 			// Formats data in a proper date format
-			userStart = picker.startDate.format()
-			userEnd = picker.endDate.format()
+			userStart = picker.startDate.format();
+			userEnd = picker.endDate.format();
 			// clear existing layers
-			filteredGroup.clearLayers()
+			filteredGroup.clearLayers();
 			// Re-add active layers with new daterange filter applied
-			addActiveLayers(picker.startDate.format(), picker.endDate.format())
+			addActiveLayers(picker.startDate.format(), picker.endDate.format());
+			updateDataPanels(filteredGroup,actDataDict, "True");
 		});
 
 		//Set email address using Javascript, harder for crawlers to grab
@@ -281,7 +276,7 @@
 		map.spin(true);
 
 		// Dict to hold panel values
-	  var actDataDict = {"count":null, "dist":null, "elev":null, "calories":null, "time":null, "speed":null}
+	  var actDataDict = {"count":null, "dist":null, "elev":null, "calories":null, "totalTime":null, "speed":null, "moveTime":null}
 
 		// see http://bl.ocks.org/marcellobenigno/9b09c24850def14250141dfe89f9a296
 		// see https://docs.mapbox.com/mapbox.js/example/v1.0.0/omnivore-kml-tooltip/
@@ -303,25 +298,15 @@
 			rawGeoJSON = orgActivities.toGeoJSON()
 			// Create a filtered group layer and add to map, this layer group will be changed using filters
 			filteredGroup = L.layerGroup([orgActivities]).addTo(map);
-			console.log(filteredGroup)
-			filteredGroup.eachLayer(function(layer) {
-				layerKeys = Object.keys(layer._layers)
-				for (i of layerKeys) {
-					attr = layer._layers[i].feature.properties
-					populateDict(attr,actDataDict, "False");
-					updateDataPanels(actDataDict);
-				}
-			});
-			// filteredGroup.eachLayer(function(layer)
+			updateDataPanels(filteredGroup, actDataDict, "False")
 			// create Leafet search for loaded geoJSON data
 			createSearchControl(filteredGroup);
+			popupAction(filteredGroup);
 			map.spin(false);
 		})
 		.on('error', function() {
 			alert("Data failed to load, please try again later.")
 		})
-
-
 </script>
 </body>
 </html>
