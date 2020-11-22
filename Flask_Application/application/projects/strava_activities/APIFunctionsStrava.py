@@ -83,13 +83,19 @@ def getFullDetails(client, actId):
     act['geom_wkt'] = wktStr
     # Add athlete id to dict
     act['athlete_id'] = athId
-    # Extend type to detect road ride vs mtb
+    # Extend type to account for mtb and road rides
     act['type_extended'] = None
     # Calculate type of riding activity, using GearIDs
     if act['gear_id'] in ["b4317610", "b2066194"]:
         act['type_extended'] = "Mountain Bike"
     elif act['gear_id'] == "b5970935":
         act['type_extended'] = "Road Cycling"
+    elif act['type'] == "Walk":
+        act['type_extended'] == "Walk"
+    elif act['type'] == "Run":
+        act['type_extended'] == "Run"
+    elif act['type'] == "Hike":
+        act['type_extended'] == "Walk"
     # List of dictionary keys to remove, these are null or uninteresting
     remove_keys = ['guid', 'external_id', 'athlete', 'location_city', 'location_state', 'location_country',
                    'kudos_count', 'comment_count', 'athlete_count', 'photo_count', 'total_photo_count', 'map',
