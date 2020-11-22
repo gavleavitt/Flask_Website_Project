@@ -107,7 +107,8 @@ html{
   width:100%;
   height:100%;
   grid-template-columns: repeat(2,1fr);
-  grid-template-rows: repeat(3,1fr);
+  /* grid-template-rows: repeat(3,1fr); */
+  grid-template-rows: repeat(4,1fr);
   grid-gap: 0.5rem;
   /* border: 0; */
   /* border-radius: 0; */
@@ -412,6 +413,14 @@ html{
   color: #1d27ff;
 }
 
+.actChart {
+grid-column: 1/3;
+grid-row: 4/5;
+}
+
+#chart {
+  width: 100%;
+}
 
 .calendarSelect{
   text-align: center;

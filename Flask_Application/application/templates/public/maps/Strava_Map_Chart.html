@@ -29,6 +29,13 @@
 
 	<!-- Leaflet Omnivore -->
 	<script src='//api.tiles.mapbox.com/mapbox.js/plugins/leaflet-omnivore/v0.3.1/leaflet-omnivore.min.js'></script>
+<!-- Chart.js JS-->
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.min.js"></script>
+
+<!-- Chart.js CSS -->
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.min.css"/>
+
+
 
 	<!-- Leaflet Table CSS -->
 	<!-- <link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.3/leaflet.css" /> -->
@@ -170,6 +177,11 @@
 				<!-- <span class="detail-context">Max Speed</span>
 				<span id="maxSpeed" class="detail-text">Loading</span> -->
 			</div>
+			<div class="item detail-panel-col actChart">
+				<canvas id="chart"></canvas>
+				<!-- <span class="detail-context">Max Speed</span>
+				<span id="maxSpeed" class="detail-text">Loading</span> -->
+			</div>
 		</div>
 	<script>
 		// Modal from https://www.w3schools.com/howto/tryit.asp?filename=tryhow_css_modal
@@ -302,6 +314,10 @@
 			// create Leafet search for loaded geoJSON data
 			createSearchControl(filteredGroup);
 			popupAction(filteredGroup);
+			chartActData = binActData(filteredGroup);
+			populateChart(chartActData);
+			// chartActData = binActData(rawGeoJSON);
+			// populateChart(chartActData);
 			map.spin(false);
 		})
 		.on('error', function() {

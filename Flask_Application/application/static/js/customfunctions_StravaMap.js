@@ -1,10 +1,225 @@
+// Find the features' year index location within the date data array
+// function findIndex(dateDataList, featYear){
+//   // Array is empty, return false, can't use just "if (dateDataList)" because Javascript is truthy
+//   if (dateDataList.length == 0){
+//     return false;
+//   }
+//   // Use this method: https://stackoverflow.com/a/34337004
+//   // Mimics Python enumerate bahavior so that index and value can be iterated over together
+//   // Loop over array object entries checking the ["x"] year value, if matching, return the index value for the match
+//   for ([index, a] of dateDataList.entries()) {
+//     if (a["x"] == featYear){
+//       return index;
+//     }
+//   };
+//   // Year is not in an array object, return false
+//   return false;
+// };
 
+// function sortByDate(dateDataList) {
+//   dateList = []
+//   for (i of dateDataList){
+//     console.log(i["x"])
+//     dateList.push(i["x"]);
+//   }
+//   dateList.sort()
+//   console.log(dateList)
+// }
+
+function binActData(filteredGroup){
+  console.log(filteredGroup)
+  geoJSONDat = filteredGroup.toGeoJSON()
+  actDataDict = {}
+  dateDataList = []
+  for (i of geoJSONDat.features) {
+    // Extract just year from datetime information
+    featYear = i.properties.startDate.substr(0,4)
+    actType = i.properties.type_extended
+    distance = i.properties.distance * 0.000621371
+    // Get list of dates already in dictionary
+    yearList = []
+    for (i of actDataDict[actType]) {
+      yearList.push(i["x"]);
+    };
+
+    // Add activity to object if not yet added
+    if (Object.keys(actDataDict).indexOf(actType) == -1) {
+      actDataDict[actType] = [];
+    };
+
+    // Add date and distance to activity object, adds new object if not already added
+    if (!yearList.includes(featYear)) {
+      actDataDict[actType].push({"x":yearList},"y":distance);
+    } else {
+      for ([index, a] of actDataDict[actType].entries()) {
+        if (a["x"] == featYear) {
+          actDataDict[actType][index]["y"] += distance;
+        };
+      };
+    }
+  };
+  // Convert meteres to miles
+  // for (a of dateDataList){
+  //   a["y"] = (a["y"] * 0.000621371).toFixed(1)
+  // }
+  // Reverse order, geosjon comes in newest first and want oldest first for bar chart
+  // dateDataList.reverse()
+  return dateDataList
+};
+
+
+// Bin activity distance data by year returning an array with an object for each year
+// function binActData(filteredGroup){
+//   console.log(filteredGroup)
+//   geoJSONDat = filteredGroup.toGeoJSON()
+//   dateDataList = []
+//   for (i of geoJSONDat.features) {
+//     // Extract just year from datetime information
+//     featYear = i.properties.startDate.substr(0,4)
+//     actType = i.properties.type_extended
+//     // Get the index value of the year within the arrray object
+//     indexVal = findIndex(dateDataList, featYear)
+//     // If index is not false, year is in array object, add this feature's distance to that year
+//     if (indexVal !== false) {
+//       dateDataList[indexVal]["y"] += i.properties.distance;
+//     } else {
+//       // Year is not in array object, add an entry for that year and start the summation with the first distance
+//       dateDataList.push({"x":featYear,"y":i.properties.distance});
+//     }
+//   };
+//   // Convert meteres to miles
+//   for (a of dateDataList){
+//     a["y"] = (a["y"] * 0.000621371).toFixed(1)
+//   }
+//   // Reverse order, geosjon comes in newest first and want oldest first for bar chart
+//   dateDataList.reverse()
+//   return dateDataList
+// };
+
+function createXaxisLabels(chartData){
+  labelList = []
+  // console.log(chartData)
+  for (i of chartData){
+    labelList.push(i["x"]);
+  };
+  return labelList;
+};
+
+function populateChart(chartData) {
+  var ctx = document.getElementById('chart').getContext('2d');
+   chartLabels = createLabels(chartData)
+  var myChart = new Chart(ctx, {
+      type: 'bar',
+      data: {
+          labels: createXaxisLabels,
+          // labels: chartLabels = createLabels(chartData),
+          datasets: [{
+              label: 'Activity Distance',
+              data: chartData,
+              backgroundColor: [
+                  'rgba(255, 99, 132, 0.2)',
+                  'rgba(54, 162, 235, 0.2)',
+                  'rgba(255, 206, 86, 0.2)',
+                  'rgba(75, 192, 192, 0.2)',
+                  'rgba(153, 102, 255, 0.2)',
+                  'rgba(255, 159, 64, 0.2)'
+              ],
+              borderColor: [
+                  'rgba(255, 99, 132, 1)',
+                  'rgba(54, 162, 235, 1)',
+                  'rgba(255, 206, 86, 1)',
+                  'rgba(75, 192, 192, 1)',
+                  'rgba(153, 102, 255, 1)',
+                  'rgba(255, 159, 64, 1)'
+              ],
+              borderWidth: 1
+          }],
+          [{
+              label: 'Activity Distance',
+              data: chartData,
+              backgroundColor: [
+                  'rgba(255, 99, 132, 0.2)',
+                  'rgba(54, 162, 235, 0.2)',
+                  'rgba(255, 206, 86, 0.2)',
+                  'rgba(75, 192, 192, 0.2)',
+                  'rgba(153, 102, 255, 0.2)',
+                  'rgba(255, 159, 64, 0.2)'
+              ],
+              borderColor: [
+                  'rgba(255, 99, 132, 1)',
+                  'rgba(54, 162, 235, 1)',
+                  'rgba(255, 206, 86, 1)',
+                  'rgba(75, 192, 192, 1)',
+                  'rgba(153, 102, 255, 1)',
+                  'rgba(255, 159, 64, 1)'
+              ],
+              borderWidth: 1
+          }],
+          [{
+              label: 'Activity Distance',
+              data: chartData,
+              backgroundColor: [
+                  'rgba(255, 99, 132, 0.2)',
+                  'rgba(54, 162, 235, 0.2)',
+                  'rgba(255, 206, 86, 0.2)',
+                  'rgba(75, 192, 192, 0.2)',
+                  'rgba(153, 102, 255, 0.2)',
+                  'rgba(255, 159, 64, 0.2)'
+              ],
+              borderColor: [
+                  'rgba(255, 99, 132, 1)',
+                  'rgba(54, 162, 235, 1)',
+                  'rgba(255, 206, 86, 1)',
+                  'rgba(75, 192, 192, 1)',
+                  'rgba(153, 102, 255, 1)',
+                  'rgba(255, 159, 64, 1)'
+              ],
+              borderWidth: 1
+          }],
+          [{
+              label: 'Activity Distance',
+              data: chartData,
+              backgroundColor: [
+                  'rgba(255, 99, 132, 0.2)',
+                  'rgba(54, 162, 235, 0.2)',
+                  'rgba(255, 206, 86, 0.2)',
+                  'rgba(75, 192, 192, 0.2)',
+                  'rgba(153, 102, 255, 0.2)',
+                  'rgba(255, 159, 64, 0.2)'
+              ],
+              borderColor: [
+                  'rgba(255, 99, 132, 1)',
+                  'rgba(54, 162, 235, 1)',
+                  'rgba(255, 206, 86, 1)',
+                  'rgba(75, 192, 192, 1)',
+                  'rgba(153, 102, 255, 1)',
+                  'rgba(255, 159, 64, 1)'
+              ],
+              borderWidth: 1
+          }]
+      },
+      options: {
+          scales: {
+              xAxes:[{
+                // type: 'time',
+                // reverse:true
+              }],
+              yAxes: [{
+                  ticks: {
+                      beginAtZero: true
+                  }
+              }]
+          }
+      }
+  });
+};
+
+// Used to display singular activites only on map and in dashboard panels, such as when searched or selected
 function filterSingleActDisplay(actID) {
   // Filter geoJSON to display only the searched feature
   searchedActivityOnly = actFilter(null, null, null, actID);
   // Open popup for activity, for some reason I can't open the popup through just .openPopup here, so this method is used instead
   filteredGroup.eachLayer(function(layer) {
-    // console.log("Going over filtered group layers!")
     // Get the id of the layer within the layer group, this number is dynamically generated by Leaflet so has to be called using .keys() and extracted from the first index location, there will only ever be one layer within this feature group
     id = Object.keys(layer._layers)[0]
     // Bind the popup using the previously bond popup content
@@ -12,14 +227,15 @@ function filterSingleActDisplay(actID) {
     // Open the popup
     layer.openPopup();
   });
+  // Update dashbaord panels
   updateDataPanels(filteredGroup,actDataDict, "True");
   // Get a list of all active buttons
   active = document.querySelectorAll('.filterbtn');
   // iterate over active buttons, turning them to inactive
   for (var h = 0; h < active.length; h++) {
-    // remove active class from buttons, reverting them to disabled opacity
     active[h].className = active[h].className.replace(" active-btn", "");
   };
+  // Set All button text to "Add Layers" to reflect its behavior
   document.getElementById("All").innerHTML = "&nbsp;&nbsp;&nbsp;Add&nbsp;&nbsp;&nbsp;&nbsp;<br>Layers";
 };
 
@@ -35,35 +251,34 @@ function createSearchControl(layerGroup) {
     initial:false,
     // set move to location to capture the full extend of the activity
     moveToLocation: function(latlng, OBJECTID, map) {
-      // var zoom = map.getBoundsZoom(latlng.layer.getBounds());
-      // map.setView(latlng, zoom);
       map.fitBounds(latlng.layer.getBounds());
     }
   });
-  // Add control to map
+  // Add search control to map
   map.addControl(searchControl);
+  // When a search location is selected filter to show that activity only
   searchControl.on('search:locationfound', function(e) {
     filterSingleActDisplay(e.layer.feature.properties.actID)
   });
-
+  // Search option activated
   searchControl.on('search:expanded', function(e) {
-    // Closes popups when user selects a new search
     map.closePopup()
-    // Add active layers back to display and search options
+    // Clear and add all layers to display and search options
     filteredGroup.clearLayers()
-    addActiveLayers()
+    actFilter("All")
   });
 }
 
-// Renderer with extra clicking tolerance, not supported in IE
+// Renderer with extra clicking tolerance, not supported in IE I think
 var myRenderer = L.canvas({ tolerance:10 });
 actWeight = 2
 actOpacity = 0.7
-// Set linestyles for each activity type
+// Set linestyles for each activity type, these match button colors
 var mtb_lineStyle =  {"weight":actWeight,"opacity":actOpacity,"renderer":myRenderer,"color":"#e41a1c"}
 var walk_lineStyle = {"weight":actWeight,"opacity":actOpacity,"renderer":myRenderer,"color":"#984ea3"}
 var road_lineStyle = {"weight":actWeight,"opacity":actOpacity,"renderer":myRenderer,"color":"#377eb8"}
 var run_lineStyle =  {"weight":actWeight,"opacity":actOpacity,"renderer":myRenderer,"color":"#a65628"}
+
 
 // Style linestyles according to their properties, uses type_extended for rides since they are not differentiated in type property.
 function actStyle(feature, layer) {
@@ -77,7 +292,7 @@ function actStyle(feature, layer) {
     return mtb_lineStyle;
   }
 };
-
+// Add onclick action to filter display when user clicks a activity
 function popupAction(layerGroup) {
   layerGroup.eachLayer(function(layer) {
     layer.on('click', function(e) {

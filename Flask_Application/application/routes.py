@@ -11,12 +11,8 @@ from application.projects.water_quality import functionsWaterQual, DBQueriesWate
 from application.flaskAuth.authentication import auth
 
 @app.route("/")
-def index():
-    return render_template("public/index.html")
-
-
 @app.route("/main")
-def main():
+def index():
     return render_template("public/index.html")
 
 @app.route("/resume")
@@ -36,10 +32,16 @@ def template():
     return render_template("public/projects/project-template.html")
 
 @app.route("/maps/stravamap")
+@app.route("/stravamap")
 def stravaprojmap():
     return render_template("public/maps/Strava_Map_TopoJSON.html")
 
+@app.route("/maps/stravamaptesting")
+def stravatestingmap():
+    return render_template("public/maps/Strava_Map_Chart.html")
+
 @app.route("/maps/sbcoceanwaterquality")
+@app.route("/waterquality")
 def waterQual():
     """
     Function to handle webpage requests of the Santa Barbara Ocean Water Quality web page.
@@ -59,6 +61,7 @@ def waterQual():
     return render_template("public/maps/Water_Qual_Map.html", beachgeojson=beachqual, standards=standards,
                            recentdate=recentrec)
 @app.route("/dashboards/livetracker")
+@app.route("/livetracker")
 @auth.login_required(role='viewer')
 def liveGPS():
     """
@@ -81,21 +84,17 @@ def waterqualproj():
 def livetrackingdash():
     return render_template("public/projects/project-Live-Tracking-Dashboard.html")
 
-
 @app.route("/projects/sanitarysewertraceapp")
 def sanitarysewertrace():
     return render_template("public/projects/project-Sanitary-Sewer-Trace.html")
-
 
 @app.route("/projects/sanitaryewerstormdrainbuildout")
 def sanitarysewerstormdrainbuildout():
     return render_template("public/projects/project-Sanitary-Sewer-Storm-Drain-Builtout.html")
 
-
 @app.route("/projects/streetlightpolepermitting")
 def streetlightpolepermitting():
     return render_template("public/projects/project-Streetlight-Pole-Permitting.html")
-
 
 @app.route("/projects/dashboardsmaps")
 def dashboardsmaps():
@@ -104,8 +103,3 @@ def dashboardsmaps():
 @app.route("/projects/stravamap")
 def stravaactivitymap():
     return render_template("public/projects/project-Strava-Activities.html")
-
-
-
-
-
