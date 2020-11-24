@@ -1,218 +1,174 @@
-// Find the features' year index location within the date data array
-// function findIndex(dateDataList, featYear){
-//   // Array is empty, return false, can't use just "if (dateDataList)" because Javascript is truthy
-//   if (dateDataList.length == 0){
-//     return false;
-//   }
-//   // Use this method: https://stackoverflow.com/a/34337004
-//   // Mimics Python enumerate bahavior so that index and value can be iterated over together
-//   // Loop over array object entries checking the ["x"] year value, if matching, return the index value for the match
-//   for ([index, a] of dateDataList.entries()) {
-//     if (a["x"] == featYear){
-//       return index;
-//     }
-//   };
-//   // Year is not in an array object, return false
-//   return false;
-// };
-
-// function sortByDate(dateDataList) {
-//   dateList = []
-//   for (i of dateDataList){
-//     console.log(i["x"])
-//     dateList.push(i["x"]);
-//   }
-//   dateList.sort()
-//   console.log(dateList)
-// }
-
 function binActData(filteredGroup){
-  console.log(filteredGroup)
+  // console.log(filteredGroup)
   geoJSONDat = filteredGroup.toGeoJSON()
   actDataDict = {}
   dateDataList = []
+  yearList = []
   for (i of geoJSONDat.features) {
     // Extract just year from datetime information
     featYear = i.properties.startDate.substr(0,4)
     actType = i.properties.type_extended
     distance = i.properties.distance * 0.000621371
-    // Get list of dates already in dictionary
-    yearList = []
-    for (i of actDataDict[actType]) {
-      yearList.push(i["x"]);
-    };
-
+    // console.log("Working on year and act type:")
+    // console.log(featYear)
+    // console.log(actType)
     // Add activity to object if not yet added
     if (Object.keys(actDataDict).indexOf(actType) == -1) {
       actDataDict[actType] = [];
     };
-
-    // Add date and distance to activity object, adds new object if not already added
-    if (!yearList.includes(featYear)) {
-      actDataDict[actType].push({"x":yearList},"y":distance);
+    if (actDataDict[actType].length == 0) {
+      // console.log("Act type is empty, adding first entry!")
+      actDataDict[actType].push({"x":featYear,"y":distance});
     } else {
-      for ([index, a] of actDataDict[actType].entries()) {
-        if (a["x"] == featYear) {
-          actDataDict[actType][index]["y"] += distance;
-        };
-      };
+      // Loop over all object entries checking if date matches, if so add this distance to it
+      inDict = false
+      for (a of actDataDict[actType]){
+        if (a["x"] == featYear){
+          // console.log("Adding distance to year!")
+          a["y"] += distance;
+          a["y"] = Math.round(a["y"])
+          inDict = true
+          break;
+        }
+      }
+      // Add date and distance to activity type object
+      if (inDict == false){
+        actDataDict[actType].push({"x":featYear,"y":distance});
+      }
     }
+  }
+  // Reverse order of years in inside objects
+  for (m of Object.keys(actDataDict)){
+    actDataDict[m].reverse()
   };
-  // Convert meteres to miles
-  // for (a of dateDataList){
-  //   a["y"] = (a["y"] * 0.000621371).toFixed(1)
-  // }
-  // Reverse order, geosjon comes in newest first and want oldest first for bar chart
-  // dateDataList.reverse()
-  return dateDataList
+  // console.log(actDataDict)
+  console.log(actDataDict)
+  return actDataDict
 };
 
-
-// Bin activity distance data by year returning an array with an object for each year
-// function binActData(filteredGroup){
-//   console.log(filteredGroup)
-//   geoJSONDat = filteredGroup.toGeoJSON()
-//   dateDataList = []
-//   for (i of geoJSONDat.features) {
-//     // Extract just year from datetime information
-//     featYear = i.properties.startDate.substr(0,4)
-//     actType = i.properties.type_extended
-//     // Get the index value of the year within the arrray object
-//     indexVal = findIndex(dateDataList, featYear)
-//     // If index is not false, year is in array object, add this feature's distance to that year
-//     if (indexVal !== false) {
-//       dateDataList[indexVal]["y"] += i.properties.distance;
-//     } else {
-//       // Year is not in array object, add an entry for that year and start the summation with the first distance
-//       dateDataList.push({"x":featYear,"y":i.properties.distance});
-//     }
-//   };
-//   // Convert meteres to miles
-//   for (a of dateDataList){
-//     a["y"] = (a["y"] * 0.000621371).toFixed(1)
-//   }
-//   // Reverse order, geosjon comes in newest first and want oldest first for bar chart
-//   dateDataList.reverse()
-//   return dateDataList
-// };
-
+// Generate x-axis labels using nested dates
 function createXaxisLabels(chartData){
   labelList = []
   // console.log(chartData)
-  for (i of chartData){
-    labelList.push(i["x"]);
+  // console.log(chartData)
+  for (i of Object.keys(chartData)){
+    // console.log(i)
+    for (a of Object.keys(chartData[i])) {
+      // console.log(a)
+      // console.log(chartData[i][a]["x"])
+      if (!labelList.includes(chartData[i][a]["x"])) {
+        labelList.push(chartData[i][a]["x"])
+      };
+    }
   };
+  labelList.sort()
+  // console.log(labelList);
   return labelList;
 };
 
-function populateChart(chartData) {
+function generateDatasetOptions(chartData) {
+  var datasetOptions = []
+  for (i of Object.keys(chartData)){
+    options = {label:i,data:chartData[i],borderWidth: 1}
+    if (i=="Mountain Bike") {
+      options['label'] = "MTB"
+      options['backgroundColor'] = 'rgba(228, 26, 28, 0.8)'
+      options['borderColor'] = 'rgba(228, 26, 28)'
+    } else if (i == "Road Cycling") {
+      options['label'] = "Road Rides"
+      options['backgroundColor'] = 'rgba(55, 126, 184, 0.8)'
+      options['borderColor'] = 'rgba(55, 126, 184)'
+    } else if (i =="Run") {
+      options['backgroundColor'] = 'rgba(166, 86, 40, 0.8)'
+      options['borderColor'] = 'rgba(166, 86, 40)'
+    } else if (i == "Walk") {
+      options['backgroundColor'] = 'rgba(152, 78, 163, 0.8)'
+      options['borderColor'] = 'rgba(152, 78, 163)'
+    }
+    datasetOptions.push(options);
+  }
+  return datasetOptions;
+};
+
+
+function createActivityChart(chartData) {
   var ctx = document.getElementById('chart').getContext('2d');
-   chartLabels = createLabels(chartData)
-  var myChart = new Chart(ctx, {
+  actChart = new Chart(ctx, {
       type: 'bar',
       data: {
-          labels: createXaxisLabels,
-          // labels: chartLabels = createLabels(chartData),
-          datasets: [{
-              label: 'Activity Distance',
-              data: chartData,
-              backgroundColor: [
-                  'rgba(255, 99, 132, 0.2)',
-                  'rgba(54, 162, 235, 0.2)',
-                  'rgba(255, 206, 86, 0.2)',
-                  'rgba(75, 192, 192, 0.2)',
-                  'rgba(153, 102, 255, 0.2)',
-                  'rgba(255, 159, 64, 0.2)'
-              ],
-              borderColor: [
-                  'rgba(255, 99, 132, 1)',
-                  'rgba(54, 162, 235, 1)',
-                  'rgba(255, 206, 86, 1)',
-                  'rgba(75, 192, 192, 1)',
-                  'rgba(153, 102, 255, 1)',
-                  'rgba(255, 159, 64, 1)'
-              ],
-              borderWidth: 1
-          }],
-          [{
-              label: 'Activity Distance',
-              data: chartData,
-              backgroundColor: [
-                  'rgba(255, 99, 132, 0.2)',
-                  'rgba(54, 162, 235, 0.2)',
-                  'rgba(255, 206, 86, 0.2)',
-                  'rgba(75, 192, 192, 0.2)',
-                  'rgba(153, 102, 255, 0.2)',
-                  'rgba(255, 159, 64, 0.2)'
-              ],
-              borderColor: [
-                  'rgba(255, 99, 132, 1)',
-                  'rgba(54, 162, 235, 1)',
-                  'rgba(255, 206, 86, 1)',
-                  'rgba(75, 192, 192, 1)',
-                  'rgba(153, 102, 255, 1)',
-                  'rgba(255, 159, 64, 1)'
-              ],
-              borderWidth: 1
-          }],
-          [{
-              label: 'Activity Distance',
-              data: chartData,
-              backgroundColor: [
-                  'rgba(255, 99, 132, 0.2)',
-                  'rgba(54, 162, 235, 0.2)',
-                  'rgba(255, 206, 86, 0.2)',
-                  'rgba(75, 192, 192, 0.2)',
-                  'rgba(153, 102, 255, 0.2)',
-                  'rgba(255, 159, 64, 0.2)'
-              ],
-              borderColor: [
-                  'rgba(255, 99, 132, 1)',
-                  'rgba(54, 162, 235, 1)',
-                  'rgba(255, 206, 86, 1)',
-                  'rgba(75, 192, 192, 1)',
-                  'rgba(153, 102, 255, 1)',
-                  'rgba(255, 159, 64, 1)'
-              ],
-              borderWidth: 1
-          }],
-          [{
-              label: 'Activity Distance',
-              data: chartData,
-              backgroundColor: [
-                  'rgba(255, 99, 132, 0.2)',
-                  'rgba(54, 162, 235, 0.2)',
-                  'rgba(255, 206, 86, 0.2)',
-                  'rgba(75, 192, 192, 0.2)',
-                  'rgba(153, 102, 255, 0.2)',
-                  'rgba(255, 159, 64, 0.2)'
-              ],
-              borderColor: [
-                  'rgba(255, 99, 132, 1)',
-                  'rgba(54, 162, 235, 1)',
-                  'rgba(255, 206, 86, 1)',
-                  'rgba(75, 192, 192, 1)',
-                  'rgba(153, 102, 255, 1)',
-                  'rgba(255, 159, 64, 1)'
-              ],
-              borderWidth: 1
-          }]
+          labels: createXaxisLabels(chartData),
+          datasets:  generateDatasetOptions(chartData)
+          // datasets: [{
+          //     label: 'MTB',
+          //     data: chartData["Mountain Bike"],
+          //     backgroundColor:'rgba(228, 26, 28, 0.8)',
+          //     borderColor:'rgba(228, 26, 28)',
+          //     borderWidth: 1
+          // },
+          // {
+          //     label: 'Road Ride',
+          //     data: chartData['Road Cycling'],
+          //     backgroundColor: 'rgba(55, 126, 184, 0.8)',
+          //     borderColor: 'rgba(55, 126, 184)',
+          //     borderWidth: 1
+          // },
+          // {
+          //     label: 'Run',
+          //     data: chartData['Run'],
+          //     backgroundColor:'rgba(166, 86, 40, 0.8)',
+          //     borderColor:'rgba(166, 86, 40)',
+          //     borderWidth: 1
+          // },
+          // {
+          //     label: 'Walk',
+          //     data: chartData['Walk'],
+          //     backgroundColor:'rgba(152, 78, 163, 0.8)',
+          //     borderColor:'rgba(152, 78, 163)',
+          //     borderWidth: 1
+          // }]
       },
       options: {
-          scales: {
-              xAxes:[{
-                // type: 'time',
-                // reverse:true
-              }],
-              yAxes: [{
-                  ticks: {
-                      beginAtZero: true
-                  }
-              }]
+        legend: {
+          labels:{
+            fontSize: 16,
+            fontStyle: "bold",
+            fontColor: "black"
           }
+        },
+        scales: {
+          xAxes:[{
+            // type: 'time',
+            // stacked:true
+          }],
+          yAxes: [{
+            scaleLabel: {
+              display: true,
+              labelString: "Total Distance(Miles)",
+              fontSize: 16,
+              fontColor: "black",
+              fontStyle: "bold"
+            },
+            // stacked:true,
+            ticks: {
+              beginAtZero: true
+            }
+          }]
+        }
       }
   });
 };
+
+// Update chart labels and datasets based on user button selections
+function updateChart(filteredGroup){
+  // Create formatted dataset
+  chartData = binActData(filteredGroup);
+  // Calculate date labels (x-axis)
+  actChart.data.labels = createXaxisLabels(chartData);
+  // Use formatted data to generate legend labels and colors based on activity type
+  actChart.data.datasets = generateDatasetOptions(chartData);
+  //
+  actChart.update();
+}
 
 // Used to display singular activites only on map and in dashboard panels, such as when searched or selected
 function filterSingleActDisplay(actID) {
@@ -460,6 +416,7 @@ function loadActivityListener() {
         actFilter(obj.target.id);
         updateDataPanels(filteredGroup, actDataDict, "True")
       }
+      updateChart(filteredGroup);
     });
   }
 };
