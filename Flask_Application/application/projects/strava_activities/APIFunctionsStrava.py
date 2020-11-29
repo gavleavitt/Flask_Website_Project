@@ -91,11 +91,11 @@ def getFullDetails(client, actId):
     elif act['gear_id'] == "b5970935":
         act['type_extended'] = "Road Cycling"
     elif act['type'] == "Walk":
-        act['type_extended'] == "Walk"
+        act['type_extended'] = "Walk"
     elif act['type'] == "Run":
-        act['type_extended'] == "Run"
+        act['type_extended'] = "Run"
     elif act['type'] == "Hike":
-        act['type_extended'] == "Walk"
+        act['type_extended'] = "Walk"
     # List of dictionary keys to remove, these are null or uninteresting
     remove_keys = ['guid', 'external_id', 'athlete', 'location_city', 'location_state', 'location_country',
                    'kudos_count', 'comment_count', 'athlete_count', 'photo_count', 'total_photo_count', 'map',

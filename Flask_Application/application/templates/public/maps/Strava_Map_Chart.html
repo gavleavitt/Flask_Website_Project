@@ -177,8 +177,11 @@
 				<!-- <span class="detail-context">Max Speed</span>
 				<span id="maxSpeed" class="detail-text">Loading</span> -->
 			</div>
-			<div class="item detail-panel-col actChart">
+			<div id="chart-cont" class="item detail-panel-col actChart show-data">
 				<canvas id="chart"></canvas>
+			</div>
+			<div id="no-data-text" class="item detail-panel-col actChart no-data">
+				<span class="detail-context detail-panel-col">Data Unavailable</span>
 				<!-- <span class="detail-context">Max Speed</span>
 				<span id="maxSpeed" class="detail-text">Loading</span> -->
 			</div>
@@ -267,6 +270,7 @@
 			// Re-add active layers with new daterange filter applied
 			addActiveLayers(picker.startDate.format(), picker.endDate.format());
 			updateDataPanels(filteredGroup,actDataDict, "True");
+			updateChart(filteredGroup);
 		});
 
 		//Set email address using Javascript, harder for crawlers to grab
