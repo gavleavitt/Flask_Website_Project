@@ -21,20 +21,7 @@ function checkDateRange(){
   }
 }
 
-// Create a single array of unique dateValue/label values that includes all activity types, used to generate x-axis labels to and determine if any dateValues need 0 values added
-function getUniqueDateValues(chartData){
-  labelList = []
-  for (i of Object.keys(chartData)){
-    for (a of Object.keys(chartData[i])) {
-      if (!labelList.includes(chartData[i][a]["x"])) {
-        labelList.push(chartData[i][a]["x"])
-      };
-    }
-  };
-  return labelList;
-};
-
-
+// Generate x-axis labels using nested dates
 // function createXaxisLabels(chartData){
 //   labelList = []
 //   for (i of Object.keys(chartData)){
@@ -44,30 +31,59 @@ function getUniqueDateValues(chartData){
 //       };
 //     }
 //   };
+//   labelList.sort()
 //   return labelList;
+// };
+
+function createXaxisLabels(chartData){
+  labelList = []
+  for (i of Object.keys(chartData)){
+    for (a of Object.keys(chartData[i])) {
+      if (!labelList.includes(chartData[i][a]["x"])) {
+        labelList.push(chartData[i][a]["x"])
+      };
+    }
+  };
+  labelList.sort();
+  return labelList;
+};
+
+// function monthLookUp(monthNum){
+//   if ((monthNum == 1) || (monthNum == 2)){
+//     return {"label":"Jan-Feb", "sort":1};
+//   } else if ((monthNum == 3) || (monthNum == 4)){
+//     return {"label":"Mar-Apr", "sort":2};
+//   } else if ((monthNum == 5) || (monthNum == 6)){
+//     return {"label":"May-Jun", "sort":3};
+//   } else if ((monthNum == 7) || (monthNum == 8)){
+//     return {"label":"Jul-Aug", "sort":4};
+//   } else if ((monthNum == 9) || (monthNum == 10)){
+//     return {"label":"Sep-Oct", "sort":5};
+//   } else if ((monthNum == 11) || (monthNum == 12)){
+//     return {"label":"Nov-Dec", "sort":6};
+//   }
 // }
 
-// Sort and Label value lookups for all dateValue and dateType entries. Used to allow sorting on non-date formatted dateValue aggregations. DateValue strings and integers are handled.
 function sortLookUp(dateValue, dateType=null) {
-  if ((dateType == "month") && ((dateValue == 1) || (dateValue == 2))){
+  if ((dateType == "month") && (dateValue == 1) || (dateValue == 2)){
     return {"label":"Jan-Feb", "sort":1};
-  } else if ((dateType == "month") && ((dateValue == 3) || (dateValue == 4))){
+  } else if ((dateType == "month") && (dateValue == 3) || (dateValue == 4)){
     return {"label":"Mar-Apr", "sort":2};
-  } else if ((dateType == "month") && ((dateValue == 5) || (dateValue == 6))){
+  } else if ((dateType == "month") && (dateValue == 5) || (dateValue == 6)){
     return {"label":"May-Jun", "sort":3};
-  } else if ((dateType == "month") && ((dateValue == 7) || (dateValue == 8))){
+  } else if ((dateType == "month") && (dateValue == 7) || (dateValue == 8)){
     return {"label":"Jul-Aug", "sort":4};
-  } else if ((dateType == "month") && ((dateValue == 9) || (dateValue == 10))){
+  } else if ((dateType == "month") && (dateValue == 9) || (dateValue == 10)){
     return {"label":"Sep-Oct", "sort":5};
-  } else if ((dateType == "month") && ((dateValue== 11) || (dateValue == 12))){
+  } else if ((dateType == "month") && (dateValue== 11) || (dateValue == 12)){
     return {"label":"Nov-Dec", "sort":6};
-  } else if ((dateType == "week") && (dateValue >= 1 && dateValue <= 7)){
+  } else if ((dateType == "week") && (dateValue >= 1 && dateValue) <= 7 ){
     return {"label":"Week 1", "sort":1};
-  } else if ((dateType == "week") && (dateValue >= 8 && dateValue <= 15)){
+  } else if ((dateType == "week") && dateValue >= 8 && dateValue <= 15){
     return {"label":"Week 2", "sort":2};
-  } else if ((dateType == "week") && (dateValue >= 16 && dateValue <= 23)){
+  } else if ((dateType == "week") && dateValue >= 16 && dateValue <= 23){
     return  {"label":"Week 3", "sort":3};
-  } else if ((dateType == "week") && (dateValue >= 24 && dateValue <= 31)){
+  } else if ((dateType == "week") && dateValue >= 24 && dateValue <= 31){
     return  {"label":"Week 4", "sort":4};
   } else if (dateValue == "Jan-Feb"){
     return {"sort":1}
@@ -82,7 +98,7 @@ function sortLookUp(dateValue, dateType=null) {
   } else if (dateValue == "Nov-Dec"){
     return {"sort":6}
   } else if (dateType == "default/year"){
-    return {"sort":parseInt(dateValue)};
+    return {"sort":dateValue};
   }  else if (dateType == "week" && dateValue == "Week 1"){
     return {"sort":1}
   } else if (dateType == "week" && dateValue == "Week 2"){
@@ -91,28 +107,33 @@ function sortLookUp(dateValue, dateType=null) {
     return {"sort":3}
   } else if (dateType == "week" && dateValue == "Week 4"){
     return {"sort":4}
-  } else if (dateType == "day") {
-    return {"sort":parseInt(dateValue.substr(3,2))}
   }
 }
 
-// Groups, zero-fills, and sorts activities by activity type and date to provide data that are formatted for use in Chart.JS. Format is: {ActivityType1:[{"x":x-value(dateValue),"y":y-value(distance, elevation, etc),"z":date-sorting value},...], ...}
+//
+// function weekLookUp(weekNum){
+//   if ( weekNum >= 1 && weekNum <= 7 ){
+//     return {"label":"Week 1", "sort":1};
+//   } else if (weekNum >= 8 && weekNum <= 15){
+//     return {"label":"Week 2", "sort":2};
+//   } else if (weekNum >= 16 && weekNum <= 23){
+//     return  {"label":"Week 3", "sort":3};
+//   } else if (weekNum >= 24 && weekNum <= 31){
+//     return  {"label":"Week 4", "sort":4}
+//   }
+// }
+
 function binActData(filteredGroup){
+  // console.log(filteredGroup)
   geoJSONDat = filteredGroup.toGeoJSON()
-  binnedActDataDict = {}
-  // This logs the state upon creation, normal console.log() returns as it is when viewing, doesn't reflect state at the time of processing
-  // I think this creates a clone of the data as a string at this point in time instead of referring to the object itself
-  // console.log is async and objects are logged when expanded, not when calculated. see:
-  // https://stackoverflow.com/questions/11214430/wrong-value-in-console-log
-  // console.log(JSON.parse(JSON.stringify(binnedActDataDict)))
-  var dateDataList = []
-  var yearList = []
-  // Set dateType based on current user daterange selection
-  var dateType = checkDateRange();
-  sortVal = null
-  featDate = null
+  actDataDict = {}
+  dateDataList = []
+  yearList = []
+  dateType = checkDateRange();
+  // sortVal = null
+  // featDate = null
   for (i of geoJSONDat.features) {
-    var actType = i.properties.type_extended
+    // Extract just year from datetime information
     if (dateType == "default/year") {
       featDate = i.properties.startDate.substr(0,4);
       sortVal =  parseInt(i.properties.startDate.substr(0,4))
@@ -124,18 +145,23 @@ function binActData(filteredGroup){
       sortVal = sortLookUp(parseInt(i.properties.startDate.substr(8,2)), "week")['sort'];
     } else if (dateType == "day") {
       featDate = i.properties.startDate.substr(5,5)
-      sortVal =  parseInt(i.properties.startDate.substr(8,2))
+      sortVal =  parseInt(i.properties.startDate.substr(5,2))
     }
+    actType = i.properties.type_extended
     // Convert distance from meters to miles
-    var distance = i.properties.distance * 0.000621371
+    distance = i.properties.distance * 0.000621371
     // Add activity to object if not yet added, use index location to determine existence
-    if (Object.keys(binnedActDataDict).indexOf(actType) == -1) {
-      binnedActDataDict[actType] = [{"x":featDate,"y":distance, "z":sortVal}];
+    if (Object.keys(actDataDict).indexOf(actType) == -1) {
+      actDataDict[actType] = [];
+    };
+    // If acttype object is empty then add this activity to it
+    if (actDataDict[actType].length == 0) {
+      // console.log("Act type is empty, adding first entry!")
+      actDataDict[actType].push({"x":featDate,"y":distance, "z":sortVal});
     } else {
-      // Loop over all object entries checking if date matches, if so add feature's distance to it
-      // Use inDict to track if dateValue is already inside activity object
+      // Loop over all object entries checking if date matches, if so add this distance to it
       var inDict = false
-      for (a of binnedActDataDict[actType]){
+      for (a of actDataDict[actType]){
         if (a["x"] == featDate){
           a["y"] += distance;
           // Set inDict date flag to true and break, no need to keep looping over stored dates
@@ -145,46 +171,53 @@ function binActData(filteredGroup){
       }
       // If inDict is false then this date has not yet been added to the acttpye object, add date and distance to activity type object
       if (inDict == false){
-        binnedActDataDict[actType].push({"x":featDate,"y":distance, "z":sortVal});
+        actDataDict[actType].push({"x":featDate,"y":distance, "z":sortVal});
       }
     }
   }
 
-  // Round y values
-  for (a of Object.keys(binnedActDataDict)) {
-    for (i of Object.keys(binnedActDataDict[a])) {
-      binnedActDataDict[a][i]["y"] = Math.round(binnedActDataDict[a][i]["y"])
+  // Round values
+  for (a of Object.keys(actDataDict)) {
+    for (i of Object.keys(actDataDict[a])) {
+      actDataDict[a][i]["y"] = Math.round(actDataDict[a][i]["y"])
     }
   };
-  // Get single array of all unique dateValues(x-axis groupings/labels) in activity object, including all activity types
-  // Add dateValues and zero-filled y-values to any activity type missing a unique dateValue
-  // This ensures that all datasets are of the same length, even if some activity types don't have activities in that time period.
-  // This ensures that mouse-over data values show the correct information. I think these mouse-over values use a index based on all dateValues in the table, any empty values break the index and may result in incorrect values
-  uniqueLabels = getUniqueDateValues(binnedActDataDict);
+
+  // Fill in time periods that don't have data, this ensures mouse-over labeling will work properly
+  uniqueLabels = createXaxisLabels(actDataDict);
   for (label of uniqueLabels){
-    for (actType of Object.keys(binnedActDataDict)) {
+    for (actType of Object.keys(actDataDict)) {
       actLabelList = []
-      for (dateEntry of Object.keys(binnedActDataDict[actType])) {
-        actLabelList.push(binnedActDataDict[actType][dateEntry]["x"]);
+      for (dateEntry of Object.keys(actDataDict[actType])) {
+        actLabelList.push(actDataDict[actType][dateEntry]["x"]);
       }
       if (!actLabelList.includes(label)){
-        binnedActDataDict[actType].push({"x":label,"y":0,"z":sortLookUp(label,dateType)["sort"]});
+        console.log("Label not included is:")
+        console.log(label)
+        console.log(dateType)
+        console.log(sortLookUp(label,dateType))
+        // actDataDict[actType].push({"x":label,"y":0,"z":parseInt(label)});
+        actDataDict[actType].push({"x":label,"y":0,"z":sortLookUp(label,dateType)["sort"]});
       }
     }
   }
+
   // Sort dates from low to high based on the z sort value
   // see https://stackoverflow.com/a/979289
   // I have no idea how this works
-  for (actType of Object.keys(binnedActDataDict)) {
-    binnedActDataDict[actType].sort((a, b) => parseFloat(a.z) - parseFloat(b.z));
-  }
-  return binnedActDataDict
+for (actType of Object.keys(actDataDict)) {
+  actDataDict[actType].sort((a, b) => parseFloat(a.z) - parseFloat(b.z));
+}
+
+  console.log(actDataDict)
+  return actDataDict
 };
 
-// Generates label and color options for each activity type within a single array. Array is formatted to be accepted a Chart.JS setting
 function generateDatasetOptions(chartData) {
   var datasetOptions = []
   for (i of Object.keys(chartData)){
+    // console.log(chartData)
+    // console.log(i)
     options = {label:i,data:chartData[i],borderWidth: 1}
     if (i=="Mountain Bike") {
       options['label'] = "MTB"
@@ -206,13 +239,13 @@ function generateDatasetOptions(chartData) {
   return datasetOptions;
 };
 
-// Create initial Chart.JS barplot using initial load state of dashboard. Chart is updated with javascript events as selections are made
+
 function createActivityChart(chartData) {
   var ctx = document.getElementById('chart').getContext('2d');
   actChart = new Chart(ctx, {
       type: 'bar',
       data: {
-          labels: getUniqueDateValues(chartData),
+          labels: createXaxisLabels(chartData),
           datasets:  generateDatasetOptions(chartData)
       },
       options: {
@@ -252,27 +285,12 @@ function createActivityChart(chartData) {
 function updateChart(filteredGroup){
   // Create formatted dataset
   chartData = binActData(filteredGroup);
-  // Check if chart data is empty, or only includes a date entry, if so, set unavailable text, if not update chart contents
-  dateCount = 0
-  for (i of Object.keys(chartData)){
-    for (a of chartData[i]){
-      dateCount += 1
-    }
-  }
-  // see https://stackoverflow.com/a/55972382 for div update method
-  if (dateCount <= 1){
-  	document.getElementById("chart-cont").classList.add("no-data");
-  	document.getElementById("no-data-text").classList.add("show-data");
-  } else {
-  	document.getElementById("chart-cont").classList.remove("no-data");
-  	document.getElementById("no-data-text").classList.remove("show-data");
-    // Calculate date labels (x-axis)
-    actChart.data.labels = getUniqueDateValues(chartData);
-    // Use formatted data to generate legend labels and colors based on activity type
-    actChart.data.datasets = generateDatasetOptions(chartData);
-    // Issue data update
-    actChart.update();
-  }
+  // Calculate date labels (x-axis)
+  actChart.data.labels = createXaxisLabels(chartData);
+  // Use formatted data to generate legend labels and colors based on activity type
+  actChart.data.datasets = generateDatasetOptions(chartData);
+  //
+  actChart.update();
 }
 
 // Used to display singular activites only on map and in dashboard panels, such as when searched or selected
@@ -298,8 +316,6 @@ function filterSingleActDisplay(actID) {
   };
   // Set All button text to "Add Layers" to reflect its behavior
   document.getElementById("All").innerHTML = "&nbsp;&nbsp;&nbsp;Add&nbsp;&nbsp;&nbsp;&nbsp;<br>Layers";
-  // Update chart
-  updateChart(filteredGroup);
 };
 
 // Create Leafet search option using activity name
