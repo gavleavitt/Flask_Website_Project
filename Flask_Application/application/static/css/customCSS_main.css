@@ -583,12 +583,12 @@ p a:visited{
 } */
 
 h3 a:visited, a:link{
-  color: #0c02e3;
+  /* color: #0c02e3; */
   text-decoration: none;
 }
 
 h2 a:visited, a:link{
-  color: #0c02e3;
+  /* color: #0c02e3; */
   text-decoration: none;
 }
 

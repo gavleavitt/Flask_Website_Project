@@ -33,12 +33,13 @@ def template():
 
 @app.route("/maps/stravamap")
 @app.route("/stravamap")
+@app.route("/strava")
 def stravaprojmap():
-    return render_template("public/maps/Strava_Map_TopoJSON.html")
+    return render_template("public/maps/Strava_Map_Dashboard.html")
 
 @app.route("/maps/stravamaptesting")
 def stravatestingmap():
-    return render_template("public/maps/Strava_Map_Chart.html")
+    return render_template("public/maps/Strava_Map_Dashboard_Testing.html")
 
 @app.route("/maps/sbcoceanwaterquality")
 @app.route("/waterquality")
