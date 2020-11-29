@@ -29,13 +29,6 @@
 
 	<!-- Leaflet Omnivore -->
 	<script src='//api.tiles.mapbox.com/mapbox.js/plugins/leaflet-omnivore/v0.3.1/leaflet-omnivore.min.js'></script>
-<!-- Chart.js JS-->
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.min.js"></script>
-
-<!-- Chart.js CSS -->
-	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.min.css"/>
-
-
 
 	<!-- Leaflet Table CSS -->
 	<!-- <link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.3/leaflet.css" /> -->
@@ -97,8 +90,7 @@
 		<div class="item titlediv">
 			<div id = "Title" class="titletext">Strava Activity Viewer</div>
 			<div class="filter-btn-group" id="act-filter-group">
-				<!-- <button class="filterbtn active-btn" onclick="actFilter('All')" id="All">Remove<br>Layers</button> -->
-				<button class="filterbtn active-btn" id="All">Remove<br>Layers</button>
+				<button class="filterbtn active-btn" onclick="actFilter('All')" id="All">Remove<br>Layers</button>
 				<button class="filterbtn" id="MTB">Mountain<br>Biking</button>
 				<button class="filterbtn" id="Road">Road<br>Rides</button>
 				<button class="filterbtn" id="Walk">Walks</button>
@@ -110,7 +102,7 @@
 				    <span id="display-date"></span> <i class="fa fa-caret-down"></i>
 				</div>
 				<!-- <button id="reset" onclick="resetAll()">Reset All</button> -->
-			</div>
+		</div>
 			<!-- See this for basic popup box: https://html-online.com/articles/simple-popup-box/ -->
 			<!-- https://www.w3schools.com/howto/howto_css_modals.asp -->
 			<div class="popupbuttontext">
@@ -146,46 +138,13 @@
 					</div>
 			 </div>
 		 </div>
+			<!-- <div class="popupbuttontext"> Map Details
+			</div> -->
 		</div>
-		<div id='map' class="map-panel item"></div>
-		<div class="detail-panel">
-			<div class="item detail-panel-col">
-				<span class="detail-context">Activity Count</span>
-				<span id="actCount" class="detail-text">Loading</span>
+	  <div class="item map-panel detail-panel-col">
+			<div id='map'>
 			</div>
-			<div class="item detail-panel-col">
-				<span class="detail-context">Total Distance</span>
-				<span id="totalDist" class="detail-text">Loading</span>
-			</div>
-			<div class="item detail-panel-col">
-				<span class="detail-context">Total Elevation</span>
-				<span id="totalElev" class="detail-text">Loading</span>
-			</div>
-			<div class="item detail-panel-col">
-				<span class="detail-context">Total Calories Burned</span>
-				<span id="totalCalories" class="detail-text">Loading</span>
-			</div>
-			<div class="item detail-panel-col">
-				<span class="detail-context">Moving Time</span>
-				<span id="movingTime" class="detail-text">Loading</span>
-				<!-- <span class="detail-context">Total Time</span>
-				<span id="totalTime" class="detail-text">Loading</span> -->
-			</div>
-			<div class="item detail-panel-col">
-				<span class="detail-context">Average Speed</span>
-				<span id="avgSpeed" class="detail-text">Loading</span>
-				<!-- <span class="detail-context">Max Speed</span>
-				<span id="maxSpeed" class="detail-text">Loading</span> -->
-			</div>
-			<div id="chart-cont" class="item detail-panel-col actChart show-data">
-				<canvas id="chart"></canvas>
-			</div>
-			<div id="no-data-text" class="item detail-panel-col actChart no-data">
-				<span class="detail-context detail-panel-col">Data Unavailable</span>
-				<!-- <span class="detail-context">Max Speed</span>
-				<span id="maxSpeed" class="detail-text">Loading</span> -->
-			</div>
-		</div>
+	</div>
 	<script>
 		// Modal from https://www.w3schools.com/howto/tryit.asp?filename=tryhow_css_modal
 		// Get the modal
@@ -226,10 +185,16 @@
 
 		// daterangepicker taken from  https://www.daterangepicker.com/
 		$(function() {
+
+	    // var start = moment().subtract(29, 'days');
+			// var start = moment('2014-01-01');
+	    // var end = moment();
+
 			// Set format of dates
 	    function cb(start, end) {
 	        $('#reportrange span').html(start.format('MMMM D, YYYY') + ' - ' + end.format('MMMM D, YYYY'));
 	    }
+
 	    $('#reportrange').daterangepicker({
 	        startDate: start,
 	        endDate: end,
@@ -257,20 +222,20 @@
 	           // 'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
 	        }
 	    }, cb);
-			// Initializes
+			// Initlizes something, not sure
 	    cb(start, end);
+
 		});
+
 		// Callback function that fires when user uses picker, filters activity display
 		$("#reportrange").on('apply.daterangepicker', function(ev, picker) {
 			// Formats data in a proper date format
-			userStart = picker.startDate.format();
-			userEnd = picker.endDate.format();
+			userStart = picker.startDate.format()
+			userEnd = picker.endDate.format()
 			// clear existing layers
-			filteredGroup.clearLayers();
+			filteredGroup.clearLayers()
 			// Re-add active layers with new daterange filter applied
-			addActiveLayers(picker.startDate.format(), picker.endDate.format());
-			updateDataPanels(filteredGroup,actDataDict, "True");
-			updateChart(filteredGroup);
+			addActiveLayers(picker.startDate.format(), picker.endDate.format())
 		});
 
 		//Set email address using Javascript, harder for crawlers to grab
@@ -286,13 +251,15 @@
 			{layers: [osm]}).setView([34.41,-119.86],12);
 		var actlimit = "1000"
 
-		jsonDataURL = "/static/json/topoJSONPublicActivities.json"
+		jsonDataURL = "/static/json/publicActivities.json"
 
 		//Loading spinner
 		map.spin(true);
 
-		// Dict to hold panel values
-	  var actDataDict = {"count":null, "dist":null, "elev":null, "calories":null, "totalTime":null, "speed":null, "moveTime":null}
+
+
+		// Add control to map
+		// map.addControl(searchControl);
 
 		// see http://bl.ocks.org/marcellobenigno/9b09c24850def14250141dfe89f9a296
 		// see https://docs.mapbox.com/mapbox.js/example/v1.0.0/omnivore-kml-tooltip/
@@ -306,7 +273,7 @@
 		var originalTopoData = omnivore.topojson(jsonDataURL, null, orgActivities)
 		.on('ready', function() {
 			// After data have loaded, create a original group layer containing all data, this won't be filtered/changed and is kept to hold original data
-			// originalGroup = L.layerGroup([orgActivities]);
+			originalGroup = L.layerGroup([orgActivities]);
 			// Create new raw geoJSON dataset using the original, un-aletered, geoJSON layer as dump source.
 			// There may be a better method than this, but I believe that L.geoJSON can only take raw geoJSON data, not an existing geoJSON layer.
 			// This requires a dump of geoJSON data into a new variable since the raw geoJSON data doesn't get stored automatically, its converted into a geoJSON layer.
@@ -314,19 +281,15 @@
 			rawGeoJSON = orgActivities.toGeoJSON()
 			// Create a filtered group layer and add to map, this layer group will be changed using filters
 			filteredGroup = L.layerGroup([orgActivities]).addTo(map);
-			updateDataPanels(filteredGroup, actDataDict, "False")
 			// create Leafet search for loaded geoJSON data
 			createSearchControl(filteredGroup);
-			popupAction(filteredGroup);
-			chartActData = binActData(filteredGroup);
-			createActivityChart(chartActData);
-			// chartActData = binActData(rawGeoJSON);
-			// populateChart(chartActData);
 			map.spin(false);
 		})
 		.on('error', function() {
 			alert("Data failed to load, please try again later.")
 		})
+
+
 </script>
 </body>
 </html>
