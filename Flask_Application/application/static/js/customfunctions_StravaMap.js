@@ -206,6 +206,30 @@ function generateDatasetOptions(chartData) {
   return datasetOptions;
 };
 
+function getChartTextSizes(){
+  width = window.innerWidth;
+  height = window.innerHeight;
+  if (width <= 1300){
+    return 12;
+  } else {
+    return 16;
+  }
+}
+
+function setChartTextSizes(){
+  width = window.innerWidth;
+  height = window.innerHeight;
+  if (width <= 1300){
+    size = 12;
+  } else {
+    size = 16;
+  }
+  actChart.options.title.fontSize = size;
+  actChart.options.legend.labels.fontSize = size;
+  // Issue data update
+  actChart.update();
+}
+
 // Create initial Chart.JS barplot using initial load state of dashboard. Chart is updated with javascript events as selections are made
 function createActivityChart(chartData) {
   var ctx = document.getElementById('chart').getContext('2d');
@@ -213,14 +237,24 @@ function createActivityChart(chartData) {
       type: 'bar',
       data: {
           labels: getUniqueDateValues(chartData),
-          datasets:  generateDatasetOptions(chartData)
+          datasets: generateDatasetOptions(chartData)
       },
       options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        title:{
+          display: true,
+          text: "Total Distance",
+          fontSize: getChartTextSizes(),
+          fontColor: "black",
+          padding: 5
+        },
         legend: {
           labels:{
-            fontSize: 14,
+            fontSize: getChartTextSizes(),
             fontStyle: "bold",
-            fontColor: "black"
+            fontColor: "black",
+            padding: 5
           }
         },
         // https://stackoverflow.com/questions/55428160/wrong-label-value-is-displayed-on-point-hover-chart-js
@@ -230,11 +264,16 @@ function createActivityChart(chartData) {
             // stacked:true
           }],
           yAxes: [{
+            afterFit: function(scale) {
+              scale.width = 54  //<-- set value as you wish
+            },
             scaleLabel: {
               display: true,
-              labelString: "Total Distance(Miles)",
-              fontSize: 14,
+              labelString: "Miles",
+              fontSize: getChartTextSizes(),
+              fontStyle: "bold",
               fontColor: "black",
+              padding: 5
               // fontStyle: "bold"
             },
             // stacked:true,
@@ -651,3 +690,7 @@ function updateDataPanels(groupLayer, actDataDict, clear){
   document.getElementById('avgSpeed').innerHTML = avgSpeed + " mph";
   // document.getElementById('maxSpeed').innerHTML = actDataDict["maxSpeed"]+ " mph";
 };
+
+// function resizeChart(){
+//
+// }
