@@ -558,6 +558,18 @@ This targets only fine pointers (mouse) for hover behavior, this prevents the ho
   }
 }
 @media screen and (max-width: 500px) {
+  #reportrange{
+    font-size: 14px;
+  }
+  .dashboard-content{
+    grid-template-rows: auto;
+  }
+  .detail-text{
+    padding-top: 5px;
+  }
+  .detail-context{
+    padding-bottom: 5px;
+  }
   .map-panel{
     grid-column: 1/8;
     grid-row: 1/4;
@@ -594,7 +606,6 @@ This targets only fine pointers (mouse) for hover behavior, this prevents the ho
 
 @media screen and (max-width: 420px) {
   .titletext{
-    font-size: 16px;
     grid-row: 2/3;
     text-align: center;
     float: none;
