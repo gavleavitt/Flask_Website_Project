@@ -72,7 +72,11 @@
 	<script src="{{ url_for('static', filename='js/spin/dist/spin.min.js') }}"></script>
 	<!-- leaflet spin JS -->
 	<script src="{{ url_for('static', filename='js/leaflet.spin.min.js') }}"></script>
-
+	<!-- Leaflet fullscreen source: https://github.com/brunob/leaflet.fullscreen -->
+	<!-- Leaflet Fullscreen JS  -->
+	<script src="{{ url_for('static', filename='js/Control.FullScreen.js') }}"></script>
+	<!-- Leaflet Fullscreen CSS  -->
+	<link rel="stylesheet" href="{{ url_for('static', filename='css/Control.FullScreen.css') }}">
 
 	<!-- Favicon links -->
 	<link rel="apple-touch-icon" sizes="180x180" href="/static/images/apple-touch-icon.png">
@@ -147,31 +151,31 @@
 			 </div>
 		 </div>
 		</div>
-		<div id='map' class="map-panel item"></div>
-		<div class="detail-panel">
-			<div class="item detail-panel-col">
+		<div class="dashboard-content">
+			<div id='map' class="map-panel item"></div>
+			<div id = "count-div" class="item detail-panel-col">
 				<span class="detail-context">Activity Count</span>
 				<span id="actCount" class="detail-text">Loading</span>
 			</div>
-			<div class="item detail-panel-col">
+			<div id = "dist-div"class="item detail-panel-col">
 				<span class="detail-context">Total Distance</span>
 				<span id="totalDist" class="detail-text">Loading</span>
 			</div>
-			<div class="item detail-panel-col">
+			<div id = "elev-div" class="item detail-panel-col">
 				<span class="detail-context">Total Elevation</span>
 				<span id="totalElev" class="detail-text">Loading</span>
 			</div>
-			<div class="item detail-panel-col">
+			<div id ="calories-div" class="item detail-panel-col">
 				<span class="detail-context">Total Calories Burned</span>
 				<span id="totalCalories" class="detail-text">Loading</span>
 			</div>
-			<div class="item detail-panel-col">
+			<div id = "moving-div"class="item detail-panel-col">
 				<span class="detail-context">Moving Time</span>
 				<span id="movingTime" class="detail-text">Loading</span>
 				<!-- <span class="detail-context">Total Time</span>
 				<span id="totalTime" class="detail-text">Loading</span> -->
 			</div>
-			<div class="item detail-panel-col">
+			<div id = "avg-div" class="item detail-panel-col">
 				<span class="detail-context">Average Speed</span>
 				<span id="avgSpeed" class="detail-text">Loading</span>
 				<!-- <span class="detail-context">Max Speed</span>
@@ -190,8 +194,9 @@
 		// Modal from https://www.w3schools.com/howto/tryit.asp?filename=tryhow_css_modal
 		// Get the modal
 
+		// Open modal
 		var modal = document.getElementById("myModal");
-
+		modal.style.display = "block";
 		// Get the button that opens the modal
 		var btn = document.getElementById("btn");
 
@@ -216,13 +221,14 @@
 		}
 		// Open modal when window loads
 		window.onload = function(){
-			modal.style.display = "block";
+			// modal.style.display = "block";
 			loadActivityListener();
 		}
 
 		// Set default start and end times of date range picker
 		var start = moment('2014-01-01');
 		var end = moment();
+
 
 		// daterangepicker taken from  https://www.daterangepicker.com/
 		$(function() {
@@ -283,7 +289,13 @@
 			 attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'})
 		// intilize map with basemap:
 		var map = L.map('map',
-			{layers: [osm]}).setView([34.41,-119.86],12);
+			{
+				layers: [osm],  
+				fullscreenControl: true,
+  			fullscreenControlOptions: {
+    			position: 'topleft'
+  			}
+			}).setView([34.41,-119.86],12);
 		var actlimit = "1000"
 
 		jsonDataURL = "/static/json/topoJSONPublicActivities.json"
@@ -327,6 +339,9 @@
 		.on('error', function() {
 			alert("Data failed to load, please try again later.")
 		})
+
+		window.addEventListener('resize', setChartTextSizes);
+		// window.onresize = getChartTextSizes();
 </script>
 </body>
 </html>
