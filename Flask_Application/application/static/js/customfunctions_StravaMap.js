@@ -34,19 +34,6 @@ function getUniqueDateValues(chartData){
   return labelList;
 };
 
-
-// function createXaxisLabels(chartData){
-//   labelList = []
-//   for (i of Object.keys(chartData)){
-//     for (a of Object.keys(chartData[i])) {
-//       if (!labelList.includes(chartData[i][a]["x"])) {
-//         labelList.push(chartData[i][a]["x"])
-//       };
-//     }
-//   };
-//   return labelList;
-// }
-
 // Sort and Label value lookups for all dateValue and dateType entries. Used to allow sorting on non-date formatted dateValue aggregations. DateValue strings and integers are handled.
 function sortLookUp(dateValue, dateType=null) {
   if ((dateType == "month") && ((dateValue == 1) || (dateValue == 2))){
@@ -206,10 +193,13 @@ function generateDatasetOptions(chartData) {
   return datasetOptions;
 };
 
+function setDisplaysize(){
+  dimen = {'width': window.innerWidth,'height':window.innerHeight};
+}
+
 function getChartTextSizes(){
-  width = window.innerWidth;
-  height = window.innerHeight;
-  if (width <= 1300){
+  // var dimen = getDisplaysize();
+  if (dimen.width <= 1300) {
     return 12;
   } else {
     return 16;
@@ -217,10 +207,11 @@ function getChartTextSizes(){
 }
 
 function setChartTextSizes(){
-  width = window.innerWidth;
-  height = window.innerHeight;
-  if (width <= 1300){
+  // dimen = getDisplaysize();;
+  if (dimen.width <= 1300 && dimen.width > 800){
     size = 12;
+  } else if (dimen.width <= 800) {
+    size = 12
   } else {
     size = 16;
   }
@@ -241,7 +232,7 @@ function createActivityChart(chartData) {
       },
       options: {
         responsive: true,
-        maintainAspectRatio: false,
+        // maintainAspectRatio: false,
         title:{
           display: true,
           text: "Total Distance",
@@ -361,6 +352,7 @@ function createSearchControl(layerGroup) {
   // When a search location is selected filter to show that activity only
   searchControl.on('search:locationfound', function(e) {
     filterSingleActDisplay(e.layer.feature.properties.actID)
+    toggleFull();
   });
   // Search option activated
   searchControl.on('search:expanded', function(e) {
@@ -394,11 +386,21 @@ function actStyle(feature, layer) {
     return mtb_lineStyle;
   }
 };
+
+function toggleFull(){
+  if ((dimen.width < 600) && fullScreenApi.isFullScreen() === false){
+    map.toggleFullscreen();
+    // map.fitBounds(e.latlng);
+  }
+}
+
+
 // Add onclick action to filter display when user clicks a activity
 function popupAction(layerGroup) {
   layerGroup.eachLayer(function(layer) {
     layer.on('click', function(e) {
       filterSingleActDisplay(e.layer.feature.properties.actID)
+      toggleFull()
     });
   });
 };
@@ -690,7 +692,3 @@ function updateDataPanels(groupLayer, actDataDict, clear){
   document.getElementById('avgSpeed').innerHTML = avgSpeed + " mph";
   // document.getElementById('maxSpeed').innerHTML = actDataDict["maxSpeed"]+ " mph";
 };
-
-// function resizeChart(){
-//
-// }

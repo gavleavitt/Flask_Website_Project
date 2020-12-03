@@ -110,7 +110,8 @@ html{
   /* grid-template-columns: repeat(4,1fr);
   grid-template-rows: repeat(8,1fr); */
   grid-template-columns: repeat(13,1fr);
-  grid-template-rows: repeat(5,1fr);
+  /* grid-template-rows: repeat(5,1fr); */
+  grid-template-rows: auto;
   /* grid-template-rows: repeat(5,minmax(0, 1fr)); */
   grid-gap: 8px;
 }
@@ -523,53 +524,7 @@ This targets only fine pointers (mouse) for hover behavior, this prevents the ho
   }
 } */
 
-@media screen and (max-width: 700px) {
-  .titletext{
-    font-size: 14px;
-  }
-  .popupbuttontext{
-    font-size: 14px;
-    flex-direction: column;
-  }
-  .headerbtn{
-    font-size: 14px;
-  }
-  .home-link{
-    font-size: 14px;
-  }
-  .filterbtn{
-    padding: 3px 3px;
-    margin-right: 2px;
-    margin-left: 2px;
-    font-size: 12px;
-  }
-  .container,.dashboard-content{
-    grid-gap: 5px;
-  }
-  .map-home{
-    margin-right: 0px;
-    padding-bottom: 16px;
-  }
-  #reportrange{
-    text-align: center;
-  }
-  .detail-panel-col{
-    font-size: 0.8em;
-  }
-}
-@media screen and (max-width: 500px) {
-  #reportrange{
-    font-size: 14px;
-  }
-  .dashboard-content{
-    grid-template-rows: auto;
-  }
-  .detail-text{
-    padding-top: 5px;
-  }
-  .detail-context{
-    padding-bottom: 5px;
-  }
+@media screen and (max-width: 1050px) {
   .map-panel{
     grid-column: 1/8;
     grid-row: 1/4;
@@ -602,6 +557,94 @@ This targets only fine pointers (mouse) for hover behavior, this prevents the ho
     grid-column: 11/14;
     grid-row: 3/4;
   }
+}
+@media screen and (max-width: 700px) {
+  .leaflet-control-attribution .leaflet-control{
+    font-size: 6px !important;
+  }
+  .titletext{
+    font-size: 14px;
+  }
+  .popupbuttontext{
+    font-size: 14px;
+    flex-direction: column;
+  }
+  .leaflet-popup-content{
+    font-size: 12px;
+  }
+  .headerbtn{
+    font-size: 14px;
+  }
+  .home-link{
+    font-size: 14px;
+  }
+  .filterbtn{
+    padding: 3px 3px;
+    margin-right: 2px;
+    margin-left: 2px;
+    font-size: 12px;
+  }
+  .container,.dashboard-content{
+    grid-gap: 5px;
+  }
+  .map-home{
+    margin-right: 0px;
+    padding-bottom: 16px;
+  }
+  #reportrange{
+    text-align: center;
+  }
+  .detail-panel-col{
+    font-size: 0.8em;
+  }
+}
+@media screen and (max-width: 500px) {
+  #reportrange{
+    font-size: 14px;
+  }
+  .leaflet-popup-content{
+    font-size: 12px;
+  }
+  .detail-text{
+    padding-top: 5px;
+    font-size: 0.7em
+  }
+  .detail-context{
+    padding-bottom: 5px;
+    font-size: 0.7em;
+  }
+  /* .map-panel{
+    grid-column: 1/8;
+    grid-row: 1/4;
+  }
+  .actChart{
+    grid-column: 1/14;
+  }
+  #count-div{
+    grid-column: 8/11;
+    grid-row: 1/2;
+  }
+
+  #dist-div{
+    grid-column: 11/14;
+    grid-row: 1/2;
+  }
+  #elev-div{
+    grid-column: 8/11;
+    grid-row: 2/3;
+  }
+  #calories-div{
+    grid-column: 11/14;
+    grid-row: 2/3;
+  }
+  #moving-div{
+    grid-column: 8/11;
+    grid-row: 3/4;
+  }
+  #avg-div{
+    grid-column: 11/14;
+    grid-row: 3/4;
+  } */
 }
 
 @media screen and (max-width: 420px) {
