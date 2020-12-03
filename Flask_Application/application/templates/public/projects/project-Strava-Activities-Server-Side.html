@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Strava Activities Project - Data Preparation and Server Side Processing</title>
+
+	<!--jquery adds "$." functionality-->
+	<!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script> -->
+
+	<!-- Custom local javascript functions -->
+	<script src="{{ url_for('static', filename='js/customfunctions.js') }}"></script>
+	<!-- Custom CSS -->
+	<link rel="stylesheet" href="{{ url_for('static', filename='css/customCSS_main.css') }}">
+	<!-- Set favicon -->
+
+	<!-- Favicon links -->
+	<link rel="apple-touch-icon" sizes="180x180" href="/static/images/apple-touch-icon.png">
+	<link rel="icon" type="image/png" sizes="32x32" href="/static/images/favicon-32x32.png">
+	<link rel="icon" type="image/png" sizes="16x16" href="/static/images/favicon-16x16.png">
+	<link rel="manifest" href="/static/images//site.webmanifest">
+	<link rel="mask-icon" href="/static/images//safari-pinned-tab.svg" color="#5bbad5">
+	<meta name="msapplication-TileColor" content="#da532c">
+	<meta name="theme-color" content="#ffffff">
+
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Lato:wght@700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@700&display=swap" rel="stylesheet">
+<link href='https://fonts.googleapis.com/css?family=Quicksand' rel='stylesheet'>
+<link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300&display=swap" rel="stylesheet">
+
+<!-- Font Awesome Social media icons -->
+<!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/brands.min.css"> -->
+
+<!-- Font Awesome Kit -->
+<script src="https://kit.fontawesome.com/fd8b0845f1.js" crossorigin="anonymous"></script>
+
+<!-- Highlight.js -->
+<link rel="stylesheet"
+      href="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.2.0/build/styles/default.min.css">
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.2.0/build/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+
+</head>
+<body>
+  <div class="container-projects sansserif">
+		<div class = "navbar">
+      <div class ="navbarleft">
+				<a href = "/">
+					<div class="icon-home-link">
+						<img id="nav-icon" src = "/static/images/wheel_custom.png">
+						<div class="nav-name">Gavin Leavitt</div>
+					</div>
+				</a>
+			</div>
+      <div id="interactiveBarRight" class="navbarright">
+        <a class= "menu-option" href = "/">Home</a>
+				<a class= "menu-option" href = "/#goto-proj">Projects</a>
+        <a class= "menu-option" href = "/about">About</a>
+        <a class= "menu-option" href = "/resume">Resume</a>
+        <a class= "menu-option" href = "/contact">Contact</a>
+				<a href = "javascript:void(0);" class="menu-icon" onclick="navBarFunction()" onmouseover="menuHover();" onmouseout="menuUnhover();">
+						<img id="menu-icon-img" src="/static/images/menu-icon-gray.svg" style="width:35px;height:35px">
+				</a>
+			</div>
+		</div>
+		<div class="project-content">
+			<div class="title">Strava Activities Project - Data Preparation and Server Side Processing</div>
+			<div class="separatorbar-title"></div>
+			<iframe src="/maps/stravamap" style="border-radius:10px;"></iframe>
+			<div class="fullsize-link">
+				<a href="/maps/stravamap" target="_blank">View fullpage dashboard for best experience( especially if on mobile)</a>
+			</div>
+			<div class="separatorbar-title"></div>
+			<span id="strava-summary" class="goto"></span>
+			<h2><a href=#strava-summary>Summary</a></h2>
+				<p>
+					This personal project displays my up-to-date Strava activity information on a interactive data dashboard using Leaflet to display geographical data and Chart.JS to display graphical information. Data can be filtered and explored by using buttons, date selections, searches, and by selecting geographical data.
+				</p>
+				<p style="border-bottom: 2px solid var(--bluecol); padding-bottom:10px;">
+					Underlining Strava data were initially pulled from the Strava API and processed using Python, then a webhook subscription was created to update my server when new activities are available for processing. Strava activity data are processed in Python using PostGIS functions to remove private areas and to simplify geometries to reduce file sizes, at the cost of spatial accuracy. Data are pre-calculated and served to the Leaflet map in the TopoJSON format to further reduce file sizes and server response times.
+
+					The description below discusses the Strava activity processing workflow and server-side processing scripts. You can view the Python files for this project in it <a href=https://github.com/gavleavitt/Flask_Website_Project/tree/master/Flask_Application/application/projects/strava_activities>GitHub project folder</a>. I have not yet finished the write-up for the client-side Javascript/HTML aspect of the project, but its available within my <a href=https://github.com/gavleavitt/Flask_Website_Project/tree/master/Flask_Application>Flask Application fodler</a>.
+				</p>
+				<div class="toc-container">
+					<p class="toc-title">Project Description Contents</p>
+					<ol class="toc-list">
+					  <li><a href="#access-activities-stravalib">Access Activities on Strava API - stravalib</a>
+					</li>
+					<li><a href="#obfuscate-location-geoalchemy">Obfuscate Sensitive Locations - SQLAlchemy/GeoAlchemy2</a></li>
+					<li><a href="#get-new-activities-webhook">Get New Activities - Strava API Webhook</a></li>
+					<li><a href="#prepare-leaflet-topojson">Prepare Data for Leaflet - TopoJSON</a></li>
+					</ol>
+				</div>
+			<span id="access-activities-stravalib" class="goto"></span>
+			<h3><a href=#access-activities-stravalib>Access Activities on Strava API - stravalib</a></h3>
+				<p>
+					The Python library <a href=https://pythonhosted.org/stravalib/>stravalib</a> provides useful functions to query the Strava API and parse results into Python objects. Instead of using the library's documentation for authentication, I ended up following<a href=https://medium.com/analytics-vidhya/accessing-user-data-via-the-strava-api-using-stravalib-d5bee7fdde17> this guide</a> on Medium Analytics Vidhya which was clearer and provided example code for refreshing the access token. This tutorial allowed me to authenticate and grant access to my Strava account once on my localhost testing application then deploy the application to my AWS webserver without having to manually authenticate again.
+				</p>
+				<p>
+					This process uses the Pickle file created in the one-time authentication and is called for all requests to the Strava API:
+					<pre><code>
+from application.stravalib.client import Client
+import os
+import time
+import pickle
+
+def gettoken():
+	# Build empty stravalib client instance
+	client = Client()
+	# Load access token from the Pickle file
+	with open(os.path.join(app.root_path, 'access_token.pickle'), 'rb') as f:
+	    access_token = pickle.load(f)
+	# Check if access token has expired
+	if time.time() > access_token['expires_at']:
+	    # Use client ID, secret, and refresh token to generate a new access token with Strava API
+	    refresh_response = client.refresh_access_token(client_id=os.getenv("STRAVA_CLIENT_ID"),
+	                                                   client_secret=os.getenv("STRAVA_CLIENT_SECRET"),
+	                                                   refresh_token=access_token['refresh_token'])
+	    # Open Pickle file and update with new access token
+	    with open(os.path.join(app.root_path, 'access_token.pickle'), 'wb') as f:
+	        pickle.dump(refresh_response, f)
+	    # Set new access token in client instance
+	    client.access_token = refresh_response['access_token']
+	    # Set refresh token in client instance
+	    client.refresh_token = refresh_response['refresh_token']
+	    # Set access token expiration time for client instance
+	    client.token_expires_at = refresh_response['expires_at']
+	# Access token is still valid, set token in client instance
+	else:
+	    client.access_token = access_token['access_token']
+	    client.refresh_token = access_token['refresh_token']
+	    client.token_expires_at = access_token['expires_at']
+	return client
+					</pre></code>
+				</p>
+				<p>
+					Now that I have full scope access to my account through the Strava API I can begin downloading activities. The API, and stravalib, offer a few different ways to download activities.
+					<ul>
+						<li>
+							<b>List Athlete Activities.</b> client.get_activities() using the after argument, provides a list of activities after the argument date. However, this does not contain full activity details, only certain summary information is returned.
+						</li>
+						<li>
+						 	<b>Get Activity.</b> client.get_activities() using a activity ID argument, provides full activity details. However, the polyline coordinate information is <a href = https://developers.strava.com/docs/>encoded</a> following the <a href=https://developers.google.com/maps/documentation/utilities/polylinealgorithm>Google Encoded Polyline Algorithm Format</a>.
+						 <li>
+						 	<b>Get Activity Streams.</b> client.get_activity_streams(), allows access to the plain text recorded sensor data for a activity. This option provides access to a variety of sensors on your phone and external connected devices.
+					 </li>
+					</ul>
+				</p>
+				<p>
+					There are also options to access routes, segments, efforts, and other account details.
+				</p>
+				<p>
+					My first goal was to download all my historic activities on Strava and add them to a Postgres/PostGIS database. Considering the API methods available, I decided on the following approach:
+				</p>
+				<p>
+					Use the <b>List Athlete Activities</b> after date method, set to before I started using Strava, to return the activity IDs for all my recorded activities, then generate a list using these IDs.
+					<pre><code>
+def getListIds(client, days):
+  """
+  Gets a list of all Strava Activity IDs since (days) ago from Strava API.
+
+  Parameters
+  ----------
+  client. Stravalib model client object. Contains access token to strava API for the user.
+  days. Int. How many days to look back, queries all activities since this calculated date.
+
+  Returns
+  -------
+  List. List of int IDs of all strava activities for the user.
+  """
+  # use current datetime and timedelta to calculate previous datetime
+  after = datetime.today() - timedelta(days=days)
+  # after = datetime(year=2019, month=8, day=1)
+  actList = []
+  # Get all activities since after time and add to list
+  acts = client.get_activities(after=after)
+  for i in acts:
+      actList.append(i.id)
+  return actList
+					</pre></code>
+				</p>
+				<p id="getFullDetails">
+					Iterate over activity ID list, passing each activity ID into <b>Get Activity</b> and <b>Get Activity Streams</b>. Parse results by structuring data, removing uninteresting/null details, calculating ancillary data, and combining GPS coordinate and time, provided as time since start of activity, into a PostGIS <a href=https://postgis.net/docs/ST_GeomFromEWKT.html>EWKT</a> LINESTRINGM format.
+					<pre><code>
+def getFullDetails(client, actId):
+  """
+  Gets the full details of Strava activities using get_activity() to query flat data and get_activity_streams() to get
+  GPS coordinates and times. Coordinates are formatted to be inserted in PostGIS following ST_GeomFromEWKT.
+
+  Parameters
+  ----------
+  client. Stravalib model client object. Contains access token to strava API for the user.
+  actId. Int. Activity ID.
+
+  Returns
+  -------
+  Dict. Activity and coordinate information formatted to be inserted into Postgres/PostGIS.
+  """
+
+  # Set logger to suppress debug errors, these messages aren't important and pollute the console
+  Log = logging.getLogger()
+  Log.setLevel('ERROR')
+  # Stream data to get from activity streams
+  types = ['time', 'latlng']
+  # Get activity details as a dictionary
+  act = client.get_activity(actId).to_dict()
+  # Get starttime and convert to datetime object
+  # starttime = datetime.fromisoformat(act['start_date'])
+  # Get the activity stream details for the activity id
+  stream = client.get_activity_streams(actId, types=types)
+  # Get athlete ID directly from API call, instead of digging into the nested result provided by get_activity
+  athId = client.get_athlete().id
+  # Extract latlng and time information from activity stream
+  latlng = stream['latlng'].data
+  time = stream['time'].data
+  linestringdat = []
+  wktList = []
+  # Iterate over time and latlng streams, combining them into a list containing sublists with lat, lng, time
+  for i in range(0, len(latlng)):
+      # Create new entry, swapping (lat, lon) to (lon, lat) then append time, provided as seconds since start of activity
+      newEntry = [latlng[i][1], latlng[i][0], time[i]]
+      # Append data as nested list
+      linestringdat.append(newEntry)
+      # Take newEntry list and create a string with a space delimiter between list items, add to list of wkt
+      # This formats data to be friendly with geoalchemy ST_GeomFromEWKT
+      wktList.append(" ".join(str(v) for v in newEntry))
+      # print(wktList)
+  # Format entire list to be friendly with geoalchemy ST_GeomFromEWKT
+  sep = ", "
+  wktstr = f"SRID=4326;LINESTRINGM({sep.join(wktList)})"
+  # Add lat, lng, time as geom key to dict
+  act['geom'] = linestringdat
+  act['actId'] = actId
+  act['geom_wkt'] = wktstr
+  # Add athlete id to dict
+  act['athlete_id'] = athId
+  # Extend type to detect road ride vs mtb
+  act['type_extended'] = None
+  # Calculate type of riding activity, using GearIDs
+  if act['gear_id'] in ["b4317610", "b2066194"]:
+      act['type_extended'] = "Mountain Bike"
+  elif act['gear_id'] == "b5970935":
+      act['type_extended'] = "Road Cycling"
+  # List of dictionary keys to remove, these are null or uninteresting
+  remove_keys = ['guid', 'external_id', 'athlete''location_city',
+								'location_state', 'location_country','kudos_count', 'comment_count',
+                 'athlete_count', 'photo_count', 'total_photo_count', 'map', 'trainer', 'commute',
+                 'gear', 'device_watts', 'has_kudoed', 'best_efforts',
+                 'segment_efforts', 'splits_metric', 'splits_standard', 'weighted_average_watts',
+                 'suffer_score', 'has_heartrate', 'average_heartrate', 'max_heartrate', 'average_cadence',
+                 'average_temp', 'embed_token', 'trainer',
+                 'photos', 'instagram_primary_photo', 'partner_logo_url', 'partner_brand_tag', 'from_accepted_tag',
+                 'segment_leaderboard_opt_out', 'highlighted_kudosers', 'laps']
+  # Iterate over dict keys, removing unnecessary/unwanted keys
+  for key in list(act.keys()):
+      if key in remove_keys:
+          del (act[key])
+  return act
+					</pre></code>
+				</p>
+				<p>
+					Finally, insert these data into Postgres:
+					<pre><code>
+def insertPrivateAct(actDict):
+	"""
+	Inserts new activity, POSTed by Strava webhook update or by manually triggering process activity event route.
+
+	Parameters
+	----------
+	actDict. Dict. Generated by StravaWebHook.handle_sub_update() or by getStravaActivities.processActs().
+
+	Returns
+	-------
+	Nothing. Data are inserted into Postgres/PostGIS.
+	"""
+	insert = strava_activities(actID=actDict['actId'], upload_id=actDict['upload_id'], name=actDict['name'],
+	                           distance=actDict['distance'], moving_time=actDict['moving_time'],
+	                           elapsed_time=actDict['elapsed_time'],
+	                           total_elevation_gain=actDict['total_elevation_gain'],
+	                           elev_high=actDict['elev_high'], elev_low=actDict['elev_low'], type=actDict['type'],
+	                           start_date=actDict['start_date'], start_date_local=actDict['start_date_local'],
+	                           timezone=actDict['timezone'], utc_offset=actDict['utc_offset'],
+	                           start_latlng=actDict['start_latlng'], end_latlng=actDict['end_latlng'],
+	                           start_latitude=actDict['start_latitude'], start_longitude=actDict['start_longitude'],
+	                           achievement_count=actDict['achievement_count'], pr_count=actDict['pr_count'],
+	                           private=actDict['private'], gear_id=actDict['gear_id'],
+	                           average_speed=actDict['average_speed'], max_speed=actDict['max_speed'],
+	                           average_watts=actDict['average_watts'], kilojoules=actDict['kilojoules'],
+	                           description=actDict['description'], workout_type=actDict['workout_type'],
+	                           calories=actDict['calories'], device_name=actDict['device_name'],
+	                           manual=actDict['manual'], athlete_id=actDict['athlete_id'],
+	                           type_extended=actDict['type_extended'], geom=actDict['geom_wkt'])
+	session = Session()
+	session.add(insert)
+	session.commit()
+	session.close()
+					</pre></code>
+				</p>
+			<span id="obfuscate-location-geoalchemy" class="goto"></span>
+			<h3><a href=#obfuscate-location-geoalchemy>Obfuscate Sensitive Locations - SQLAlchemy/GeoAlchemy2</a></h3>
+				<p>
+					Now I have the details and coordinates of every Strava activity on my account stored in my Postgres database ready to be served to a Leaflet application. This creates another problem however, since I stored the full coordinate information for each activity, any personal locations such as my home and homes of friends and family will be visible if I share the data publically. Strava's solution to this issue is to allow users to create privacy zones, which are used to remove any sections of publically visible activities that start or end within the zones. This solution is bypassed in my dataset since I queried the full coordinates of my activities using full scope access.
+				</p>
+				<p>
+					To maintain my privacy, I decided to create my own privacy zones in QGIS and store them within my database. A second, public friendly dataset, was generated using SQLAlchemy and GeoAlchemy2 PostGIS functions which removed all sections that crossed these privacy areas.
+					Also, since the dataset from Strava contains a coordinate vertex about every second of recorded time, I simplified the data to reduce the overall number of vertices.
+				</p>
+				<p>
+					Here you can see the SQLAlchemy ORM expressions used to initially populate the public friendly table:
+					<pre><code>
+# import GeoAlchemy2 and extended SQLAlchemy functions
+from sqlalchemy import func as sqlfunc
+# import session factory
+from application Session
+# Table holding all geometry and attribute data from Strava API
+import strava_activities
+# Table holding masked, public friendly, data
+import strava_activities_masked
+
+def processActivitiesPublic(recordID):
+	"""
+	Processes Strava activity by simplifying geometry and removing private areas. This prepares the activity to be
+	shared publicly on a Leaflet map. These functions greatly reduce the number of vertices, reducing JSON file size,
+	and process the data to be topoJSON friendly, preventing geometries from failing to be converted.
+	Parameters
+	----------
+	recordID. Int. Strava activity record ID.
+
+	Returns
+	-------
+	Nothing. Data are processed and committed to PostgresSQL/PostGIS database.
+	"""
+
+	# Create database session
+	session = Session()
+	simplifyFactor = 15
+	geometricProj = 32610
+	webSRID = 4326
+	gridSnap = 3
+	collectionExtract = 3
+	# Create CTE to query privacy zone polygons, combine them, extract polygons, and transform to geometricProj
+	privacy_cte = session.query(sqlfunc.ST_Transform(sqlfunc.ST_CollectionExtract(sqlfunc.ST_Collect(AOI.geom),
+		 collectionExtract), geometricProj).label("priv_aoi")).filter(AOI.privacy == "Yes").cte("privacy_aoi")
+
+	# Processes all records in the strava_activities table, used for initial masked table setup only
+privacyClipQuery = session.query(strava_activities.actID, sqlfunc.ST_AsEWKB(
+		sqlfunc.ST_Transform(
+				sqlfunc.ST_MakeValid(
+						sqlfunc.ST_Multi(
+								sqlfunc.ST_Simplify(
+										sqlfunc.ST_SnapToGrid(
+												sqlfunc.ST_Difference(
+														sqlfunc.ST_SnapToGrid(sqlfunc.ST_Transform(
+																strava_activities.geom, geometricProj), nonNodedSnap), privacy_cte.c.priv_aoi)
+												, gridSnap),
+										simplifyFactor),
+										)), webSRID)))
+	for i in privacyClipQuery:
+	   session.add(strava_activities_masked(actID=i[0], geom=i[1]))
+	session.commit()
+	session.close()
+					</pre></code>
+				</p>
+				<p>
+					The above ORM select query is equivalent to the following PostgreSQL/PostGIS SQL select query:
+					<pre><code>
+WITH privacy_cte as
+(
+   SELECT
+      ST_Transform(ST_CollectionExtract(ST_Collect("AOI".geom), 3), 32610) as priv_aoi
+   FROM
+      "AOI"
+   where
+      "AOI".privacy = 'Yes'
+)
+SELECT
+   strava_activities."actID",
+   ST_AsEWKB(ST_Transform(ST_MakeValid(ST_Multi(ST_Simplify(ST_SnapToGrid(ST_Difference(ST_SnapToGrid(ST_Transform(strava_activities.geom, 32610), 0.0001), privacy_cte.priv_aoi), 5), 15))), 4326))
+FROM
+   strava_activities,
+   privacy_cte;
+					</pre></code>
+				</p>
+				<p>
+					This query does the following:
+					<ol class="strava-list">
+						<li>
+							<b>Create a common table expression (CTE) to select privacy zones geometry.</b> This CTE is used to create a
+			        single multi-part polygon containing all privacy zones. This ensures that ST_Difference only calculates the
+			        difference between each activity and the privacy zones only once. If the privacy zones are not combined, then
+			        the difference between each privacy zone record and the activity would be calculated, resulting in duplicated
+			        results.
+							<ol class="strava-list">
+								<li>
+									<b>Select AOI polygons flagged as privacy zones.</b>
+								</li>
+								<li>
+									<b>Combine polygons into a single multi-part polygon contained inside a geometry collection <a href=https://postgis.net/docs/ST_Collect.html>(ST_Collect)</a>.</b>
+								</li>
+								<li>
+									<b>Extract multi-polygon from geometry collection <a href=https://postgis.net/docs/ST_CollectionExtract.html>(ST_CollectionExtract)</a>.</b> Even though this collection only contains the multi-polygon, it still needs to be extracted.
+								</li>
+								<li>
+									<b>Tranform geometry to the projected coordinate system geometricProj <a href=https://postgis.net/docs/ST_Transform.html>(ST_Transform)</a>.</b> Using a projected coordinate allows for faster geometric calculations and allows for meters to be used in
+					        PostGIS function parameters, which use the geometry's unit system.
+								</li>
+							</ol>
+						</li>
+						<li>
+							<b>Select strava_activities activity linestring geometry based on Record ID and transform <a href=https://postgis.net/docs/ST_Transform.html>(ST_Transform)</a> to
+				      geometricProj.</b>
+						</ii>
+						<li>
+							<b>Snap activity linestrings to a 0.0001m grid <a href=https://postgis.net/docs/ST_SnapToGrid.html>(ST_SnapToGrid, variant 3)</a>.</b> This solves a non-node intersection error when running ST_Difference. See <a href= https://gis.stackexchange.com/q/50399>this StackExchange thread</a> for an explanation for this problem and solution
+						</li>
+						<li>
+							<b>Calculate difference <a href=https://postgis.net/docs/ST_Difference.html>(ST_Difference)</a> between activity linestring and privacy zone CTE result.</b> ST_Difference
+							subtracts geometry B from A, removing the vertices from A that are within B and segments that touch B.
+						</li>
+						<li>
+							<b><a href=https://postgis.net/docs/ST_SnapToGrid.html>Snap activity linestring vertices to a 5m grid(ST_SnapToGrid, variant 3)</a></b>. This removes some messy areas by
+        				combining and removing excess vertices while also reducing resulting geometry memory/file size. This also solves
+        				geometric errors when exporting data to a topoJSON format. However, resulting linestring geometries have a
+        				step-shaped appearance resembling the grid.
+						</li>
+						<li>
+						<b>Simplify activity linestring with a 15m tolerance <a href=https://postgis.net/docs/ST_Simplify.html>(ST_Simplify)</a>.</b> This further removes messy areas and bends in
+        			the linestring by removing vertices to create longer straight line segments. This provides large reductions in
+        			resulting geometry memory/file sizes and mitigates the step-shaped results created by ST_SnapToGrid.
+						</li>
+						<li>
+							<b>Convert linestrings to multi-linestrings <a href=https://postgis.net/docs/ST_Multi.html>(ST_Multi)</a>.</b> Geometries in the strava_activities table are stored as
+        			linestrings since activity data provided by Strava are contiguous and don't need to be stored in a multi-part
+        			format. However, ST_Difference may create multi-linestrings that must be stored as such, so all geometries
+        			are converted to this format.
+						</li>
+						<li>
+							<b>Fix any invalid activity linestring geometries <a href=https://postgis.net/docs/ST_MakeValid.html>(ST_MakeValid)</a> that were generated during prior processing.</b>
+						</li>
+						<li>
+							<b>Transform activity linestring geometry <a href=https://postgis.net/docs/ST_Transform.html>(ST_Transform)</a> back into WGS 1984, SRID 4326.</b> WGS 1984 is best this project since its required for display in Leaflet.
+						</li>
+						<li>
+							<b>Convert linestring geometry representation to Extended Well Known Binary <a href=https://postgis.net/docs/ST_AsEWKB.html>(ST_AsEWKB)</a>.</b> This ensures that data can be
+        			be easily inserted into the strava_activities_masked table.
+						</li>
+						<li>
+							 <b>Query Activity ID of strava_activities record.</b> Will be inserted as a foreign in strava_activities_masked table.</b>
+						</li>
+					</ol>
+			<span id="get-new-activities-webhook" class="goto"></span>
+			<h3><a href=#get-new-activities-webhook>Get New Activities - Strava API Webhook</a></h3>
+				<p>
+					In order to keep my stored data up-to-date I created a <a href=https://developers.strava.com/docs/webhooks/>Strava webhook subscription</a> using stravalib. This enables my server to receive updates from the Strava API whenever I add a new activity, without needing to poll the API for changes. Note that a update is sent whenever a new activity is added, an exsiting activity's title, type, or privacy is changed, or if the account revokes access to the application. As this is my own account, I am only interested in new activities, so only these updates will be used. Also note that new activity updates include activity IDs only, its my server's responsibility to call the API for any further details.
+				</p>
+				<p>
+			 		While stravalib has <a href=https://pythonhosted.org/stravalib/api.html#stravalib.client.Client.create_subscription>functions dedicated to webhooks</a>, they are minimally documented with no examples provided. Also, as of the time I started work on this project, the version of stravalib on PyPI, 0.10.2, did not support the newest version of the Strava API. Fortunately, the stravalib team has an updated version on their <a href=https://github.com/hozn/stravalib>Github page</a> which supports it.
+				</p>
+				<p>
+					Here is the conceptual process of creating a new webhook subscription:
+				</p>
+				<img src="/static/images/Create_Subscription_Flowchart_Cropped_V2.png" style="width:500px;height:auto;max-width: 100%;box-shadow:none;">
+				<p>
+						The server issues a subscription creation POST request to the Strava API, containing the Client ID and Secret in addition to an optional user/server created verification token and a required callback URL configured to handle GET and POST requests. The verification token is used by the server to confirm that further setup requests are being sent by Strava. The creation request can be created in stravalib using the following:
+				</p>
+				<pre><code>
+def createStravaWebhook(client):
+	"""
+	Creates new Strava webhook subscription. Client information and client generated token are pulled from environmental
+	variables and the callback URL is set to a dedicated callback address on the application.
+
+	If subscription is successful, a subscription ID will be provided by Strava and this ID will be inserted into
+	Postgres.
+
+	Returns
+	-------
+	Integer. Strava subscription id
+	"""
+	try:
+			# Site Index uses Elastic Beanstalk base environment URL
+	    response = client.create_subscription(client_id=os.getenv("STRAVA_CLIENT_ID"),
+	                                          client_secret=os.getenv("STRAVA_CLIENT_SECRET"),
+	                                          callback_url=(
+	                                                      script_config.htttpSiteIndex + "/api/v0.1/stravasubcallback/"),
+	                                          verify_token=os.getenv("STRAVA_VERIFY_TOKEN"))
+	    # Update database with sub id
+	    DBQueriesStrava.updateSubId(response.id)
+	    return response.id
+	except Exception as e:
+	    application.logger.error(f"Create subscription function failed with the error {e}")
+				</pre></code>
+				<p>
+					The above script kicks off the process of creating a new webhook subscription, using Client information, a pre-generated verification token, and a full callback URL address. After the subscription has been successfully created, the callback functions are shown further below, the stravalib "create_subscription" function will issue a GET request to the Strava API to get the ID of the newly created subscription. This ID is used to update the subscription entry in my Postgres database and is used to verify thay webhook subscription updates are from Strava. Since I am the only athelete in the database and only a single subscription should be active at a time, this overwrites all subscription ID records:
+				</p>
+				<pre><code>
+def updateSubId(subId):
+	"""
+	Updates all athlete records with the new strava webhook subscription id.
+
+	Parameters
+	----------
+	subId: Integer. Provided by Strava following create subscription callback flow.
+
+	Returns
+	-------
+	Nothing
+	"""
+	session = Session()
+	try:
+	    session.query(athletes).update({athletes.sub_id: subId})
+	    session.commit()
+	    session.close()
+				</pre></code>
+				<p>
+					During initial setup a GET request is sent to the server's callback URL and after successful setup POST requests will be issued when specific account updates occurr. The following code is used to handle Strava API webhook subscription GET and POST requests:
+				</p>
+				<pre><code class="python">
+@app.route("/api/v0.1/stravacallbackurl", methods=['GET', 'POST'])
+def subCallback():
+  """
+  Strava subscription callback URL.
+
+  Returns
+  -------
+  GET request:
+      JSON, echoed Strava challenge text.
+  POST request:
+      Success code if data are successfully added to Postgres/PostGIS. Strava must receive a 200 code in response to
+      POST.
+  """
+	# Pass request into function
+  statusCode = handleSubCallback(request)
+  return Response(status=statusCode)
+
+def handleSubCallback(request):
+  """
+  Handles requests to Strava subscription callback URL.
+
+  GET:
+      Webhoook Subscription Creation Process:
+          CallbackURL is sent a GET request containing a challenge code. This code is sent back to Strava to verify
+          the callback.
+  POST:
+      Webhook subscription update message. Sent when a activity on a subscribed account is created, updated, or deleted,
+      or when a privacy related profile setting is changed.
+
+      All update messages are inputted into Postgres.
+
+      Currently, only activity creation events are handled, additional development is needed to handle other events.
+
+  Returns
+  -------
+  GET request:
+      JSON, echoed Strava challenge text.
+  POST request:
+      Success code if data are successfully added to Postgres/PostGIS. Strava must receive a 200 code in response to
+      POST.
+  """
+  # Get application access credentials from auth module
+  client = OAuthStrava.getAuth()
+  # Check if request is a GET callback request, part of webhook subscription process
+  if request.method == 'GET':
+      # Extract challenge and verification tokens
+      callBackContent = request.args.get("hub.challenge")
+      callBackVerifyToken = request.args.get("hub.verify_token")
+      # Form callback response as dict
+      callBackResponse = {"hub.challenge": callBackContent}
+      # Check if verification tokens match,is GET request is from Strava
+      if callBackVerifyToken == os.getenv('STRAVA_VERIFY_TOKEN'):
+          # Verification succeeded, return challenge code as dict
+          # Using Flask Response API automatically converts it to JSON with HTTP 200 success code
+          return callBackResponse
+			else:
+				# Verification failed, raise error
+				application.logger.error(f"Strava verification token doesn't match!")
+				raise ValueError('Strava token verification failed.')
+  # POST request containing webhook subscription update message, new activity or other change to Strava account
+  elif request.method == 'POST':
+      try:
+          # Convert JSON body to dict
+          callbackContent = request.get_json()
+          # Call function to handle update message and process new activity, if applicable
+          handleSubUpdate(client, callbackContent)
+          # return success code, Strava expects this code and will try to send up to 3 POST requests until a success code is received
+          return 200
+      except Exception as e:
+					# Failed to process properly, send a 500 code. Note that this will NOT stop Strava from sending up to 3 POST requests
+					application.logger.error(f"Strava subscription update failed with the error {e}")
+					return 500
+				</pre></code>
+				<p>
+					After the subscription has been created, the following code processes Strava subscription update messages by inserting them into Postgres and triggering activity processing (described <a href=#getFullDetails>above</a>), if applicable:
+				</p>
+				<pre><code>
+def handleSubUpdate(client, updateContent):
+  """
+  Handles Strava webhook subscription update. This function is called by a valid Strava POST request to the webhook subscription callback
+  URL.
+
+  Parameters
+  ----------
+  client. Stravalib model client object. Contains access token to strava API for the user.
+  updateContent. Dict. POST request JSON data formatted by Flask as a dict.
+
+  Returns
+  -------
+  Nothing. Data are inserted into Postgres/PostGIS.
+  """
+  # Parse update information into a model using stravalib
+  update = client.handle_subscription_update(updateContent)
+	# Verify that the athlete(s) and subscription ID contained in the message are in Postgres
+  if update.owner_id in DBQueriesStrava.getAthleteList() and update.subscription_id in \
+          DBQueriesStrava.getSubIdList():
+      # Insert subscription update message details into Postgres
+      DBQueriesStrava.insertSubUpdate(update)
+      # Verify that the update is a activity creation event
+      if update.aspect_type == "create" and update.object_type == "activity":
+          try:
+              # Get activity details for newly created activity
+              activity = getFullDetails(client, update.object_id)
+              # Insert original, non-masked, activity coordinates and attribute details into Postgres/PostGIS
+              insertPrivateAct(activity)
+              # Calculate masked, publicly sharable, activities and insert into Postgres masked table
+              processActivitiesPublic(activity["actId"])
+          except Exception as e:
+              application.logger.error(f"Handling and inserting new webhook activity failed with the error {e}")
+      else:
+          # Write logic to handle update and delete events
+          application.logger.debug("Sub update message contains an update or delete event, skipping request")
+          pass
+				</pre></code>
+				<p>
+					Insert subscription update details into Postgres:
+					<pre><code>
+def insertSubUpdate(content):
+	"""
+
+  Inserts Strava webhook subscription data into Postgres database. This information will be used to get full activity
+  information from another query.
+
+  Parameters
+  ----------
+  content. SubscriptionUpdate object of Strava webhook update generated by Stravalib
+
+  Returns
+  -------
+  Nothing. Updates database.
+  """
+  # Verify is activity title is in update data, if not set to None.
+  if "title" in content.updates.keys():
+      title = content.updates['title']
+  else:
+      title = None
+  session = Session()
+  insert = sub_update(aspect=content.aspect_type, event_time=datetime.fromtimestamp(content.event_time.timestamp),
+                      object_id=content.object_id, object_type=content.object_type, owner_id=content.owner_id,
+                      subscription_id=content.subscription_id,
+                      update_title=title)
+  session.add(insert)
+  session.commit()
+  session.close()
+					</pre></code>
+				</p>
+			<span id="prepare-leaflet-topojson" class="goto"></span>
+			<h3><a href=#prepare-leaflet-topojson>Prepare Data for Leaflet - TopoJSON</a></h3>
+				<p>
+					GeoJSON is a standard and convenient format for transferring geospatial data over the web, especially since its supported by Leaflet. However, its not very efficient in storing data, largely because it stores a full list of coordinates and contains unnecessary spacing. Currently, my masked GeoJSON dataset exports out to a 2.8 MB JSON file, which is a fairly large file to transfer on every page load. Fortunately, there's the <a href=https://github.com/topojson/topojson>TopoJSON</a> format that in addition to encoding a topology, which isn't useful for this multi-linestring dataset, stores coordiantes as deltas from an origin coordinate, resulting in a large reduction of stored information. Using the <a href=https://pypi.org/project/topojson/>Topojson Python library</a> allowed me to reduce the JSON filesize down to about 1.3 MB, still large but us under half the original filesize. While other encoding techniques are available, this format meets the project's needs since it not only reduces filesize and is easily usable in Leaflet, it also retains all attribute information which will be needed in the web map/viewer.
+				</p>
+				<p>
+					Process to generate TopoJSON:
+				<pre><code>
+import geoJSON
+import topojson as tp
+import os
+from application import session
+def createStravaPublicActTopoJSON():
+		# Create Postgres connection
+    session = Session()
+		# Query geom as GeoJSON and other attribute information
+    query = session.query(sqlfunc.ST_AsGeoJSON(strava_activities_masked.geom, 5),
+                          strava_activities.name,
+                          strava_activities.actID,
+                          strava_activities.type,
+                          strava_activities.distance,
+                          strava_activities.private,
+                          strava_activities.calories,
+                          strava_activities.start_date,
+                          strava_activities.elapsed_time,
+                          strava_activities.start_date_local,
+                          strava_activities.total_elevation_gain,
+                          strava_activities.average_speed,
+                          strava_activities.max_speed,
+                          strava_activities.type_extended,
+                          strava_gear.gear_name) \
+        .join(strava_activities_masked.act_rel) \
+        .join(strava_activities.gear_rel, isouter=True) \
+        .order_by(strava_activities.start_date.desc())
+    features = []
+    for row in query:
+        # Build a dictionary of the attribute information
+        propDict = {"name": row.name, "actID": row.actID, "type": row.type, "distance": round(row.distance),
+                    "private": row.private, "calories": round(row.calories),
+                    "startDate": row.start_date_local.isoformat(),
+                    "elapsed_time": row.elapsed_time.seconds, "total_elevation_gain": round(row.total_elevation_gain),
+                    "average_speed": round(row.average_speed, 1), "max_speed": row.max_speed, "gear_name": row.gear_name,
+                    "type_extended": row.type_extended}
+        # Take ST_AsGeoJSON() result and load as geojson object
+        geojsonGeom = geojson.loads(row[0])
+        # Build the feature and add to feature list
+        features.append(Feature(geometry=MultiLineString(geojsonGeom), properties=propDict))
+    session.close()
+    # Build the feature collection result
+    feature_collection = FeatureCollection(features)
+    # Set topojson filename and pathway
+    topojsonFileName = "topoJSONPublicActivities.json"
+    topojsonFullPath = os.path.join(application.root_path, 'static', 'json', topojsonFileName)
+    # Remove existing json if it exists
+    try:
+        os.remove(topojsonFullPath)
+    except:
+        pass
+    # Create local topoJSON file of geoJSON Feature Collection. Don't create a topology, doesn't matter for a polyline
+    # and prequantize the data, this reduces file size at the cost of processing time.
+    tp.Topology(feature_collection, topology=False, prequantize=True).to_json(topojsonFullPath)
+				</pre></code>
+			</p>
+			<p>
+				This script queries the masked activities as GeoJSON, loads and parses each record into a GeoJSON MultiLineString Feature, combines all records into a Geometry Collection, and finally creates a local TopoJSON file.
+			</p>
+			<p>
+				The data are stored in a local pre-calculated TopoJSON file which is overwritten on server start or when a activity creation webhook subscription update is received. This improves server response time since the above function takes several seconds to run and it reduces AWS EC2 T2 credit costs since CPU time won't be spent calculating it on every page load. Storing this file locally on EB S3 buckets that are re-calculated on every development is not ideal, in the future I would like to look into using Amazon's SDK for Python, <a href=https://github.com/boto/boto3>boto3</a>, to store the file in a public S3 bucket and only replace it when updates are received.
+			<p>
+				The Topology function is also very picky about incoming geometries and kept removing records without a explanation as to why, even though they passed PostGIS ST_MakeValid and ST_IsValid. All original, non-masked, GeoJSON records converted properly, I assume that ST_Difference caused geometries to break during conversion. The additional processing steps during masking, in particular ST_SnapToGrid, appeared to have resolved these issues. However, I assume they may need more fine tuning to ensure that no geometries fail to be converted to TopoJSON in the future.
+			</p>
+			<h2>Final Thoughts</h2>
+			<p>
+				Now a process flow is setup to automatically process new Strava activities to be consumed by a public facing dashboard using Leaflet to display geographic data. The most recent version of my dashboard is visible at the top of this page, and a full page dashboard is available <a href=/maps/stravamap>here</a>. I have not yet finished the write-up for the client-side HTML/Javascript for this project, however you can visit the GitHub Repo project folder<a href=https://github.com/gavleavitt/Flask_Website_Project/tree/master/Flask_Application/application/projects/strava_activities>here</a>.
+			</p>
+			<p>
+				My next goal for the server side aspect of this project is to extract time, watt, speed, and elevation data from the activity streams data and make them available for each activity in a S3 bucket. This would enable me to request formatted activity stream information for individual activities and display them as charts on my dashboard, providing additional insights into these activites.
+			</p>
+			<p>
+				This was a fun, challenging, and rewarding project to work on. I was able to get my first experience working with PostGIS functions to manipulate spatial data. I also learned, through much trial and error, that some datasets need to be aggregated for some PostGIS functions to return desired results. I'm looking forward to getting to work with PostGIS more in the future.
+			</p>
+		</div>
+		<div class="footer" style="grid-row:3/4">
+			<p>© 2020 Gavin Leavitt | Contact: <span id="emailaddr"></span>
+			<br>Images, maps, and webpages created by Gavin Leavitt unless otherwise noted.
+			<br>Icons made by <a href="https://www.flaticon.com/authors/roundicons" title="Roundicons">Roundicons</a>,  <a href="https://www.flaticon.com/authors/freepik" title="Freepik">Freepik</a> from <a href="https://www.flaticon.com/" title="Flaticon"> www.flaticon.com</a> and modified by Gavin Leavitt.
+			</p>
+			<div class="social-media">
+				<div class="social-icon">
+					<a href="https://www.github.com/gavleavitt" target="_blank" rel="external" class="fab fa-github">
+					</a>
+				</div>
+				<div class="social-icon">
+					<a href="https://www.facebook.com/gavin.leavitt.7/" target="_blank" rel="external" class="fab fa-facebook">
+					</a>
+				</div>
+				<div class="social-icon">
+					<a href="https://www.linkedin.com/in/gavin-leavitt-326973165/" target="_blank" rel="external" class="fab fa-linkedin">
+					</a>
+				</div>
+			</div>
+		</div>
+		</div>
+	</div>
+	<script>
+	var email = "gav" + "lea" + "web" + "@g" + "mail" + ".com";
+	document.getElementById("emailaddr").innerHTML = "<a href='mailto:" + email + "'>" + email + "</a>"
+	window.onscroll = function(){closeMenu()};
+	</script>

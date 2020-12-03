@@ -103,4 +103,4 @@ def dashboardsmaps():
 
 @app.route("/projects/stravamap")
 def stravaactivitymap():
-    return render_template("public/projects/project-Strava-Activities.html")
+    return render_template("public/projects/project-Strava-Activities-Server-Side.html")

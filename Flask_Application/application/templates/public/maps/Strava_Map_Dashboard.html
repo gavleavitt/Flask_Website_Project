@@ -286,11 +286,12 @@
 		var streetsnight = L.esri.Vector.basemap('StreetsNight');
 		var imageryesri = L.esri.basemapLayer('Imagery');
 		var osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-			 attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'})
+			 // attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'})
+			 attribution: '&copy;'})
 		// intilize map with basemap:
 		var map = L.map('map',
 			{
-				layers: [osm],  
+				layers: [osm],
 				fullscreenControl: true,
   			fullscreenControlOptions: {
     			position: 'topleft'
@@ -340,7 +341,16 @@
 			alert("Data failed to load, please try again later.")
 		})
 
+		dimen = {'width': window.innerWidth,'height':window.innerHeight};
+		// Leaflet fullscreen event listener, if full screen is exited and the device display is less than 600px, close any open popups
+		map.on('exitFullscreen', function(){
+			// var dimen = getDisplaysize();
+			if (dimen.width < 600){
+				map.closePopup();
+			}
+		});
 		window.addEventListener('resize', setChartTextSizes);
+		window.addEventListener('resize', setDisplaysize);
 		// window.onresize = getChartTextSizes();
 </script>
 </body>
