@@ -256,7 +256,7 @@ function createActivityChart(chartData) {
           }],
           yAxes: [{
             afterFit: function(scale) {
-              scale.width = 54  //<-- set value as you wish
+              scale.width = 56  //<-- set value as you wish
             },
             scaleLabel: {
               display: true,

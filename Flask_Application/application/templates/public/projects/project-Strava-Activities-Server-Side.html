@@ -69,18 +69,25 @@
 			<div class="separatorbar-title"></div>
 			<iframe src="/maps/stravamap" style="border-radius:10px;"></iframe>
 			<div class="fullsize-link">
-				<a href="/maps/stravamap" target="_blank">View fullpage dashboard for best experience( especially if on mobile)</a>
+				<a href="/maps/stravamap" target="_blank">View fullpage dashboard for best experience</a>
 			</div>
 			<div class="separatorbar-title"></div>
 			<span id="strava-summary" class="goto"></span>
 			<h2><a href=#strava-summary>Summary</a></h2>
 				<p>
-					This personal project displays my up-to-date Strava activity information on a interactive data dashboard using Leaflet to display geographical data and Chart.JS to display graphical information. Data can be filtered and explored by using buttons, date selections, searches, and by selecting geographical data.
+					This personal project displays my up-to-date <a href=https://www.strava.com/>Strava</a> fitness activity information on a interactive mobile friendly data dashboard using Leaflet to display geographical data and Chart.JS to display graphical information. Data can be filtered and explored by using buttons, date selections, searches, and by selecting geographical data.
+				</p>
+				<p>
+					Strava is a fitness tracking mobile application which logs GPS data recorded during outdoor fitness activities. I have been logging rides, walks, runs, and hikes for years to the application and have accumulated over 400 total activites. Strava provides an <a href=https://developers.strava.com/>API</a> to access these records and additional data that the service calculates. I saw this as an opportunity to expand my server and client side development skills by accessing, processing, and presenting the data in a map/dashboard.
+				</p>
+				<p>
+					Histroic Strava data were initially pulled from the Strava API and processed using Python, then a webhook subscription was created which updates my server when new activities are available for processing. Strava activity data are processed in Python using PostGIS functions to remove private areas and to simplify geometries to reduce file sizes, at the cost of spatial accuracy. Data are pre-calculated and served to the Leaflet map in the TopoJSON format to further reduce file sizes and server response times.
+				</p>
+				<p>
+					The description below discusses the Strava activity processing workflow and server-side processing scripts. You can view the Python files for this project in its <a href=https://github.com/gavleavitt/Flask_Website_Project/tree/master/Flask_Application/application/projects/strava_activities>GitHub project folder</a>.
 				</p>
 				<p style="border-bottom: 2px solid var(--bluecol); padding-bottom:10px;">
-					Underlining Strava data were initially pulled from the Strava API and processed using Python, then a webhook subscription was created to update my server when new activities are available for processing. Strava activity data are processed in Python using PostGIS functions to remove private areas and to simplify geometries to reduce file sizes, at the cost of spatial accuracy. Data are pre-calculated and served to the Leaflet map in the TopoJSON format to further reduce file sizes and server response times.
-
-					The description below discusses the Strava activity processing workflow and server-side processing scripts. You can view the Python files for this project in it <a href=https://github.com/gavleavitt/Flask_Website_Project/tree/master/Flask_Application/application/projects/strava_activities>GitHub project folder</a>. I have not yet finished the write-up for the client-side Javascript/HTML aspect of the project, but its available within my <a href=https://github.com/gavleavitt/Flask_Website_Project/tree/master/Flask_Application>Flask Application fodler</a>.
+					I have not yet finished the write-up for the client-side Javascript/HTML aspect of this project, but the source code is available within my <a href=https://github.com/gavleavitt/Flask_Website_Project/tree/master/Flask_Application>Flask Application folder</a>.
 				</p>
 				<div class="toc-container">
 					<p class="toc-title">Project Description Contents</p>
@@ -138,12 +145,12 @@ def gettoken():
 					Now that I have full scope access to my account through the Strava API I can begin downloading activities. The API, and stravalib, offer a few different ways to download activities.
 					<ul>
 						<li>
-							<b>List Athlete Activities.</b> client.get_activities() using the after argument, provides a list of activities after the argument date. However, this does not contain full activity details, only certain summary information is returned.
+							<b>List Athlete Activities</b> - client.get_activities() using the after argument. Provides a list of activities after the argument date. However, this does not contain full activity details, only certain summary information is returned.
 						</li>
 						<li>
-						 	<b>Get Activity.</b> client.get_activities() using a activity ID argument, provides full activity details. However, the polyline coordinate information is <a href = https://developers.strava.com/docs/>encoded</a> following the <a href=https://developers.google.com/maps/documentation/utilities/polylinealgorithm>Google Encoded Polyline Algorithm Format</a>.
+						 	<b>Get Activity</b> - client.get_activities() using a activity ID argument. Provides full activity details. However, the polyline coordinate information is <a href = https://developers.strava.com/docs/>encoded</a> following the <a href=https://developers.google.com/maps/documentation/utilities/polylinealgorithm>Google Encoded Polyline Algorithm Format</a>.
 						 <li>
-						 	<b>Get Activity Streams.</b> client.get_activity_streams(), allows access to the plain text recorded sensor data for a activity. This option provides access to a variety of sensors on your phone and external connected devices.
+						 	<b>Get Activity Streams</b> - client.get_activity_streams(). Allows access to the plain text recorded sensor data for a activity. This option provides data access to a variety of the sensors on your phone and external connected devices.
 					 </li>
 					</ul>
 				</p>
@@ -181,7 +188,7 @@ def getListIds(client, days):
 					</pre></code>
 				</p>
 				<p id="getFullDetails">
-					Iterate over activity ID list, passing each activity ID into <b>Get Activity</b> and <b>Get Activity Streams</b>. Parse results by structuring data, removing uninteresting/null details, calculating ancillary data, and combining GPS coordinate and time, provided as time since start of activity, into a PostGIS <a href=https://postgis.net/docs/ST_GeomFromEWKT.html>EWKT</a> LINESTRINGM format.
+					Iterate over activity ID list, passing each activity ID into <b>Get Activity</b> and <b>Get Activity Streams</b>. Parse results by structuring data, removing uninteresting/null details, calculating ancillary data, and combining GPS coordinate and time, provided as time since start of activity, into a PostGIS <a href=https://postgis.net/docs/ST_GeomFromEWKT.html>EWKT</a> LINESTRINGM format. Even though I bring in the time information under a M-value, I am not using this time dimension in this project.
 					<pre><code>
 def getFullDetails(client, actId):
   """
