@@ -57,9 +57,9 @@
 	<!-- Local static files-->
 	<!-- leaflet Mouset Position JS-->
 	<!-- leaflet Ajax JS-->
-	<script src="{{ url_for('static', filename='js/leaflet.ajax.js') }}"></script>
+	<!-- <script src="{{ url_for('static', filename='js/leaflet.ajax.js') }}"></script> -->
 	<!-- leaflet Ajax JS-->
-	<script src="{{ url_for('static', filename='js/leaflet.ajax.min.js') }}"></script>
+	<!-- <script src="{{ url_for('static', filename='js/leaflet.ajax.min.js') }}"></script> -->
 	<!-- Custom local javascript functions -->
 	<script src="{{ url_for('static', filename='js/customfunctions_StravaMap.js') }}"></script>
 	<!-- Custom CSS -->
@@ -130,13 +130,13 @@
 					<div class="modal-text">
 						<p style="margin-top:0px;"><b>Map Details</b>
 						<br>
-							This map displays my up-to-date Strava activities, which can be filtered by activity type and date. Additional activity details are available in pop-up windows.
+							This personal project displays my up-to-date <a href=https://www.strava.com/>Strava</a> activity information on a interactive mobile friendly data dashboard using Leaflet to display geographical data and Chart.JS to display graphical information. Data can be filtered and explored by using buttons, date selections, searches, and by selecting geographical data.
 						</p>
 						<p>
-							The data displayed here have been queried from the Strava API and added to a personal Postgres/PostGIS database. All my activites are present in this dataset. Historic data were bulk downloaded and new Strava activity uploads are automatically downloaded from the Strava API based on webhook subscription updates. Activity details and activity stream data (GPS coordinates) are queried and processed to obfuscate private locations and simplify data.
+							Histroic Strava data were initially pulled from the <a href=https://developers.strava.com/>Strava API</a> and processed using Python, then a webhook subscription was created which updates my server when new activities are available for processing. Strava activity data are processed in Python using PostGIS functions to remove private areas and to simplify geometries to reduce file sizes, at the cost of spatial accuracy. Data are pre-calculated and served to the Leaflet map in the TopoJSON format to further reduce file sizes and server response times.
 						</p>
 						<p>
-						Visit the <a href=#>project page</a> for this map to see a full process description.
+						Visit the <a href=/projects/stravamapserverside>server-side processing project page</a> for this dashboard to see a full description of the server side processing and data preparation steps.
 						</p>
 						<p><b>Contact Me</b>
 						<br>
@@ -287,7 +287,7 @@
 		var imageryesri = L.esri.basemapLayer('Imagery');
 		var osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 			 // attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'})
-			 attribution: '&copy;'})
+			 })
 		// intilize map with basemap:
 		var map = L.map('map',
 			{

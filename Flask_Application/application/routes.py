@@ -101,6 +101,6 @@ def streetlightpolepermitting():
 def dashboardsmaps():
     return render_template("public/projects/project-Operations-Dashboards-Maps.html")
 
-@app.route("/projects/stravamap")
+@app.route("/projects/stravamapserverside")
 def stravaactivitymap():
     return render_template("public/projects/project-Strava-Activities-Server-Side.html")

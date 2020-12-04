@@ -811,7 +811,7 @@ box-shadow: 5px 10px 8px #888888;
 
 li {
   font-size: 16px;
-
+  margin: 3px;
 }
 
 .toc-container li{
