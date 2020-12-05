@@ -125,8 +125,29 @@ html{
   position:relative;
   height: 99%;
   width: 100%;
-  /* height: 34vh;
-  width: 30vw; */
+  /* grid-column: 10/14;
+  grid-row: 4/6; */
+}
+
+.chartToggle{
+  /* border: none; */
+  background-color: #dbdbdb;
+  padding: 10px;
+  /* margin-top: 10px; */
+  border-radius: 10%;
+  font-weight: bold;
+}
+
+.chart-active{
+  background-color: #bababa;
+}
+
+
+.chartToggle:hover{
+  background-color: #bababa;
+}
+
+.chartPanel{
   grid-column: 10/14;
   grid-row: 4/6;
 }
@@ -480,6 +501,7 @@ html{
   /* width: 100%; */
 }
 
+
 .calendarSelect{
   text-align: center;
 }
@@ -529,7 +551,7 @@ This targets only fine pointers (mouse) for hover behavior, this prevents the ho
     grid-column: 1/8;
     grid-row: 1/4;
   }
-  .actChart{
+  .chartPanel{
     grid-column: 1/14;
   }
   #count-div{
@@ -613,38 +635,6 @@ This targets only fine pointers (mouse) for hover behavior, this prevents the ho
     padding-bottom: 5px;
     font-size: 0.7em;
   }
-  /* .map-panel{
-    grid-column: 1/8;
-    grid-row: 1/4;
-  }
-  .actChart{
-    grid-column: 1/14;
-  }
-  #count-div{
-    grid-column: 8/11;
-    grid-row: 1/2;
-  }
-
-  #dist-div{
-    grid-column: 11/14;
-    grid-row: 1/2;
-  }
-  #elev-div{
-    grid-column: 8/11;
-    grid-row: 2/3;
-  }
-  #calories-div{
-    grid-column: 11/14;
-    grid-row: 2/3;
-  }
-  #moving-div{
-    grid-column: 8/11;
-    grid-row: 3/4;
-  }
-  #avg-div{
-    grid-column: 11/14;
-    grid-row: 3/4;
-  } */
 }
 
 @media screen and (max-width: 420px) {

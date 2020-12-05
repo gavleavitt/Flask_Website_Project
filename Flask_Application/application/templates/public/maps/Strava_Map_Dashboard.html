@@ -55,13 +55,8 @@
 
 
 	<!-- Local static files-->
-	<!-- leaflet Mouset Position JS-->
-	<!-- leaflet Ajax JS-->
-	<!-- <script src="{{ url_for('static', filename='js/leaflet.ajax.js') }}"></script> -->
-	<!-- leaflet Ajax JS-->
-	<!-- <script src="{{ url_for('static', filename='js/leaflet.ajax.min.js') }}"></script> -->
 	<!-- Custom local javascript functions -->
-	<script src="{{ url_for('static', filename='js/customfunctions_StravaMap.js') }}"></script>
+	<script src="{{ url_for('static', filename='js/strava_dashboard/strava_dashboard_functions.js') }}"></script>
 	<!-- Custom CSS -->
 	<link rel="stylesheet" href="{{ url_for('static', filename='css/customCSS_strava_map.css') }}">
 	<!-- Search CSS-->
@@ -181,14 +176,27 @@
 				<!-- <span class="detail-context">Max Speed</span>
 				<span id="maxSpeed" class="detail-text">Loading</span> -->
 			</div>
-			<div id="chart-cont" class="item detail-panel-col actChart show-data">
+
+			<div class="item detail-panel-col chartPanel">
+				<div id="chart-cont" class="detail-panel-col actChart show-data">
+					<div id="chart-Btns">
+						<span><button id="count-btn" class="chartToggle chart-active" onclick="updateChart(filteredGroup,'Count');updateChartBtn('count-btn');">Count</button></span>
+						<span><button id="distance-btn" class="chartToggle" onclick="updateChart(filteredGroup,'Distance');updateChartBtn('distance-btn')">Distance</button></span>
+						<span><button id="elevation-btn" class="chartToggle"  onclick="updateChart(filteredGroup,'Elevation');updateChartBtn('elevation-btn')">Elevation</button></span>
+						<span><button id="time-btn" class="chartToggle"  onclick="updateChart(filteredGroup,'Time');updateChartBtn('time-btn')">Time</button></span>
+						<!-- <span><button id ="avgspd-btn" class="chartToggle"  onclick="updateChart(filteredGroup,'Avg Speed');updateChartBtn('avgspd-btn')">Avg Speed</button></span> -->
+						<span><button id ="avgwatt-btn" class="chartToggle"  onclick="updateChart(filteredGroup,'Avg Watts');updateChartBtn('avgwatt-btn')">Avg Watts</button></span>
+					</div>
+					<canvas id="chart"></canvas>
+				</div>
+				<div id="no-data-text" class="detail-panel-col actChart no-data">
+					<span class="detail-context detail-panel-col">Data Unavailable</span>
+			</div>
+			<!-- <div id="chart-cont" class="item detail-panel-col actChart show-data">
 				<canvas id="chart"></canvas>
 			</div>
 			<div id="no-data-text" class="item detail-panel-col actChart no-data">
-				<span class="detail-context detail-panel-col">Data Unavailable</span>
-				<!-- <span class="detail-context">Max Speed</span>
-				<span id="maxSpeed" class="detail-text">Loading</span> -->
-			</div>
+				<span class="detail-context detail-panel-col">Data Unavailable</span> -->
 		</div>
 	<script>
 		// Modal from https://www.w3schools.com/howto/tryit.asp?filename=tryhow_css_modal
@@ -331,8 +339,8 @@
 			// create Leafet search for loaded geoJSON data
 			createSearchControl(filteredGroup);
 			popupAction(filteredGroup);
-			chartActData = binActData(filteredGroup);
-			createActivityChart(chartActData);
+			chartActData = binActData(filteredGroup, "Count");
+			createActivityChart(chartActData, "Count");
 			// chartActData = binActData(rawGeoJSON);
 			// populateChart(chartActData);
 			map.spin(false);
