@@ -158,3 +158,4 @@ def processActs(days):
 def getAthlete(client):
     athlete = client.get_athlete()
     return athlete
+

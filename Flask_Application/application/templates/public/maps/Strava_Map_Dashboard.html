@@ -57,6 +57,8 @@
 	<!-- Local static files-->
 	<!-- Custom local javascript functions -->
 	<script src="{{ url_for('static', filename='js/strava_dashboard/strava_dashboard_functions.js') }}"></script>
+		<script src="{{ url_for('static', filename='js/strava_dashboard/strava_chart_functions.js') }}"></script>
+
 	<!-- Custom CSS -->
 	<link rel="stylesheet" href="{{ url_for('static', filename='css/customCSS_strava_map.css') }}">
 	<!-- Search CSS-->
@@ -96,7 +98,6 @@
 		<div class="item titlediv">
 			<div id = "Title" class="titletext">Strava Activity Viewer</div>
 			<div class="filter-btn-group" id="act-filter-group">
-				<!-- <button class="filterbtn active-btn" onclick="actFilter('All')" id="All">Remove<br>Layers</button> -->
 				<button class="filterbtn active-btn" id="All">Remove<br>Layers</button>
 				<button class="filterbtn" id="MTB">Mountain<br>Biking</button>
 				<button class="filterbtn" id="Road">Road<br>Rides</button>
@@ -110,8 +111,6 @@
 				</div>
 				<!-- <button id="reset" onclick="resetAll()">Reset All</button> -->
 			</div>
-			<!-- See this for basic popup box: https://html-online.com/articles/simple-popup-box/ -->
-			<!-- https://www.w3schools.com/howto/howto_css_modals.asp -->
 			<div class="popupbuttontext">
 				<div class="map-home"><a class="home-link" href="/">Home</a></div>
 				<button class="headerbtn" id="btn">Map Details</button>
@@ -190,113 +189,22 @@
 					<canvas id="chart"></canvas>
 				</div>
 				<div id="no-data-text" class="detail-panel-col actChart no-data">
-					<span class="detail-context detail-panel-col">Data Unavailable</span>
+					<span class="detail-context detail-panel-col">Data Unavailable/Unsupported</span>
 			</div>
-			<!-- <div id="chart-cont" class="item detail-panel-col actChart show-data">
-				<canvas id="chart"></canvas>
-			</div>
-			<div id="no-data-text" class="item detail-panel-col actChart no-data">
-				<span class="detail-context detail-panel-col">Data Unavailable</span> -->
 		</div>
 	<script>
-		// Modal from https://www.w3schools.com/howto/tryit.asp?filename=tryhow_css_modal
-		// Get the modal
-
-		// Open modal
-		var modal = document.getElementById("myModal");
-		modal.style.display = "block";
-		// Get the button that opens the modal
-		var btn = document.getElementById("btn");
-
-		// Get the <span> element that closes the modal
-		var span = document.getElementsByClassName("close")[0];
-
-		// When the user clicks the button, open the modal
-		btn.onclick = function() {
-		  modal.style.display = "block";
-		}
-
-		// When the user clicks on <span> (x), close the modal
-		span.onclick = function() {
-		  modal.style.display = "none";
-		}
-
-		// When the user clicks anywhere outside of the modal, close it
-		window.onclick = function(event) {
-		  if (event.target == modal) {
-		    modal.style.display = "none";
-		  }
-		}
-		// Open modal when window loads
-		window.onload = function(){
-			// modal.style.display = "block";
-			loadActivityListener();
-		}
-
+		// Initialize modal
+		initModal();
 		// Set default start and end times of date range picker
 		var start = moment('2014-01-01');
 		var end = moment();
-
-
-		// daterangepicker taken from  https://www.daterangepicker.com/
-		$(function() {
-			// Set format of dates
-	    function cb(start, end) {
-	        $('#reportrange span').html(start.format('MMMM D, YYYY') + ' - ' + end.format('MMMM D, YYYY'));
-	    }
-	    $('#reportrange').daterangepicker({
-	        startDate: start,
-	        endDate: end,
-					// Show year/month dropdown options when using custom range
-					"showDropdowns": true,
-					// Minimum date that can be selected, no records before this time
-					"minDate":"01/01/2014",
-					// Maximum date that can be selected, set to current day
-					"maxDate": String(moment().format('MM/DD/YYYY')),
-					// "maxYear":"11/18/2020",
-					"opens": "center",
-					// Stops input from auto updating, no entirely sure what this means but leaving it enabled caused odd/annoying behavior
-					// "autoUpdateInput": false,
-					"autoUpdateInput": true,
-					// Unlink start and end calendars so they don't show the same year/month changed. Leaving it on true creates confusion on whether or not the date was selected properly
-					"linkedCalendars": false,
-					// Set preset date ranges to select from
-					ranges: {
-						'All Time (default)': [moment('2014-01-01'), moment().endOf('year')],
-	          'Today': [moment(), moment()],
-	          'Last 7 Days': [moment().subtract(6, 'days'), moment()],
-	          'Last 30 Days': [moment().subtract(29, 'days'), moment()],
-	          'This Month': [moment().startOf('month'), moment().endOf('month')],
-						'This Year': [moment().startOf('year'), moment().endOf('year')]
-	           // 'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
-	        }
-	    }, cb);
-			// Initializes
-	    cb(start, end);
-		});
-		// Callback function that fires when user uses picker, filters activity display
-		$("#reportrange").on('apply.daterangepicker', function(ev, picker) {
-			// Formats data in a proper date format
-			userStart = picker.startDate.format();
-			userEnd = picker.endDate.format();
-			// clear existing layers
-			filteredGroup.clearLayers();
-			// Re-add active layers with new daterange filter applied
-			addActiveLayers(picker.startDate.format(), picker.endDate.format());
-			updateDataPanels(filteredGroup,actDataDict, "True");
-			updateChart(filteredGroup);
-		});
-
-		//Set email address using Javascript, harder for crawlers to grab
-		var email = "gav" + "lea" + "web" + "@g" + "mail" + ".com";
-		document.getElementById("emailaddr").innerHTML = "<a href='mailto:" + email + "'>" + email + "</a>"
 		// Make basemaps
 		var streetsnight = L.esri.Vector.basemap('StreetsNight');
 		var imageryesri = L.esri.basemapLayer('Imagery');
 		var osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 			 // attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'})
 			 })
-		// intilize map with basemap:
+		// intilize Leaflet map with basemap:
 		var map = L.map('map',
 			{
 				layers: [osm],
@@ -305,61 +213,28 @@
     			position: 'topleft'
   			}
 			}).setView([34.41,-119.86],12);
-		var actlimit = "1000"
-
-		jsonDataURL = "/static/json/topoJSONPublicActivities.json"
 
 		//Loading spinner
 		map.spin(true);
 
+		// Set topoJSON URL
+		jsonDataURL = "/static/json/topoJSONPublicActivities.json"
+		// Get screen size
+		dimen = {'width': window.innerWidth,'height':window.innerHeight};
 		// Dict to hold panel values
 	  var actDataDict = {"count":null, "dist":null, "elev":null, "calories":null, "totalTime":null, "speed":null, "moveTime":null}
+		// Global variable holding chart display type
+		tabDataType = "Count"
 
-		// see http://bl.ocks.org/marcellobenigno/9b09c24850def14250141dfe89f9a296
-		// see https://docs.mapbox.com/mapbox.js/example/v1.0.0/omnivore-kml-tooltip/
-		// Create a empty geoJSON with style and popup settings.
-		var orgActivities = L.geoJson(null, {
-	    style: actStyle,
-			onEachFeature: onEachFeatureAct
-		});
+		// Initialize Leaflet, panel, and chart with all activity data
+		initializeDisplay(jsonDataURL);
 
-		// Use Leaflet omnivore to import/process topoJSON data. This function passes the loaded data into a existing empty geoJSON layer.
-		var originalTopoData = omnivore.topojson(jsonDataURL, null, orgActivities)
-		.on('ready', function() {
-			// After data have loaded, create a original group layer containing all data, this won't be filtered/changed and is kept to hold original data
-			// originalGroup = L.layerGroup([orgActivities]);
-			// Create new raw geoJSON dataset using the original, un-aletered, geoJSON layer as dump source.
-			// There may be a better method than this, but I believe that L.geoJSON can only take raw geoJSON data, not an existing geoJSON layer.
-			// This requires a dump of geoJSON data into a new variable since the raw geoJSON data doesn't get stored automatically, its converted into a geoJSON layer.
-			// This may cause performance issues on some browsers/devices since this is effectively storing another copy of the data in addition to what's being displayed
-			rawGeoJSON = orgActivities.toGeoJSON()
-			// Create a filtered group layer and add to map, this layer group will be changed using filters
-			filteredGroup = L.layerGroup([orgActivities]).addTo(map);
-			updateDataPanels(filteredGroup, actDataDict, "False")
-			// create Leafet search for loaded geoJSON data
-			createSearchControl(filteredGroup);
-			popupAction(filteredGroup);
-			chartActData = binActData(filteredGroup, "Count");
-			createActivityChart(chartActData, "Count");
-			// chartActData = binActData(rawGeoJSON);
-			// populateChart(chartActData);
-			map.spin(false);
-		})
-		.on('error', function() {
-			alert("Data failed to load, please try again later.")
-		})
+		// Initialize window, activity button, and map listeners
+		initializeListeners();
 
-		dimen = {'width': window.innerWidth,'height':window.innerHeight};
-		// Leaflet fullscreen event listener, if full screen is exited and the device display is less than 600px, close any open popups
-		map.on('exitFullscreen', function(){
-			// var dimen = getDisplaysize();
-			if (dimen.width < 600){
-				map.closePopup();
-			}
-		});
-		window.addEventListener('resize', setChartTextSizes);
-		window.addEventListener('resize', setDisplaysize);
-		// window.onresize = getChartTextSizes();
+		//Set email address using Javascript, harder for crawlers to grab
+		var email = "gav" + "lea" + "web" + "@g" + "mail" + ".com";
+		document.getElementById("emailaddr").innerHTML = "<a href='mailto:" + email + "'>" + email + "</a>"
 </script>
 </body>
 </html>
