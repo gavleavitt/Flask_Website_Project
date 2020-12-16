@@ -29,4 +29,4 @@ query_testing
 logs/
 .platform
 *.pickle
-Flask_Application
+Flask_Application.zip

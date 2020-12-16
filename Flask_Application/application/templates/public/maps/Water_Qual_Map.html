@@ -205,7 +205,7 @@
 
 		// intilize map with basemap:
 		var map = L.map('map',
-			{layers: [osm]}).setView([34.41,-119.86],12);
+			{layers: [osm]}).setView([34.7,-119.86],10);
 		// Load JSON data from Flask Jinja template
 		var waterquality_geojson = {{beachgeojson|tojson}}
 		var standards = {{standards|tojson}}
@@ -236,6 +236,11 @@
 			},
 			// Populate popup window text for each feature
 			onEachFeature: function(feature,layer){
+				// layer.bindTooltip(feature.properties.Name, {
+				// 	permanent: true,
+				// 	// offset: [0, -30],
+				// 	'className': 'beachLabel'
+				// })
 				layer.bindPopup(
 					'<div class="spanbotbord"><b>' + feature.properties.Name + '</b></div>' +
 					'<span>PDF Report (Release) Date: <b>' + feature.properties.insDate + '</b></span>' +

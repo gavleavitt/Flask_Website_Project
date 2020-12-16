@@ -12,7 +12,7 @@
 	<!-- leaflet Javascript-->
 	<script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js"></script>
 	<!--jquery adds "$." functionality-->
-	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+	<!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script> -->
 	<!-- Load Esri Leaflet from CDN, stable -->
 	<script src="https://unpkg.com/esri-leaflet@2.4.0/dist/esri-leaflet.js"
 	integrity="sha512-kq0i5Xvdq0ii3v+eRLDpa++uaYPlTuFaOYrfQ0Zdjmms/laOwIvLMAxh7cj1eTqqGG47ssAcTY4hjkWydGt6Eg=="
@@ -29,12 +29,6 @@
 
 	<!-- Leaflet Omnivore -->
 	<script src='//api.tiles.mapbox.com/mapbox.js/plugins/leaflet-omnivore/v0.3.1/leaflet-omnivore.min.js'></script>
-<!-- Chart.js JS-->
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.min.js"></script>
-
-<!-- Chart.js CSS -->
-	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.min.css"/>
-
 
 
 	<!-- Leaflet Table CSS -->
@@ -52,6 +46,18 @@
 	<script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
 	<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
 	<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+
+	<!-- Chart.js JS-->
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.min.js"></script>
+	<!-- Chart.js CSS -->
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.min.css"/>
+	<!-- SheetJS -->
+	<!-- <script src="https://unpkg.com/browse/xlsx@0.16.9/xlsx.mini.js"></script> -->
+	<!-- chartJS plugin datasource - CSV support -->
+	<!-- <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datasource"></script> -->
+	<!-- jquery-csv -->
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-csv/1.0.11/jquery.csv.min.js"></script>
+
 
 
 	<!-- Local static files-->
@@ -177,7 +183,7 @@
 			</div>
 
 			<div class="item detail-panel-col chartPanel">
-				<div id="chart-cont" class="detail-panel-col actChart show-data">
+				<div id="chart-cont" class="detail-panel-col actChart no-data show-data">
 					<div id="chart-Btns">
 						<span><button id="count-btn" class="chartToggle chart-active" onclick="updateChart(filteredGroup,'Count');updateChartBtn('count-btn');">Count</button></span>
 						<span><button id="distance-btn" class="chartToggle" onclick="updateChart(filteredGroup,'Distance');updateChartBtn('distance-btn')">Distance</button></span>
@@ -188,8 +194,16 @@
 					</div>
 					<canvas id="chart"></canvas>
 				</div>
+				<div id="chart-line-cont" class="detail-panel-col actChart no-data">
+					<div id="chart-Btns">
+						<span><button id="elev-btn" class="chartToggle chart-active" onclick="updateChart(filteredGroup,'Count');updateChartBtn('count-btn');">Elevation</button></span>
+						<span><button id="speed-btn" class="chartToggle" onclick="updateChart(filteredGroup,'Distance');updateChartBtn('distance-btn')">Speed</button></span>
+						<span><button id="grade-btn" class="chartToggle"  onclick="updateChart(filteredGroup,'Elevation');updateChartBtn('elevation-btn')">Grade</button></span>
+					</div>
+					<canvas id="chart-line"></canvas>
+				</div>
 				<div id="no-data-text" class="detail-panel-col actChart no-data">
-					<span class="detail-context detail-panel-col">Data Unavailable/Unsupported</span>
+					<span class="detail-context detail-panel-col">No Data</span>
 			</div>
 		</div>
 	<script>
@@ -198,6 +212,8 @@
 		// Set default start and end times of date range picker
 		var start = moment('2014-01-01');
 		var end = moment();
+		// Initialize daterangepicker and listener
+		initDateRange();
 		// Make basemaps
 		var streetsnight = L.esri.Vector.basemap('StreetsNight');
 		var imageryesri = L.esri.basemapLayer('Imagery');
