@@ -39,8 +39,8 @@ function initializeDisplay(jsonDataURL){
     // create Leafet search for loaded geoJSON data
     createSearchControl(filteredGroup);
     popupAction(filteredGroup);
-    chartActData = binActData(filteredGroup, "Count");
-    createActivityChart(chartActData, "Count");
+    chartActData = binActData(filteredGroup, "count-btn");
+    createActivityChart(chartActData, "count-btn");
     // chartActData = binActData(rawGeoJSON);
     // populateChart(chartActData);
     map.spin(false);
@@ -104,7 +104,8 @@ function filterSingleActDisplay(actID) {
   // Set All button text to "Add Layers" to reflect its behavior
   document.getElementById("All").innerHTML = "&nbsp;&nbsp;&nbsp;Add&nbsp;&nbsp;&nbsp;&nbsp;<br>Layers";
   // Update chart
-  updateChart(filteredGroup, null, actID);
+  // updateChart(filteredGroup, null, actID);
+  updateChart(filteredGroup);
 };
 
 // Create Leafet search option using activity name
@@ -339,7 +340,10 @@ function loadActivityBtnListener() {
         actFilter(obj.target.id);
         updateDataPanels(filteredGroup, actDataDict, "True")
       }
-      updateChart(filteredGroup);
+      // prevMultiActBtn = document.querySelectorAll(".multiAct.chart-active")[0].id
+      // updateChart(filteredGroup,prevMultiActBtn);
+      updateChart(filteredGroup)
+      // activateChartButton();
     });
   }
 };
@@ -495,7 +499,7 @@ function initDateRange(){
         // Set preset date ranges to select from
         ranges: {
           'All Time (default)': [moment('2014-01-01'), moment().endOf('year')],
-          'Today': [moment(), moment()],
+          'Today': [moment().startOf('day'), moment().endOf('day')],
           'Last 7 Days': [moment().subtract(6, 'days'), moment()],
           'Last 30 Days': [moment().subtract(29, 'days'), moment()],
           'This Month': [moment().startOf('month'), moment().endOf('month')],
@@ -517,5 +521,6 @@ function initDateRange(){
     addActiveLayers(picker.startDate.format(), picker.endDate.format());
     updateDataPanels(filteredGroup,actDataDict, "True");
     updateChart(filteredGroup);
+    // activateChartButton();
   });
 };

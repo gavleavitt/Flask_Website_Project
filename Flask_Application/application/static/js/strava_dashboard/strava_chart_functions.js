@@ -1,5 +1,4 @@
-// jquery csv
-function setCSVStreamData(streamType = "altitude"){
+function setCSVStreamData(streamType){
   var csvURL = '/static/documents/4413728207.csv'
   // Issue jquery ajax request:
   $.ajax({
@@ -12,14 +11,16 @@ function setCSVStreamData(streamType = "altitude"){
     // var count = null
     // var max = null
     for (i of Object.keys(csvDatObject)){
-      if (streamType == "altitude"){
+      if (streamType == "elevation-stream-btn" || streamType === null){
         dataY.push(Math.round(parseFloat(csvDatObject[i].altitude)*3.28))
-      } else if (streamType == "speed"){
-        dataY.push((parseFloat(csvDatObject[i].speed)*2.23694).toFixed(1))
-      } else if (streamType == "grade") {
-        dataY.push(parseFloat(csvDatObject[i].grade).toFixed(1))
+        yLabel = "Feet"
+      } else if (streamType == "speed-stream-btn"){
+        dataY.push((parseFloat(csvDatObject[i].velocity_smooth)*2.23694).toFixed(1))
+        yLabel = "Speed(mph)"
+      } else if (streamType == "grade-stream-btn") {
+        dataY.push(parseFloat(csvDatObject[i].grade_smooth).toFixed(1))
+        yLabel = "Grade(%)"
       }
-
       // dataX.push(parseInt(csvDatObject[i].time))
       dataX.push(new Date(parseInt(csvDatObject[i].time)*1000).toISOString().substr(11,5));
       // count += 1
@@ -46,10 +47,10 @@ function setCSVStreamData(streamType = "altitude"){
     // actStreamLineChart.data.datasets.data = dataY;
     actStreamLineChart.data.labels = dataX
     actStreamLineChart.data.datasets[0].data = dataY;
-    actStreamLineChart.data.datasets[0].label = "Elevation"
+    actStreamLineChart.data.datasets[0].label = yLabel
     // actStreamLineChart.data.datasets.label = "test!"
     actStreamLineChart.options.legend.display = false
-    actStreamLineChart.options.scales.yAxes[0].scaleLabel.labelString = "Feet"
+    actStreamLineChart.options.scales.yAxes[0].scaleLabel.labelString = yLabel
     // actStreamLineChart.data.datasets.label = "test2";
     // actChart.options.scales.yAxes[0].scaleLabel.labelString = getYLabelText();
     // actChart.options.title.text = tabDataType
@@ -61,14 +62,12 @@ function setCSVStreamData(streamType = "altitude"){
   })
 }
 
-function createActStreamLabels(dataX){
-
-};
-
 
 // Groups, zero-fills, and sorts activities by activity type and date to provide data that are formatted for use in Chart.JS. Format is: {ActivityType1:[{"x":x-value(dateValue),"y":y-value(distance, elevation, etc),"z":date-sorting value},...], ...}
-function binActData(filteredGroup){
+function binActData(filteredGroup, btnSelection){
   geoJSONDat = filteredGroup.toGeoJSON()
+  // console.log("raw geojson is:")
+  // console.log(JSON.parse(JSON.stringify(geoJSONDat)))
   binnedActDataDict = {}
   // This logs the state upon creation, normal console.log() returns as it is when viewing, doesn't reflect state at the time of processing
   // I think this creates a clone of the data as a string at this point in time instead of referring to the object itself
@@ -79,9 +78,11 @@ function binActData(filteredGroup){
   var yearList = []
   // Set dateType based on current user daterange selection
   var dateType = checkDateRange();
-  sortVal = null
-  featDate = null
-  count = 0
+  // console.log("datatype is:")
+  // console.log(dateType)
+  var sortVal = null
+  var featDate = null
+  var count = 0
   for (i of geoJSONDat.features) {
     var actType = i.properties.type_extended
     if (dateType == "default/year") {
@@ -99,18 +100,20 @@ function binActData(filteredGroup){
       sortVal =  parseInt(i.properties.startDate.substr(8,2))
     }
     //
-    if (tabDataType == "Count"){
+    // console.log("Tab datatype is:")
+    // console.log(tabDataType)
+    if (btnSelection == "count-btn"){
       var yValue = 1
-    } else if (tabDataType == "Distance") {
+    } else if (btnSelection == "distance-btn") {
       var yValue = i.properties.distance * 0.000621371;
-    } else if (tabDataType== "Elevation") {
+    } else if (btnSelection == "elevation-btn") {
       var yValue = i.properties.total_elevation_gain * 3.28084;
-    } else if (tabDataType == "Time") {
+    } else if (btnSelection == "time-btn") {
       var yValue = i.properties.moving_time;
-    } else if (tabDataType == "Avg Speed") {
+    } else if (btnSelection == "Avg Speed") {
       var yValue = i.properties.average_speed;
       count = 1;
-    } else if (tabDataType == "Avg Watts"){
+    } else if (btnSelection == "avgwatt-btn"){
       var yValue = i.properties.average_watts;
       count = 1
     }
@@ -136,6 +139,7 @@ function binActData(filteredGroup){
       }
     }
   }
+  // console.log(JSON.parse(JSON.stringify(binnedActDataDict)))
   // Average values if tabDataType is an average
   if (tabDataType == "Avg Watts"){
     for (a of Object.keys(binnedActDataDict)) {
@@ -182,7 +186,7 @@ function binActData(filteredGroup){
   for (actType of Object.keys(binnedActDataDict)) {
     binnedActDataDict[actType].sort((a, b) => parseFloat(a.z) - parseFloat(b.z));
   }
-
+  // console.log(JSON.parse(JSON.stringify(binnedActDataDict)))
   return binnedActDataDict
 };
 
@@ -239,18 +243,18 @@ function setChartTextSizes(){
   actChart.update();
 }
 
-function getYLabelText(){
-  if (tabDataType == "Count"){
+function getYLabelText(tabDataType){
+  if (tabDataType == "count-btn"){
     return "Count"
-  } else if (tabDataType == "Distance"){
+  } else if (tabDataType == "distance-btn"){
     return "Miles"
-  } else if (tabDataType== "Elevation"){
+  } else if (tabDataType== "elevation-btn"){
     return "Feet"
   } else if (tabDataType== "Average Speed"){
       return "Speed (mph)"
-  } else if (tabDataType == "Time"){
+  } else if (tabDataType == "time-btn"){
     return "Hours"
-  } else if (tabDataType == "Avg Watts") {
+  } else if (tabDataType == "avgwatt-btn") {
     return "Avg Watts"
   }
 }
@@ -338,7 +342,7 @@ function createActivityChart(chartData) {
             },
             scaleLabel: {
               display: true,
-              labelString: getYLabelText(),
+              labelString: getYLabelText("count-btn"),
               fontSize: getChartTextSizes(),
               fontStyle: "bold",
               fontColor: "black",
@@ -355,35 +359,48 @@ function createActivityChart(chartData) {
       }
   });
 };
+
+// function activateChartButton(){
+//   // When user picks a new date range or activity type, active the correct active chart type button
+//   console.log("Activating button for:")
+//   console.log(document.querySelector('.show-data').querySelectorAll(".chart-active")[0])
+//   document.querySelector('.show-data').querySelectorAll(".chart-active")[0].click()
+// }
+
 // Update chart labels and datasets based on user button selections
-function updateChart(filteredGroup, btnSelection, actID){
-  if (btnSelection !== null && btnSelection !== undefined){
-    tabDataType = btnSelection
-  }
-  // Create formatted dataset
-  chartData = binActData(filteredGroup);
+// function updateChart(filteredGroup,tabDataType){
+function updateChart(filteredGroup,tabDataType){
+  // console.log(document.querySelector('.show-data').querySelectorAll(".chart-active"))
+  // // Create formatted dataset
+  // chartData = binActData(filteredGroup, tabDataType);
   var actCount = parseInt(document.getElementById("actCount").innerText)
   // see https://stackoverflow.com/a/55972382 for div update method
   if (actCount == 0){
-    // document.getElementById("chart-cont").classList.add("no-data");
     document.getElementById("chart-cont").classList.remove("show-data");
     document.getElementById("chart-line-cont").classList.remove("show-data");
   	document.getElementById("no-data-text").classList.add("show-data");
   } else if (actCount == 1) {
+    // Create formatted dataset
+    btnSelection = document.querySelectorAll('.singleAct.chart-active')[0].id
+    // chartData = binActData(filteredGroup, btnSelection);
+    setCSVStreamData(btnSelection);
     document.getElementById("chart-cont").classList.remove("show-data")
     document.getElementById("no-data-text").classList.remove("show-data");
     document.getElementById("chart-line-cont").classList.add("show-data");
-    setCSVStreamData();
   } else {
+    // Create formatted dataset
+    btnSelection = document.querySelectorAll('.multiAct.chart-active')[0].id
+    chartData = binActData(filteredGroup, btnSelection);
+    // console.log("btnsel is:")
+    // console.log(btnSelection)
     document.getElementById("no-data-text").classList.remove("show-data");
     document.getElementById("chart-line-cont").classList.remove("show-data");
-    // document.getElementById("no-data-text").classList.add("no-data");
     document.getElementById("chart-cont").classList.add("show-data");
     // Calculate date labels (x-axis)
     actChart.data.labels = getUniqueDateValues(chartData);
     // Use formatted data to generate legend labels and colors based on activity type
     actChart.data.datasets = generateDatasetOptions(chartData);
-    actChart.options.scales.yAxes[0].scaleLabel.labelString = getYLabelText();
+    actChart.options.scales.yAxes[0].scaleLabel.labelString = getYLabelText(btnSelection);
     // actChart.options.title.text = tabDataType
     // Issue data update
     actChart.update();
@@ -464,14 +481,23 @@ function sortLookUp(dateValue, dateType=null) {
   } else if (dateType == "week" && dateValue == "Week 4"){
     return {"sort":4}
   } else if (dateType == "day") {
-    console.log("Day in lookup!")
     return {"sort":parseInt(dateValue.substr(3,2))}
   }
 }
 
-function updateChartBtn(btnID){
+function updateChartBtn(btnID,actDataSource){
   // console.log(document.querySelectorAll('.chart-active')[0].classList)
-  document.querySelectorAll('.chart-active')[0].classList.remove("chart-active")
-  // .classlist.remove(chart-active)
+  if (actDataSource == "topoJSON"){
+    for (i of document.querySelectorAll('.multiAct.chart-active')){
+      i.classList.remove("chart-active")
+    }
+    // document.querySelectorAll('.multiAct, .chart-active')[0].classList.remove("chart-active")
+  } else {
+    for (i of document.querySelectorAll('.singleAct.chart-active')){
+      i.classList.remove("chart-active")
+    }
+    // console.log(document.querySelectorAll('.singleAct, .chart-active')[0].classList)
+    // document.querySelectorAll('.singleAct, .chart-active')[0].classList.remove("chart-active")
+  }
   document.getElementById(btnID).classList.add("chart-active")
 }

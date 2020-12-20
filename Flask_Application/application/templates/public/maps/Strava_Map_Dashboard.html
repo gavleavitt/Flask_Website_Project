@@ -185,20 +185,20 @@
 			<div class="item detail-panel-col chartPanel">
 				<div id="chart-cont" class="detail-panel-col actChart no-data show-data">
 					<div id="chart-Btns">
-						<span><button id="count-btn" class="chartToggle chart-active" onclick="updateChart(filteredGroup,'Count');updateChartBtn('count-btn');">Count</button></span>
-						<span><button id="distance-btn" class="chartToggle" onclick="updateChart(filteredGroup,'Distance');updateChartBtn('distance-btn')">Distance</button></span>
-						<span><button id="elevation-btn" class="chartToggle"  onclick="updateChart(filteredGroup,'Elevation');updateChartBtn('elevation-btn')">Elevation</button></span>
-						<span><button id="time-btn" class="chartToggle"  onclick="updateChart(filteredGroup,'Time');updateChartBtn('time-btn')">Time</button></span>
+						<span><button id="count-btn" class="chartToggle multiAct chart-active" onclick="updateChartBtn('count-btn','topoJSON');updateChart(filteredGroup,'count-btn');">Count</button></span>
+						<span><button id="distance-btn" class="chartToggle multiAct" onclick="updateChartBtn('distance-btn','topoJSON');updateChart(filteredGroup,'distance-btn');">Distance</button></span>
+						<span><button id="elevation-btn" class="chartToggle multiAct"  onclick="updateChartBtn('elevation-btn','topoJSON');updateChart(filteredGroup,'elevation-btn');">Elevation</button></span>
+						<span><button id="time-btn" class="chartToggle multiAct"  onclick="updateChartBtn('time-btn','topoJSON');updateChart(filteredGroup,'time-btn');">Time</button></span>
 						<!-- <span><button id ="avgspd-btn" class="chartToggle"  onclick="updateChart(filteredGroup,'Avg Speed');updateChartBtn('avgspd-btn')">Avg Speed</button></span> -->
-						<span><button id ="avgwatt-btn" class="chartToggle"  onclick="updateChart(filteredGroup,'Avg Watts');updateChartBtn('avgwatt-btn')">Avg Watts</button></span>
+						<span><button id ="avgwatt-btn" class="chartToggle multiAct"  onclick="updateChartBtn('avgwatt-btn','topoJSON');updateChart(filteredGroup,'avgwatt-btn');">Avg Watts</button></span>
 					</div>
 					<canvas id="chart"></canvas>
 				</div>
 				<div id="chart-line-cont" class="detail-panel-col actChart no-data">
 					<div id="chart-Btns">
-						<span><button id="elev-btn" class="chartToggle chart-active" onclick="updateChart(filteredGroup,'Count');updateChartBtn('count-btn');">Elevation</button></span>
-						<span><button id="speed-btn" class="chartToggle" onclick="updateChart(filteredGroup,'Distance');updateChartBtn('distance-btn')">Speed</button></span>
-						<span><button id="grade-btn" class="chartToggle"  onclick="updateChart(filteredGroup,'Elevation');updateChartBtn('elevation-btn')">Grade</button></span>
+						<span><button id="elevation-stream-btn" class="chartToggle singleAct chart-active" onclick="updateChartBtn('elevation-stream-btn','csv');updateChart(filteredGroup,'elevation-stream-btn');">Elevation</button></span>
+						<span><button id="speed-stream-btn" class="chartToggle singleAct" onclick="updateChartBtn('speed-stream-btn','csv');updateChart(filteredGroup,'speed-stream-btn');">Speed</button></span>
+						<span><button id="grade-stream-btn" class="chartToggle singleAct"  onclick="updateChartBtn('grade-stream-btn','csv');updateChart(filteredGroup,'grade-stream-btn');">Grade</button></span>
 					</div>
 					<canvas id="chart-line"></canvas>
 				</div>
@@ -212,6 +212,7 @@
 		// Set default start and end times of date range picker
 		var start = moment('2014-01-01');
 		var end = moment();
+		console.log(end);
 		// Initialize daterangepicker and listener
 		initDateRange();
 		// Make basemaps
@@ -241,7 +242,7 @@
 	  var actDataDict = {"count":null, "dist":null, "elev":null, "calories":null, "totalTime":null, "speed":null, "moveTime":null}
 		// Global variable holding chart display type
 		tabDataType = "Count"
-
+		// streamDataType = "elevation-stream"
 		// Initialize Leaflet, panel, and chart with all activity data
 		initializeDisplay(jsonDataURL);
 
