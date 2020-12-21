@@ -16,7 +16,7 @@ from flask import jsonify
 from application import script_config
 from application.projects.location_tracker import DBQueriesTracker, objectGenerationTracker
 from application.flaskAuth.authentication import auth
-from application.projects.strava_activities import WebHookFunctionsStrava, DBQueriesStrava
+from application.projects.strava_activities import WebHookFunctionsStrava, DBQueriesStrava, StreamDataAWSS3
 
 # @app.route establishes the URL within the domain
 # @auth.login_required sets up basic http auth for the URL and role sets the user level needed to access the URL
@@ -112,4 +112,11 @@ def subCallback():
 def stravaActAPI():
     actLimit = int(request.args.get("actlimit"))
     res = DBQueriesStrava.getStravaMaskedActGeoJSON(actLimit)
+    return res
+
+@app.route("/api/v0.1/stravastreamdata", methods=['GET'])
+def getsteams3url():
+    csvName = str(request.args.get("csvName"))
+    print(f"csvname is: {csvName}")
+    res = StreamDataAWSS3.create_presigned_url(csvName)
     return res

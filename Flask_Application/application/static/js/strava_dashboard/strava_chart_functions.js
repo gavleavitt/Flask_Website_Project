@@ -1,8 +1,33 @@
+// see https://stackoverflow.com/questions/30024948/flask-download-a-csv-file-on-clicking-a-button
+
 function setCSVStreamData(streamType){
-  var csvURL = '/static/documents/4413728207.csv'
-  // Issue jquery ajax request:
+  // var csvURL = 'https://stravastreamdata.s3-us-west-1.amazonaws.com/4413728207.csv'
+  // get pre-signed URL
+
+  var csvURL = '/api/v0.1/stravastreamdata'
+  // see https://stackoverflow.com/questions/1152692/jquery-ajax-get-responsetext-from-http-url
+  presignedURL = null
   $.ajax({
-    url:csvURL,
+      url:csvURL,
+      //https://stackoverflow.com/questions/47523265/jquery-ajax-no-access-control-allow-origin-header-is-present-on-the-requested
+      data: {csvName:'4413728207.csv'},
+      async: false,
+      type: 'GET',
+      dataType: 'text',
+      success : function(text){
+          presignedURL = text;
+        }
+  })
+  // Issue jquery ajax request:
+  console.log("presignedURL is:")
+  console.log(presignedURL)
+  $.ajax({
+    url:presignedURL,
+    //https://stackoverflow.com/questions/47523265/jquery-ajax-no-access-control-allow-origin-header-is-present-on-the-requested
+    headers: {  'Access-Control-Allow-Origin': 'https://stravastreamdata.s3-us-west-1.amazonaws.com' },
+    crossOrigin: true,
+    // data: {csvName:'4413728207.csv'},
+    type: 'GET',
     dataType: 'text'
   }).done(function(data){
     var csvDatObject = $.csv.toObjects(data);
