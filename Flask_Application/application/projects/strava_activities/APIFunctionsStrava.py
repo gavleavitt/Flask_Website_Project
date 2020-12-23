@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-from application.projects.strava_activities import OAuthStrava, DBQueriesStrava, APIFunctionsStrava
+from application.projects.strava_activities import OAuthStrava, DBQueriesStrava, StreamDataAWSS3
 from application import application
 import logging
 import time
@@ -47,7 +47,7 @@ def getFullDetails(client, actId):
     Log = logging.getLogger()
     Log.setLevel('ERROR')
     # Stream data to get from activity streams
-    types = ['time', 'latlng']
+    types = ['time', 'latlng', 'altitude', 'velocity_smooth', 'grade_smooth']
     # Get activity details as a dictionary
     act = client.get_activity(actId).to_dict()
     # Get starttime and convert to datetime object
@@ -109,7 +109,7 @@ def getFullDetails(client, actId):
     for key in list(act.keys()):
         if key in remove_keys:
             del (act[key])
-    return act
+    return {"act": act, "stream": stream}
 
 def processActs(days):
     """

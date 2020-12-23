@@ -1,7 +1,7 @@
 from stravalib.client import Client
 import os
 from application import application, script_config, errorEmail
-from application.projects.strava_activities import OAuthStrava, DBQueriesStrava, APIFunctionsStrava
+from application.projects.strava_activities import OAuthStrava, DBQueriesStrava, APIFunctionsStrava, StreamDataAWSS3
 
 
 def createStravaWebhook(client):
@@ -71,10 +71,14 @@ def handleSubUpdate(client, updateContent):
                 activity = APIFunctionsStrava.getFullDetails(client, update.object_id)
                 application.logger.debug("Inserting activity details")
                 # Insert original, non-masked, coordinates and attribute details into Postgres/PostGIS
-                DBQueriesStrava.insertPrivateAct(activity)
+                DBQueriesStrava.insertPrivateAct(activity['act'])
                 # Calculate masked, publicly sharable, activities and insert into Postgres masked table
                 application.logger.debug("Processing and inserting masked geometries")
-                DBQueriesStrava.processActivitiesPublic(activity["actId"])
+                DBQueriesStrava.processActivitiesPublic(activity["act"]["actId"])
+                # Create in-memory buffer csv of stream data
+                csvBuff = StreamDataAWSS3.writeMemoryCSV(activity["stream"])
+                # Upload buffer csv to AWS S3 bucket
+                StreamDataAWSS3.uploadToS3(csvBuff, activity["act"]["actId"])
             except Exception as e:
                 application.logger.error(f"Handling and inserting new webhook activity failed with the error {e}")
                 errorEmail.sendErrorEmail(script="Webhook Activity Update", exceptiontype=e.__class__.__name__, body=e)

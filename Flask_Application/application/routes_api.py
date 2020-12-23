@@ -115,7 +115,7 @@ def stravaActAPI():
     return res
 
 @app.route("/api/v0.1/stravastreamdata", methods=['GET'])
-def getsteams3url():
+def getsteamS3url():
     csvName = str(request.args.get("csvName"))
     print(f"csvname is: {csvName}")
     res = StreamDataAWSS3.create_presigned_url(csvName)
