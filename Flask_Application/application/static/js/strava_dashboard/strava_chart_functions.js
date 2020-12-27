@@ -1,27 +1,83 @@
 // see https://stackoverflow.com/questions/30024948/flask-download-a-csv-file-on-clicking-a-button
 
-function setCSVStreamData(streamType){
-  // var csvURL = 'https://stravastreamdata.s3-us-west-1.amazonaws.com/4413728207.csv'
-  // get pre-signed URL
+// Callback function approach
+//https://stackoverflow.com/a/14220323
+//https://stackify.com/return-ajax-response-asynchronous-javascript-call/
 
-  var csvURL = '/api/v0.1/stravastreamdata'
-  // see https://stackoverflow.com/questions/1152692/jquery-ajax-get-responsetext-from-http-url
-  presignedURL = null
-  $.ajax({
-      url:csvURL,
-      //https://stackoverflow.com/questions/47523265/jquery-ajax-no-access-control-allow-origin-header-is-present-on-the-requested
-      data: {csvName:'4413728207.csv'},
-      async: false,
-      type: 'GET',
-      dataType: 'text',
-      success : function(text){
-          presignedURL = text;
-        }
+
+function handleStreamChartUpdate(streamType, filteredGroup){
+  filteredGroup.eachLayer(function(layer){
+    layer.eachLayer(function(feature){
+      if (feature.feature.properties.actID == actID){
+        // This CSV has already been loaded, update existing table
+        actID = feature.feature.properties.actID
+        streamdata = populateStreamChartUpdateData(streamType);
+        updateStreamChart(streamdata["dataX"],streamdata["dataY"])
+      } else {
+        // This CSV has not been loaded, load it
+        actID = feature.feature.properties.actID
+        getS3URL(actID).then(function(presignedURL){
+          return getS3CSVData(presignedURL)
+        }).then(function(csvData){
+          csvDatObject = $.csv.toObjects(csvData);
+          streamdata = populateStreamChartUpdateData(streamType);
+          updateStreamChart(streamdata["dataX"],streamdata["dataY"])
+        })
+      }
+    })
   })
-  // Issue jquery ajax request:
-  console.log("presignedURL is:")
-  console.log(presignedURL)
-  $.ajax({
+}
+
+function populateStreamChartUpdateData(streamType){
+  dataY = []
+  dataX = []
+  // var count = null
+  // var max = null
+  for (i of Object.keys(csvDatObject)){
+    if (streamType == "elevation-stream-btn" || streamType === null){
+      dataY.push(Math.round(parseFloat(csvDatObject[i].altitude)*3.28))
+      yLabel = "Feet"
+    } else if (streamType == "speed-stream-btn"){
+      dataY.push((parseFloat(csvDatObject[i].velocity_smooth)*2.23694).toFixed(1))
+      yLabel = "Speed(mph)"
+    } else if (streamType == "grade-stream-btn") {
+      dataY.push(parseFloat(csvDatObject[i].grade_smooth).toFixed(1))
+      yLabel = "Grade(%)"
+    }
+    // dataX.push(parseInt(csvDatObject[i].time))
+    dataX.push(new Date(parseInt(csvDatObject[i].time)*1000).toISOString().substr(11,5));
+    // count += 1
+    // if (parseInt(csvDatObject[i].time) > max){
+    //   max = parseInt(csvDatObject[i].time)
+    // }
+  }
+  return {"dataX":dataX, "dataY":dataY}
+}
+
+function updateStreamChart(dataX,dataY){
+  actStreamLineChart.data.labels = dataX
+  actStreamLineChart.data.datasets[0].data = dataY;
+  actStreamLineChart.data.datasets[0].label = yLabel
+  actStreamLineChart.options.legend.display = false
+  actStreamLineChart.options.scales.yAxes[0].scaleLabel.labelString = yLabel
+  // Issue data update
+  actStreamLineChart.update();
+}
+
+
+function getS3URL(actID){
+  csvAPIURL = '/api/v0.1/getstravastreamurl'
+  return $.ajax({
+      url:csvAPIURL,
+      //https://stackoverflow.com/questions/47523265/jquery-ajax-no-access-control-allow-origin-header-is-present-on-the-requested
+      data: {actID:actID},
+      type: 'GET',
+      dataType: 'text'
+  });
+}
+
+function getS3CSVData(presignedURL){
+  return $.ajax({
     url:presignedURL,
     //https://stackoverflow.com/questions/47523265/jquery-ajax-no-access-control-allow-origin-header-is-present-on-the-requested
     headers: {  'Access-Control-Allow-Origin': 'https://stravastreamdata.s3-us-west-1.amazonaws.com' },
@@ -29,62 +85,7 @@ function setCSVStreamData(streamType){
     // data: {csvName:'4413728207.csv'},
     type: 'GET',
     dataType: 'text'
-  }).done(function(data){
-    var csvDatObject = $.csv.toObjects(data);
-    dataY = []
-    dataX = []
-    // var count = null
-    // var max = null
-    for (i of Object.keys(csvDatObject)){
-      if (streamType == "elevation-stream-btn" || streamType === null){
-        dataY.push(Math.round(parseFloat(csvDatObject[i].altitude)*3.28))
-        yLabel = "Feet"
-      } else if (streamType == "speed-stream-btn"){
-        dataY.push((parseFloat(csvDatObject[i].velocity_smooth)*2.23694).toFixed(1))
-        yLabel = "Speed(mph)"
-      } else if (streamType == "grade-stream-btn") {
-        dataY.push(parseFloat(csvDatObject[i].grade_smooth).toFixed(1))
-        yLabel = "Grade(%)"
-      }
-      // dataX.push(parseInt(csvDatObject[i].time))
-      dataX.push(new Date(parseInt(csvDatObject[i].time)*1000).toISOString().substr(11,5));
-      // count += 1
-      // if (parseInt(csvDatObject[i].time) > max){
-      //   max = parseInt(csvDatObject[i].time)
-      // }
-    }
-    // console.log("key count is:")
-    // console.log(count)
-    // console.log("max value is:")
-    // console.log(max)
-    // maxTime = (Object.keys(csvDatObject).length - 1)
-    // data = {"x":xVal,"y":yVal};
-    // console.log(data["y"])
-    // console.log("Y data are:")
-    // console.log(dataY)
-    // console.log("X data are:")
-    // console.log(dataX)
-    // Process X-data, get the max time, not max length, convert to hours/minutes (string) then divide by 8 to get intervals. Create new X-dataset which is empty arrays, '', for the length of the original x/y dataset. Find the index locations within the original dataset that match with the new intervals then insert these at the index locations within the new x-dataset
-
-    // see https://stackoverflow.com/questions/22064577/limit-labels-number-on-chart-js-line-chart
-    // actChart.data.labels = ""
-    // Use formatted data to generate legend labels and colors based on activity type
-    // actStreamLineChart.data.datasets.data = dataY;
-    actStreamLineChart.data.labels = dataX
-    actStreamLineChart.data.datasets[0].data = dataY;
-    actStreamLineChart.data.datasets[0].label = yLabel
-    // actStreamLineChart.data.datasets.label = "test!"
-    actStreamLineChart.options.legend.display = false
-    actStreamLineChart.options.scales.yAxes[0].scaleLabel.labelString = yLabel
-    // actStreamLineChart.data.datasets.label = "test2";
-    // actChart.options.scales.yAxes[0].scaleLabel.labelString = getYLabelText();
-    // actChart.options.title.text = tabDataType
-    // Issue data update
-    actStreamLineChart.update();
-    // console.log(actStreamLineChart.data.datasets)
-    // console.log(actStreamLineChart.data.labels)
-    // console.log(actStreamLineChart)
-  })
+  });
 }
 
 
@@ -408,7 +409,9 @@ function updateChart(filteredGroup,tabDataType){
     // Create formatted dataset
     btnSelection = document.querySelectorAll('.singleAct.chart-active')[0].id
     // chartData = binActData(filteredGroup, btnSelection);
-    setCSVStreamData(btnSelection);
+    // setCSVStreamData(btnSelection,filteredGroup);
+    handleStreamChartUpdate(btnSelection, filteredGroup);
+    // getCSVData(btnSelection, filteredGroup)
     document.getElementById("chart-cont").classList.remove("show-data")
     document.getElementById("no-data-text").classList.remove("show-data");
     document.getElementById("chart-line-cont").classList.add("show-data");

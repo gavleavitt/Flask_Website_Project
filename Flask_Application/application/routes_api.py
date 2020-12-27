@@ -114,9 +114,9 @@ def stravaActAPI():
     res = DBQueriesStrava.getStravaMaskedActGeoJSON(actLimit)
     return res
 
-@app.route("/api/v0.1/stravastreamdata", methods=['GET'])
+@app.route("/api/v0.1/getstravastreamurl", methods=['GET'])
 def getsteamS3url():
-    csvName = str(request.args.get("csvName"))
-    print(f"csvname is: {csvName}")
-    res = StreamDataAWSS3.create_presigned_url(csvName)
+    actID = str(request.args.get("actID"))
+    print(f"csvname is: {actID}")
+    res = StreamDataAWSS3.create_presigned_url(actID)
     return res

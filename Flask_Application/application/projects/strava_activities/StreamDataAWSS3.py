@@ -17,7 +17,7 @@ def connectToS3():
                              aws_secret_access_key=os.getenv("BOTO3_Flask_KEY"))
     return s3_client
 
-def create_presigned_url(object_name, expiration=300):
+def create_presigned_url(actID, expiration=300):
     """Generate a presigned URL to share an S3 object
 
     :param object_name: string
@@ -25,12 +25,13 @@ def create_presigned_url(object_name, expiration=300):
     :return: Presigned URL as string. If error, returns None.
     """
     # Generate a presigned URL for the S3 object
-    print("Generating temp access URL")
+    # print("Generating temp access URL")
     s3_client = connectToS3()
+    csvName = f"stream_{actID}.csv"
     try:
         response = s3_client.generate_presigned_url('get_object',
                                                     Params={'Bucket': os.getenv("S3_STREAM_BUCKET"),
-                                                            'Key': object_name},
+                                                            'Key': csvName},
                                                     ExpiresIn=expiration)
     except ClientError as e:
         print("Error!")
@@ -82,7 +83,8 @@ def uploadToS3(memCSV, actID):
         # compatible with other boto3 object creation methods see:
         # https://stackoverflow.com/a/45700716
         # https://stackoverflow.com/a/60293770
-        conn.put_object(Body=memCSV.getvalue(), Bucket=bucket, Key=fileName, ContentType='application/vnd.ms-excel')
+        # conn.put_object(Body=memCSV.getvalue(), Bucket=bucket, Key=fileName, ContentType='application/vnd.ms-excel')
+        conn.put_object(Body=memCSV.getvalue(), Bucket=bucket, Key=fileName)
     except Exception as e:
         application.logger.error(f"Upload to S3 bucket failed in the error: {e}")
         # errorEmail.senderroremail(script="UploadToS3Bucket", exceptiontype=e.__class__.__name__, body=e)
