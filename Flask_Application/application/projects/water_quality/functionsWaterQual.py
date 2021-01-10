@@ -164,7 +164,7 @@ def handlePDFStatus(pdfStatus, pdfLoc, hashedText, pdfDict, pdfName):
             # print("Google Drive upload threw an error, emailing exception")
             application.logger.debug("Google drive upload failed, trying to send email report")
             application.logger.debug(e)
-            errorEmail.senderroremail(script="addtoGDrive", exceptiontype=e.__class__.__name__, body=e)
+            errorEmail.sendErrorEmail(script="addtoGDrive", exceptiontype=e.__class__.__name__, body=e)
         # print("Finished with local PDF, removing it from system")
         os.remove(pdfLoc)
     if checkResamp(pdfDict['cleanedtext']) == True:
@@ -348,7 +348,12 @@ def getPDFContents(pdfLoc):
         pdfDict['text'] = p1.extract_text()
         raw_tab = p1.extract_tables()[0]
         pdfDict['tab'] = raw_tab
-    pdfDate = cleanText([pdfDict['text'].split("Sample Results for the Week of: ")[1].split(" \nOpen")[0]])[0]
+    # pdfDate = cleanText([pdfDict['text'].split("Sample Results for the Week of: ")[1].split(" \nOpen")[0]])[0]
+
+    pdfTitleList = pdfDict['text'].split("Sample Results for the Week of: ")[1].split(" ")
+    dirtyTitle = f"{pdfTitleList[0]} {pdfTitleList[1]} {pdfTitleList[2]}"
+    pdfDate = cleanText([dirtyTitle])[0]
+
     pdfDict['pdfDate'] = datetime.strptime(pdfDate, '%B %d %Y')
     cleanedtext = []
     for beachdetails in raw_tab:
@@ -423,6 +428,8 @@ def parsePDF():
     # Handle the results of the md5 hash check and control generation of dictionaries and interactions with postgres
     handlePDFStatus(pdfstatus, pdfLoc, hashedText, pdfDict, pdfName)
     print("All done processing PDF!")
+    return pdfName
+
 
 
 def pdfjob():
@@ -439,7 +446,8 @@ def pdfjob():
 
     application.logger.debug("PDF job issued, downloading and parsing PDF")
     try:
-        parsePDF()
+        pdfName = parsePDF()
+        errorEmail.sendSuccessEmail(script="parsePDF", body=f"The PDF: {pdfName} was successfully processed!")
         application.logger.debug("Successfully parsed a new PDF!")
     except SystemExit:
         logger.debug("Ended ParsePDF early since file has already been processed")
@@ -448,4 +456,8 @@ def pdfjob():
         # print("Parse PDF threw an error, emailing exception")
         application.logger.error("Parse PDF threw an error")
         application.logger.error(e)
-        errorEmail.senderroremail(script="ParsePDF", exceptiontype=e.__class__.__name__, body=e)
+        try:
+            errorEmail.sendErrorEmail(script="ParsePDF", exceptiontype=e.__class__.__name__, body=e)
+        except Exception as f:
+            application.logger.error("Failed to send error email")
+            application.logger.error(e)

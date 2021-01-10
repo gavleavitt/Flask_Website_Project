@@ -79,6 +79,10 @@ def handleSubUpdate(client, updateContent):
                 csvBuff = StreamDataAWSS3.writeMemoryCSV(activity["stream"])
                 # Upload buffer csv to AWS S3 bucket
                 StreamDataAWSS3.uploadToS3(csvBuff, activity["act"]["actId"])
+                errorEmail.sendSuccessEmail("Webhook Activity Update", f'The strava activity: {activity["act"]["actId"]}'
+                                                                       f' has been processed, the activity can be'
+                                                                       f' viewed on Strava at: '
+                                                                       f'https://www.strava.com/activities/{activity["act"]["actId"]}')
             except Exception as e:
                 application.logger.error(f"Handling and inserting new webhook activity failed with the error {e}")
                 errorEmail.sendErrorEmail(script="Webhook Activity Update", exceptiontype=e.__class__.__name__, body=e)
