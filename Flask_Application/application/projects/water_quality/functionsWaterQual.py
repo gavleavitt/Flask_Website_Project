@@ -37,6 +37,14 @@ def handleBeaches():
     geojsonResult = getWaterQualGeoJSON(beachResults)
     return {"waterqual": geojsonResult, "recent": mostRecent}
 
+def makeNull(beachDict):
+    # for i in list(beachDict.keys()):
+    #     for a in list(beachDict[i].keys()):
+    #         if not beachDict[i][a]:
+    #             beachDict[i][a] = None
+    for i in list(beachDict.keys()):
+        if not beachDict[i]["Total Coliform Results (MPN*)"]:
+            beachDict.pop(i, None)
 
 def recentRecord(records):
     maxRec = 0
@@ -194,9 +202,12 @@ def handlePDFStatus(pdfStatus, pdfLoc, hashedText, pdfDict, pdfName):
     # return beachDict
     # Get the md5 hash for the new pdf
     application.logger.debug("Getting hash id")
+    # Mutate beachDict to replace empty strings with None values
+    makeNull(beachDict)
     hashid = DBQueriesWaterQuality.insmd5(hashedText, pdfDict['pdfDate'], pdfName)
     application.logger.debug(f"Hash id is {hashid}, inserting into postgres")
     # Insert records into postgres, using the beachDict
+    application.logger.debug(f"Beach dict being inserted is: {beachDict}")
     DBQueriesWaterQuality.insertWaterQual(beachDict, hashid)
     application.logger.debug("New water record has been inserted into postgres!")
     return beachDict
@@ -285,14 +296,14 @@ def genReSampleDict(tab, hashedtext, pdfDate):
     :param pdfDate:
     :return:
     """
-    print("Generating beach dictionary with resampled and data fill-ins")
+    application.logger.debug("Generating beach dictionary with resampled and data fill-ins")
     resampBeaches = []
     combinedBeaches = []
     resampTab = [tab[0]]
     newRecTab = [tab[0]]
     # Get list of null beaches
     nullBeaches = DBQueriesWaterQuality.getNullBeaches(pdfDate)
-    print(f"Null beaches are {nullBeaches}")
+    application.logger.debug(f"Null beaches are {nullBeaches}")
     # Iterate over all records in the table
     for row in range(1, len(tab)):
         # Check each beach name, index 0 in the nested list, to see if it contains "sample", meaning it was resampled
@@ -311,7 +322,7 @@ def genReSampleDict(tab, hashedtext, pdfDate):
         elif tab[row][0] in nullBeaches and tab[row][1] is not None:
             # print("This re-sample PDF is also filling in missing data")
             # Add beach name to the combined beaches list
-            print(f"Adding the following beach to the combined beaches list {tab[row][0]} ")
+            application.logger.debug(f"Adding the following beach to the combined beaches list {tab[row][0]}")
             # print(f"Records to be appended are {tab[row]}")
             combinedBeaches.append(tab[row][0])
             # Add table row to the new records list
@@ -413,7 +424,7 @@ def parsePDF():
     pdfLoc = pdfDest = os.path.join(app.root_path, 'static', 'documents', 'Water_Qual_PDFs', pdfName)
     downloadURL = "http://countyofsb.org/uploadedFiles/phd/PROGRAMS/EHS/Ocean%20Water%20Weekly%20Results.pdf"
     # Kick off script by downloading PDF
-    print("Starting to parse PDF")
+    application.logger.debug("Starting to parse PDF")
     downloadPDF(downloadURL, pdfDest)
     application.logger.debug("Downloaded PDF!")
     # Get pdf details
@@ -427,7 +438,7 @@ def parsePDF():
     application.logger.debug(f"PDF md5 has been checked, PDF status is {pdfstatus}")
     # Handle the results of the md5 hash check and control generation of dictionaries and interactions with postgres
     handlePDFStatus(pdfstatus, pdfLoc, hashedText, pdfDict, pdfName)
-    print("All done processing PDF!")
+    application.logger.debug("All done processing PDF!")
     return pdfName
 
 
@@ -451,7 +462,7 @@ def pdfjob():
         application.logger.debug("Successfully parsed a new PDF!")
     except SystemExit:
         logger.debug("Ended ParsePDF early since file has already been processed")
-        print("Ended ParsePDF job early")
+        application.logger.debug("Ended ParsePDF job early")
     except Exception as e:
         # print("Parse PDF threw an error, emailing exception")
         application.logger.error("Parse PDF threw an error")

@@ -492,15 +492,28 @@ html{
 }
 
 
-.no-data{
+/* .no-data{
   display: none;
 }
 
 .show-data {
   display:flex;
-  /* width: 100%; */
+} */
+
+
+.no-data{
+  visibility: hidden;
+  opacity: 0;
+  max-height: 0;
 }
 
+.show-data {
+  display:flex;
+  visibility: visible;
+  opacity: 1;
+  transition: opacity 0.2s linear;
+  transition-delay: 0.2s;
+}
 
 .calendarSelect{
   text-align: center;

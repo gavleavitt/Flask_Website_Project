@@ -1,4 +1,3 @@
-from stravalib.client import Client
 import os
 from application import application, script_config, errorEmail
 from application.projects.strava_activities import OAuthStrava, DBQueriesStrava, APIFunctionsStrava, StreamDataAWSS3

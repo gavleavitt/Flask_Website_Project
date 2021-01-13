@@ -20,7 +20,6 @@ def connectToS3():
 def create_presigned_url(actID, expiration=300):
     """Generate a presigned URL to share an S3 object
 
-    :param object_name: string
     :param expiration: Time in seconds for the presigned URL to remain valid
     :return: Presigned URL as string. If error, returns None.
     """
@@ -87,7 +86,7 @@ def uploadToS3(memCSV, actID):
         conn.put_object(Body=memCSV.getvalue(), Bucket=bucket, Key=fileName)
     except Exception as e:
         application.logger.error(f"Upload to S3 bucket failed in the error: {e}")
-        # errorEmail.senderroremail(script="UploadToS3Bucket", exceptiontype=e.__class__.__name__, body=e)
+        errorEmail.sendErrorEmail(script="UploadToS3Bucket", exceptiontype=e.__class__.__name__, body=e)
     finally:
         # Close in-memory buffer file, removing it from memory
         memCSV.close()

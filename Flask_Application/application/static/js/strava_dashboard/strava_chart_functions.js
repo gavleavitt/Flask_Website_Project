@@ -167,29 +167,29 @@ function binActData(filteredGroup, btnSelection){
   }
   // console.log(JSON.parse(JSON.stringify(binnedActDataDict)))
   // Average values if tabDataType is an average
-  if (tabDataType == "Avg Watts"){
+  if (btnSelection == "avgwatt-btn"){
     for (a of Object.keys(binnedActDataDict)) {
       for (i of Object.keys(binnedActDataDict[a])) {
         binnedActDataDict[a][i]["y"] = (binnedActDataDict[a][i]["y"]/binnedActDataDict[a][i]["count"])
       }
     };
   }
-
   // Convert seconds to hours
-  if (tabDataType == "Time"){
+  if (btnSelection == "time-btn"){
     for (a of Object.keys(binnedActDataDict)) {
       for (i of Object.keys(binnedActDataDict[a])) {
-        binnedActDataDict[a][i]["y"] = moment.duration(binnedActDataDict[a][i]["y"], 'seconds').asHours()
+        // binnedActDataDict[a][i]["y"] = moment.duration(binnedActDataDict[a][i]["y"], 'seconds').asHours()
+        binnedActDataDict[a][i]["y"] = (moment.duration(binnedActDataDict[a][i]["y"], 'seconds').hours() + "." + moment.duration(binnedActDataDict[a][i]["y"], 'seconds').minutes())
       }
     };
   }
 
   // Round y values
-  for (a of Object.keys(binnedActDataDict)) {
-    for (i of Object.keys(binnedActDataDict[a])) {
-      binnedActDataDict[a][i]["y"] = Math.round(binnedActDataDict[a][i]["y"])
-    }
-  };
+  // for (a of Object.keys(binnedActDataDict)) {
+  //   for (i of Object.keys(binnedActDataDict[a])) {
+  //     binnedActDataDict[a][i]["y"] = Math.round(binnedActDataDict[a][i]["y"])
+  //   }
+  // };
   // Get single array of all unique dateValues(x-axis groupings/labels) in activity object, including all activity types
   // Add dateValues and zero-filled y-values to any activity type missing a unique dateValue
   // This ensures that all datasets are of the same length, even if some activity types don't have activities in that time period.
@@ -290,11 +290,13 @@ function createStreamLineChart(){
   actStreamLineChart = new Chart(streamChart, {
     type: 'line',
     data:{
-      // labels: [2,540,700],
+      labels: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16],
       datasets:[{
         backgroundColor: 'rgb(255, 99, 132)',
-        borderColor: 'rgb(255, 99, 132)'
-        // data: [{"x":5,"y":65},{"x":600,"y":800}]
+        borderColor: 'rgb(255, 99, 132)',
+        // data:[20,10,20,10,10,10,20,10,20,10,20,10,20,10,20,10,20,10,20,10,20,10,20,10]
+        // data:[10,20,30,40,50,60,70,80,90,80,70,60,50,40,30,20,10]
+        data:[30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30]
       }]
     },
     options:{
@@ -394,7 +396,6 @@ function createActivityChart(chartData) {
 // }
 
 // Update chart labels and datasets based on user button selections
-// function updateChart(filteredGroup,tabDataType){
 function updateChart(filteredGroup,tabDataType){
   // console.log(document.querySelector('.show-data').querySelectorAll(".chart-active"))
   // // Create formatted dataset
@@ -403,8 +404,11 @@ function updateChart(filteredGroup,tabDataType){
   // see https://stackoverflow.com/a/55972382 for div update method
   if (actCount == 0){
     document.getElementById("chart-cont").classList.remove("show-data");
+    document.getElementById("chart-cont").classList.add("no-data");
     document.getElementById("chart-line-cont").classList.remove("show-data");
+    document.getElementById("chart-line-cont").classList.add("no-data");
   	document.getElementById("no-data-text").classList.add("show-data");
+    document.getElementById("no-data-text").classList.remove("no-data");
   } else if (actCount == 1) {
     // Create formatted dataset
     btnSelection = document.querySelectorAll('.singleAct.chart-active')[0].id
@@ -412,18 +416,27 @@ function updateChart(filteredGroup,tabDataType){
     // setCSVStreamData(btnSelection,filteredGroup);
     handleStreamChartUpdate(btnSelection, filteredGroup);
     // getCSVData(btnSelection, filteredGroup)
-    document.getElementById("chart-cont").classList.remove("show-data")
+    // https://stackoverflow.com/a/43909756
+    document.getElementById("chart-cont").classList.remove("show-data");
+    document.getElementById("chart-cont").classList.add("no-data");
     document.getElementById("no-data-text").classList.remove("show-data");
+    document.getElementById("no-data-text").classList.add("no-data");
     document.getElementById("chart-line-cont").classList.add("show-data");
+    document.getElementById("chart-line-cont").classList.remove("no-data");
+    // $("chart-line-cont").fadeIn();
   } else {
-    // Create formatted dataset
     btnSelection = document.querySelectorAll('.multiAct.chart-active')[0].id
+    // Create formatted dataset
     chartData = binActData(filteredGroup, btnSelection);
     // console.log("btnsel is:")
     // console.log(btnSelection)
     document.getElementById("no-data-text").classList.remove("show-data");
+    document.getElementById("no-data-text").classList.add("no-data");
     document.getElementById("chart-line-cont").classList.remove("show-data");
+    document.getElementById("chart-line-cont").classList.add("no-data");
     document.getElementById("chart-cont").classList.add("show-data");
+    document.getElementById("chart-cont").classList.remove("no-data");
+
     // Calculate date labels (x-axis)
     actChart.data.labels = getUniqueDateValues(chartData);
     // Use formatted data to generate legend labels and colors based on activity type
@@ -439,7 +452,7 @@ function checkDateRange(){
   if ((typeof userStart !== 'undefined') && (typeof userEnd !== 'undefined')) {
     //Get activity count:
     var actCount = parseInt(document.getElementById('actCount').innerHTML)
-    if (actCount <= 10 || (userStart.substr(5,2) == userEnd.substr(5,2))) {
+    if (actCount <= 10 || (userStart.substr(2,2) == userEnd.substr(2,2))) {
       return "day"
     } else if (userStart.substr(0,4) !== userEnd.substr(0,4)){
       return "default/year"

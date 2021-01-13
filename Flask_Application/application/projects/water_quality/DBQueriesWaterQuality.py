@@ -76,15 +76,20 @@ def insmd5(MD5, pdfDate, pdfName):
     :return:
     """
     session = Session()
-    application.logger.debug(f"Inserting new md5 hash using the following details: md5:{MD5}, pdfdate:{pdfDate}",
-                             f" pdfname:{pdfName}, insdate:{datetime.now()}")
+    # application.logger.debug(f"Inserting new md5 hash using the following details: md5:{MD5}, pdfdate:{pdfDate}",
+    #                          f" pdfname:{pdfName}, insdate:{datetime.now()}")
+    application.logger.debug(f"Inserting new md5 hash using the following details:")
+    application.logger.debug(MD5)
+    application.logger.debug(pdfDate)
+    application.logger.debug(pdfName)
+    application.logger.debug(datetime.now())
     newrec = waterQualityMD5(md5=MD5, pdfdate=pdfDate, pdfName=pdfName, insdate=datetime.now())
     session.add(newrec)
     session.commit()
     newId = newrec.id
     session.close()
-    print("Data added to MD5 table!")
-    print(f"New water quality md5 hash id is {newrec.id}")
+    application.logger.debug("Data added to MD5 table!")
+    application.logger.debug(f"New water quality md5 hash id is {newrec.id}")
     return newId
 
 
@@ -114,7 +119,7 @@ def insertWaterQual(beachDict, md5_fk):
     session.add_all(inslist)
     session.commit()
     session.close()
-    print("Data added to water quality table!")
+    application.logger.debug("Data added to water quality table!")
 
 
 def getBeachWaterQual():

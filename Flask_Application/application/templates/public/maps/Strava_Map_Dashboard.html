@@ -11,8 +11,7 @@
 	<!-- Other imports! -->
 	<!-- leaflet Javascript-->
 	<script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js"></script>
-	<!--jquery adds "$." functionality-->
-	<!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script> -->
+
 	<!-- Load Esri Leaflet from CDN, stable -->
 	<script src="https://unpkg.com/esri-leaflet@2.4.0/dist/esri-leaflet.js"
 	integrity="sha512-kq0i5Xvdq0ii3v+eRLDpa++uaYPlTuFaOYrfQ0Zdjmms/laOwIvLMAxh7cj1eTqqGG47ssAcTY4hjkWydGt6Eg=="
@@ -58,7 +57,8 @@
 	<!-- jquery-csv -->
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-csv/1.0.11/jquery.csv.min.js"></script>
 
-
+	<!--jquery adds "$." functionality-->
+	<!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script> -->
 
 	<!-- Local static files-->
 	<!-- Custom local javascript functions -->
@@ -183,7 +183,8 @@
 			</div>
 
 			<div class="item detail-panel-col chartPanel">
-				<div id="chart-cont" class="detail-panel-col actChart no-data show-data">
+				<!-- <div id="chart-cont" class="detail-panel-col actChart no-data show-data"> -->
+				<div id="chart-cont" class="detail-panel-col actChart show-data">
 					<div id="chart-Btns">
 						<span><button id="count-btn" class="chartToggle multiAct chart-active" onclick="updateChartBtn('count-btn','topoJSON');updateChart(filteredGroup,'count-btn');">Count</button></span>
 						<span><button id="distance-btn" class="chartToggle multiAct" onclick="updateChartBtn('distance-btn','topoJSON');updateChart(filteredGroup,'distance-btn');">Distance</button></span>

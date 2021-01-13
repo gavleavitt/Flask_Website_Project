@@ -1,8 +1,7 @@
 from datetime import datetime, timedelta
-from application.projects.strava_activities import OAuthStrava, DBQueriesStrava, StreamDataAWSS3
-from application import application
+# from application.projects.strava_activities import OAuthStrava, DBQueriesStrava, StreamDataAWSS3
+# from application import application
 import logging
-import time
 
 def getListIds(client, days):
     """
@@ -111,49 +110,49 @@ def getFullDetails(client, actId):
             del (act[key])
     return {"act": act, "stream": stream}
 
-def processActs(days):
-    """
-    Handle issuing functions to download and insert Strava activities since days ago. This is used to grab Strava
-    activities manually that are not within a webhook update and to download all existing activities in preparation
-    for webhook to provide updates. Currently this is used to download activities as the webhook is developed, once
-    fully functional this function should not be needed.
-
-    Parameters
-    ----------
-    days. Int. How many days back to download Strava Activites
-
-    Returns
-    -------
-    String. Provides details about which activities were processed.
-    """
-    client = OAuthStrava.getAuth()
-    listIds = getListIds(client, days)
-    count = 0
-    print(f"Length of ID list is {len(listIds)}")
-    waitTime = 960
-    for actId in listIds:
-        for attempt in range(3):
-            try:
-                print(f"\nWorking on activity {actId}")
-                actDict = getFullDetails(client, actId)
-                if actDict['manual'] == "true":
-                    application.logger.error(f"Activity {actId} is a manual entry, attempting to break loop to skip")
-                    break
-                else:
-                    DBQueriesStrava.insertAct(actDict)
-                    DBQueriesStrava.maskandInsertAct(actId)
-            except Exception as e:
-                # print(f"Strava download/insert failed with the error {e}")
-                application.logger.error(f"Strava activity {actId} failed to parse properly, possible API"
-                                         f"timeout, waiting {waitTime} seconds to try again.")
-                application.logger.error(e)
-                time.sleep(waitTime)
-            else:
-                break
-        print(f"Finished working on activity {actId}")
-        count += 1
-        print(f"{count} out of {len(listIds)} activities processed")
-    return f"Success, finished working on ActIDs {listIds}"
+# def processActs(days):
+#     """
+#     Handle issuing functions to download and insert Strava activities since days ago. This is used to grab Strava
+#     activities manually that are not within a webhook update and to download all existing activities in preparation
+#     for webhook to provide updates. Currently this is used to download activities as the webhook is developed, once
+#     fully functional this function should not be needed.
+#
+#     Parameters
+#     ----------
+#     days. Int. How many days back to download Strava Activites
+#
+#     Returns
+#     -------
+#     String. Provides details about which activities were processed.
+#     """
+#     client = OAuthStrava.getAuth()
+#     listIds = getListIds(client, days)
+#     count = 0
+#     print(f"Length of ID list is {len(listIds)}")
+#     waitTime = 960
+#     for actId in listIds:
+#         for attempt in range(3):
+#             try:
+#                 print(f"\nWorking on activity {actId}")
+#                 actDict = getFullDetails(client, actId)
+#                 if actDict['manual'] == "true":
+#                     application.logger.error(f"Activity {actId} is a manual entry, attempting to break loop to skip")
+#                     break
+#                 else:
+#                     DBQueriesStrava.insertAct(actDict)
+#                     DBQueriesStrava.maskandInsertAct(actId)
+#             except Exception as e:
+#                 # print(f"Strava download/insert failed with the error {e}")
+#                 application.logger.error(f"Strava activity {actId} failed to parse properly, possible API"
+#                                          f"timeout, waiting {waitTime} seconds to try again.")
+#                 application.logger.error(e)
+#                 time.sleep(waitTime)
+#             else:
+#                 break
+#         print(f"Finished working on activity {actId}")
+#         count += 1
+#         print(f"{count} out of {len(listIds)} activities processed")
+#     return f"Success, finished working on ActIDs {listIds}"
 
 def getAthlete(client):
     athlete = client.get_athlete()

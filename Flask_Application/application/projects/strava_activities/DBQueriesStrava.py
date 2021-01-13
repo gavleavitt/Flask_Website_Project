@@ -1,14 +1,11 @@
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
 from application.projects.strava_activities.modelsStrava import athletes, sub_update, strava_activities, \
-    strava_activities_masked, strava_gear, privacy_clip_poly, AOI
+    strava_activities_masked, strava_gear, AOI
 import os
 from datetime import datetime
 from application import application, errorEmail, Session
 from sqlalchemy import func as sqlfunc
 import geojson
 from geojson import Feature, FeatureCollection, MultiLineString
-import time
 import topojson as tp
 
 def updateSubId(subId):
@@ -34,7 +31,7 @@ def updateSubId(subId):
         session.close()
     except Exception as e:
         application.logger.debug(f"Update Strava athlete sub Id failed with the exception: {e}")
-        errorEmail.senderroremail(script="addtoGDrive", exceptiontype=e.__class__.__name__, body=e)
+        errorEmail.sendErrorEmail(script="addtoGDrive", exceptiontype=e.__class__.__name__, body=e)
 
 
 def getAthleteList():
