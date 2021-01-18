@@ -76,6 +76,7 @@
 						<img class="proj-img" src="static/images/strava_dashboard_ex_comp.PNG"></img>
 						<b>Strava Activities Project - Data Preparation and Server Side Processing</b>
 						<span>Personal project to display my up-to-date Strava fitness activity information on a interactive mobile friendly data and map dashboard.</span>
+						<div class="tagText">-Personal</div>
 					</a>
 				</div>
 				<div class="grid-item">
@@ -83,13 +84,15 @@
 						<img class="proj-img" src="static/images/SBCWQ_zoomed_comp.png"></img>
 						<b>Santa Barbara County Ocean Water Quality Map</b>
 						<span>Personal project to create a Leaflet map displaying up-to-date water quality test results conducted by the Santa Barbara Public Health Department.</span>
+						<div class="tagText">-Personal</div>
 					</a>
 				</div>
 				<div class="grid-item">
 					<a class = "divlink" href = "/projects/livetrackingdashboard">
 						<img class="proj-img" src="static/images/tracker_ex4_comp.png"></img>
 						<b>Live Tracking Dashboard</b>
-						<span>Leaflet map showing the showing the live location of a mobile device running the open source Android application GPS Logger for Android.</span>
+						<span>Personal project with a Leaflet map showing the showing the live location of a mobile device running the open source Android application GPS Logger for Android.</span>
+						<div class="tagText">-Personal</div>
 					</a>
 				</div>
 				<div class="grid-item">
@@ -97,6 +100,7 @@
 						<img class="proj-img" src="static/images/sewerapp_grid_size_comp.png"></img>
 						<b>Sanitary Sewer Trace Application</b>
 						<span>ArcGIS Online Web Application and Geoprocessing Service for estimating the size of sewage spills caused by sanitary sewer main breaks within the City of Salinas.</span>
+						<div class="tagText">-Professional</div>
 					</a>
 				</div>
 				<div class="grid-item">
@@ -104,6 +108,7 @@
 						<img class="proj-img" src="static/images/sanitarysewer_ex_comp.png" style="max-height:266px"></img>
 						<b><br>Sanitary Sewer and Storm Drain System GIS Build-out</b>
 						<span>Project to build out and quality check the Sanitary Sewer and Storm Sewer GIS datasets within the City of Salinas using historic engineering and development plans.</span>
+						<div class="tagText">-Professional</div>
 					</a>
 				</div>
 				<div class="grid-item">
@@ -111,6 +116,7 @@
 						<img class="proj-img" src="static/images/streelightpole_permitting_edited_comp.png"></img>
 						<b>Streetlight Pole 5G Deployment Permitting</b>
 						<span>Project to assist the City of Salinas permitting department in managing and tracking the deployment of 5G nodes within the city.</span>
+						<div class="tagText">-Professional</div>
 					</a>
 				</div>
 				<div class="grid-item">
@@ -118,12 +124,13 @@
 						<img class="proj-img" src="static/images/MHRT_example_comp.png"></img>
 						<b>Esri Operations Dashboards and Various Maps</b>
 						<span>Showcase and brief description of dashboards and maps created for the City of Salinas, CA.</span>
+						<div class="tagText">-Professional</div>
 					</a>
 				</div>
     	</div>
 		</div>
 		<div class="footer" style="grid-row:4/4">
-			<p>© 2020 Gavin Leavitt | Contact: <span id="emailaddr"></span>
+			<p>© <span id="year">2020</span> Gavin Leavitt | Contact: <span id="emailaddr"></span>
 			<br>Images, maps, and webpages created by Gavin Leavitt unless otherwise noted.
 			<br>Icons made by <a href="https://www.flaticon.com/authors/roundicons" title="Roundicons">Roundicons</a>,  <a href="https://www.flaticon.com/authors/freepik" title="Freepik">Freepik</a> from <a href="https://www.flaticon.com/" title="Flaticon"> www.flaticon.com</a> and modified by Gavin Leavitt.
 			</p>
@@ -147,6 +154,7 @@
 		<script>
 		var email = "gav" + "lea" + "web" + "@g" + "mail" + ".com";
 		document.getElementById("emailaddr").innerHTML = "<a href='mailto:" + email + "'>" + email + "</a>"
+		document.getElementById("year").innerHTML = new Date().getFullYear()
 		</script>
 		</div>
 	<script>

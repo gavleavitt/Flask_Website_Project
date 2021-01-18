@@ -23,7 +23,8 @@
 
 	<!-- Esri vector needs mapbox-gl to work -->
 	<link rel="stylesheet" href="https://unpkg.com/mapbox-gl/dist/mapbox-gl.css"/>
-	<script src="https://unpkg.com/mapbox-gl/dist/mapbox-gl.js"></script>
+	<!-- <script src="https://unpkg.com/mapbox-gl/dist/mapbox-gl.js"></script> -->
+	<script src="https://unpkg.com/mapbox-gl@1.13.0/dist/mapbox-gl.js"></script>
 
 	<!-- load the latest release from the cdn automatically -->
 	<!-- <script src="https://unpkg.com/esri-leaflet-vector/dist/esri-leaflet-vector-debug.js"></script> -->
@@ -55,7 +56,7 @@
 	<!-- leaflet Ajax JS-->
 	<script src="{{ url_for('static', filename='js/leaflet.ajax.min.js') }}"></script>
 	<!-- Custom local javascript functions -->
-	<script src="{{ url_for('static', filename='js/customfunctions.js') }}"></script>
+	<script src="{{ url_for('static', filename='js/customfunctions_livetracker.js') }}"></script>
 	<!-- Custom CSS -->
 	<link rel="stylesheet" href="{{ url_for('static', filename='css/customCSS_tracker.css') }}">
 	<!-- Leaflet Pulse Icon JS -->

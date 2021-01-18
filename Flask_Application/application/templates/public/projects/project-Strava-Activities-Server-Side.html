@@ -92,11 +92,14 @@
 				<div class="toc-container">
 					<p class="toc-title">Project Description Contents</p>
 					<ol class="toc-list">
+						<li><a href="#strava-summary">Summary</a>
+						</li>
 					  <li><a href="#access-activities-stravalib">Access Activities on Strava API - stravalib</a>
-					</li>
-					<li><a href="#obfuscate-location-geoalchemy">Obfuscate Sensitive Locations - SQLAlchemy/GeoAlchemy2</a></li>
-					<li><a href="#get-new-activities-webhook">Get New Activities - Strava API Webhook</a></li>
-					<li><a href="#prepare-leaflet-topojson">Prepare Data for Leaflet - TopoJSON</a></li>
+						</li>
+						<li><a href="#obfuscate-location-geoalchemy">Obfuscate Sensitive Locations - SQLAlchemy/GeoAlchemy2</a></li>
+						<li><a href="#get-new-activities-webhook">Get New Activities - Strava API Webhook</a></li>
+						<li><a href="#prepare-leaflet-topojson">Prepare Data for Leaflet - TopoJSON</a></li>
+						<li><a href="#final-thoughts">Final Thoughts</a></li>
 					</ol>
 				</div>
 			<span id="access-activities-stravalib" class="goto"></span>
@@ -740,9 +743,10 @@ def createStravaPublicActTopoJSON():
 			<p>
 				The Topology function is also very picky about incoming geometries and kept removing records without a explanation as to why, even though they passed PostGIS ST_MakeValid and ST_IsValid. All original, non-masked, GeoJSON records converted properly, I assume that ST_Difference caused geometries to break during conversion. The additional processing steps during masking, in particular ST_SnapToGrid, appeared to have resolved these issues. However, I assume they may need more fine tuning to ensure that no geometries fail to be converted to TopoJSON in the future.
 			</p>
-			<h2>Final Thoughts</h2>
+			<span id="final-thoughts" class="goto"></span>
+			<h2><a href=#final-thoughts>Final Thoughts</a></h2>
 			<p>
-				Now a process flow is setup to automatically process new Strava activities to be consumed by a public facing dashboard using Leaflet to display geographic data. The most recent version of my dashboard is visible at the top of this page, and a full page dashboard is available <a href=/maps/stravamap>here</a>. I have not yet finished the write-up for the client-side HTML/Javascript for this project, however you can visit the GitHub Repo project folder<a href=https://github.com/gavleavitt/Flask_Website_Project/tree/master/Flask_Application/application/projects/strava_activities>here</a>.
+				Now a process flow is setup to automatically process new Strava activities to be consumed by a public facing dashboard using Leaflet to display geographic data. The most recent version of my dashboard is visible at the top of this page, and a full page dashboard is available <a href=/maps/stravamap>here</a>. I have not yet finished the write-up for the client-side HTML/Javascript for this project, however you can visit the GitHub Repo project folder <a href=https://github.com/gavleavitt/Flask_Website_Project/tree/master/Flask_Application/application/projects/strava_activities>here</a>.
 			</p>
 			<p>
 				My next goal for the server side aspect of this project is to extract time, watt, speed, and elevation data from the activity streams data and make them available for each activity in a S3 bucket. This would enable me to request formatted activity stream information for individual activities and display them as charts on my dashboard, providing additional insights into these activites.
@@ -752,7 +756,7 @@ def createStravaPublicActTopoJSON():
 			</p>
 		</div>
 		<div class="footer" style="grid-row:3/4">
-			<p>© 2020 Gavin Leavitt | Contact: <span id="emailaddr"></span>
+			<p>© <span id="year">2020</span> Gavin Leavitt | Contact: <span id="emailaddr"></span>
 			<br>Images, maps, and webpages created by Gavin Leavitt unless otherwise noted.
 			<br>Icons made by <a href="https://www.flaticon.com/authors/roundicons" title="Roundicons">Roundicons</a>,  <a href="https://www.flaticon.com/authors/freepik" title="Freepik">Freepik</a> from <a href="https://www.flaticon.com/" title="Flaticon"> www.flaticon.com</a> and modified by Gavin Leavitt.
 			</p>
@@ -775,6 +779,7 @@ def createStravaPublicActTopoJSON():
 	</div>
 	<script>
 	var email = "gav" + "lea" + "web" + "@g" + "mail" + ".com";
+	document.getElementById("year").innerHTML = new Date().getFullYear()
 	document.getElementById("emailaddr").innerHTML = "<a href='mailto:" + email + "'>" + email + "</a>"
 	window.onscroll = function(){closeMenu()};
 	</script>

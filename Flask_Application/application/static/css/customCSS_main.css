@@ -123,6 +123,10 @@ h5{
   background-color: var(--projbackcol);
 }
 
+.tagText{
+  padding-top: 5px;
+  font-weight: bold;
+}
 
 .container-projects {
   display: grid;

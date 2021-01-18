@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Water Quality Project</title>
+
+	<!--jquery adds "$." functionality-->
+	<!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script> -->
+
+	<!-- Custom local javascript functions -->
+	<script src="{{ url_for('static', filename='js/customfunctions.js') }}"></script>
+	<!-- Custom CSS -->
+	<link rel="stylesheet" href="{{ url_for('static', filename='css/customCSS_main.css') }}">
+	<!-- Set favicon -->
+
+	<!-- Favicon links -->
+	<link rel="apple-touch-icon" sizes="180x180" href="/static/images/apple-touch-icon.png">
+	<link rel="icon" type="image/png" sizes="32x32" href="/static/images/favicon-32x32.png">
+	<link rel="icon" type="image/png" sizes="16x16" href="/static/images/favicon-16x16.png">
+	<link rel="manifest" href="/static/images//site.webmanifest">
+	<link rel="mask-icon" href="/static/images//safari-pinned-tab.svg" color="#5bbad5">
+	<meta name="msapplication-TileColor" content="#da532c">
+	<meta name="theme-color" content="#ffffff">
+
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Lato:wght@700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@700&display=swap" rel="stylesheet">
+<link href='https://fonts.googleapis.com/css?family=Quicksand' rel='stylesheet'>
+<link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300&display=swap" rel="stylesheet">
+
+<!-- Font Awesome Social media icons -->
+<!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/brands.min.css"> -->
+
+<!-- Font Awesome Kit -->
+<script src="https://kit.fontawesome.com/fd8b0845f1.js" crossorigin="anonymous"></script>
+
+<!-- Highlight.js -->
+<link rel="stylesheet"
+      href="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.2.0/build/styles/default.min.css">
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.2.0/build/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+
+</head>
+<body>
+  <div class="container-projects sansserif">
+		<div class = "navbar">
+      <div class ="navbarleft">
+				<a href = "/">
+					<div class="icon-home-link">
+						<img id="nav-icon" src = "/static/images/wheel_custom.png">
+						<div class="nav-name">Gavin Leavitt</div>
+					</div>
+				</a>
+			</div>
+      <div id="interactiveBarRight" class="navbarright">
+        <a class= "menu-option" href = "/">Home</a>
+				<a class= "menu-option" href = "/#goto-proj">Projects</a>
+        <a class= "menu-option" href = "/about">About</a>
+        <a class= "menu-option" href = "/resume">Resume</a>
+        <a class= "menu-option" href = "/contact">Contact</a>
+				<a href = "javascript:void(0);" class="menu-icon" onclick="navBarFunction()" onmouseover="menuHover();" onmouseout="menuUnhover();">
+						<img id="menu-icon-img" src="/static/images/menu-icon-gray.svg" style="width:35px;height:35px">
+				</a>
+			</div>
+		</div>
+		<div class="project-content">
+			<div class="title">Santa Barbara County Ocean Water Quality</div>
+			<div class="separatorbar-title"></div>
+			<iframe id="iframe1" src="/maps/sbcoceanwaterquality" style="border-radius:10px;"></iframe>
+			<div class="fullsize-link">
+				<a href="/maps/sbcoceanwaterquality" target="_blank">View fullpage map</a>
+			</div>
+			<div class="separatorbar-title"></div>
+			<span id="water-qual-summary" class="goto"></span>
+			<h2><a href=#water-qual-summary>
+				Summary
+			</a></h2>
+			<p>
+				This is a personal project which uses a Leaflet map to display ocean water test results provided by the <a href=https://countyofsb.org/phd/oceanwatermonitoring/>Santa Barbara County Public Health Department’s Ocean Water Monitoring Program</a>. The county tests beaches at least weekly and may issue warnings or close beaches if targeted bacterial counts exceed state standards. These targeted bacterial groups are indicators of fecal water contamination and elevated levels beyond state standards may present health hazards to ocean users. If a beach exceeds the standards, warnings will be posted or the beach will be closed then re-sampled at intervals until it is within acceptable standards and restrictions can be lifted.
+			</p>
+			<p>
+				Water quality reports are posted as PDFs to the <a href=https://www.countyofsb.org/phd/oceanwatermonitoring/>Ocean Water Monitoring page</a>. Test result data are not otherwise accessible on the internet. I saw this as an opportunity to expand my Python, database management, and web design skills. I designed a workflow and web map to display these data in an easily usable and mobile friendly format. Report PDFs are downloaded, test result details are extracted, and data are inserted into a Postgres database. These data are then served to a Leaflet map which displays the most recent test results.
+			</p>
+			<div class="toc-container">
+				<p class="toc-title">Project Description Contents</p>
+				<ol class="toc-list">
+					<li><a href="#PDF-processing">PDF Processing</a></li>
+					<li><a href="#data-storage">Data Storage - Postgres</a></li>
+					<li><a href="#storing-pdfs">Storing PDF Reports</a></li>
+					<li><a href="#serving-data-leafet">Serving up Data for Leaflet</a></li>
+					<li><a href="#leaflet">Leaflet</a></li>
+					<li><a href="#final-thoughts">Final Thoughts</a></li>
+				</ol>
+			</div>
+			<span id="PDF-processing" class="goto"></span>
+			<h3><a href=#PDF-processing>PDF Processing</a></h3>
+				<p>
+					Here is an example of a standard PDF ocean water quality report with all beaches filled in:
+					<div class="centered-imgs">
+						<a href="/static/images/PDF_Ex_Filled_In_Comp.PNG" target="_blank">
+							<img src="/static/images/PDF_Ex_Filled_In_Comp.PNG" style="box-shadow: 5px 6px 8px #888;border-radius:10px;">
+						</a>
+					</div>
+				</p>
+				<p>
+					To begin processing the data first the PDF must be downloaded, which is a relatively simple task since the county’s test result PDF download URL is static. However, since the URL is static, there is no way to determine if a new PDF report has been released without opening it and reading the contents. My solution is to download the PDF daily, calculate the MD5 hash of the contents,
+					and check if that PDF has already been processed in the past, if so the PDF is deleted, if its new then the hash is stored and the PDF contents are parsed.
+				</p>
+				<p>
+					Extracting PDF contents was a bit of a challenge. The PDFs are machine generated, i.e. exported from a Word Document, so OCR isn’t needed, but I had a hard time finding a python library that extracted the contents correctly. After trying a couple libraries, I came across the <a href=https://www.github.com/jsvine/pdfplumber>pdfplumber</a> library that not only extracted the contents well, but also had the ability to detect and pull out the data table content as a separate object.
+				</p>
+					Extract contents of PDF, clean text to normalize unicode, remove extra characters, and replace empty strings then place into dictionary:
+				<p>
+					<pre><code>
+def getPDFContents(pdfLoc):
+	"""
+	Extracts contents of PDF, including date and table information, and formats data by normalizing unicode data and
+	removing extra characters.
+
+	:param pdfLoc: String. Location of local PDF file.
+	:return: Dict:
+	    ['text']: Original raw text of PDF
+	    ['tab']: Raw table extracted from PDF
+	    ['pdfDate']: Date from PDF converted to the following format: {full month name} {numeric day} {full year}
+	    ['cleanedtext']: list of values from table, each row is a nested list containing normalized values
+	"""
+	pdfDict = {}
+	# Open pdf and extract content
+	with pdfplumber.open(pdfLoc) as pdf:
+	    p1 = pdf.pages[0]
+	    pdfDict['text'] = p1.extract_text()
+	    raw_tab = p1.extract_tables()[0]
+	    pdfDict['tab'] = raw_tab
+
+	# Extract date from title and create a list of values
+	pdfTitleList = pdfDict['text'].split("Sample Results for the Week of: ")[1].split(" ")
+	# Pull the first 3 values from list, these are the date values
+	dirtyTitle = f"{pdfTitleList[0]} {pdfTitleList[1]} {pdfTitleList[2]}"
+	# Normalize and remove extra characters
+	pdfDate = cleanText([dirtyTitle])[0]
+	# Convert to string time
+	pdfDict['pdfDate'] = datetime.strptime(pdfDate, '%B %d %Y')
+	cleanedtext = []
+	# Normalize the data within the raw table, each row is a nested list
+	for beachdetails in raw_tab:
+	    cleanedtext.append(cleanText(beachdetails))
+	pdfDict['cleanedtext'] = cleanedtext
+	return pdfDict
+
+def cleanText(textList):
+	"""
+  Normalizes the unicode text within the provided list, this is needed since the PDF conversion to text leads to
+  some unicode characters being a combination of two unicode characters, where we want a single value for ease of use.
+  Empty strings are changed to None type, "<0" is changed to 0, ">" characters are removed, and extra characters and
+  formatting are removed. This ensures that data can be cleanly inserted into Postgres with consistent values.
+
+  :param textList: Nested list of values to be cleaned.
+  :return: Nested list of cleaned values
+  """
+  text = []
+	for item in textList:
+      if not item:
+          # Captures None types and skips
+          pass
+      elif item == '':
+          item = None
+      elif item == "<10":
+          item = "0"
+      elif ">" in item:
+          item = item.replace(">","")
+      elif item is not None:
+          item = unicodedata.normalize("NFKD", item).replace("\n", "").replace("‐", "-").replace(",", "")
+          if item == 'Results not available':
+              item = None
+      text.append(item)
+	return text
+					</pre></code>
+				</p>
+				<p>
+					Now I was finally getting somewhere and had data to work with. However, I quickly ran into another problem, equality checks kept failing for beach names and data didn’t come through as expected. After some research and many print statements, I finally discovered that I was having Unicode issues. The strings provided by pdfplumber contained non-breaking spaces, new-line notations, and dash characters that were not standard keyboard keys, as well as other characters/notations. Fortunately, there’s a <a href=https://www.docs.python.org/3/library/unicodedata.html#unicodedata.normalize>normalization function</a> to handle most of these issues.
+				</p>
+				<p>
+					Then begun the slow process of parsing out the beach information, which is provided by pdfplumber as nested lists. Completely filled in PDFs without exceedances are relatively simple to process, however special care had to be given to cases where a PDF contains empty values or amended results, such as re-sampled or filled in values. This is the primary reason for daily downloads and checks of PDFs. If a PDF contains amendments, then only those amended values are added to the database.
+				</p>
+				<p>
+					In this example, you can see a beach with an exceedance and two beaches missing results. The second image shows the PDF report from later in the week with re-sampling and data fill amendments.
+					<div class="centered-imgs">
+						<a href="/static/images/PDF_Ex_Exceed_highlight_comp.png" target="_blank">
+							<img src="/static/images/PDF_Ex_Exceed_highlight_comp.png" style="box-shadow: 5px 6px 8px #888;border-radius:10px;">
+						</a>
+						<a href="/static/images/PDF_Ex_Resample_highlight_comp.png"  target="_blank">
+							<img src="/static/images/PDF_Ex_Resample_highlight_comp.png" style="box-shadow: 5px 6px 8px #888;border-radius:10px;">
+						</a>
+					</div>
+				</p>
+				<p>
+					Since this script has to be ran at intervals, I decided to use the Python <a href=https://apscheduler.readthedocs.io/en/stable/>APScheduler</a> library to schedule download tasks instead of creating a cron job on the server. This was a much simpler solution than figuring how to create Linux cron jobs on AWS.
+				</p>
+			<span id="data-storage" class="goto"></span>
+			<h3><a href=#data-storage>Data Storage - Postgres</a></h3>
+				<p>
+					Now that the data are extracted and processed, they need to be stored. I had already built a Postgres/PostGIS database on AWS RDS for my <a href=/projects/livetrackingdashboard>Mobile Livetracker</a> so I expanded it to include these data. I did not leverage database relationships in my previous project, so I took the time to build multiple tables with foreign key relationships to familiarize myself with this essential aspect of database design.
+				</p>
+				<p>
+					Here is a quick visualization of the simple schema:
+					<p>
+					<a href="/static/images/Water_Quality_Diagram_Cropped_comp.png"  target="_blank">
+						<img src="/static/images/Water_Quality_Diagram_Cropped_comp.png" style="box-shadow: 5px 6px 8px #888;border-radius:10px;">
+					</a>
+					</p>
+				</p>
+			<span id="storing-pdfs" class="goto"></span>
+			<h3><a href=#storing-pdfs>Storing PDF Reports</a></h3>
+			<p>
+				Since the server is processing the PDFs, I needed an easy way to store and review PDFs that didn't involve connecting directly to the server through SSH. During development and testing I was storing PDFs in a Google Drive File Stream folder. I decided to continue storing PDFs in this folder from the server using the Google Drive API.
+			</p>
+			<p>
+				The Python library <a href=https://pythonhosted.org/PyDrive/>PyDrive</a> simplified this process greatly. To authenticate  the application and grant access to my Google Drive account using OAuth2.0, I followed the PyDrive guide <a href=https://pythonhosted.org/PyDrive/quickstart.html>here</a> on a localhost version of the application. However, instead of using the local web server method, I used command line authentication. I did this in case I ever need to re-authenticate my application on the web server instead of on localhost. I am not sure if that will ever be required since it appears that authentication and granting of access only needs to occurr once, even if its on localhost, as long as the correct settings are used and the the credentials file/details are accessible by the application.
+			</p>
+			<p>
+				Code to authenticate with Google Drive API, establish connection to API, and to upload a PDF to a specific folder using its ID:
+				<pre><code>
+from pydrive.auth import GoogleAuth
+from pydrive.drive import GoogleDrive
+# Change default location for client_secrets.json
+GoogleAuth.DEFAULT_SETTINGS['client_config_file'] = os.path.join(app.root_path, 'credentials.json')
+# Create authenticated GoogleDrive instance using settings from the setting.yaml file to auto-authenticate with saved
+# credentials
+gauth = GoogleAuth(settings_file=os.path.join(app.root_path, 'settings.yaml'))
+# Establish connection with Google Drive API
+drive = GoogleDrive(gauth)
+# Create a new GoogleDriveFile instance with a PDF mimetype in the water quality PDF folder using the parent folder's ID
+newfile = drive.CreateFile({"title": pdfname,
+                            'mimeType': 'application/pdf',
+                            'parents': [{'id': "1GRunRWB7SKmH3I0wWbtyJ_UOCDiHGAxO"}]})
+# Read file and set the content of the new file instance
+newfile.SetContentFile(pdfloc)
+# Upload the file to Google Drive
+newfile.Upload()
+			</code></pre>
+			</p>
+			<p>
+				To enable auto-authentication on a remote machine I used the <a href = https://pythonhosted.org/PyDrive/oauth.html>setting.yaml remote method</a> with the following settings:
+<pre><code>
+client_config_backend: settings
+client_config:
+  client_id: [ID]
+  client_secret: [Secret]
+save_credentials: True
+save_credentials_backend: file
+save_credentials_file: application/credentials.json
+
+get_refresh_token: True
+
+oauth_scope:
+  - https://www.googleapis.com/auth/drive
+</code></pre>
+			</p>
+			<p>
+				Storing the files in my Google Drive account is primarily for QAQCing any issues with the application and to retain records since the County doesn't provide historic reports on its website. These PDFs are not publically available, however in the future I would like to expand this web application and work with AWS S3 buckets to serve out these historic reports as downloadable files.
+			</p>
+			<span id="serving-data-leafet" class="goto"></span>
+			<h3><a href=#serving-data-leafet>Serving up Data for Leaflet</a></h3>
+				<p>
+				Now it’s time to query that data I worked so hard to get into the database. For simplicity, I decided to serve out just the most recent results for each beach. Flask templates and expressions are used to pass the data into the HTML document to be accessed by JavaScript and Leaflet. This process provided me with major two hurdles, querying and accessing data from
+				related records and getting the data into proper GeoJSON format for Leaflet. I had a hard time finding solid examples of how to setup SQLAlchemy models for foreign key relationships and how to query and extract information from them. Fortunately, this <a href=https://www.stackoverflow.com/questions/44069023/sqlalchemy-show-only-latest-result-if-a-join-returns-multiple-results>post</a> contained example code on how to query the newest record per beach based on data from related tables.
+				</p>
+				<p>
+					Python SQLAlchemy Foreign Key Relationships:
+					<pre><code class="python">
+class waterQuality(db.Model):
+  __tablename__ = "Water_Quality"
+
+  id = Column(Integer, primary_key=True)
+  TotColi = Column(Integer)
+  FecColi = Column(Integer)
+  Entero = Column(Integer)
+  ExceedsRatio = Column(String)
+  BeachStatus = Column(String)
+  beach_id = Column(Integer, ForeignKey("Beaches.id"))
+  md5_id = Column(Integer, ForeignKey("water_qual_md5.id"))
+  resample = Column(String)
+
+  beach_rel = relationship(beaches, backref="Water_Quality")
+  hash_rel = relationship(waterQualityMD5, backref="Water_Quality")
+				</code></pre>
+				</p>
+				<p>
+					Python function to get the most recent water quality results per beach:
+					<pre><code class="python">
+records = session.query(waterQuality, waterQualityMD5, beaches, \
+		sqlfunc.ST_GeometryType(beaches.geom), sqlfunc.st_x(beaches.geom), \
+		sqlfunc.st_y(beaches.geom)) \
+    .join(waterQualityMD5) \
+    .join(beaches) \
+    .distinct(waterQuality.beach_id)\
+    .order_by(waterQuality.beach_id,  waterQualityMD5.insdate.desc()).all()
+					</code></pre>
+				</p>
+				<p>
+				Working with GeoJSON data was difficult, as I wanted to avoid manually formatting the structure of the data. While I had a method developed for my Livetracker, I wanted a more direct
+				method for generating feature collections. Fortunately the <a href=https://www.pypi.org/project/geojson/ rel="external">GeoJSON</a> library worked perfectly and had solid example code. Working with the
+				well-known binary (WKB) representation of coordinates, provided when using select queries against PostgreSQL/PostGIS, was also challenging. However, the
+				<a href=https://www.geoalchemy-2.readthedocs.io/en/latest/> Geo-Alchemy2</a> library contains PostGIS query functions to query coordinates directly, avoiding the need to convert text from binary.
+				</p>
+				<p>
+					Python function to generate a Feature Collection result:
+				<div><pre><code class="python">
+resultDict = {}
+for i, item in enumerate(records):
+	beachname = (item.waterQuality.beach_rel.BeachName)
+	resultDict[beachname] = {}
+	resultDict[beachname]['FecColi'] = item.waterQuality.FecColi
+	resultDict[beachname]['TotColi'] = item.waterQuality.TotColi
+	resultDict[beachname]['Entero'] = item.waterQuality.Entero
+	resultDict[beachname]['ExceedsRatio'] = item.waterQuality.ExceedsRatio
+	resultDict[beachname]['BeachStatus'] = (item.waterQuality.BeachStatus).rstrip()
+	resultDict[beachname]['resample'] = (item.waterQuality.resample).rstrip()
+	resultDict[beachname]['insDate'] = (item.waterQuality.hash_rel.insdate).strftime("%Y-%m-%d")
+	resultDict[beachname]['pdfDate'] = (item.waterQuality.hash_rel.pdfdate).strftime("%Y-%m-%d")
+	resultDict[beachname]['GeomType'] = (records[i][-3]).split("ST_")[1]
+	resultDict[beachname]['Lon'] = round(records[i][-2], 5)
+	resultDict[beachname]['Lat'] = round(records[i][-1], 5)
+	resultDict[beachname]['Name'] = (item.waterQuality.beach_rel.BeachName).rstrip()
+featList = []
+for key in resultDict.keys():
+		# Point takes items as long, lat. Point must have (())
+		beachPoint = Point((resultDict[key]['Lon'], resultDict[key]['Lat']))
+		feature = Feature(geometry=beachPoint, properties=resultDict[key])
+		featList.append(feature)
+
+featCollect = FeatureCollection(featList)
+</pre></code></div>
+			<span id="leaflet" class="goto"></span>
+			<h3><a href=#leaflet>Leaflet</a></h3>
+			<p>
+				Finally, it’s time to display the data with a responsive web map. Loading and displaying the data in Leaflet with a legend and markers is relatively easy. The beach open status
+				property is used to determine which icon to display for each beach and up-to-date beach details are available as pop-ups. To facilitate navigating through the beaches dataset, I
+				used the <a href=https://www.github.com/stefanocudini/leaflet-search>Leaflet Search</a></span> plugin to enable auto-completion searching of beaches by name. I also included a modal that opens on page load, and is openable with a
+				button, so users can read about the map and data limitations. The final step was to make the map mobile friendly. A viewport tag to size content down on mobile screens allows all content and pop-up information to be clearly visible and not in conflict with other map elements. JavaScript event listeners further reduce clutter by closing pop-ups and windows on user actions.
+			</p>
+			<p> JavaScript Listeners:
+				<pre><code class="javascript">
+searchControl.on('search:locationfound', function(e) {
+	if(e.layer._popup)
+		e.layer.openPopup();
+});
+
+searchControl.on('search:expanded', function(e) {
+	map.closePopup()
+});
+				</pre></code>
+			</p>
+			<span id="final-thoughts" class="goto"></span>
+			<h2><a href=#final-thoughts>Final Thoughts</a></h2>
+			<p>
+			This was a fun project that allowed me to expand and refine many of my coding and web development skills while generating a product that’s useful for beach-goers. My next goal for this map is to add expandable graphs to the beach pop-up windows that show the histories of the respective test result along with the ability to download histroic report PDFs served from a S3 bucket.
+			</p>
+		</div>
+		<div class="footer" style="grid-row:3/4">
+			<p>© <span id="year">2020</span> Gavin Leavitt | Contact: <span id="emailaddr"></span>
+			<br>Images, maps, and webpages created by Gavin Leavitt unless otherwise noted.
+			<br>Icons made by <a href="https://www.flaticon.com/authors/roundicons" title="Roundicons">Roundicons</a>,  <a href="https://www.flaticon.com/authors/freepik" title="Freepik">Freepik</a> from <a href="https://www.flaticon.com/" title="Flaticon"> www.flaticon.com</a> and modified by Gavin Leavitt.
+			</p>
+			<div class="social-media">
+				<div class="social-icon">
+					<a href="https://www.github.com/gavleavitt" target="_blank" rel="external" class="fab fa-github">
+					</a>
+				</div>
+				<div class="social-icon">
+					<a href="https://www.facebook.com/gavin.leavitt.7/" target="_blank" rel="external" class="fab fa-facebook">
+					</a>
+				</div>
+				<div class="social-icon">
+					<a href="https://www.linkedin.com/in/gavin-leavitt-326973165/" target="_blank" rel="external" class="fab fa-linkedin">
+					</a>
+				</div>
+			</div>
+		</div>
+		</div>
+	</div>
+	<script>
+	var email = "gav" + "lea" + "web" + "@g" + "mail" + ".com";
+	document.getElementById("year").innerHTML = new Date().getFullYear()
+	document.getElementById("emailaddr").innerHTML = "<a href='mailto:" + email + "'>" + email + "</a>"
+	window.onscroll = function(){closeMenu()};
+	window.onload = function (){
+		document.getElementById("iframe1").contentWindow.document.getElementsByClassName("home-link")[0].remove();
+	};
+	</script>

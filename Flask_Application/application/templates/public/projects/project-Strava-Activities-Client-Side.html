@@ -1059,7 +1059,7 @@ $(function() {
 			</p>
 		</div>
 		<div class="footer" style="grid-row:3/4">
-			<p>© 2020 Gavin Leavitt | Contact: <span id="emailaddr"></span>
+			<p>© <span id="year">2020</span> Gavin Leavitt | Contact: <span id="emailaddr"></span>
 			<br>Images, maps, and webpages created by Gavin Leavitt unless otherwise noted.
 			<br>Icons made by <a href="https://www.flaticon.com/authors/roundicons" title="Roundicons">Roundicons</a>,  <a href="https://www.flaticon.com/authors/freepik" title="Freepik">Freepik</a> from <a href="https://www.flaticon.com/" title="Flaticon"> www.flaticon.com</a> and modified by Gavin Leavitt.
 			</p>
@@ -1082,6 +1082,7 @@ $(function() {
 	</div>
 	<script>
 	var email = "gav" + "lea" + "web" + "@g" + "mail" + ".com";
+	document.getElementById("year").innerHTML = new Date().getFullYear()
 	document.getElementById("emailaddr").innerHTML = "<a href='mailto:" + email + "'>" + email + "</a>"
 	window.onscroll = function(){closeMenu()};
 	</script>

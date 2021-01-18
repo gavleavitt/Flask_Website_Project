@@ -23,7 +23,7 @@ def checkmd5(hash, pdfDate):
     :return: String
         "Exists" - Hash is already in Postgres
         "New" - Hash is not in Postgres and no other hashes exist for the PDF result week
-        "Update" - Hash is not in Postgres but other hashes exist for th PDF result week
+        "Update" - Hash is not in Postgres but other hashes exist for the PDF result week
     """
     # Query Postgres with pdfDate of newly downloaded PDF
     session = Session()
@@ -62,18 +62,20 @@ def getNullBeaches(pdfDate):
     nullbeaches = []
     for i in query:
         nullbeaches.append(i.beach_rel.BeachName)
-    return nullbeaches
     session.close()
+    return nullbeaches
+
 
 def insmd5(MD5, pdfDate, pdfName):
     """
     Add water quality md5 and other information to postgres database. After committing, call on the primary key, id,
     to get the persisted, auto-incremented, id. The record must be committed before this value is assigned.
-    :param MD5:
-    :param pdfDate:
-    :param pdfName:
-    :param insDate:
+    :param MD5: String of MD5 hash.
+    :param pdfDate: String of pdfDate.
+    :param pdfName: String of PDF name, without file location
+
     :return:
+    Int, primary key of new MD5 entry
     """
     session = Session()
     # application.logger.debug(f"Inserting new md5 hash using the following details: md5:{MD5}, pdfdate:{pdfDate}",
@@ -108,6 +110,7 @@ def insertWaterQual(beachDict, md5_fk):
     """
     session = Session()
     inslist = []
+    # Iterate over beaches in dictionary creating waterQuality objects for each beach key
     for key in beachDict.keys():
         inslist.append(
             waterQuality(beach_id=beachDict[key]['fk'], TotColi=beachDict[key]['Total Coliform Results (MPN*)'],
@@ -116,6 +119,7 @@ def insertWaterQual(beachDict, md5_fk):
                          ExceedsRatio=beachDict[key]['Exceeds FC:TC ratio standard **'],
                          BeachStatus=beachDict[key]['Beach Status'], resample=beachDict[key]['resample'],
                          md5_id=int(md5_fk)))
+    # Add list of objects to session
     session.add_all(inslist)
     session.commit()
     session.close()

@@ -142,29 +142,36 @@ def deletePDFQuit(pdfLoc):
 
 def handlePDFStatus(pdfStatus, pdfLoc, hashedText, pdfDict, pdfName):
     """
+    Handles status of newly downloaded PDF. If the PDF's MD5 hash already existed in Postgres then the local file is
+    deleted and the script quits. If the PDF is new or an update then its uploaded to Google Drive and the contents
+    are extracted. If the PDF contains re-sampled or data fill-ins, then just those results are extracted, if the
+    PDF is new then all non-null values are extracted.
 
     Parameters
     ----------
-    pdfStatus
-    pdfLoc
-    hashedText
-    pdfDict
-    pdfName
+    pdfStatus: String of PDF Status
+    pdfLoc: String of PDF location
+    pdfDict: Dict of PDF contents
+    pdfName: Name of PDF
 
     Returns
     -------
-
+    Dictionary of formatted beach results, ready for Postgres insertion
     """
     if pdfStatus == "Exists":
         # print("Already processed this pdf, removing local pdf and quitting!")
+        # PDF has been processed, remove local file
         application.logger.debug("Already processed PDF, removing local PDF")
         try:
             os.remove(pdfLoc)
         except:
             # print("Failed to delete file!")
             application.logger.debug("Failed to remove local PDF")
-        quit()
+        finally:
+            # Quit script, no further processing is needed, this exception will be caught separately from others
+            quit()
     else:
+        # PDF is new, it contains re-sampled or data fill-ins, upload file to Google Drive
         try:
             GoogleDriveUploadWaterQuality.addtoGDrive(pdfLoc, pdfName)
             application.logger.debug("PDF uploaded to Google Drive")
@@ -176,10 +183,13 @@ def handlePDFStatus(pdfStatus, pdfLoc, hashedText, pdfDict, pdfName):
         # print("Finished with local PDF, removing it from system")
         os.remove(pdfLoc)
     if checkResamp(pdfDict['cleanedtext']) == True:
+        # PDF contains re-sample results
         # print("This PDF contains re-sampled results")
         application.logger.debug("PDF contains re-sampled results, generating resample dict")
-        beachDict = genReSampleDict(pdfDict['cleanedtext'], hashedText, pdfDict['pdfDate'])
+        # Create dictionary with re-sampled and data fill-ins
+        beachDict = genReSampleDict(pdfDict['cleanedtext'], pdfDict['pdfDate'])
     else:
+        # PDF doesn't contain re-sampled results but may contain data fill-ins
         # Generate beach dictionary
         beachDict = genDict(pdfDict['pdfDate'])
         # Populate beach dictionary with results
@@ -204,9 +214,10 @@ def handlePDFStatus(pdfStatus, pdfLoc, hashedText, pdfDict, pdfName):
     application.logger.debug("Getting hash id")
     # Mutate beachDict to replace empty strings with None values
     makeNull(beachDict)
+    # Insert MD5 hash into Postgres
     hashid = DBQueriesWaterQuality.insmd5(hashedText, pdfDict['pdfDate'], pdfName)
     application.logger.debug(f"Hash id is {hashid}, inserting into postgres")
-    # Insert records into postgres, using the beachDict
+    # Insert records into Postgres, using the beachDict
     application.logger.debug(f"Beach dict being inserted is: {beachDict}")
     DBQueriesWaterQuality.insertWaterQual(beachDict, hashid)
     application.logger.debug("New water record has been inserted into postgres!")
@@ -216,21 +227,27 @@ def handlePDFStatus(pdfStatus, pdfLoc, hashedText, pdfDict, pdfName):
 def cleanText(textList):
     """
     Normalizes the unicode text within the provided list, this is needed since the PDF conversion to text leads to
-    some unicode characters being a combination of two unicode points, where we want a single value for ease of use.
-    Items that are None are also converted to "Null" since the conversion sets some values to None for some reason.
-    :param textList:
-    :return:
+    some unicode characters being a combination of two unicode characters, where we want a single value for ease of use.
+    Empty strings are changed to None type, "<0" is changed to 0, ">" characters are removed, and extra characters and
+    formatting are removed. This ensures that data can be cleanly inserted into Postgres with consistent values.
+
+    :param textList: Nested list of values to be cleaned.
+    :return: Nested list of cleaned values
     """
     text = []
     for item in textList:
         # print(f"item value is {item}")
-        # item = convertValue(item)
-        if item == '':
+        if not item:
+            # Captures None types and skips
+            pass
+        elif item == '':
             item = None
         elif item == "<10":
             item = "0"
+        elif ">" in item:
+            item = item.replace(">","")
         elif item is not None:
-            item = (unicodedata.normalize("NFKD", item).replace("\n", "").replace("‐", "-").replace(",", ""))
+            item = unicodedata.normalize("NFKD", item).replace("\n", "").replace("‐", "-").replace(",", "")
             if item == 'Results not available':
                 item = None
         # print(f"cleaned item is {item}")
@@ -243,9 +260,11 @@ def genDict(pdfDate):
     Generate a nested dictionary with beach names as keys at the upper level, and columns as keys at the
     nested level, values are set to '', except for the pdf date, so they can be filled in later.
 
-    :param pdfDate:
+    :param pdfDate: String of PDF date
     :return:
+    Nested dict structured with with keys and empty values.
     """
+    # Beaches to be included in dictionary
     beachList = ['Carpinteria State Beach', 'Summerland Beach', 'Hammond\'s', 'Butterfly Beach',
                  'East Beach @ Sycamore Creek',
                  'East Beach @ Mission Creek', 'Leadbetter Beach', 'Arroyo Burro Beach', 'Hope Ranch Beach',
@@ -253,6 +272,7 @@ def genDict(pdfDate):
                  'Sands @ Coal Oil Point', 'El Capitan State Beach', 'Refugio State Beach', 'Guadalupe Dunes',
                  'Jalama Beach',
                  'Gaviota State Beach']
+    # Beaches with their foreign key values
     beachFK = {'Carpinteria State Beach': 1, 'Summerland Beach': 2, 'Hammond\'s': 3, 'Butterfly Beach': 4,
                'East Beach @ Sycamore Creek': 5, 'East Beach @ Mission Creek': 6, 'Leadbetter Beach': 7,
                'Arroyo Burro Beach': 8, 'Hope Ranch Beach': 9, 'Goleta Beach': 10,
@@ -260,11 +280,12 @@ def genDict(pdfDate):
                'Guadalupe Dunes': 14,
                'Jalama Beach': 15,
                'Gaviota State Beach': 16}
+    # Table columns, nested dict keys
     col = ['Total Coliform Results (MPN*)', 'Total Coliform State Health Standard (MPN*)',
            "Fecal Coliform Results (MPN*)", 'Fecal Coliform State Health Standard (MPN*)',
            'Enterococcus Results (MPN*)',
            'Enterococcus State Health Standard (MPN*)', 'Exceeds FC:TC ratio standard **', 'Beach Status', 'fk']
-
+    # Build dict structure, inner dict values are empty strings
     beachDict = {}
     for i in beachList:
         beachDict[i] = {}
@@ -276,25 +297,14 @@ def genDict(pdfDate):
     return beachDict
 
 
-def convertValue(record):
+def genReSampleDict(tab, pdfDate):
     """
+    Generates nested dictionary of re-sampled and fill-in records, with beach names and column names as keys.
 
-    :param record:
+    :param tab: Nested list of cleaned table records
+    :param pdfDate: String of PDF Date
     :return:
-    """
-    if record == "<10":
-        return "0"
-    else:
-        return record
-
-
-def genReSampleDict(tab, hashedtext, pdfDate):
-    """
-
-    :param tab:
-    :param hashedtext:
-    :param pdfDate:
-    :return:
+    Nested dictionary containing re-sampled records and filled-in records, with beach names as keys
     """
     application.logger.debug("Generating beach dictionary with resampled and data fill-ins")
     resampBeaches = []
@@ -349,24 +359,34 @@ def checkResamp(tab):
 
 def getPDFContents(pdfLoc):
     """
+    Extracts contents of PDF, including date and table information, and formats data by normalizing unicode data and
+    removing extra characters.
 
-    :param pdfLoc:
-    :return:
+    :param pdfLoc: String. Location of local PDF file.
+    :return: Dict:
+        ['text']: Original raw text of PDF
+        ['tab']: Raw table extracted from PDF
+        ['pdfDate']: Date from PDF converted to the following format: {full month name} {numeric day} {full year}
+        ['cleanedtext']: list of values from table, each row is a nested list containing normalized values
     """
     pdfDict = {}
+    # Open pdf and extract content
     with pdfplumber.open(pdfLoc) as pdf:
         p1 = pdf.pages[0]
         pdfDict['text'] = p1.extract_text()
         raw_tab = p1.extract_tables()[0]
         pdfDict['tab'] = raw_tab
-    # pdfDate = cleanText([pdfDict['text'].split("Sample Results for the Week of: ")[1].split(" \nOpen")[0]])[0]
 
+    # Extract date from title and create a list of values
     pdfTitleList = pdfDict['text'].split("Sample Results for the Week of: ")[1].split(" ")
+    # Pull the first 3 values from list, these are the date values
     dirtyTitle = f"{pdfTitleList[0]} {pdfTitleList[1]} {pdfTitleList[2]}"
+    # Normalize and remove extra characters
     pdfDate = cleanText([dirtyTitle])[0]
-
+    # Convert to string time
     pdfDict['pdfDate'] = datetime.strptime(pdfDate, '%B %d %Y')
     cleanedtext = []
+    # Normalize the data within the raw table, each row is a nested list
     for beachdetails in raw_tab:
         cleanedtext.append(cleanText(beachdetails))
     pdfDict['cleanedtext'] = cleanedtext
@@ -375,16 +395,17 @@ def getPDFContents(pdfLoc):
 
 def populateDict(tab, beachDict, resample):
     """
+    Populates test results dictionary structure with test result values for each beach.
 
     Parameters
     ----------
-    tab
-    beachDict
-    resample
+    tab: Nested list with cleaned beach results
+    beachDict: Dictionary with structure but empty values, will be mutated.
+    resample: String of re-resample status
 
     Returns
     -------
-
+    Mutates and returns input beachDict with beach test results.
     """
     col = ['Total Coliform Results (MPN*)', 'Total Coliform State Health Standard (MPN*)',
            "Fecal Coliform Results (MPN*)", 'Fecal Coliform State Health Standard (MPN*)',
@@ -395,7 +416,7 @@ def populateDict(tab, beachDict, resample):
     # print("Inside pop dict func")
     for row in range(1, len(tab)):
         # print(f"Working on row {tab[row]}")
-        # For every row in the table, iterate over the columns, ignoring the first column(beach name),
+        # For every row in the table, iterate over the columns, ignoring the first column (beach name),
         # since this is the key value. Use the column index to call on the column names list, which acts as a lookup
         # for the dictionary key value (column name) to be added to the 2nd level dictionary
         for i in range(1, (len(tab[row]))):
@@ -425,13 +446,15 @@ def parsePDF():
     downloadURL = "http://countyofsb.org/uploadedFiles/phd/PROGRAMS/EHS/Ocean%20Water%20Weekly%20Results.pdf"
     # Kick off script by downloading PDF
     application.logger.debug("Starting to parse PDF")
-    downloadPDF(downloadURL, pdfDest)
+    urlretrieve(downloadURL, pdfDest)
+    # downloadPDF(downloadURL, pdfDest)
     application.logger.debug("Downloaded PDF!")
     # Get pdf details
     pdfDict = getPDFContents(pdfLoc)
     application.logger.debug("PDF contents have been extracted")
-    # Hash text of pdf document
-    hashedText = md5hash(pdfDict['text'])
+    # Hash text of pdf document, I believe encode is required for the hashing to work properly
+    hashedText = hashlib.md5(pdfDict['text'].encode()).hexdigest()
+    # hashedText = md5hash(pdfDict['text'])
     # Check if md5 hash is already in postgres
     application.logger.debug("Checking PDF MD5 hash value against Postgres")
     pdfstatus = DBQueriesWaterQuality.checkmd5(hashedText, pdfDict['pdfDate'])
@@ -471,4 +494,4 @@ def pdfjob():
             errorEmail.sendErrorEmail(script="ParsePDF", exceptiontype=e.__class__.__name__, body=e)
         except Exception as f:
             application.logger.error("Failed to send error email")
-            application.logger.error(e)
+            application.logger.error(f)
