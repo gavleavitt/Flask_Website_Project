@@ -46,18 +46,18 @@ application.logger.addHandler(handler)
 
 application.logger.debug("Python Flask debugger active!")
 
+
+# # Set up celery client, allows async tasks to be setup
+# app.config['CELERY_BROKER_URL'] = 'redis://localhost:6379/0'
+# # app.config['CELERY_RESULT_BACKEND'] = 'redis://localhost:6379/0'
+# cel_client = Celery(app.name, broker=app.config['CELERY_BROKER_URL'])
+# cel_client.conf.update(app.config)
+
+
 # Setup SQLAlchemy engine sessionmaker factory
 engine = create_engine(os.environ.get("DBCON"))
 Session = sessionmaker(bind=engine)
 
-
-# Get environmental variables for AWS RDS connection 
-# app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get("DBCON")
-# app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-# Set up Flask-SQLAlchemy database connection with the Flask app.
-# db = SQLAlchemy(app)
-# Setup Flask migrate connection with the application and database
-# migrate = Migrate(app, db)
 
 # Import project files (initialize them?), imports from the application flask object have to be after flask
 # application is initialized to avoid circular imports

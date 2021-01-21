@@ -1,7 +1,7 @@
 import os
 from application import application, script_config, errorEmail
 from application.projects.strava_activities import OAuthStrava, DBQueriesStrava, APIFunctionsStrava, StreamDataAWSS3
-
+import time
 
 def createStravaWebhook(client):
     """
@@ -134,7 +134,6 @@ def deleteStravaSubIds(client):
         client.delete_subscription(v, os.getenv('STRAVA_CLIENT_ID'), os.getenv('STRAVA_CLIENT_SECRET'))
     return idList
 
-
 def handleSubCallback(request):
     """
     Handles requests to Strava subscription callback URL.
@@ -162,6 +161,8 @@ def handleSubCallback(request):
         Success code if data are successfully added to Postgres/PostGIS. Strava must receive a 200 code in response to
         POST.
     """
+    # application.logger.debug("Waiting!")
+    # time.sleep(10)
     application.logger.debug("Got a callback request!")
     # Get application access credentials
     client = OAuthStrava.getAuth()
@@ -196,7 +197,7 @@ def handleSubCallback(request):
             handleSubUpdate(client, callbackContent)
             application.logger.debug("Inserted webhook update and activity details into postgres tables!")
             # return success code, Strava expects this code
-            return 200
+            # return 200
         except Exception as e:
             application.logger.error(f"Strava subscription update failed with the error {e}")
-            return 500
+            # return 500

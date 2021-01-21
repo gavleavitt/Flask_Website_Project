@@ -11,12 +11,13 @@ Created on Fri May 22 17:45:44 2020
 @author: Gavin Leavitt
 """
 from application import app, application
-from flask import request, Response
+from flask import request, Response, copy_current_request_context
 from flask import jsonify
 from application import script_config
 from application.projects.location_tracker import DBQueriesTracker, objectGenerationTracker
 from application.flaskAuth.authentication import auth
 from application.projects.strava_activities import WebHookFunctionsStrava, DBQueriesStrava, StreamDataAWSS3
+from threading import Thread
 
 # @app.route establishes the URL within the domain
 # @auth.login_required sets up basic http auth for the URL and role sets the user level needed to access the URL
@@ -103,10 +104,17 @@ def subCallback():
         Success code if data are successfully added to Postgres/PostGIS. Strava must receive a 200 code in response to
         POST.
     """
-    application.logger.debug("Got a callback request!")
-    statusCode = WebHookFunctionsStrava.handleSubCallback(request)
-    application.logger.debug("Callback request has been handled, returning success code!")
-    return Response(status=statusCode)
+    application.logger.debug("Got a callback request, issuing aysnc processing!")
+    # see: https://stackoverflow.com/a/53559969
+    @copy_current_request_context
+    def asyncRequest():
+        WebHookFunctionsStrava.handleSubCallback(request)
+    Thread(target=asyncRequest).start()
+
+    # taskRes = WebHookFunctionsStrava.handleSubCallback.apply_async(args=request.get_json(), countdown=10)
+
+    application.logger.debug("Returning success code!")
+    return Response(status=200)
 
 @app.route("/api/v0.1/stravaroutes", methods=['GET'])
 def stravaActAPI():
