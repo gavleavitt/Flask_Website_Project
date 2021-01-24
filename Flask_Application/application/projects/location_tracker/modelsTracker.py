@@ -14,9 +14,13 @@ from sqlalchemy.schema import FetchedValue
 from geoalchemy2.types import Geometry
 from geoalchemy2 import Geometry
 from sqlalchemy.ext.declarative import declarative_base
-
+import pytz
+from datetime import datetime
 
 Base = declarative_base()
+
+
+
 
 class gpstracks(Base):
     __tablename__ = 'gpstracks'
@@ -32,6 +36,7 @@ class gpstracks(Base):
     profile = Column(String(30))
     length = Column(Float())
     geom = Column(Geometry('Linestring', 4326, from_text='ST_GeomFromEWKT', name='geometry'))
+
 
     def builddict(self):
         """
@@ -81,6 +86,19 @@ class gpsdatmodel(Base):
     county = Column(String(30))
     geom = Column(Geometry('POINT', 4326, from_text='ST_GeomFromEWKT', name='geometry'))
 
+
+    def getPSTTime(self):
+        tz = pytz.timezone("US/Pacific")
+        # print(datetime.fromisoformat(self.startstamp))
+        # return tz.localize(datetime.fromisoformat(self.startstamp), is_dst=True)
+        # print(datetime.fromisoformat(self.startstamp).replace(tzinfo=tz))
+
+        # Create date time object with timezone set to UTC:
+        utcTime = datetime.fromisoformat(self.startstamp).replace(tzinfo=pytz.utc)
+        # Set to PST and return
+        # print(utcTime.astimezone(tz))
+        return utcTime.astimezone(tz).isoformat()
+    
     def builddict(self):
         """
         Formats data in a GeoJSON friendly format, removes troublesome columns and formats datetime fields using .isoformat()
@@ -94,6 +112,8 @@ class gpsdatmodel(Base):
         for v in dateCol:
             if type(res_dict[v]) is not "str":
                 res_dict[v] = res_dict[v].isoformat()
+        res_dict["timePST"] = self.getPSTTime()
+        print(self.getPSTTime())
         return res_dict
 
 class CACounty(Base):

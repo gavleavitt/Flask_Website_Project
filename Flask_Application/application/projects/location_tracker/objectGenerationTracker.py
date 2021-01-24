@@ -11,6 +11,8 @@ from application.projects.location_tracker.modelsTracker import gpsdatmodel, gps
 from application import script_config as dbconfig
 from application import Session
 import time
+from datetime import datetime
+import pytz
 
 def handleTrackerPOST(data):
     """
@@ -228,22 +230,31 @@ def stringToNone(x):
 
 def convertTime(timestamp_e, timestart):
     """
-    Converts times that are received in the http POST into a dict of times that are formatted to local time.
+    Converts times that are received in the http POST into a dict of datetimes. Postgres always stores datetimes in UTC,
+    for this reason records will be converted to local time when they are requested.
 
     Parameters
     ----------
-    timestamp_e : UTC Time(since epoch)
+    timestamp_e : str. UTC Time(since epoch)
         timestamp for the current record.
-    timestart : UTC Time(since epoch)
+    timestart : str. UTC Time(since epoch)
         start timestamp of the current recording session.
 
     Returns
     -------
-    result : dict{} with keys "timestamp_e","timestart"
-        Times converted to local time from UTC.
+    result : dict{} with keys "timestamp_e","timestart","Date"
+        Values are datetimes
 
     """
-    timestamp = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(int(timestamp_e)))
-    start_time = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(int(timestart)))
-    date_today = time.strftime('%Y-%m-%d', time.localtime(int(timestamp_e)))
-    return {'Timestamp_e': timestamp, 'Timestart': start_time, 'Date': date_today}
+
+    # timestamp = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(int(timestamp_e)))
+    # start_time = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(int(timestart)))
+    # date_today = time.strftime('%Y-%m-%d', time.localtime(int(timestamp_e)))
+
+    # tz = pytz.timezone('US/Pacific')
+    # date_today = tz.localize(timestamp)
+    timestamp = datetime.utcfromtimestamp(int(timestamp_e))
+    start_time = datetime.utcfromtimestamp(int(timestart))
+
+
+    return {'Timestamp_e': timestamp, 'Timestart': start_time, 'Date': start_time}

@@ -561,36 +561,41 @@ This targets only fine pointers (mouse) for hover behavior, this prevents the ho
 } */
 
 @media screen and (max-width: 1050px) {
+
+  .leaflet-left{
+    opacity: 0.7;
+  }
   .map-panel{
-    grid-column: 1/8;
+    /* grid-column: 1/8; */
+    grid-column: 1/10;
     grid-row: 1/4;
   }
   .chartPanel{
     grid-column: 1/14;
   }
   #count-div{
-    grid-column: 8/11;
+    grid-column: 10/12;
     grid-row: 1/2;
   }
 
   #dist-div{
-    grid-column: 11/14;
+    grid-column: 12/14;
     grid-row: 1/2;
   }
   #elev-div{
-    grid-column: 8/11;
+    grid-column: 10/12;
     grid-row: 2/3;
   }
   #calories-div{
-    grid-column: 11/14;
+    grid-column: 12/14;
     grid-row: 2/3;
   }
   #moving-div{
-    grid-column: 8/11;
+    grid-column: 10/12;
     grid-row: 3/4;
   }
   #avg-div{
-    grid-column: 11/14;
+    grid-column: 12/14;
     grid-row: 3/4;
   }
 }
@@ -598,6 +603,7 @@ This targets only fine pointers (mouse) for hover behavior, this prevents the ho
   .leaflet-control-attribution .leaflet-control{
     font-size: 6px !important;
   }
+
   .titletext{
     font-size: 14px;
   }
@@ -639,7 +645,7 @@ This targets only fine pointers (mouse) for hover behavior, this prevents the ho
     font-size: 14px;
   }
   .leaflet-popup-content{
-    font-size: 12px;
+    font-size: 10px;
   }
   .detail-text{
     padding-top: 5px;

@@ -53,10 +53,13 @@ def getTrackerFeatCollection(datatype, reclimit):
         # Set timezine to US/Pacific
         tz = pytz.timezone("US/Pacific")
         # Set the current date in the set timezone
-        todaydate = tz.localize(datetime.today(), is_dst=None).strftime('%Y-%m-%d')
+        todaydate = tz.localize(datetime.today(), is_dst=True).strftime('%Y-%m-%d')
         # Query using GeoAlchemy PostGIS function to get geojson representation of geometry and regular query to get
         # tabular data
-        query = session.query(sqlfunc.ST_AsGeoJSON(gpstracks.geom), gpstracks).filter_by(date=todaydate)
+        # Since all records are recorded in PST, they will always be -8 from UTC so the date in postgres may be a day
+        # ahead of the local time, use >= to account for this
+        # query = session.query(sqlfunc.ST_AsGeoJSON(gpstracks.geom), gpstracks).filter_by(date=todaydate)
+        query = session.query(sqlfunc.ST_AsGeoJSON(gpstracks.geom), gpstracks).filter(gpstracks.date >= todaydate)
     features = []
     for row in query:
         # Build a dictionary of the attribute information
@@ -124,10 +127,12 @@ def getPathPointRecords(datetoday):
        Results of gps point query with details as keys.
 
     """
+    ## TODO:
+    # Dont use date, take UTC, convert to PST, get date from there
     session = Session()
     records = session.query(gpsdatmodel.id, gpsdatmodel.lat, gpsdatmodel.lon, gpsdatmodel.geom, gpsdatmodel.timeutc,
                             gpsdatmodel.date). \
-        filter(gpsdatmodel.date == datetoday). \
+        filter(gpsdatmodel.date >= datetoday). \
         order_by(gpsdatmodel.timeutc.desc()).limit(1).all()
     res_dict = {}
     row_count = 0

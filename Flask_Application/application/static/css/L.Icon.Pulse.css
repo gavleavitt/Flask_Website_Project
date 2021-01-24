@@ -9,7 +9,8 @@
     height: 300%;
     width: 300%;
     position: absolute;
-    margin: -100% 0 0 -150%;
+    /* Change margin if icon is off center! */
+    margin: -100% 0 0 -100%;
 
 }
 

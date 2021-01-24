@@ -165,7 +165,7 @@ function actStyle(feature, layer) {
 
 function toggleFull(){
   if ((dimen.width < 600) && fullScreenApi.isFullScreen() === false){
-    map.toggleFullscreen();
+    // map.toggleFullscreen();
     // map.fitBounds(e.latlng);
   }
 }

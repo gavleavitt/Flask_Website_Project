@@ -39,11 +39,12 @@ function timedif(jsontime){
     dif = new Date(msdif).toISOString().substr(14, 5);
     res = dif.substr(0,2) + " Minutes " + dif.substr(3,2) + " Seconds ago";
   } else if (seconds < 60){
+    // console.log(seconds)
     res = "Less than a minute ago!";
   } else {
     res = "Time difference error!";
   }
-  return ("<br>("+ res + ")<br>60 Second Logging Interval")
+  return ("<br>("+ res + ")<br>10 Minute Logging Interval")
 };
 
 function nearestpathway(road,trail,distroad,disttrail,poi,speed){
