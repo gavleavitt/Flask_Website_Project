@@ -90,11 +90,10 @@ class gpsdatmodel(Base):
     def getPSTTime(self):
         tz = pytz.timezone("US/Pacific")
         # print(datetime.fromisoformat(self.startstamp))
-        # return tz.localize(datetime.fromisoformat(self.startstamp), is_dst=True)
         # print(datetime.fromisoformat(self.startstamp).replace(tzinfo=tz))
 
         # Create date time object with timezone set to UTC:
-        utcTime = datetime.fromisoformat(self.startstamp).replace(tzinfo=pytz.utc)
+        utcTime = datetime.fromisoformat(self.timeutc).replace(tzinfo=pytz.utc)
         # Set to PST and return
         # print(utcTime.astimezone(tz))
         return utcTime.astimezone(tz).isoformat()
@@ -113,7 +112,7 @@ class gpsdatmodel(Base):
             if type(res_dict[v]) is not "str":
                 res_dict[v] = res_dict[v].isoformat()
         res_dict["timePST"] = self.getPSTTime()
-        print(self.getPSTTime())
+        # print(self.getPSTTime())
         return res_dict
 
 class CACounty(Base):

@@ -54,6 +54,7 @@ def getTrackerFeatCollection(datatype, reclimit):
         tz = pytz.timezone("US/Pacific")
         # Set the current date in the set timezone
         todaydate = tz.localize(datetime.today(), is_dst=True).strftime('%Y-%m-%d')
+        # print(f"Date used to query gpstracks: {todaydate}")
         # Query using GeoAlchemy PostGIS function to get geojson representation of geometry and regular query to get
         # tabular data
         # Since all records are recorded in PST, they will always be -8 from UTC so the date in postgres may be a day
