@@ -1,12 +1,12 @@
 
 *.pyc
-leaflet_testing/script_config.py
+Misc/leaflet_testing/script_config.py
 Data.*
 Data/
 .spyproject/
 __pycache__/
 zip/
-GoogleDriveAPI/
+Misc/GoogleDriveAPI/
 start_servers.sh
 activate_servers
 source env/bin/activate
