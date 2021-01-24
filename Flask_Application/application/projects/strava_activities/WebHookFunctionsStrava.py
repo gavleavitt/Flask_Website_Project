@@ -2,6 +2,7 @@ import os
 from application import application, script_config, errorEmail
 from application.projects.strava_activities import OAuthStrava, DBQueriesStrava, APIFunctionsStrava, StreamDataAWSS3
 import time
+import json
 
 def createStravaWebhook(client):
     """
@@ -163,7 +164,7 @@ def handleSubCallback(request):
     """
     # application.logger.debug("Waiting!")
     # time.sleep(10)
-    application.logger.debug("Got a callback request!")
+    # application.logger.debug("Got a callback request!")
     # Get application access credentials
     client = OAuthStrava.getAuth()
     # Check if request is a GET callback request, part of webhook subscription process
@@ -190,8 +191,13 @@ def handleSubCallback(request):
         application.logger.debug("New activity incoming! Got a POST callback request from Strava")
         try:
             # Convert JSON body to dict
-            callbackContent = request.get_json()
-            # application.logger.debug(f"Update content is {callbackContent}")
+            ## TODO:
+            # Fix, I think the request isn't coming through properly
+            # see https://stackoverflow.com/questions/46092457/flask-request-get-json-raise-badrequest
+            # callbackContent = request.get_json()
+            callbackContent = json.loads(request.data, strict=False)
+            application.logger.debug("JSON content has been extracted")
+            application.logger.debug(f"Update content is {callbackContent}")
             # application.logger.debug(f"Update content dir is {dir(callbackContent)}")
             # Call function to handle update message and process new activity, if applicable
             handleSubUpdate(client, callbackContent)
