@@ -7,7 +7,7 @@ Created on Mon Jun 22 19:29:11 2020
 """
 
 from application.projects.location_tracker import DBQueriesTracker as trackerFunc
-from application.projects.location_tracker.modelsTracker import gpsdatmodel, gpstracks
+from application.projects.location_tracker.modelsTracker import gpsPointModel, gpstracks
 from application import script_config as dbconfig
 from application import Session
 import time
@@ -27,6 +27,7 @@ def handleTrackerPOST(data):
     """
     session = Session()
     newObjDict = {}
+    # Create instance of a gps track
     trackRecord = gpsTrackObj(data)
     # Check if there has been movement, if so add to new object dictionary, otherwise no entry will be made
     if trackRecord["activity"] == "Yes":
@@ -61,15 +62,18 @@ def gpsTrackObj(data):
         Dict containing the gps track object (to be inserted into DB) and activity status (yes/no).
 
     """
+    # Extract lat and lon from POST data
     coordinates = f"{data['Longitude']} {data['Latitude']}"
-    timeDict = convertTime(data['Timestamp'], data['Start_timestamp'])
-    tracks = handleTracks(coordinates, timeDict["Date"], data['Provider'])
+    # print("Converting time types!")
+    # Convert time formats from POST data
+    timeDict = convertTime(data['Timestamp'], data['Start_timestamp'], data['Time_Zone'])
+    tracks = handleTracks(coordinates, data['Provider'])
     # print(f"!! tracks result is: {tracks}")
     if tracks["activity"] == "Yes":
         model = gpstracks(timestamp_epoch=timeDict['Timestamp_e'], timeutc=data['Time_UTC'], date=timeDict["Date"],
                           startstamp=timeDict['Timestart'], androidid=data['Android_ID'],
                           serial=data['Serial'], profile=data['Profile'], length=tracks['length'], gpsid=None,
-                          geom=tracks['Linestring'])
+                          geom=tracks['Linestring'], timezone=data['Time_Zone'])
     else:
         model = None
     return {"model": model, "activity": tracks["activity"]}
@@ -94,8 +98,8 @@ def newGPSRecord(data, actStatus):
     """
     geomData = (f"SRID={dbconfig.settings['srid']};POINT({data['Longitude']} {data['Latitude']})")
     queryData = handleTrackerQueries(geomData)
-    timeDict = convertTime(data['Timestamp'], data['Start_timestamp'])
-    model = gpsdatmodel(lat=data['Latitude'], lon=data['Longitude'], satellites=int(data['Satellites']),
+    timeDict = convertTime(data['Timestamp'], data['Start_timestamp'], data['Time_Zone'])
+    model = gpsPointModel(lat=data['Latitude'], lon=data['Longitude'], satellites=int(data['Satellites']),
                         altitude=float(data['Altitude']), speed=float(data['Speed']),
                         accuracy=data['Accuracy'].split(".")[0], direction=data['Direction'].split(".")[0],
                         provider=data['Provider'], timestamp_epoch=timeDict['Timestamp_e'], timeutc=data['Time_UTC'],
@@ -151,7 +155,7 @@ def handleTrackerQueries(geomData):
     return res
 
 
-def handleTracks(coordinate2, dateToday, locationType):
+def handleTracks(coordinate2, locationType):
     """
     Determines if the incoming record is the first of the day, which returns no activity, then determines if movement
     has occurred between the incoming record and most recent record for the day. Movement is determined if the distance
@@ -163,9 +167,7 @@ def handleTracks(coordinate2, dateToday, locationType):
     ----------
     coordinate2 : string
         Incoming gps point in the form of "lon lat".
-    dateToday : string
-        Date (local time) of incoming gps point, in the form of "YYYY-MM-DD"
-    locationType: string
+    locationType: string. States if coordinate came from GPS or from cellular network triangulation.
     Returns
     -------
     dict
@@ -176,8 +178,8 @@ def handleTracks(coordinate2, dateToday, locationType):
                 model geometry column
 
     """
-    record = trackerFunc.getPathPointRecords(dateToday)
-    # print(f"!!!! Record result is: {record}")
+    record = trackerFunc.getPathPointRecords()
+    # print(f"Record result is: {record}")
     # check if a previous record exists, if not then this is the first record of the day and no movement could have
     # occurred
     if record != None:
@@ -185,12 +187,15 @@ def handleTracks(coordinate2, dateToday, locationType):
         recid = list(record.keys())
         # Reverse sort keys, list[0] is the key, gpsdat id, of the most recent record
         recid.sort(reverse=True)
-        # format data to be sent to geoalchemy functions as WKT
+        # Format data to be sent to geoalchemy functions as WKT
         # Previous record, pulled from postgres and formatted in WKT
         coor1_Q_str = f"POINT({record[recid[0]]['lon']} {record[recid[0]]['lat']})"
         # Incoming record
         coor2_Q_str = f"POINT({coordinate2})"
         dist = trackerFunc.getDist(coor1_Q_str, coor2_Q_str)
+        # print(f"Movement distance is: {dist}")
+        #TODO:
+        # dist > 100
         if (dist > 10 and locationType != 'network') or dist > 100:
             # print("Movement!")
             # Movement greater than 10m, returns dictionary with linestring formmated WKT record and activity type
@@ -228,7 +233,7 @@ def stringToNone(x):
         return x
 
 
-def convertTime(timestamp_e, timestart):
+def convertTime(timestamp_e, timestart, timeZone):
     """
     Converts times that are received in the http POST into a dict of datetimes. Postgres always stores datetimes in UTC,
     for this reason records will be converted to local time when they are requested.
@@ -239,22 +244,27 @@ def convertTime(timestamp_e, timestart):
         timestamp for the current record.
     timestart : str. UTC Time(since epoch)
         start timestamp of the current recording session.
-
+    timeZone: str. tz database formatted time zone.
     Returns
     -------
-    result : dict{} with keys "timestamp_e","timestart","Date"
-        Values are datetimes
-
+    result : dict{} with keys "timestamp_e","timestart", "Date", "timeLocal"
     """
 
     # timestamp = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(int(timestamp_e)))
     # start_time = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(int(timestart)))
     # date_today = time.strftime('%Y-%m-%d', time.localtime(int(timestamp_e)))
 
-    # tz = pytz.timezone('US/Pacific')
-    # date_today = tz.localize(timestamp)
+    # Set timezone to localtime from POST request
+    tz = pytz.timezone(timeZone)
+    # Convert utc timestamp string (seconds since epoch) to a datetime object then replace timezone with utc
+    # Trying to use replace with the variable timeZone resulted in the datetime being set to the wrong time,
+    # the datetime object would be set to local time at the UTC time, instead of offset
+    utcTime = datetime.utcfromtimestamp(int(timestamp_e)).replace(tzinfo=pytz.utc)
+    # Set UTC time to local time zone and return iso string format
+    timeLocal = utcTime.astimezone(tz).isoformat()
+    # Convert timestamp and start times into UTC datetime objects
     timestamp = datetime.utcfromtimestamp(int(timestamp_e))
     start_time = datetime.utcfromtimestamp(int(timestart))
+    # print("Times converted!")
 
-
-    return {'Timestamp_e': timestamp, 'Timestart': start_time, 'Date': start_time}
+    return {'Timestamp_e': timestamp, 'Timestart': start_time, 'Date': start_time, 'timeLocal': timeLocal}

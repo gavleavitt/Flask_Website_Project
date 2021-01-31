@@ -37,7 +37,7 @@ def handle_gps():
     # print("Hit with a post request!")
     if request.method == 'POST':
         if request.is_json:
-            # print("Hit server with POST request and valid json mime type!", file=sys.stdout)
+            # print("Hit server with POST request and valid json mime type!")
             data = request.get_json()
             # print(data)
             objectGenerationTracker.handleTrackerPOST(data)

@@ -22,9 +22,9 @@
 	<!-- <script src="https://unpkg.com/esri-leaflet-vector/dist/esri-leaflet-vector.js"></script> -->
 
 	<!-- Esri vector needs mapbox-gl to work -->
-	<link rel="stylesheet" href="https://unpkg.com/mapbox-gl/dist/mapbox-gl.css"/>
+	<!-- <link rel="stylesheet" href="https://unpkg.com/mapbox-gl/dist/mapbox-gl.css"/> -->
 	<!-- <script src="https://unpkg.com/mapbox-gl/dist/mapbox-gl.js"></script> -->
-	<script src="https://unpkg.com/mapbox-gl@1.13.0/dist/mapbox-gl.js"></script>
+	<!-- <script src="https://unpkg.com/mapbox-gl@1.13.0/dist/mapbox-gl.js"></script> -->
 
 	<!-- load the latest release from the cdn automatically -->
 	<!-- <script src="https://unpkg.com/esri-leaflet-vector/dist/esri-leaflet-vector-debug.js"></script> -->
@@ -155,15 +155,17 @@
 	</script>
 	<script>
 		// Make basemaps
-		var streetsnight = L.esri.Vector.basemap('StreetsNight');
+		// var streetsnight = L.esri.Vector.basemap('StreetsNight');
 		var imageryesri = L.esri.basemapLayer('Imagery');
-		var Stadia_AlidadeSmoothDark =  L.tileLayer('https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png');
+		var esriStreets = L.esri.basemapLayer('Streets');
+		// var Stadia_AlidadeSmoothDark =  L.tileLayer('https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png');
+		var esriDarkGray = L.esri.basemapLayer('DarkGray');
 		var osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 			 attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'})
 
 		// intilize map with basemap:
 		var map = L.map('map',
-			{layers: [Stadia_AlidadeSmoothDark]}).setView([34.41,-119.86],15);
+			{layers: [esriDarkGray]}).setView([34.41,-119.86],15);
 		/*
 		document.getElementsByClassName("leaflet-control-zoom-out")[0].style.setProperty('background-color', '#2b3940');
 		document.getElementsByClassName("leaflet-control-zoom-out")[0].style.setProperty('color', '#5ac73e');
@@ -259,8 +261,8 @@
 				Object.keys(e.update).forEach(function(id) {
 				//console.log("Inside for each function")
 				var feature = e.update[id];
-				document.getElementById('last-logged').innerHTML = formattime(feature.properties.timePST);
-				document.getElementById('last-logged').innerHTML += timedif(feature.properties.timePST);
+				document.getElementById('last-logged').innerHTML = formattime(feature.properties.timeLocal);
+				document.getElementById('last-logged').innerHTML += timedif(feature.properties.timeLocal);
 				document.getElementById('nearest-road').innerHTML = nearestpathway(feature.properties.nearestroad,feature.properties.nearesttrail,feature.properties.dist_nearestroad,
 					feature.properties.dist_nearesttrail,feature.properties.POI,feature.properties.speed);
 				document.getElementById('batterylife').innerHTML = batteryinfo(feature.properties.battery);
@@ -284,10 +286,10 @@
 
 		// Basemaps dictionary
 		var basemaps = {
-			"<span>Streets Night (Vector)</span>": streetsnight,
+			"<span>Dark Gray (Raster)</span>":esriDarkGray,
 			"<span>Imagery (Raster)</span>": imageryesri,
-			"<span>OSM (Vector)</span>": osm,
-			"<span>Stadia Dark (Raster)</span>":Stadia_AlidadeSmoothDark
+			"<span>Streets (Raster)</span>": esriStreets,
+			"<span>OSM (Vector)</span>": osm
 		};
 		var livedata = {
 			"<span><b>Location</b></span>":realtime,

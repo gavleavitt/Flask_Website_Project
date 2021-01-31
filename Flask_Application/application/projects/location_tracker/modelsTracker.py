@@ -35,6 +35,7 @@ class gpstracks(Base):
     serial = Column(String(30))
     profile = Column(String(30))
     length = Column(Float())
+    timezone = Column(String(30))
     geom = Column(Geometry('Linestring', 4326, from_text='ST_GeomFromEWKT', name='geometry'))
 
 
@@ -52,8 +53,8 @@ class gpstracks(Base):
             res_dict[i] = res_dict[i].isoformat()
         return res_dict
 
-class gpsdatmodel(Base):
-    __tablename__ = 'gpsapidata'
+class gpsPointModel(Base):
+    __tablename__ = 'gpstrackerpoints'
 
     id = Column(Integer, primary_key=True)
     lat = Column(Float())
@@ -84,11 +85,26 @@ class gpsdatmodel(Base):
     AOI = Column(String(30))
     city = Column(String(30))
     county = Column(String(30))
+    timezone = Column(String(30))
     geom = Column(Geometry('POINT', 4326, from_text='ST_GeomFromEWKT', name='geometry'))
 
 
-    def getPSTTime(self):
-        tz = pytz.timezone("US/Pacific")
+    def getLocalTime(self, tz):
+        """
+        Converts the database Datetime to local time using the provided time zone.
+
+        Parameters
+        ----------
+        tz: String. tz database formatted time zone.
+        -------
+
+        Returns
+        -------
+        result : Str. Iso formatted time in input timezone
+
+        """
+
+        # tz = pytz.timezone("US/Pacific")
         # print(datetime.fromisoformat(self.startstamp))
         # print(datetime.fromisoformat(self.startstamp).replace(tzinfo=tz))
 
@@ -111,7 +127,7 @@ class gpsdatmodel(Base):
         for v in dateCol:
             if type(res_dict[v]) is not "str":
                 res_dict[v] = res_dict[v].isoformat()
-        res_dict["timePST"] = self.getPSTTime()
+        res_dict["timeLocal"] = self.getLocalTime(self.timezone)
         # print(self.getPSTTime())
         return res_dict
 

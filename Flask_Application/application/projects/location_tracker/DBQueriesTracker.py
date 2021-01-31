@@ -9,7 +9,7 @@ Created on Sun May 24 22:25:08 2020
 from datetime import datetime
 from geojson import Point, Feature, FeatureCollection
 from application import script_config as dbconfig
-from application.projects.location_tracker.modelsTracker import gpsdatmodel, gpstracks, AOI, CaliforniaPlaces, CACounty
+from application.projects.location_tracker.modelsTracker import gpsPointModel, gpstracks, AOI, CaliforniaPlaces, CACounty
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import func as sqlfunc
@@ -46,7 +46,7 @@ def getTrackerFeatCollection(datatype, reclimit):
     if datatype == "gpspoints":
         # Query using GeoAlchemy PostGIS function to get geojson representation of geometry and regular query to get
         # tabular data
-        query = session.query(sqlfunc.ST_AsGeoJSON(gpsdatmodel.geom), gpsdatmodel).order_by(gpsdatmodel.id.desc()).\
+        query = session.query(sqlfunc.ST_AsGeoJSON(gpsPointModel.geom), gpsPointModel).order_by(gpsPointModel.id.desc()).\
             limit(reclimit)
     elif datatype == "gpstracks":
         # todaydate = datetime.today().strftime('%Y-%m-%d')
@@ -109,7 +109,7 @@ def getDist(coordinate1, coordinate2):
     return dist
 
 
-def getPathPointRecords(datetoday):
+def getPathPointRecords():
     """
     Gets the most recently recorded GPS point, used to check for movement and to generate a GPS track. This entire function may not be needed
     and can likely be combined with "getrecords".
@@ -119,22 +119,21 @@ def getPathPointRecords(datetoday):
 
     Parameters
     ----------
-    datetoday : String
-        String of current date in the form of %Y-%m-%d, set to local timezone ('America/Los_Angeles').
-
     Returns
     -------
     res_dict : Dictionary
        Results of gps point query with details as keys.
 
     """
-    ## TODO:
-    # Dont use date, take UTC, convert to PST, get date from there
+
     session = Session()
-    records = session.query(gpsdatmodel.id, gpsdatmodel.lat, gpsdatmodel.lon, gpsdatmodel.geom, gpsdatmodel.timeutc,
-                            gpsdatmodel.date). \
-        filter(gpsdatmodel.date >= datetoday). \
-        order_by(gpsdatmodel.timeutc.desc()).limit(1).all()
+    # records = session.query(gpsdatmodel.id, gpsdatmodel.lat, gpsdatmodel.lon, gpsdatmodel.geom, gpsdatmodel.timeutc,
+    #                         gpsdatmodel.date). \
+    #     filter(gpsdatmodel.getLocalTime() >= dateTime). \
+    #     order_by(gpsdatmodel.timeutc.desc()).limit(1).all()
+    records = session.query(gpsPointModel.id, gpsPointModel.lat, gpsPointModel.lon, gpsPointModel.geom,
+                            gpsPointModel.timeutc, gpsPointModel.date). \
+        order_by(gpsPointModel.timeutc.desc()).limit(1).all()
     res_dict = {}
     row_count = 0
     for row in records:

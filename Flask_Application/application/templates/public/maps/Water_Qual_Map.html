@@ -18,11 +18,11 @@
 	integrity="sha512-kq0i5Xvdq0ii3v+eRLDpa++uaYPlTuFaOYrfQ0Zdjmms/laOwIvLMAxh7cj1eTqqGG47ssAcTY4hjkWydGt6Eg=="
 	crossorigin=""></script>
 	<!-- Esri Leaflet and Esri Leaflet Vector, experimential -->
-	<script src="https://unpkg.com/esri-leaflet/dist/esri-leaflet.js"></script>
-	<script src="https://unpkg.com/esri-leaflet-vector/dist/esri-leaflet-vector.js"></script>
+	<!-- <script src="https://unpkg.com/esri-leaflet/dist/esri-leaflet.js"></script>
+	<script src="https://unpkg.com/esri-leaflet-vector/dist/esri-leaflet-vector.js"></script> -->
 	<!-- Esri vector tiles relies on maxbo gl -->
-	<link rel="stylesheet" href="https://unpkg.com/mapbox-gl/dist/mapbox-gl.css"/>
-	<script src="https://unpkg.com/mapbox-gl/dist/mapbox-gl.js"></script>
+	<!-- <link rel="stylesheet" href="https://unpkg.com/mapbox-gl/dist/mapbox-gl.css"/>
+	<script src="https://unpkg.com/mapbox-gl/dist/mapbox-gl.js"></script> -->
 
 	<!-- load the latest release from the cdn automatically -->
 	<script src="https://unpkg.com/esri-leaflet-vector/dist/esri-leaflet-vector-debug.js"></script>
@@ -190,7 +190,7 @@
 		var email = "gav" + "lea" + "web" + "@g" + "mail" + ".com";
 		document.getElementById("emailaddr").innerHTML = "<a href='mailto:" + email + "'>" + email + "</a>"
 		// Make basemaps
-		var streetsnight = L.esri.Vector.basemap('StreetsNight');
+		// var streetsnight = L.esri.Vector.basemap('StreetsNight');
 		var imageryesri = L.esri.basemapLayer('Imagery');
 		var osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 			 attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'})
@@ -287,7 +287,6 @@
 
 		// Basemaps dictionary used for layer control
 		var basemaps = {
-			"<span>Streets Night (Vector)</span>": streetsnight,
 			"<span>Imagery (Raster)</span>": imageryesri,
 			"<span>OSM (Vector)</span>": osm
 		};
