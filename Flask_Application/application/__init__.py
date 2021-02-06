@@ -87,7 +87,7 @@ except Exception as e:
     application.logger.error(e)
 # Create local public Strava activities topoJSON file
 application.logger.debug("Initializing Strava activities TopoJSON.")
-# DBQueriesStrava.createStravaPublicActTopoJSON()
+DBQueriesStrava.createStravaPublicActTopoJSON()
 application.logger.debug("Strava activities TopoJSON has been initialized.")
 
 

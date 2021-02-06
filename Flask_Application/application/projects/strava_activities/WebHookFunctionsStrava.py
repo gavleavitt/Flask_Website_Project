@@ -13,26 +13,30 @@ def threadedActivityProcessing(client, update):
     @return:
     """
 
-    application.logger.debug("Getting full activity details")
-    # Get activity details for newly created activity
-    activity = APIFunctionsStrava.getFullDetails(client, update.object_id)
-    application.logger.debug("Inserting activity details")
+    try:
+        application.logger.debug("Getting full activity details")
+        # Get activity details for newly created activity
+        activity = APIFunctionsStrava.getFullDetails(client, update.object_id)
+        application.logger.debug("Inserting activity details")
 
-    # Insert original, non-masked, coordinates and attribute details into Postgres/PostGIS
-    DBQueriesStrava.insertPrivateAct(activity['act'])
-    # Calculate masked, publicly sharable, activities and insert into Postgres masked table
-    application.logger.debug("Processing and inserting masked geometries")
-    DBQueriesStrava.processActivitiesPublic(activity["act"]["actId"])
-    # Create in-memory buffer csv of stream data
-    csvBuff = StreamDataAWSS3.writeMemoryCSV(activity["stream"])
-    # Upload buffer csv to AWS S3 bucket
-    StreamDataAWSS3.uploadToS3(csvBuff, activity["act"]["actId"])
-    # Send success email
-    errorEmail.sendSuccessEmail("Webhook Activity Update", f'The strava activity: {activity["act"]["actId"]}'
-                                                           f' has been processed, the activity can be'
-                                                           f' viewed on Strava at: '
-                                                           f'https://www.strava.com/activities/{activity["act"]["actId"]}')
-    application.logger.debug("Strava activity has been processed!")
+        # Insert original, non-masked, coordinates and attribute details into Postgres/PostGIS
+        DBQueriesStrava.insertPrivateAct(activity['act'])
+        # Calculate masked, publicly sharable, activities and insert into Postgres masked table
+        application.logger.debug("Processing and inserting masked geometries")
+        DBQueriesStrava.processActivitiesPublic(activity["act"]["actId"])
+        # Create in-memory buffer csv of stream data
+        csvBuff = StreamDataAWSS3.writeMemoryCSV(activity["stream"])
+        # Upload buffer csv to AWS S3 bucket
+        StreamDataAWSS3.uploadToS3(csvBuff, activity["act"]["actId"])
+        # Send success email
+        errorEmail.sendSuccessEmail("Webhook Activity Update", f'The strava activity: {activity["act"]["actId"]}'
+                                                               f' has been processed, the activity can be'
+                                                               f' viewed on Strava at: '
+                                                               f'https://www.strava.com/activities/{activity["act"]["actId"]}')
+        application.logger.debug("Strava activity has been processed!")
+    except Exception as e:
+        application.logger.error(f"Handling and inserting new webhook activity inside a thread failed with the error {e}")
+        errorEmail.sendErrorEmail(script="Webhook Activity Threaded Task Update", exceptiontype=e.__class__.__name__, body=e)
 
 def createStravaWebhook(client):
     """
@@ -72,8 +76,9 @@ def createStravaWebhook(client):
 
 def handleSubUpdate(client, updateContent):
     """
-    Handles Strava webhook subscription update. This function is called by a valid Strava POST request to the webhook subscription callback
-    URL.
+    Handles Strava webhook subscription update. This function is called by a valid Strava POST request to the webhook
+    subscription callback URL.
+
     Parameters
     ----------
     client. Stravalib model client object. Contains access token to strava API for the user.
@@ -97,30 +102,9 @@ def handleSubUpdate(client, updateContent):
             application.logger.debug("This is a activity create event, creating thread to process activity")
             try:
                 Thread(target=threadedActivityProcessing, args=(client, update)).start()
-                ## Async the remaining steps
-                # application.logger.debug("Getting full activity details")
-                # # Get activity details for newly created activity
-                # activity = APIFunctionsStrava.getFullDetails(client, update.object_id)
-                # application.logger.debug("Inserting activity details")
-                #
-                #
-                #
-                # # Insert original, non-masked, coordinates and attribute details into Postgres/PostGIS
-                # DBQueriesStrava.insertPrivateAct(activity['act'])
-                # # Calculate masked, publicly sharable, activities and insert into Postgres masked table
-                # application.logger.debug("Processing and inserting masked geometries")
-                # DBQueriesStrava.processActivitiesPublic(activity["act"]["actId"])
-                # # Create in-memory buffer csv of stream data
-                # csvBuff = StreamDataAWSS3.writeMemoryCSV(activity["stream"])
-                # # Upload buffer csv to AWS S3 bucket
-                # StreamDataAWSS3.uploadToS3(csvBuff, activity["act"]["actId"])
-                # errorEmail.sendSuccessEmail("Webhook Activity Update", f'The strava activity: {activity["act"]["actId"]}'
-                #                                                        f' has been processed, the activity can be'
-                #                                                        f' viewed on Strava at: '
-                #                                                        f'https://www.strava.com/activities/{activity["act"]["actId"]}')
             except Exception as e:
-                application.logger.error(f"Handling and inserting new webhook activity failed with the error {e}")
-                errorEmail.sendErrorEmail(script="Webhook Activity Update", exceptiontype=e.__class__.__name__, body=e)
+                application.logger.error(f"Creating a thread to process new activity failed with in the error: {e}")
+                errorEmail.sendErrorEmail(script="Webhook Activity Threading", exceptiontype=e.__class__.__name__, body=e)
         else:
             # Write logic to handle update and delete events
             application.logger.debug("Sub update message contains an update or delete event, skipping request")
