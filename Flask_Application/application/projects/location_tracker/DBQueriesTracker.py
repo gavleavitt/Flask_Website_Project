@@ -14,6 +14,7 @@ from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import func as sqlfunc
 from application import Session
+from application import application
 import os
 import pytz
 import geojson
@@ -25,6 +26,8 @@ import geojson
 #     session = Session()
 #     return session
 
+#TODO:
+# Re-do the documentation for this function, out of date for new datetime query function
 def getTrackerFeatCollection(datatype, reclimit):
     """
     handleTrackerQueries PostgreSQL using SQLAlchemy and GeoAlchemy functions, returns data formatted as a geoJSON feature collection.
@@ -49,18 +52,34 @@ def getTrackerFeatCollection(datatype, reclimit):
         query = session.query(sqlfunc.ST_AsGeoJSON(gpsPointModel.geom), gpsPointModel).order_by(gpsPointModel.id.desc()).\
             limit(reclimit)
     elif datatype == "gpstracks":
-        # todaydate = datetime.today().strftime('%Y-%m-%d')
-        # Set timezine to US/Pacific
-        tz = pytz.timezone("US/Pacific")
-        # Set the current date in the set timezone
-        todaydate = tz.localize(datetime.today(), is_dst=True).strftime('%Y-%m-%d')
-        # print(f"Date used to query gpstracks: {todaydate}")
+
+        newestRecordTime = session.query(gpsPointModel.timezone, gpsPointModel.timeutc). \
+            order_by(gpsPointModel.timeutc.desc()).limit(1).all()
+        recTZ = []
+        recDateTime = []
+        for row in newestRecordTime:
+            recTZ.append(row.timezone)
+            recDateTime.append(row.timeutc)
+
+        # Set time to UTC time zone:
+        # utcTime = recDateTime[0].replace(tzinfo=recTZ[0])
+        # application.logger.debug(f"Queried time is: {recDateTime[0]}")
+        utcTime = recDateTime[0].replace(tzinfo=pytz.utc)
+        # application.logger.debug(f"UTC time is: {utcTime }")
+        localTime = utcTime.astimezone(recTZ[0])
+        # application.logger.debug(f"Local time time is: {localTime}")
+        startofDayLocal = localTime.replace(hour=0, minute=0, second=0, microsecond=0)
+        # Convert to startofDayLocal to UTC time
+        # application.logger.debug(f"Start of day in local is: {startofDayLocal}")
+        startofDayUTC = startofDayLocal.astimezone(pytz.utc)
+        # application.logger.debug(f"Start of day in UTC is: {startofDayUTC}")
+
         # Query using GeoAlchemy PostGIS function to get geojson representation of geometry and regular query to get
         # tabular data
         # Since all records are recorded in PST, they will always be -8 from UTC so the date in postgres may be a day
         # ahead of the local time, use >= to account for this
         # query = session.query(sqlfunc.ST_AsGeoJSON(gpstracks.geom), gpstracks).filter_by(date=todaydate)
-        query = session.query(sqlfunc.ST_AsGeoJSON(gpstracks.geom), gpstracks).filter(gpstracks.date >= todaydate)
+        query = session.query(sqlfunc.ST_AsGeoJSON(gpstracks.geom), gpstracks).filter(gpstracks.timeutc >= startofDayUTC)
     features = []
     for row in query:
         # Build a dictionary of the attribute information

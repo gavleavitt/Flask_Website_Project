@@ -3,6 +3,36 @@ from application import application, script_config, errorEmail
 from application.projects.strava_activities import OAuthStrava, DBQueriesStrava, APIFunctionsStrava, StreamDataAWSS3
 import time
 import json
+from threading import Thread
+
+def threadedActivityProcessing(client, update):
+    """
+
+    @param client:
+    @param update:
+    @return:
+    """
+
+    application.logger.debug("Getting full activity details")
+    # Get activity details for newly created activity
+    activity = APIFunctionsStrava.getFullDetails(client, update.object_id)
+    application.logger.debug("Inserting activity details")
+
+    # Insert original, non-masked, coordinates and attribute details into Postgres/PostGIS
+    DBQueriesStrava.insertPrivateAct(activity['act'])
+    # Calculate masked, publicly sharable, activities and insert into Postgres masked table
+    application.logger.debug("Processing and inserting masked geometries")
+    DBQueriesStrava.processActivitiesPublic(activity["act"]["actId"])
+    # Create in-memory buffer csv of stream data
+    csvBuff = StreamDataAWSS3.writeMemoryCSV(activity["stream"])
+    # Upload buffer csv to AWS S3 bucket
+    StreamDataAWSS3.uploadToS3(csvBuff, activity["act"]["actId"])
+    # Send success email
+    errorEmail.sendSuccessEmail("Webhook Activity Update", f'The strava activity: {activity["act"]["actId"]}'
+                                                           f' has been processed, the activity can be'
+                                                           f' viewed on Strava at: '
+                                                           f'https://www.strava.com/activities/{activity["act"]["actId"]}')
+    application.logger.debug("Strava activity has been processed!")
 
 def createStravaWebhook(client):
     """
@@ -64,25 +94,30 @@ def handleSubUpdate(client, updateContent):
         DBQueriesStrava.insertSubUpdate(update)
         # Verify that the update is a activity creation event
         if update.aspect_type == "create" and update.object_type == "activity":
-            application.logger.debug("This is a activity create event, inserting update event data")
+            application.logger.debug("This is a activity create event, creating thread to process activity")
             try:
-                application.logger.debug("Getting full activity details")
-                # Get activity details for newly created activity
-                activity = APIFunctionsStrava.getFullDetails(client, update.object_id)
-                application.logger.debug("Inserting activity details")
-                # Insert original, non-masked, coordinates and attribute details into Postgres/PostGIS
-                DBQueriesStrava.insertPrivateAct(activity['act'])
-                # Calculate masked, publicly sharable, activities and insert into Postgres masked table
-                application.logger.debug("Processing and inserting masked geometries")
-                DBQueriesStrava.processActivitiesPublic(activity["act"]["actId"])
-                # Create in-memory buffer csv of stream data
-                csvBuff = StreamDataAWSS3.writeMemoryCSV(activity["stream"])
-                # Upload buffer csv to AWS S3 bucket
-                StreamDataAWSS3.uploadToS3(csvBuff, activity["act"]["actId"])
-                errorEmail.sendSuccessEmail("Webhook Activity Update", f'The strava activity: {activity["act"]["actId"]}'
-                                                                       f' has been processed, the activity can be'
-                                                                       f' viewed on Strava at: '
-                                                                       f'https://www.strava.com/activities/{activity["act"]["actId"]}')
+                Thread(target=threadedActivityProcessing, args=(client, update)).start()
+                ## Async the remaining steps
+                # application.logger.debug("Getting full activity details")
+                # # Get activity details for newly created activity
+                # activity = APIFunctionsStrava.getFullDetails(client, update.object_id)
+                # application.logger.debug("Inserting activity details")
+                #
+                #
+                #
+                # # Insert original, non-masked, coordinates and attribute details into Postgres/PostGIS
+                # DBQueriesStrava.insertPrivateAct(activity['act'])
+                # # Calculate masked, publicly sharable, activities and insert into Postgres masked table
+                # application.logger.debug("Processing and inserting masked geometries")
+                # DBQueriesStrava.processActivitiesPublic(activity["act"]["actId"])
+                # # Create in-memory buffer csv of stream data
+                # csvBuff = StreamDataAWSS3.writeMemoryCSV(activity["stream"])
+                # # Upload buffer csv to AWS S3 bucket
+                # StreamDataAWSS3.uploadToS3(csvBuff, activity["act"]["actId"])
+                # errorEmail.sendSuccessEmail("Webhook Activity Update", f'The strava activity: {activity["act"]["actId"]}'
+                #                                                        f' has been processed, the activity can be'
+                #                                                        f' viewed on Strava at: '
+                #                                                        f'https://www.strava.com/activities/{activity["act"]["actId"]}')
             except Exception as e:
                 application.logger.error(f"Handling and inserting new webhook activity failed with the error {e}")
                 errorEmail.sendErrorEmail(script="Webhook Activity Update", exceptiontype=e.__class__.__name__, body=e)
@@ -90,7 +125,8 @@ def handleSubUpdate(client, updateContent):
             # Write logic to handle update and delete events
             application.logger.debug("Sub update message contains an update or delete event, skipping request")
             pass
-
+    else:
+        application.logger.debug("POST request is invalid, user ID or subscription ID don't match those in database!")
 
 def listStravaSubIds(client):
     """
@@ -135,6 +171,7 @@ def deleteStravaSubIds(client):
         client.delete_subscription(v, os.getenv('STRAVA_CLIENT_ID'), os.getenv('STRAVA_CLIENT_SECRET'))
     return idList
 
+# def handleSubCallback(request):
 def handleSubCallback(request):
     """
     Handles requests to Strava subscription callback URL.
@@ -190,11 +227,11 @@ def handleSubCallback(request):
     elif request.method == 'POST':
         application.logger.debug("New activity incoming! Got a POST callback request from Strava")
         try:
-            # Convert JSON body to dict
             ## TODO:
             # Fix, I think the request isn't coming through properly
             # see https://stackoverflow.com/questions/46092457/flask-request-get-json-raise-badrequest
             # callbackContent = request.get_json()
+            # Convert JSON body to dict
             callbackContent = json.loads(request.data, strict=False)
             application.logger.debug("JSON content has been extracted")
             application.logger.debug(f"Update content is {callbackContent}")

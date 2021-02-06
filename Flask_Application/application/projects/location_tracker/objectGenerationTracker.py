@@ -7,7 +7,9 @@ Created on Mon Jun 22 19:29:11 2020
 """
 
 from application.projects.location_tracker import DBQueriesTracker as trackerFunc
+from application.projects.location_tracker import OverPassAPI as OPA
 from application.projects.location_tracker.modelsTracker import gpsPointModel, gpstracks
+from application import application
 from application import script_config as dbconfig
 from application import Session
 import time
@@ -97,7 +99,7 @@ def newGPSRecord(data, actStatus):
 
     """
     geomData = (f"SRID={dbconfig.settings['srid']};POINT({data['Longitude']} {data['Latitude']})")
-    queryData = handleTrackerQueries(geomData)
+    queryData = handleTrackerQueries(geomData, data['Latitude'], data['Longitude'], data['Profile'].replace("+", " "))
     timeDict = convertTime(data['Timestamp'], data['Start_timestamp'], data['Time_Zone'])
     model = gpsPointModel(lat=data['Latitude'], lon=data['Longitude'], satellites=int(data['Satellites']),
                         altitude=float(data['Altitude']), speed=float(data['Speed']),
@@ -111,11 +113,12 @@ def newGPSRecord(data, actStatus):
                         activity=actStatus, travelled=data['Dist_Travelled'].split(".")[0], AOI=queryData['AOI'],
                         city=queryData['city'], county=queryData['county'], nearestroad=queryData['road'],
                         dist_nearestroad=queryData['dist_road'], nearesttrail=queryData['trail'],
-                        dist_nearesttrail=queryData['dist_trail'], geom=geomData)
+                        dist_nearesttrail=queryData['dist_trail'], method=queryData["method"], geom=geomData)
     return model
 
-
-def handleTrackerQueries(geomData):
+#TODO:
+# Update documentation to include OSM queries
+def handleTrackerQueries(geomData, lat, lon, profile):
     """
     Takes Flask API HTTP POST GPS data and issues pre-defined SQLAlchemy database query functions.
     Data is returned in a dict format that is prepared for insertion into the gps activity database table.
@@ -138,20 +141,36 @@ def handleTrackerQueries(geomData):
     """
     # Build a dict with DB query results
     res = {}
+    # Get AOI if inside one
     res["AOI"] = trackerFunc.AOIIntersection(geomData)
-    res['city'] = trackerFunc.cityIntersection(geomData)
-    res["county"] = trackerFunc.countyIntersection(geomData)
-    roadInfo = trackerFunc.getNearestRoad(geomData)
-    res["road"] = roadInfo["street"]
-    res["dist_road"] = roadInfo["distance"]
-    # Check if the AOI intersection returned a result in the AOI list, if so calcuate the nearest trail and distance to
-    # trail
-    if res["AOI"] in dbconfig.settings["AOI_Outdoors"]:
-        outdoors = trackerFunc.getNearestTrail(geomData)
-        res["trail"] = outdoors['trail']
-        res['dist_trail'] = outdoors['trail_distance']
-    else:
-        res['trail'], res['dist_trail'] = None, None
+
+    try:
+        osmWayDict = OPA.handleNearestOSMWays(lat=lat, lon=lon, type=profile)
+        osmAreaIntersectDict = OPA.getOSMLocation(lat=lat, lon=lon)
+        res['road'] = osmWayDict['Road'][0]
+        res["dist_road"] = osmWayDict['Road'][1]
+        res['city'] = osmAreaIntersectDict["place"]
+        res['county'] = osmAreaIntersectDict["county"]
+        res["trail"] = osmWayDict['Route'][0]
+        res["dist_trail"] = osmWayDict['Route'][1]
+        res["method"] = "Overpass"
+    except Exception as e:
+        application.logger.debug(f"OSM query failed with the error {e}, failing over to Postgres queries!", exc_info=True)
+        # Fail over to Postgres method
+        res['city'] = trackerFunc.cityIntersection(geomData)
+        res["county"] = trackerFunc.countyIntersection(geomData)
+        roadInfo = trackerFunc.getNearestRoad(geomData)
+        res["road"] = roadInfo["street"]
+        res["dist_road"] = roadInfo["distance"]
+        # Check if the AOI intersection returned a result in the AOI list, if so calcuate the nearest trail and distance to
+        # trail
+        if res["AOI"] in dbconfig.settings["AOI_Outdoors"]:
+            outdoors = trackerFunc.getNearestTrail(geomData)
+            res["trail"] = outdoors['trail']
+            res['dist_trail'] = outdoors['trail_distance']
+        else:
+            res['trail'], res['dist_trail'] = None, None
+        res["method"] = "GeoAlchemy"
     return res
 
 

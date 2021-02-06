@@ -63,6 +63,9 @@ def waterQual():
                            recentdate=recentrec)
 @app.route("/dashboards/livetracker")
 @app.route("/livetracker")
+@app.route("/liveviewer")
+@app.route("/tracker")
+@app.route("/viewer")
 @auth.login_required(role='viewer')
 def liveGPS():
     """

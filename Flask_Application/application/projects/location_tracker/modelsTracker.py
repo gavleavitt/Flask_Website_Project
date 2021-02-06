@@ -86,6 +86,7 @@ class gpsPointModel(Base):
     city = Column(String(30))
     county = Column(String(30))
     timezone = Column(String(30))
+    method = Column(String(30))
     geom = Column(Geometry('POINT', 4326, from_text='ST_GeomFromEWKT', name='geometry'))
 
 

@@ -185,11 +185,13 @@ function binActData(filteredGroup, btnSelection){
   }
 
   // Round y values
-  // for (a of Object.keys(binnedActDataDict)) {
-  //   for (i of Object.keys(binnedActDataDict[a])) {
-  //     binnedActDataDict[a][i]["y"] = Math.round(binnedActDataDict[a][i]["y"])
-  //   }
-  // };
+  if (btnSelection != "time-btn"){
+    for (a of Object.keys(binnedActDataDict)) {
+      for (i of Object.keys(binnedActDataDict[a])) {
+        binnedActDataDict[a][i]["y"] = (binnedActDataDict[a][i]["y"]).toFixed(0)
+      }
+    };
+  }
   // Get single array of all unique dateValues(x-axis groupings/labels) in activity object, including all activity types
   // Add dateValues and zero-filled y-values to any activity type missing a unique dateValue
   // This ensures that all datasets are of the same length, even if some activity types don't have activities in that time period.
@@ -332,6 +334,10 @@ function createStreamLineChart(){
 }
 
 // Create initial Chart.JS barplot using initial load state of dashboard. Chart is updated with javascript events as selections are made
+// To add events and grab details see:
+// https://stackoverflow.com/a/58222435
+// https://stackoverflow.com/a/41870115
+// https://stackoverflow.com/a/44160605
 function createActivityChart(chartData) {
   var ctx = document.getElementById('chart').getContext('2d');
   actChart = new Chart(ctx, {
@@ -341,6 +347,16 @@ function createActivityChart(chartData) {
           datasets: generateDatasetOptions(chartData)
       },
       options: {
+        onClick:function(click,item) {
+          console.log("Clicked!")
+          console.log(click)
+          console.log(item)
+          dat = i[0];
+          var x_value = this.data.labels[dat._index];
+          var y_value = this.data.datasets[0].data[dat._index];
+          console.log(x_value);
+          console.log(y_value);
+        },
         responsive: true,
         // maintainAspectRatio: false,
         title:{
@@ -387,6 +403,11 @@ function createActivityChart(chartData) {
       }
   });
 };
+
+// function chartClickEvent(clickEvent, data){
+//   console.log(clickEvent);
+//   console.log(data);
+// };
 
 // function activateChartButton(){
 //   // When user picks a new date range or activity type, active the correct active chart type button

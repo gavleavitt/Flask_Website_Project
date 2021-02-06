@@ -104,15 +104,16 @@ def subCallback():
         Success code if data are successfully added to Postgres/PostGIS. Strava must receive a 200 code in response to
         POST.
     """
-    application.logger.debug("Got a callback request, issuing aysnc processing!")
+    application.logger.debug("Got a callback request!")
     # see: https://stackoverflow.com/a/53559969
-    @copy_current_request_context
-    def asyncRequest():
-        WebHookFunctionsStrava.handleSubCallback(request)
-    Thread(target=asyncRequest).start()
+    # https://smirnov-am.github.io/background-jobs-with-flask/
+    # @copy_current_request_context
+    # def asyncRequest(request):
+    #     WebHookFunctionsStrava.handleSubCallback(request)
+    # Thread(target=asyncRequest, args=(request,)).start()
 
     # taskRes = WebHookFunctionsStrava.handleSubCallback.apply_async(args=request.get_json(), countdown=10)
-
+    WebHookFunctionsStrava.handleSubCallback(request)
     application.logger.debug("Returning success code!")
     return Response(status=200)
 
