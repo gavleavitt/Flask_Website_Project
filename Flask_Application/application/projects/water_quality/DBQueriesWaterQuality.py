@@ -118,7 +118,7 @@ def insertWaterQual(beachDict, md5_fk):
                          Entero=beachDict[key]['Enterococcus Results (MPN*)'],
                          ExceedsRatio=beachDict[key]['Exceeds FC:TC ratio standard **'],
                          BeachStatus=beachDict[key]['Beach Status'], resample=beachDict[key]['resample'],
-                         md5_id=int(md5_fk)))
+                         md5_id=int(md5_fk)).zeroOut())
     # Add list of objects to session
     session.add_all(inslist)
     session.commit()

@@ -5,12 +5,14 @@ from geoalchemy2 import Geometry
 
 Base = declarative_base()
 
+
 class beaches(Base):
     __tablename__ = 'Beaches'
 
     id = Column(Integer, primary_key=True)
     BeachName = Column(String)
     geom = Column(Geometry('POINT', 4326, from_text='ST_GeomFromEWKT', name='geometry'))
+
 
 class waterQualityMD5(Base):
     __tablename__ = 'water_qual_md5'
@@ -29,6 +31,7 @@ class stateStandards(Base):
     Name = Column(String)
     StandardMPN = Column(String)
 
+
 class waterQuality(Base):
     __tablename__ = "Water_Quality"
 
@@ -44,3 +47,11 @@ class waterQuality(Base):
 
     beach_rel = relationship(beaches, backref="Water_Quality")
     hash_rel = relationship(waterQualityMD5, backref="Water_Quality")
+
+    def zeroOut(self):
+        if self.TotColi == "<10":
+            self.TotColi = 0
+        if self.FecColi == "<10":
+            self.FecColi = 0
+        if self.Entero == "<10":
+            self.Entero = 0
