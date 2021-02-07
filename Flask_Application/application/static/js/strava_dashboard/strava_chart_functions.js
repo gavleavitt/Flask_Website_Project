@@ -348,14 +348,14 @@ function createActivityChart(chartData) {
       },
       options: {
         onClick:function(click,item) {
-          console.log("Clicked!")
-          console.log(click)
-          console.log(item)
-          dat = i[0];
-          var x_value = this.data.labels[dat._index];
-          var y_value = this.data.datasets[0].data[dat._index];
-          console.log(x_value);
-          console.log(y_value);
+          // console.log("Clicked!")
+          // console.log(click)
+          // console.log(item)
+          // dat = i[0];
+          // var x_value = this.data.labels[dat._index];
+          // var y_value = this.data.datasets[0].data[dat._index];
+          // console.log(x_value);
+          // console.log(y_value);
         },
         responsive: true,
         // maintainAspectRatio: false,

@@ -41,6 +41,7 @@ function initializeDisplay(jsonDataURL){
     popupAction(filteredGroup);
     chartActData = binActData(filteredGroup, "count-btn");
     createActivityChart(chartActData, "count-btn");
+    initTable(filteredGroup)
     // chartActData = binActData(rawGeoJSON);
     // populateChart(chartActData);
     map.spin(false);

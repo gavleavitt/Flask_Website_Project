@@ -114,10 +114,11 @@ html{
   grid-template-rows: auto;
   /* grid-template-rows: repeat(5,minmax(0, 1fr)); */
   grid-gap: 8px;
+  max-height: 100%;
 }
 
 .map-panel{
-   grid-row: 1/6;
+   grid-row: 1/5;
    grid-column: 1/10;
 }
 
@@ -125,8 +126,6 @@ html{
   position:relative;
   height: 99%;
   width: 100%;
-  /* grid-column: 10/14;
-  grid-row: 4/6; */
 }
 
 .chartToggle{
@@ -150,6 +149,7 @@ html{
 .chartPanel{
   grid-column: 10/14;
   grid-row: 4/6;
+  height:100%;
 }
 
 #count-div{
@@ -176,6 +176,10 @@ html{
 #avg-div{
   grid-column: 12/14;
   grid-row: 3/4;
+}
+#datatable{
+  grid-column: 1/10;
+  grid-row: 5/6
 }
 .detail-panel{
   /* display: grid; */
@@ -558,6 +562,12 @@ This targets only fine pointers (mouse) for hover behavior, this prevents the ho
   .actChart{
     grid-column: 1/14;
   }
+} */
+
+
+/* Find whats causing overflow */
+/* * {
+  border: 1px solid #f00 !important;
 } */
 
 @media screen and (max-width: 1050px) {
