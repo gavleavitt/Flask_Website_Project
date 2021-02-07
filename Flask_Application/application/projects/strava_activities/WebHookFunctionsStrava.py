@@ -20,7 +20,7 @@ def threadedActivityProcessing(client, update):
         application.logger.debug("Inserting activity details")
 
         # Insert original, non-masked, coordinates and attribute details into Postgres/PostGIS
-        DBQueriesStrava.insertPrivateAct(activity['act'])
+        DBQueriesStrava.insertOriginalAct(activity['act'])
         # Calculate masked, publicly sharable, activities and insert into Postgres masked table
         application.logger.debug("Processing and inserting masked geometries")
         DBQueriesStrava.processActivitiesPublic(activity["act"]["actId"])
@@ -28,6 +28,8 @@ def threadedActivityProcessing(client, update):
         csvBuff = StreamDataAWSS3.writeMemoryCSV(activity["stream"])
         # Upload buffer csv to AWS S3 bucket
         StreamDataAWSS3.uploadToS3(csvBuff, activity["act"]["actId"])
+        # Create topojson file
+        DBQueriesStrava.createStravaPublicActTopoJSON()
         # Send success email
         errorEmail.sendSuccessEmail("Webhook Activity Update", f'The strava activity: {activity["act"]["actId"]}'
                                                                f' has been processed, the activity can be'
@@ -105,6 +107,9 @@ def handleSubUpdate(client, updateContent):
             except Exception as e:
                 application.logger.error(f"Creating a thread to process new activity failed with in the error: {e}")
                 errorEmail.sendErrorEmail(script="Webhook Activity Threading", exceptiontype=e.__class__.__name__, body=e)
+        elif update.aspect_type == "update" and update.object_type == "activity":
+            application.logger.debug("This is a activity update event, updating existing record")
+            DBQueriesStrava.updateExistingActivity(update)
         else:
             # Write logic to handle update and delete events
             application.logger.debug("Sub update message contains an update or delete event, skipping request")

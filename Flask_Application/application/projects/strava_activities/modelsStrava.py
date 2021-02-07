@@ -71,6 +71,7 @@ class strava_activities(Base):
     description = Column(String(255))
     workout_type = Column(String(100))
     calories = Column(Float)
+    avgtemp = Column(Integer)
     geom = Column(Geometry(geometry_type='LINESTRINGM', srid=4326, from_text = 'ST_GeomFromEWKT',  name='geometry',
                            dimension=3))
     gear_rel = relationship(strava_gear, backref="strava_gear")

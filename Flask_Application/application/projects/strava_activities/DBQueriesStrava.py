@@ -8,6 +8,7 @@ import geojson
 from geojson import Feature, FeatureCollection, MultiLineString
 import topojson as tp
 
+
 def updateSubId(subId):
     """
     Updates all athlete records with the new strava webhook subscription id.
@@ -98,7 +99,26 @@ def insertSubUpdate(content):
     application.logger.debug(f"New webhook update has been added to Postgres!")
 
 
-def insertPrivateAct(actDict):
+def updateExistingActivity(update):
+    """
+    Consider making this a new thread with a 30-60 minute wait time, giving time plenty of time for the original update
+    to finish before issuing the rename request
+    @param update:
+    @return:
+    """
+    # Get object ID
+    objectID = update.object_id
+    # Get new activity title, if applicable
+    newTitle = update.updates['title']
+    session = Session()
+    # use SQL alchemy to update existing feature title
+    session.query(strava_activities).filter(strava_activities.actID == objectID).\
+        update({strava_activities.name: newTitle})
+    session.commit()
+    session.close()
+
+
+def insertOriginalAct(actDict):
     """
     Inserts new activity, POSTed by Strava webhook update or by manually triggering process activity event route.
 
@@ -126,12 +146,14 @@ def insertPrivateAct(actDict):
                                description=actDict['description'], workout_type=actDict['workout_type'],
                                calories=actDict['calories'], device_name=actDict['device_name'],
                                manual=actDict['manual'], athlete_id=actDict['athlete_id'],
-                               type_extended=actDict['type_extended'], geom=actDict['geom_wkt'])
+                               type_extended=actDict['type_extended'], avgtemp=actDict['average_temp'],
+                               geom=actDict['geom_wkt'])
     session = Session()
     session.add(insert)
     session.commit()
     session.close()
     application.logger.debug(f"New webhook update for activity {actDict['actId']} has been added to Postgres!")
+
 
 def createStravaPublicActTopoJSON():
     """
@@ -172,9 +194,10 @@ def createStravaPublicActTopoJSON():
                     "private": row.private, "calories": round(row.calories),
                     "startDate": row.start_date_local.isoformat(),
                     "elapsed_time": row.elapsed_time.seconds, "total_elevation_gain": round(row.total_elevation_gain),
-                    "average_speed": round(row.average_speed, 1), "max_speed": row.max_speed, "gear_name": row.gear_name,
+                    "average_speed": round(row.average_speed, 1), "max_speed": row.max_speed,
+                    "gear_name": row.gear_name,
                     "type_extended": row.type_extended, "moving_time": row.moving_time.seconds,
-                    "average_watts":row.average_watts}
+                    "average_watts": row.average_watts}
         # Take ST_AsGeoJSON() result and load as geojson object
         geojsonGeom = geojson.loads(row[0])
         # Build the feature and add to feature list
@@ -272,7 +295,9 @@ def processActivitiesPublic(recordID):
     collectionExtract = 3
     # Create CTE to query privacy zone polygons, combine them, extract polygons, and transform to geometricProj
     privacy_cte = session.query(sqlfunc.ST_Transform(sqlfunc.ST_CollectionExtract(sqlfunc.ST_Collect(AOI.geom),
-        collectionExtract), geometricProj).label("priv_aoi")).filter(AOI.privacy == "Yes").cte("privacy_aoi")
+                                                                                  collectionExtract),
+                                                     geometricProj).label("priv_aoi")).filter(AOI.privacy == "Yes").cte(
+        "privacy_aoi")
 
     if recordID == "All":
         privacyClipQuery = session.query(strava_activities.actID, sqlfunc.ST_AsEWKB(
@@ -286,7 +311,7 @@ def processActivitiesPublic(recordID):
                                         strava_activities.geom, geometricProj), nonNodedSnap), privacy_cte.c.priv_aoi)
                                 , gridSnap),
                             simplifyFactor),
-                            )), webSRID)))
+                    )), webSRID)))
     else:
         privacyClipQuery = session.query(strava_activities.actID, sqlfunc.ST_AsEWKB(
             sqlfunc.ST_Transform(
@@ -295,10 +320,11 @@ def processActivitiesPublic(recordID):
                         sqlfunc.ST_Simplify(
                             sqlfunc.ST_SnapToGrid(
                                 sqlfunc.ST_Difference(
-                                    sqlfunc.ST_SnapToGrid(sqlfunc.ST_Transform(strava_activities.geom, geometricProj), nonNodedSnap), privacy_cte.c.priv_aoi)
+                                    sqlfunc.ST_SnapToGrid(sqlfunc.ST_Transform(strava_activities.geom, geometricProj),
+                                                          nonNodedSnap), privacy_cte.c.priv_aoi)
                                 , gridSnap),
                             simplifyFactor),
-                            )), webSRID))) \
+                    )), webSRID))) \
             .filter(strava_activities.actID == recordID)
     # Iterate over query to process data, add data to strava_activities_masked instance, and add instance to session
     for i in privacyClipQuery:

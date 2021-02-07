@@ -95,13 +95,16 @@ def getFullDetails(client, actId):
         act['type_extended'] = "Run"
     elif act['type'] == "Hike":
         act['type_extended'] = "Walk"
+    # Wahoo Bolt provides average temp, check if populated, if not set to null
+    if act['average_temp'] == "":
+        act['average_temp'] = None
     # List of dictionary keys to remove, these are null or uninteresting
     remove_keys = ['guid', 'external_id', 'athlete', 'location_city', 'location_state', 'location_country',
                    'kudos_count', 'comment_count', 'athlete_count', 'photo_count', 'total_photo_count', 'map',
                    'trainer', 'commute', 'gear', 'device_watts', 'has_kudoed', 'best_efforts',
                    'segment_efforts', 'splits_metric', 'splits_standard', 'weighted_average_watts',
                    'suffer_score', 'has_heartrate', 'average_heartrate', 'max_heartrate', 'average_cadence',
-                   'average_temp', 'embed_token', 'trainer', 'photos', 'instagram_primary_photo', 'partner_logo_url',
+                   'embed_token', 'trainer', 'photos', 'instagram_primary_photo', 'partner_logo_url',
                    'partner_brand_tag', 'from_accepted_tag', 'segment_leaderboard_opt_out', 'highlighted_kudosers',
                    'laps']
     # Iterate over dict keys, removing unnecessary/unwanted keys
