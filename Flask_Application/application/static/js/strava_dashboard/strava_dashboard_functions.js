@@ -344,6 +344,7 @@ function loadActivityBtnListener() {
       // prevMultiActBtn = document.querySelectorAll(".multiAct.chart-active")[0].id
       // updateChart(filteredGroup,prevMultiActBtn);
       updateChart(filteredGroup)
+      generateTableFormatedData(filteredGroup, "Update")
       // activateChartButton();
     });
   }
@@ -522,6 +523,7 @@ function initDateRange(){
     addActiveLayers(picker.startDate.format(), picker.endDate.format());
     updateDataPanels(filteredGroup,actDataDict, "True");
     updateChart(filteredGroup);
+    generateTableFormatedData(filteredGroup, "Update")
     // activateChartButton();
   });
 };

@@ -47,6 +47,7 @@ function populateStreamChartUpdateData(streamType){
       dataY.push(parseFloat(csvDatObject[i].grade_smooth).toFixed(1))
       yLabel = "Grade(%)"
     }
+    xLabel = "Time"
     // dataX.push(parseInt(csvDatObject[i].time))
     dataX.push(new Date(parseInt(csvDatObject[i].time)*1000).toISOString().substr(11,5));
     // count += 1
@@ -323,6 +324,14 @@ function createStreamLineChart(){
       }]
     },
     options:{
+      elements:{
+        point:{
+          radius:0
+        },
+        line:{
+          borderWidth: 1
+        }
+      },
       scales:{
         xAxes:[{
           scaleLabel:{
@@ -368,6 +377,13 @@ function createActivityChart(chartData) {
           datasets: generateDatasetOptions(chartData)
       },
       options: {
+        // Trying to set point radius, doesnt appear to work
+        elements:{
+          point:{
+            radius: 0,
+            pointRadius: 0
+          }
+        },
         onClick:function(click,item) {
           // console.log("Clicked!")
           // console.log(click)

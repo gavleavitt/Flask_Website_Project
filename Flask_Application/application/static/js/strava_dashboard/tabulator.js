@@ -2,13 +2,13 @@ function initTable(groupedData){
   //  see example: http://tabulator.info/docs/4.9/quickstart
   // Generate and format geosjson data into format:
   var dataTab = generateTableFormatedData(groupedData);
-  var table = new Tabulator("#datatable", {
+  table = new Tabulator("#datatable", {
     height:"100%",
     width:"100%",
     data:dataTab,
     cellHozAlign:"center",
     headerHozAlign:"center",
-    selectable:true,
+    selectable:1,
     rowClick:function(e, row){
       row.deselect(); //toggle row selected state on row click
       console.log(row)
@@ -39,20 +39,21 @@ function initTable(groupedData){
     // Fires when users selects a row in the table, update Leaflet, panels, and chart based on the user's selection
     rowClick:function(e, row){
       selectedID = row.getData().actID
+      // clear existing layers
       filteredGroup.clearLayers();
       // Update map layer
-      actFilter(actType=null,userStartDate=null,userEndDate=null,actID=selectedID )
+      addActiveLayers(userStartDate = null, userEndDate = null, actType = selectedID)
       // Update Panels
       updateDataPanels(filteredGroup,actDataDict, clear="True");
       // Update chart
-      updateChart(filteredGroup);
+      filterSingleActDisplay(selectedID)
       // Update data table
     },
   });
 };
 
 
-function generateTableFormatedData(groupedData){
+function generateTableFormatedData(groupedData, update){
   // console.log(geoJSONDat);
   var tabData = []
   id = 0
@@ -74,8 +75,23 @@ function generateTableFormatedData(groupedData){
     tabData.push({id:id,name:name,date:date,type:type,typeExtended:typeExtended,
       movingTime:movingTime,distance:distance,elevationGain:elevationGain,avgwatts:avgwatts,calories:calories,actID:actID})
   }
-  return tabData
+  if (update == "Update"){
+    // Clear existing data
+    table.clearData();
+    // Add newly updated data to table
+    table.addData(tabData)
+    // Re-set sorter, needed to ensure that sorting occurs correctly when multi-selecting or else first activity type added is always first but still sorted
+    table.setSort("date","desc")
+  }
+  else{
+    return tabData
+  }
   // groupedData.eachLayer(function(layer){
   //   console.log(layer.feature.properties.actID)
   // })
 };
+
+// Trigger to highlight row in table when a user selects a activity on the map or searches for an activity
+function highlightRow(activityID){
+
+}
