@@ -309,6 +309,7 @@ function getYLabelText(tabDataType){
   }
 }
 
+// Creates single activity chart in initial state with placeholder data, this allows for a better initial transition from the multi-activity bar plot
 function createStreamLineChart(){
   var streamChart = document.getElementById('chart-line').getContext('2d');
   actStreamLineChart = new Chart(streamChart, {
@@ -324,6 +325,16 @@ function createStreamLineChart(){
       }]
     },
     options:{
+      onHover: function(event, activeElements) {
+        // console.log(e)
+        if (activeElements.length > 0){
+          var index = activeElements[0]._index
+          var totalRecords = actStreamLineChart.data.labels.length
+          var portionAlong = (index/totalRecords)
+          // Get total length of records
+          getDistanceAlongLine(portionAlong);
+        }
+      },
       elements:{
         point:{
           radius:0
@@ -599,4 +610,11 @@ function updateChartBtn(btnID,actDataSource){
     // document.querySelectorAll('.singleAct, .chart-active')[0].classList.remove("chart-active")
   }
   document.getElementById(btnID).classList.add("chart-active")
+}
+
+//// TODO:
+// Get point at distance along line
+// see http://turfjs.org/docs/#along
+function getDistanceAlongLine(portionAlong){
+
 }
