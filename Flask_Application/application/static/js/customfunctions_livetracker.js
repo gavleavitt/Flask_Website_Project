@@ -29,7 +29,7 @@ function timedif(jsontime){
   seconds = msdif/1000;
   hours = seconds/3600;
   if (hours > 24){
-    res = "Over a day old!"
+    res = "<span style='color:#f5493d;'>Over 24 hours since last record</span>"
   } else if (hours < 24.0 && hours > 1.0){
     //Hours, minutes
     dif = new Date(msdif).toISOString().substr(11, 5);

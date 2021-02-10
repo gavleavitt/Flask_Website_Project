@@ -128,7 +128,9 @@ function createSearchControl(layerGroup) {
   map.addControl(searchControl);
   // When a search location is selected filter to show that activity only
   searchControl.on('search:locationfound', function(e) {
-    filterSingleActDisplay(e.layer.feature.properties.actID)
+    filterSingleActDisplay(e.layer.feature.properties.actID);
+    // Select table row
+    highlightRow(e.layer.feature.properties.actID)
     toggleFull();
   });
   // Search option activated
@@ -177,6 +179,7 @@ function popupAction(layerGroup) {
   layerGroup.eachLayer(function(layer) {
     layer.on('click', function(e) {
       filterSingleActDisplay(e.layer.feature.properties.actID)
+      highlightRow(e.layer.feature.properties.actID)
       toggleFull()
     });
   });

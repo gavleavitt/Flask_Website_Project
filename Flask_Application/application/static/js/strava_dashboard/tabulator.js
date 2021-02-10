@@ -9,11 +9,12 @@ function initTable(groupedData){
     cellHozAlign:"center",
     headerHozAlign:"center",
     selectable:1,
-    rowClick:function(e, row){
-      row.deselect(); //toggle row selected state on row click
-      console.log(row)
-      console.log(e)
-    },
+    // rowClick:function(e, row){
+    //   console.log(row)
+    //   console.log(e)
+    //   row.deselect(); //toggle row selected state on row click
+    //
+    // },
     // selectablePersistence:false, // disable rolling selection
     // layout:"fitColumns",
     // layout:"fitData",
@@ -23,7 +24,22 @@ function initTable(groupedData){
     columns:[
       {title:"Name", field:"name", hozAlign:"center"},
       {title:"Date(PST)", field:"date", sorter:"date", hozAlign:"center", sorterParams:{format:"YYYY-MM-DD hh:mm A"}},
-      {title:"Activity Type", field:"typeExtended", hozAlign:"center"},
+      {title:"Activity Type", field:"typeExtended", hozAlign:"center", formatter: function(cell, formatterParms){
+        // Set a slight cell background color based on cell value
+        value = cell.getValue()
+        if(value === "Road Cycling"){
+          // Change color on entire row
+          // cell.getRow().getElement().style.backgroundColor ='rgba(55, 126, 184, 0.2)';
+          cell.getElement().style.backgroundColor ='rgba(55, 126, 184, 0.3)';
+        } else if (value === "Walk") {
+          cell.getElement().style.backgroundColor ='rgba(152, 78, 163, 0.3)';
+        } else if (value === "Run") {
+          cell.getElement().style.backgroundColor ='rgba(166, 86, 40, 0.3)';
+        } else if (value === "Mountain Bike") {
+          cell.getElement().style.backgroundColor ='rgba(228, 26, 28, 0.3)';
+        }
+        return value;
+      }},
       {title:"Distance(Miles)", field:"distance", hozAlign:"center"},
       {title:"Elevation Gain(Feet)", field:"elevationGain", hozAlign:"center"},
       {title:"Duration", field:"movingTime", hozAlign:"center"},
@@ -39,15 +55,25 @@ function initTable(groupedData){
     // Fires when users selects a row in the table, update Leaflet, panels, and chart based on the user's selection
     rowClick:function(e, row){
       selectedID = row.getData().actID
+      // Highlight cell
+      // row.getElement().style.backgroundColor ='rgba(55, 126, 184, 0.2)'
+      // console.log(row.getElement())
       // clear existing layers
       filteredGroup.clearLayers();
       // Update map layer
-      addActiveLayers(userStartDate = null, userEndDate = null, actType = selectedID)
+      addActiveLayers(userStartDate = null, userEndDate = null, actType = selectedID);
       // Update Panels
       updateDataPanels(filteredGroup,actDataDict, clear="True");
       // Update chart
-      filterSingleActDisplay(selectedID)
-      // Update data table
+      filterSingleActDisplay(selectedID);
+
+      // //get array of currently selected data.
+      // var selectedID = table.getSelectedData()[0].id;
+      // // console.log(selectedData)
+      // // Update data table
+      // // refreshes selection, store selection and reapply using table.selectRow(id)?
+      // generateTableFormatedData(filteredGroup, "Update");
+      // table.selectRow(selectedID);
     },
   });
 };
@@ -93,5 +119,15 @@ function generateTableFormatedData(groupedData, update){
 
 // Trigger to highlight row in table when a user selects a activity on the map or searches for an activity
 function highlightRow(activityID){
-
+  // Clear selection
+  table.deselectRow();
+  // Select row using activity ID
+  table.selectRow(table.getRows().filter(row => row.getData().actID == activityID));
+  // Move selection to top
+  // https://stackoverflow.com/a/64054179
+  // get ID of row
+  // console.log(table.getRows().filter(row => row.getData().actID == activityID))
+  rowID = table.getRows().filter(row => row.getData().actID == activityID)[0]._row.data.id
+  // Move row to top of table
+  table.moveRow(rowID, table.getRows()[0], true);
 }
