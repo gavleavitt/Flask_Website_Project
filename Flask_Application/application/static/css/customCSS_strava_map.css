@@ -12,8 +12,10 @@ body {
   align-items: center;
 }
 
+
 html{
   height: 100%;
+  overflow:hidden;
 }
 
 .container {
@@ -103,30 +105,17 @@ html{
   border: 2px solid #171717;
 }
 
-.dashboard-content{
-  grid-column: 1/3;
-  grid-row: 2/3;
-  display: grid;
-  /* grid-template-columns: repeat(4,1fr);
-  grid-template-rows: repeat(8,1fr); */
-  grid-template-columns: repeat(13,1fr);
-  /* grid-template-rows: repeat(5,1fr); */
-  grid-template-rows: auto;
-  /* grid-template-rows: repeat(5,minmax(0, 1fr)); */
-  grid-gap: 8px;
-}
-
-.map-panel{
-   grid-row: 1/6;
-   grid-column: 1/10;
+.tabulator{
+  box-shadow: 0 5px 10px rgba(0,0,0,0.19), 0 3px 3px rgba(0,0,0,0.23);
+  color: #fff; /*Text color */
+  border-radius: 3px;
+  border: 2px solid #171717;
 }
 
 .actChart {
   position:relative;
   height: 99%;
   width: 100%;
-  /* grid-column: 10/14;
-  grid-row: 4/6; */
 }
 
 .chartToggle{
@@ -147,35 +136,79 @@ html{
   background-color: #bababa;
 }
 
+/* EDIT THIS */
+
+
+/* Find whats causing overflow */
+/* * {
+  border: 1px solid #f00 !important;
+} */
+
+.dashboard-content{
+  grid-column: 1/3;
+  grid-row: 2/3;
+  display: grid;
+  /* grid-template-columns: repeat(4,1fr);
+  grid-template-rows: repeat(8,1fr); */
+  /* grid-template-columns: repeat(13,1fr); */
+  grid-template-columns: repeat(13,minmax(auto, 1fr));
+  grid-template-rows: repeat(11,minmax(auto, 1fr));
+  min-height: 0;
+  min-width: 0;
+  /* grid-template-rows: auto; */
+  /* grid-template-rows: repeat(5,minmax(0, 1fr)); */
+  grid-gap: 8px;
+  max-height: 100%;
+}
+
+.map-panel{
+   grid-row: 1/9;
+   grid-column: 1/10;
+}
+
+#chart-Btns{
+  min-height: 0;
+  min-width: 0;
+}
+
 .chartPanel{
   grid-column: 10/14;
-  grid-row: 4/6;
+  grid-row: 7/12;
+  /* height:fit-content; */
+  height:100%;
+  min-height: 0;
+  min-width: 0;
 }
 
 #count-div{
   grid-column: 10/12;
-  grid-row: 1/2;
+  grid-row: 1/3;
 }
 
 #dist-div{
   grid-column: 12/14;
-  grid-row: 1/2;
+  grid-row: 1/3;
 }
 #elev-div{
   grid-column: 10/12;
-  grid-row: 2/3;
+  grid-row: 3/5;
 }
 #calories-div{
   grid-column: 12/14;
-  grid-row: 2/3;
+  grid-row: 3/5;
 }
 #moving-div{
   grid-column: 10/12;
-  grid-row: 3/4;
+  grid-row: 5/7;
 }
 #avg-div{
   grid-column: 12/14;
-  grid-row: 3/4;
+  grid-row: 5/7;
+}
+#table-container{
+  grid-column: 1/10;
+  grid-row: 9/12;
+  width:100%;
 }
 .detail-panel{
   /* display: grid; */
@@ -192,6 +225,10 @@ html{
   grid-row: 2/4; */
 }
 
+/* .tabulator-row.tabulator-selectable:hover {
+  background-color: #008516 !important;
+} */
+
 .titlediv{
   align-items: center;
   /* background-color: #f7f7f7; */
@@ -201,6 +238,20 @@ html{
   grid-row: 1/1;
   grid-column: 1/3;
 
+}
+
+
+/* see: https://stackoverflow.com/questions/54051312/how-to-set-default-color-for-column */
+/* .tabulator .tabulator-row .tabulator-cell[tabulator-field="name"]{
+    background-color:red;
+} */
+
+.tabulator-row.tabulator-selected{
+  background-color: rgba(69, 69, 69, 0.4);
+}
+
+.tabulator-row.tabulator-selectable:hover {
+  background-color: rgba(69, 69, 69, 0.6);
 }
 
 .popupbuttontext{
@@ -559,6 +610,8 @@ This targets only fine pointers (mouse) for hover behavior, this prevents the ho
     grid-column: 1/14;
   }
 } */
+
+
 
 @media screen and (max-width: 1050px) {
 

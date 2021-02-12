@@ -52,7 +52,7 @@ def getTrackerFeatCollection(datatype, reclimit):
         query = session.query(sqlfunc.ST_AsGeoJSON(gpsPointModel.geom), gpsPointModel).order_by(gpsPointModel.id.desc()).\
             limit(reclimit)
     elif datatype == "gpstracks":
-
+        # Get timezone from the most recently recorded gpstrack record
         newestRecordTime = session.query(gpsPointModel.timezone, gpsPointModel.timeutc). \
             order_by(gpsPointModel.timeutc.desc()).limit(1).all()
         recTZ = []

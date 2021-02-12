@@ -8,11 +8,14 @@
 function handleStreamChartUpdate(streamType, filteredGroup){
   filteredGroup.eachLayer(function(layer){
     layer.eachLayer(function(feature){
+
+      // Get activity type:
+      var actType = feature.feature.properties.type_extended
       if (feature.feature.properties.actID == actID){
         // This CSV has already been loaded, update existing table
         actID = feature.feature.properties.actID
         streamdata = populateStreamChartUpdateData(streamType);
-        updateStreamChart(streamdata["dataX"],streamdata["dataY"])
+        updateStreamChart(streamdata["dataX"],streamdata["dataY"], actType)
       } else {
         // This CSV has not been loaded, load it
         actID = feature.feature.properties.actID
@@ -21,7 +24,7 @@ function handleStreamChartUpdate(streamType, filteredGroup){
         }).then(function(csvData){
           csvDatObject = $.csv.toObjects(csvData);
           streamdata = populateStreamChartUpdateData(streamType);
-          updateStreamChart(streamdata["dataX"],streamdata["dataY"])
+          updateStreamChart(streamdata["dataX"],streamdata["dataY"], actType)
         })
       }
     })
@@ -44,6 +47,7 @@ function populateStreamChartUpdateData(streamType){
       dataY.push(parseFloat(csvDatObject[i].grade_smooth).toFixed(1))
       yLabel = "Grade(%)"
     }
+    xLabel = "Time"
     // dataX.push(parseInt(csvDatObject[i].time))
     dataX.push(new Date(parseInt(csvDatObject[i].time)*1000).toISOString().substr(11,5));
     // count += 1
@@ -54,12 +58,27 @@ function populateStreamChartUpdateData(streamType){
   return {"dataX":dataX, "dataY":dataY}
 }
 
-function updateStreamChart(dataX,dataY){
+
+function updateStreamChart(dataX,dataY, actType){
   actStreamLineChart.data.labels = dataX
   actStreamLineChart.data.datasets[0].data = dataY;
   actStreamLineChart.data.datasets[0].label = yLabel
   actStreamLineChart.options.legend.display = false
   actStreamLineChart.options.scales.yAxes[0].scaleLabel.labelString = yLabel
+
+  if (actType=="Mountain Bike") {
+    actStreamLineChart.data.datasets[0].backgroundColor = 'rgba(228, 26, 28, 0.4)'
+    actStreamLineChart.data.datasets[0].borderColor = 'rgba(228, 26, 28)'
+  } else if (actType == "Road Cycling") {
+    actStreamLineChart.data.datasets[0].backgroundColor =  'rgba(55, 126, 184, 0.4)'
+    actStreamLineChart.data.datasets[0].borderColor = 'rgba(55, 126, 184)'
+  } else if (actType =="Run") {
+    actStreamLineChart.data.datasets[0].backgroundColor =  'rgba(166, 86, 40, 0.4)'
+    actStreamLineChart.data.datasets[0].borderColor = 'rgba(166, 86, 40)'
+  } else if (actType == "Walk") {
+    actStreamLineChart.data.datasets[0].backgroundColor =  'rgba(152, 78, 163, 0.4)'
+    actStreamLineChart.data.datasets[0].borderColor = 'rgba(152, 78, 163)'
+  }
   // Issue data update
   actStreamLineChart.update();
 }
@@ -218,7 +237,10 @@ function binActData(filteredGroup, btnSelection){
   return binnedActDataDict
 };
 
-// Generates label and color options for each activity type within a single array. Array is formatted to be accepted a Chart.JS setting
+
+
+
+// Generates label and color options for each activity type within a single array. Array is formatted to be a Chart.JS setting
 function generateDatasetOptions(chartData) {
   var datasetOptions = []
   for (i of Object.keys(chartData)){
@@ -287,6 +309,7 @@ function getYLabelText(tabDataType){
   }
 }
 
+// Creates single activity chart in initial state with placeholder data, this allows for a better initial transition from the multi-activity bar plot
 function createStreamLineChart(){
   var streamChart = document.getElementById('chart-line').getContext('2d');
   actStreamLineChart = new Chart(streamChart, {
@@ -302,6 +325,24 @@ function createStreamLineChart(){
       }]
     },
     options:{
+      onHover: function(event, activeElements) {
+        // console.log(e)
+        if (activeElements.length > 0){
+          var index = activeElements[0]._index
+          var totalRecords = actStreamLineChart.data.labels.length
+          var portionAlong = (index/totalRecords)
+          // Get total length of records
+          getDistanceAlongLine(portionAlong);
+        }
+      },
+      elements:{
+        point:{
+          radius:0
+        },
+        line:{
+          borderWidth: 1
+        }
+      },
       scales:{
         xAxes:[{
           scaleLabel:{
@@ -347,15 +388,22 @@ function createActivityChart(chartData) {
           datasets: generateDatasetOptions(chartData)
       },
       options: {
+        // Trying to set point radius, doesnt appear to work
+        elements:{
+          point:{
+            radius: 0,
+            pointRadius: 0
+          }
+        },
         onClick:function(click,item) {
-          console.log("Clicked!")
-          console.log(click)
-          console.log(item)
-          dat = i[0];
-          var x_value = this.data.labels[dat._index];
-          var y_value = this.data.datasets[0].data[dat._index];
-          console.log(x_value);
-          console.log(y_value);
+          // console.log("Clicked!")
+          // console.log(click)
+          // console.log(item)
+          // dat = i[0];
+          // var x_value = this.data.labels[dat._index];
+          // var y_value = this.data.datasets[0].data[dat._index];
+          // console.log(x_value);
+          // console.log(y_value);
         },
         responsive: true,
         // maintainAspectRatio: false,
@@ -562,4 +610,11 @@ function updateChartBtn(btnID,actDataSource){
     // document.querySelectorAll('.singleAct, .chart-active')[0].classList.remove("chart-active")
   }
   document.getElementById(btnID).classList.add("chart-active")
+}
+
+//// TODO:
+// Get point at distance along line
+// see http://turfjs.org/docs/#along
+function getDistanceAlongLine(portionAlong){
+
 }

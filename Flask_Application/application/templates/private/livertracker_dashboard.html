@@ -213,8 +213,21 @@
 			onEachFeature is used instead of pointToLayer sn
 			*/
 			onEachFeature: function(feature, layer){
+				// Create variable holding pulsing icon settings
 				var pulsingIcon = L.icon.pulse({iconSize:[15,15],color:'red'});
+				// Activate the pulsing icon
 				layer.setIcon(pulsingIcon);
+				// Load initial state of data from most recent GPS point
+				document.getElementById('last-logged').innerHTML = formattime(feature.properties.timeLocal);
+				document.getElementById('last-logged').innerHTML += timedif(feature.properties.timeLocal);
+				document.getElementById('nearest-road').innerHTML = nearestpathway(feature.properties.nearestroad,feature.properties.nearesttrail,feature.properties.dist_nearestroad,
+					feature.properties.dist_nearesttrail,feature.properties.POI,feature.properties.speed);
+				document.getElementById('batterylife').innerHTML = batteryinfo(feature.properties.battery);
+				document.getElementById('coordinates').innerHTML = coors(feature.properties.lat,feature.properties.lon,feature.properties.provider);
+				document.getElementById('activity').innerHTML = activitytext(feature.properties.profile);
+				document.getElementById('location').innerHTML = locationtext(feature.properties.AOI,feature.properties.city,feature.properties.county);
+				document.getElementById('battery-icon').src = batteryicon(feature.properties.battery);
+				activityicon(feature.properties.profile)
 			}
 		}).addTo(map);
 
@@ -250,6 +263,7 @@
 		).addTo(map);
 
 		decGroup.addLayer(realtime_polylines);
+
 
 		// Set time variable to null, used to determine if a record is new
 		time = null
