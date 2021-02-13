@@ -453,7 +453,7 @@ def parsePDF():
     pdfDict = getPDFContents(pdfLoc)
     application.logger.debug("PDF contents have been extracted")
     # Hash text of pdf document, I believe encode is required for the hashing to work properly
-    hashedText = hashlib.md5(pdfDict['text'].encode()).hexdigest()
+    hashedText = hashlib.md5(pdfDict['text'].strip().encode()).hexdigest()
     # hashedText = md5hash(pdfDict['text'])
     # Check if md5 hash is already in postgres
     application.logger.debug("Checking PDF MD5 hash value against Postgres")

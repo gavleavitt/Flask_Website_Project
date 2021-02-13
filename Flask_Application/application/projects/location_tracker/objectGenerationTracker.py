@@ -113,7 +113,8 @@ def newGPSRecord(data, actStatus):
                         activity=actStatus, travelled=data['Dist_Travelled'].split(".")[0], AOI=queryData['AOI'],
                         city=queryData['city'], county=queryData['county'], nearestroad=queryData['road'],
                         dist_nearestroad=queryData['dist_road'], nearesttrail=queryData['trail'],
-                        dist_nearesttrail=queryData['dist_trail'], method=queryData["method"], geom=geomData)
+                        dist_nearesttrail=queryData['dist_trail'], method=queryData["method"],
+                        timezone=data['Time_Zone'], geom=geomData)
     return model
 
 #TODO:
@@ -213,8 +214,6 @@ def handleTracks(coordinate2, locationType):
         coor2_Q_str = f"POINT({coordinate2})"
         dist = trackerFunc.getDist(coor1_Q_str, coor2_Q_str)
         # print(f"Movement distance is: {dist}")
-        #TODO:
-        # dist > 100
         if (dist > 10 and locationType != 'network') or dist > 100:
             # print("Movement!")
             # Movement greater than 10m, returns dictionary with linestring formmated WKT record and activity type

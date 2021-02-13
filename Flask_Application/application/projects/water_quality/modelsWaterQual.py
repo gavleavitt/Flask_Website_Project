@@ -48,6 +48,7 @@ class waterQuality(Base):
     beach_rel = relationship(beaches, backref="Water_Quality")
     hash_rel = relationship(waterQualityMD5, backref="Water_Quality")
 
+    # Doesn't work and creates empty instances, not sure why, removed for now
     def zeroOut(self):
         if self.TotColi == "<10":
             self.TotColi = 0

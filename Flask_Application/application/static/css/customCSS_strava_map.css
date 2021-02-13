@@ -625,6 +625,7 @@ This targets only fine pointers (mouse) for hover behavior, this prevents the ho
   }
   .chartPanel{
     grid-column: 1/14;
+    grid-row: 4/12;
   }
   #count-div{
     grid-column: 10/12;
@@ -650,6 +651,9 @@ This targets only fine pointers (mouse) for hover behavior, this prevents the ho
   #avg-div{
     grid-column: 12/14;
     grid-row: 3/4;
+  }
+  #table-container{
+    display: None;
   }
 }
 @media screen and (max-width: 700px) {

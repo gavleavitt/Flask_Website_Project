@@ -52,7 +52,7 @@ def getTrackerFeatCollection(datatype, reclimit):
         query = session.query(sqlfunc.ST_AsGeoJSON(gpsPointModel.geom), gpsPointModel).order_by(gpsPointModel.id.desc()).\
             limit(reclimit)
     elif datatype == "gpstracks":
-        # Get timezone from the most recently recorded gpstrack record
+        # Get timezone and datetime(UTC) from the most recently recorded gpstrack record
         newestRecordTime = session.query(gpsPointModel.timezone, gpsPointModel.timeutc). \
             order_by(gpsPointModel.timeutc.desc()).limit(1).all()
         recTZ = []
@@ -66,18 +66,18 @@ def getTrackerFeatCollection(datatype, reclimit):
         # application.logger.debug(f"Queried time is: {recDateTime[0]}")
         utcTime = recDateTime[0].replace(tzinfo=pytz.utc)
         # application.logger.debug(f"UTC time is: {utcTime }")
+        # Convert from utc time to localtime
         localTime = utcTime.astimezone(recTZ[0])
         # application.logger.debug(f"Local time time is: {localTime}")
+        # Set local time to start of day
         startofDayLocal = localTime.replace(hour=0, minute=0, second=0, microsecond=0)
-        # Convert to startofDayLocal to UTC time
+        # Convert startofDayLocal to UTC time
         # application.logger.debug(f"Start of day in local is: {startofDayLocal}")
         startofDayUTC = startofDayLocal.astimezone(pytz.utc)
         # application.logger.debug(f"Start of day in UTC is: {startofDayUTC}")
 
         # Query using GeoAlchemy PostGIS function to get geojson representation of geometry and regular query to get
-        # tabular data
-        # Since all records are recorded in PST, they will always be -8 from UTC so the date in postgres may be a day
-        # ahead of the local time, use >= to account for this
+        # tabular data records from the start of day in localtime and later are returned
         # query = session.query(sqlfunc.ST_AsGeoJSON(gpstracks.geom), gpstracks).filter_by(date=todaydate)
         query = session.query(sqlfunc.ST_AsGeoJSON(gpstracks.geom), gpstracks).filter(gpstracks.timeutc >= startofDayUTC)
     features = []
