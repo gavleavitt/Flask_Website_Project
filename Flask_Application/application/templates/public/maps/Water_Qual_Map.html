@@ -13,6 +13,8 @@
 	<script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js"></script>
 	<!--jquery adds "$." functionality-->
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <!-- Momentjs -->
+	<script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
 	<!-- Load Esri Leaflet from CDN, stable -->
 	<script src="https://unpkg.com/esri-leaflet@2.4.0/dist/esri-leaflet.js"
 	integrity="sha512-kq0i5Xvdq0ii3v+eRLDpa++uaYPlTuFaOYrfQ0Zdjmms/laOwIvLMAxh7cj1eTqqGG47ssAcTY4hjkWydGt6Eg=="
@@ -32,6 +34,11 @@
 	<!-- Leaflet Table JS -->
 	<!-- <script src="http://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.3/leaflet.js"></script> -->
 
+	<!-- Chart.js JS-->
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.min.js"></script>
+	<!-- Chart.js CSS -->
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.min.css"/>
+
 	<!-- Locate Control, geolocation -->
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"/>
 	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet.locatecontrol@0.72.0/dist/L.Control.Locate.min.css" />
@@ -45,13 +52,17 @@
 	<!-- leaflet Ajax JS-->
 	<script src="{{ url_for('static', filename='js/leaflet.ajax.min.js') }}"></script>
 	<!-- Custom local javascript functions -->
-	<script src="{{ url_for('static', filename='js/customfunctions_WaterQuality.js') }}"></script>
+	<script src="{{ url_for('static', filename='js/WaterQualityFunctions/WaterQuality_Chart_Functions.js') }}"></script>
+	<!--  -->
+	<script src="{{ url_for('static', filename='js/WaterQualityFunctions/WaterQuality_General_Functions.js') }}"></script>
+
 	<!-- Custom CSS -->
 	<link rel="stylesheet" href="{{ url_for('static', filename='css/customCSS_WaterQuality.css') }}">
 	<!-- Search CSS-->
 	<link rel="stylesheet" href="{{ url_for('static', filename='css/leaflet-search.src.css') }}">
 	<!-- Search JS -->
 	<script src="{{ url_for('static', filename='js/leaflet-search.src.js') }}"></script>
+
 
 	<!-- Favicon links -->
 	<link rel="apple-touch-icon" sizes="180x180" href="/static/images/apple-touch-icon.png">
@@ -241,17 +252,46 @@
 				// 	// offset: [0, -30],
 				// 	'className': 'beachLabel'
 				// })
+
+
+
+				// Init chart when user clicks a beach
+				// layer.on('click', function(e){
+				// 	createChart(feature.properties.Name);
+				// })
+
+				// Set beach name variable when user clicks on a beach
+				layer.on('click', function(e){
+					clickedBeach = feature.properties.Name;
+				})
+
+
+				// Bind popup contents
 				layer.bindPopup(
-					'<div class="spanbotbord"><b>' + feature.properties.Name + '</b></div>' +
-					'<span>PDF Report (Release) Date: <b>' + feature.properties.insDate + '</b></span>' +
-					'<br><span>Beach status: <b>' + colortext(feature.properties.BeachStatus) + '</b></span>' +
-					'<br><span>Fecal Coliform Count: <b>' + subten(feature.properties.FecColi) + '</b> (' + standards["Fecal Coliform State Health Standard"] + ')</span>' +
-					'<br><span>Total Coliform Count: <b>' + subten(feature.properties.TotColi) + '</b> (' + standards["Total Coliform State Health Standard"] + ')</span>' +
-					'<br><span>Enterococcus Count: <b>' + subten(feature.properties.Entero)    + '</b> (' + standards["Enterococcus State Health Standard"] + ')</span>' +
-					'<br><span>Exceeds Coliform Ratio: <b>' + subten(feature.properties.ExceedsRatio) + '</b></span>' +
-					'<br><span>Reporting week: <b>' +feature.properties.pdfDate + '</b></span>' +
-					'<br><span><b>*</b>Results are given as MPN (most probable number), an approximation of bacteria per 100 ml of water.<span>' +
-					'<br><span><b>**</b>State Health Standards are enclosed with parentheses, (), as MPN.</span>'
+						'<div class="tabs">' +  '<div class="tab" id="tab-1">' +
+            '<div class="content">' +
+						'<div class="spanbotbord"><b>' + feature.properties.Name + '</b></div>' +
+						'<span>PDF Report (Release) Date: <b>' + feature.properties.insDate + '</b></span>' +
+						'<br><span>Beach status: <b>' + colortext(feature.properties.BeachStatus) + '</b></span>' +
+						'<br><span>Fecal Coliform Count: <b>' + subten(feature.properties.FecColi) + '</b> (' + standards["Fecal Coliform State Health Standard"] + ')</span>' +
+						'<br><span>Total Coliform Count: <b>' + subten(feature.properties.TotColi) + '</b> (' + standards["Total Coliform State Health Standard"] + ')</span>' +
+						'<br><span>Enterococcus Count: <b>' + subten(feature.properties.Entero)    + '</b> (' + standards["Enterococcus State Health Standard"] + ')</span>' +
+						'<br><span>Exceeds Coliform Ratio: <b>' + subten(feature.properties.ExceedsRatio) + '</b></span>' +
+						'<br><span>Reporting week: <b>' +feature.properties.pdfDate + '</b></span>' +
+						'<br><span><b>*</b>Results are given as MPN (most probable number), an approximation of bacteria per 100 ml of water.<span>' +
+						'<br><span><b>**</b>State Health Standards are enclosed with parentheses, (), as MPN.</span>' +
+            '</div>' +
+						'</div>' +
+						'<div class="tab" id="tab-2">' +
+            '<div class="content">' +
+						'<canvas id=history-chart></canvas>' +
+            '</div>' +
+            '</div>' +
+						'<ul id="tabs-link" class="tabs-link">' +
+            '<a href="#tab-1"><li class="tab-link active-link"><span>Current</span></li></a>' +
+            '<a href="#tab-2"><button id="history-button" class="tab-link" onclick="createChart(clickedBeach)"><li id="History"><span>History</span></li></button></a>' +
+            '</ul>' +
+        		'</div>'
 				)
 				// see https://github.com/Leaflet/Leaflet/issues/4811
 				// Query Leaflet control/UI elements
@@ -284,6 +324,22 @@
 				}
 			}
 		}).addTo(map);
+
+
+		beachreports.on('click', function(event){
+			// Add active class to the current button (highlight it)
+			var header = document.getElementById("tabs-link");
+			var btns = header.getElementsByClassName("tab-link");
+			for (var i = 0; i < btns.length; i++) {
+				btns[i].addEventListener("click", function() {
+				var current = document.getElementsByClassName("active-link");
+				current[0].className = current[0].className.replace(" active-link", "");
+				this.className += " active-link";
+				});
+			}
+		});
+
+
 
 		// Basemaps dictionary used for layer control
 		var basemaps = {

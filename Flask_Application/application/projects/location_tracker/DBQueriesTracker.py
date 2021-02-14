@@ -67,7 +67,7 @@ def getTrackerFeatCollection(datatype, reclimit):
         utcTime = recDateTime[0].replace(tzinfo=pytz.utc)
         # application.logger.debug(f"UTC time is: {utcTime }")
         # Convert from utc time to localtime
-        localTime = utcTime.astimezone(recTZ[0])
+        localTime = utcTime.astimezone(pytz.timezone(recTZ[0]))
         # application.logger.debug(f"Local time time is: {localTime}")
         # Set local time to start of day
         startofDayLocal = localTime.replace(hour=0, minute=0, second=0, microsecond=0)

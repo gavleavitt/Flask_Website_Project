@@ -113,7 +113,7 @@ class gpsPointModel(Base):
         utcTime = datetime.fromisoformat(self.timeutc).replace(tzinfo=pytz.utc)
         # Set to PST and return
         # print(utcTime.astimezone(tz))
-        return utcTime.astimezone(tz).isoformat()
+        return utcTime.astimezone(pytz.timezone(tz)).isoformat()
     
     def builddict(self):
         """

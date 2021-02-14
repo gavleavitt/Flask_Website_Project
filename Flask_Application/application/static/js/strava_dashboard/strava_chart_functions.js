@@ -324,16 +324,32 @@ function createStreamLineChart(){
         data:[30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30]
       }]
     },
+    // Activate label nearest to the pointer
+    hover: {
+       mode: 'nearest',
+       intersect: false,
+       // see https://stackoverflow.com/a/58529907
+       // place onHover in here with hover options so I can extend the functionality
+       onHover: function(event, activeElements) {
+         // console.log(e)
+         if (activeElements.length > 0){
+           var index = activeElements[0]._index
+           var totalRecords = actStreamLineChart.data.labels.length
+           var portionAlong = (index/totalRecords)
+           // Get total length of records
+           getDistanceAlongLine(portionAlong);
+         }
+    },
     options:{
-      onHover: function(event, activeElements) {
-        // console.log(e)
-        if (activeElements.length > 0){
-          var index = activeElements[0]._index
-          var totalRecords = actStreamLineChart.data.labels.length
-          var portionAlong = (index/totalRecords)
-          // Get total length of records
-          getDistanceAlongLine(portionAlong);
-        }
+      // onHover: function(event, activeElements) {
+      //   // console.log(e)
+      //   if (activeElements.length > 0){
+      //     var index = activeElements[0]._index
+      //     var totalRecords = actStreamLineChart.data.labels.length
+      //     var portionAlong = (index/totalRecords)
+      //     // Get total length of records
+      //     getDistanceAlongLine(portionAlong);
+      //   }
       },
       elements:{
         point:{
