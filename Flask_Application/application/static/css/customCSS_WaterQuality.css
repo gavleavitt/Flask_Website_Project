@@ -44,13 +44,13 @@ html{
     clear:both;
     margin:25px 0;
 }
-.tab {
+/* .tab {
     float:left;
     display: none;
-}
-.tab:first-of-type {
+} */
+/* .tab:first-of-type {
     display: inline-block;
-}
+} */
 .tabs-link {
     position: relative;
     top: -14px;
@@ -68,6 +68,7 @@ html{
     left:1px;
     top:1px;
     cursor:pointer;
+    font-weight: bold;
 }
 
 
@@ -107,6 +108,11 @@ html{
   font-weight: bold;
 }
 
+
+#hist-Tab{
+  float:left;
+  display:none;
+}
 
 /* End popup tabs */
 

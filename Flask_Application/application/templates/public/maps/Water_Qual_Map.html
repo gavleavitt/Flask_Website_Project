@@ -269,7 +269,7 @@
 				// Bind popup contents
 				layer.bindPopup(
 						'<div class="tabs">' +  '<div class="tab" id="tab-1">' +
-            '<div class="content">' +
+            '<div id="text-content" class="content">' +
 						'<div class="spanbotbord"><b>' + feature.properties.Name + '</b></div>' +
 						'<span>PDF Report (Release) Date: <b>' + feature.properties.insDate + '</b></span>' +
 						'<br><span>Beach status: <b>' + colortext(feature.properties.BeachStatus) + '</b></span>' +
@@ -282,14 +282,14 @@
 						'<br><span><b>**</b>State Health Standards are enclosed with parentheses, (), as MPN.</span>' +
             '</div>' +
 						'</div>' +
-						'<div class="tab" id="tab-2">' +
-            '<div class="content">' +
+						'<div class="tab" id="hist-Tab">' +
+            '<div id="hist-content" class="content">' +
 						'<canvas id=history-chart></canvas>' +
             '</div>' +
             '</div>' +
 						'<ul id="tabs-link" class="tabs-link">' +
-            '<a href="#tab-1"><li class="tab-link active-link"><span>Current</span></li></a>' +
-            '<a href="#tab-2"><button id="history-button" class="tab-link" onclick="createChart(clickedBeach)"><li id="History"><span>History</span></li></button></a>' +
+            '<li id="current" class="tab-link active-link"><span>Current</span></li>' +
+            '<button id="history-button" class="tab-link" onclick="createChart(clickedBeach)"><li id="History"><span>History</span></li></button>' +
             '</ul>' +
         		'</div>'
 				)
@@ -327,14 +327,46 @@
 
 
 		beachreports.on('click', function(event){
+			// Reset size of popup
+			var popupContent = document.getElementsByClassName('leaflet-popup-content-wrapper')
+			popupContent[0].style.width = "auto";
+			popupContent[0].style.height = "auto";
+			// Reset active-link status
+			var current = document.getElementById("current");
+			current.classList.add("active-link");
+
+			// popupContent[0].style.height = "300px";
 			// Add active class to the current button (highlight it)
-			var header = document.getElementById("tabs-link");
-			var btns = header.getElementsByClassName("tab-link");
+			// var header = document.getElementById("tabs-link");
+			var btns = document.getElementsByClassName("tab-link");
+			// console.log(btns)
 			for (var i = 0; i < btns.length; i++) {
 				btns[i].addEventListener("click", function() {
-				var current = document.getElementsByClassName("active-link");
-				current[0].className = current[0].className.replace(" active-link", "");
-				this.className += " active-link";
+					// console.log("Adding event listeners!")
+					var currentActive = document.getElementsByClassName("active-link");
+					currentActive[0].className = currentActive[0].className.replace(" active-link", "");
+					this.className += " active-link";
+					if (currentActive[0].id == "current"){
+						// console.log("Clicked current tab")
+
+						// Hide chart div
+						var historyChartContent = document.getElementById('hist-Tab');
+						historyChartContent.style.display = "none";
+						// Reset size of popup
+						var popupContent = document.getElementsByClassName('leaflet-popup-content-wrapper')
+						popupContent[0].style.width = "auto";
+						popupContent[0].style.height = "auto";
+						var textContent = document.getElementById('text-content');
+						textContent.style.display = "block";
+						// popupContent[0].style.height = "300px";
+					} else if (currentActive[0].id == "history-button") {
+						// var popupContent = document.getElementsByClassName('leaflet-popup-content-wrapper')
+						// popupContent[0].style.height = "320px";
+						// var histContent = document.getElementById('hist-content');
+						// histContent.style.height = "200px";
+						// var textContent = document.getElementById('text-content');
+						// textContent.style.display = "none";
+					}
 				});
 			}
 		});
