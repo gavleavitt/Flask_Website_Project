@@ -17,6 +17,7 @@ from application import script_config
 from application.projects.location_tracker import DBQueriesTracker, objectGenerationTracker
 from application.flaskAuth.authentication import auth
 from application.projects.strava_activities import WebHookFunctionsStrava, DBQueriesStrava, StreamDataAWSS3
+from application.projects.water_quality import DBQueriesWaterQuality
 from threading import Thread
 
 # @app.route establishes the URL within the domain
@@ -118,6 +119,11 @@ def stravaActAPI():
 @app.route("/api/v0.1/getstravastreamurl", methods=['GET'])
 def getsteamS3url():
     actID = str(request.args.get("actID"))
-    print(f"csvname is: {actID}")
+    # print(f"csvname is: {actID}")
     res = StreamDataAWSS3.create_presigned_url(actID)
     return res
+
+@app.route("/api/v0.1/getbeachhistory", methods=['GET'])
+def getWaterQualityHistory():
+    beachName = str(request.args.get("beachName"))
+    return DBQueriesWaterQuality.getBeachResults(beachName)

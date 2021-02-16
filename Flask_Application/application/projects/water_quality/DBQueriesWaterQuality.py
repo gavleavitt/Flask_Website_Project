@@ -5,6 +5,7 @@ import os
 from datetime import datetime
 from application import application, Session
 from sqlalchemy import func as sqlfunc
+import pytz
 
 # def createSession():
 #     engine = create_engine(os.environ.get("DBCON"))
@@ -85,7 +86,9 @@ def insmd5(MD5, pdfDate, pdfName):
     application.logger.debug(pdfDate)
     application.logger.debug(pdfName)
     application.logger.debug(datetime.now())
-    newrec = waterQualityMD5(md5=MD5, pdfdate=pdfDate, pdfName=pdfName, insdate=datetime.now())
+    # Get datetime in PST since records are from this time zone
+    newrec = waterQualityMD5(md5=MD5, pdfdate=pdfDate, pdfName=pdfName,
+                             insdate=datetime.now(pytz.timezone("America/Los_Angeles")))
     session.add(newrec)
     session.commit()
     newId = newrec.id
@@ -152,6 +155,9 @@ def getBeachWaterQual():
         .join(beaches) \
         .distinct(waterQuality.beach_id) \
         .order_by(waterQuality.beach_id, waterQualityMD5.insdate.desc()).all()
+
+    # Can't close session here because these results are used in another function
+    # session.close()
     return records
 
 
@@ -170,4 +176,30 @@ def getStandards():
     recDict = {}
     for i in records:
         recDict[i.Name] = i.StandardMPN
+    session.close()
     return recDict
+
+
+def getBeachResults(beach):
+    """
+
+    @param beach:
+    @return:
+    """
+    session = Session()
+    records = session.query(waterQuality, waterQualityMD5) \
+        .join(waterQualityMD5) \
+        .join(beaches) \
+        .filter(beaches.BeachName == beach) \
+        .order_by(waterQuality.id.desc()) \
+        .limit(10)
+
+    resultDict = {}
+    for i in records:
+        resultDict[i[0].id] = {}
+        resultDict[i[0].id]["status"] = i[0].BeachStatus
+        resultDict[i[0].id]["date"] = i[1].pdfdate.isoformat()
+        # print(i[0].FecColi)
+
+    session.close()
+    return resultDict

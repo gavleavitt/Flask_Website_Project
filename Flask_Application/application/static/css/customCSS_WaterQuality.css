@@ -33,6 +33,89 @@ html{
   border-bottom-color: #000;
 }
 
+
+/* Pop-up tabs */
+
+
+
+.tabs {
+    position:relative;
+    min-height:200px;
+    clear:both;
+    margin:25px 0;
+}
+/* .tab {
+    float:left;
+    display: none;
+} */
+/* .tab:first-of-type {
+    display: inline-block;
+} */
+.tabs-link {
+    position: relative;
+    top: -14px;
+    height: 20px;
+    left: -40px;
+}
+.tab-link {
+    background:#f8f8f8;
+    display: inline-block;
+    padding:10px;
+    border:1px solid #ccc;
+    margin-left:-1px;
+    position:relative;
+    list-style-type: none;
+    left:1px;
+    top:1px;
+    cursor:pointer;
+    font-weight: bold;
+}
+
+
+#history-button{
+  color: #303030;
+  font-weight: bold;
+  padding-top: 12px;
+  padding-bottom: 12px;
+}
+
+.active-link {
+  background:#949494;
+}
+
+.tab-link:hover {
+    background:#bfbfbf;
+}
+
+
+.content {
+    background:white;
+    position:absolute;
+    top:28px;
+    left:0;
+    right:0;
+    bottom:0;
+    padding:20px;
+    border:1px solid #ccc;
+    height:310px;
+}
+.tab:target {
+    display: block;
+}
+
+.leaflet-container a{
+  color: #303030;
+  font-weight: bold;
+}
+
+
+#hist-Tab{
+  float:left;
+  display:none;
+}
+
+/* End popup tabs */
+
 #map{
     position: relative;
     top: 0px;
@@ -42,8 +125,11 @@ html{
     z-index: 1;
 }
 
+
 .leaflet-popup-content{
   font-size: 14px;
+  width:300px;
+  height:380px;
 }
 
 .detail-panel-col{

@@ -14,7 +14,7 @@ from application.projects.water_quality import DBQueriesWaterQuality
 import os
 from application import logger
 from geojson import Point, Feature, FeatureCollection
-
+import pytz
 
 # resampcol = ['Total Coliform Results (MPN*)', "Fecal Coliform Results (MPN*)", 'Enterococcus Results (MPN*)']
 
@@ -441,7 +441,8 @@ def parsePDF():
     Print Statement
     """
     # set PDF name
-    pdfName = f"Ocean_Water_Quality_Report_{datetime.now().strftime('%Y%m%d')}.pdf"
+    # pdfName = f"Ocean_Water_Quality_Report_{datetime.now().strftime('%Y%m%d')}.pdf"
+    pdfName = f"Ocean_Water_Quality_Report_{datetime.now(pytz.timezone('America/Los_Angeles')).strftime('%Y%m%d')}.pdf"
     pdfLoc = pdfDest = os.path.join(app.root_path, 'static', 'documents', 'Water_Qual_PDFs', pdfName)
     downloadURL = "http://countyofsb.org/uploadedFiles/phd/PROGRAMS/EHS/Ocean%20Water%20Weekly%20Results.pdf"
     # Kick off script by downloading PDF
