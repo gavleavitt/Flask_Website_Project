@@ -217,10 +217,11 @@
 	<script>
 		// Initialize modal
 		initModal();
+		// Initialize modal for downloading histroic PDFs
+		// initDownloadModal();
 		// Set default start and end times of date range picker
 		var start = moment('2014-01-01');
 		var end = moment();
-		console.log(end);
 		// Initialize daterangepicker and listener
 		initDateRange();
 		// Make basemaps
@@ -243,7 +244,8 @@
 		map.spin(true);
 
 		// Set topoJSON URL
-		jsonDataURL = "/static/json/topoJSONPublicActivities.json"
+		// jsonDataURL = "/static/json/topoJSONPublicActivities.json"
+		jsonDataURL = "/api/v0.1/getstravatopojsonurl"
 		// Get screen size
 		dimen = {'width': window.innerWidth,'height':window.innerHeight};
 		// Dict to hold panel values

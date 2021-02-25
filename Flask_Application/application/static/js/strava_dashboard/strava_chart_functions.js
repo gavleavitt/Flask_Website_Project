@@ -19,7 +19,7 @@ function handleStreamChartUpdate(streamType, filteredGroup){
       } else {
         // This CSV has not been loaded, load it
         actID = feature.feature.properties.actID
-        getS3URL(actID).then(function(presignedURL){
+        getS3StreamURL(actID).then(function(presignedURL){
           return getS3CSVData(presignedURL)
         }).then(function(csvData){
           csvDatObject = $.csv.toObjects(csvData);
@@ -84,7 +84,7 @@ function updateStreamChart(dataX,dataY, actType){
 }
 
 
-function getS3URL(actID){
+function getS3StreamURL(actID){
   csvAPIURL = '/api/v0.1/getstravastreamurl'
   return $.ajax({
       url:csvAPIURL,
@@ -339,6 +339,7 @@ function createStreamLineChart(){
            // Get total length of records
            getDistanceAlongLine(portionAlong);
          }
+       }
     },
     options:{
       // onHover: function(event, activeElements) {
@@ -350,10 +351,11 @@ function createStreamLineChart(){
       //     // Get total length of records
       //     getDistanceAlongLine(portionAlong);
       //   }
-      },
+      // },
       elements:{
         point:{
-          radius:0
+          radius:0,
+          pointRadius: 0
         },
         line:{
           borderWidth: 1

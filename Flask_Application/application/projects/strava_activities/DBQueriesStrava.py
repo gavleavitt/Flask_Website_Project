@@ -206,24 +206,23 @@ def createStravaPublicActTopoJSON():
     # Build the feature collection result
     feature_collection = FeatureCollection(features)
     # Set topojson filename and pathway
-    topojsonFileName = "topoJSONPublicActivities.json"
-    topojsonFullPath = os.path.join(application.root_path, 'static', 'json', topojsonFileName)
-    geojsonFileName = "geoJSONPublicActivities.json"
-    geojsonFullPath = os.path.join(application.root_path, 'static', 'json', geojsonFileName)
-    # Remove existing json if it exists
-    try:
-        os.remove(topojsonFullPath)
-        os.remove(geojsonFullPath)
-    except:
-        pass
+    # topojsonFileName = "topoJSONPublicActivities.json"
+    # topojsonFullPath = os.path.join(application.root_path, 'static', 'json', topojsonFileName)
+    # geojsonFileName = "geoJSONPublicActivities.json"
+    # geojsonFullPath = os.path.join(application.root_path, 'static', 'json', geojsonFileName)
+    # # Remove existing json if it exists
+    # try:
+    #     os.remove(topojsonFullPath)
+    #     os.remove(geojsonFullPath)
+    # except:
+    #     pass
     # Create local topoJSON file of geoJSON Feature Collection. Don't create a topology, doesn't matter for a polyline
     # and prequantize the data, this reduces file size at the cost of processing time.
     # prequantize 1e7 is used over default, 1e6, to avoid errors in which data were placed in the South Pacific Ocean
-    tp.Topology(feature_collection, topology=False, prequantize=10000000).to_json(topojsonFullPath)
+    # tp.Topology(feature_collection, topology=False, prequantize=10000000).to_json(topojsonFullPath)
     # with open(geojsonFullPath, 'w') as f:
-
     #     geojson.dump(feature_collection, f)
-
+    return tp.Topology(feature_collection, topology=False, prequantize=10000000).to_json()
 
 def processActivitiesPublic(recordID):
     """

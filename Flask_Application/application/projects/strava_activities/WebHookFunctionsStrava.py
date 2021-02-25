@@ -1,6 +1,6 @@
 import os
 from application import application, script_config, errorEmail
-from application.projects.strava_activities import OAuthStrava, DBQueriesStrava, APIFunctionsStrava, StreamDataAWSS3
+from application.projects.strava_activities import OAuthStrava, DBQueriesStrava, APIFunctionsStrava, StravaAWSS3
 import time
 import json
 from threading import Thread
@@ -25,11 +25,13 @@ def threadedActivityProcessing(client, update):
         application.logger.debug("Processing and inserting masked geometries")
         DBQueriesStrava.processActivitiesPublic(activity["act"]["actId"])
         # Create in-memory buffer csv of stream data
-        csvBuff = StreamDataAWSS3.writeMemoryCSV(activity["stream"])
+        csvBuff = StravaAWSS3.writeMemoryCSV(activity["stream"])
         # Upload buffer csv to AWS S3 bucket
-        StreamDataAWSS3.uploadToS3(csvBuff, activity["act"]["actId"])
+        StravaAWSS3.uploadToS3(csvBuff, activity["act"]["actId"])
         # Create topojson file
-        DBQueriesStrava.createStravaPublicActTopoJSON()
+        topoJSON = DBQueriesStrava.createStravaPublicActTopoJSON()
+        # Upload topoJSON to AWS S3
+        StravaAWSS3.uploadToS3(topoJSON)
         # Send success email
         errorEmail.sendSuccessEmail("Webhook Activity Update", f'The strava activity: {activity["act"]["actId"]}'
                                                                f' has been processed, the activity can be'

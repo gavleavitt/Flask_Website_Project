@@ -14,7 +14,7 @@ function initializeListeners(){
   // window.onresize = getChartTextSizes();
 }
 
-function initializeDisplay(jsonDataURL){
+function initializeDisplay(stravaTopojsonUrl){
   // see http://bl.ocks.org/marcellobenigno/9b09c24850def14250141dfe89f9a296
   // see https://docs.mapbox.com/mapbox.js/example/v1.0.0/omnivore-kml-tooltip/
   // Create a empty geoJSON with style and popup settings.
@@ -23,33 +23,57 @@ function initializeDisplay(jsonDataURL){
     onEachFeature: onEachFeatureAct
   });
   createStreamLineChart();
-  // Use Leaflet omnivore to import/process topoJSON data. This function passes the loaded data into a existing empty geoJSON layer.
-  // var originalTopoData = omnivore.topojson(jsonDataURL, null, orgActivities)
-  omnivore.topojson(jsonDataURL, null, orgActivities).on('ready', function() {
-    // After data have loaded, create a original group layer containing all data, this won't be filtered/changed and is kept to hold original data
-    // originalGroup = L.layerGroup([orgActivities]);
-    // Create new raw geoJSON dataset using the original, un-aletered, geoJSON layer as dump source.
-    // There may be a better method than this, but I believe that L.geoJSON can only take raw geoJSON data, not an existing geoJSON layer.
-    // This requires a dump of geoJSON data into a new variable since the raw geoJSON data doesn't get stored automatically, its converted into a geoJSON layer.
-    // This may cause performance issues on some browsers/devices since this is effectively storing another copy of the data in addition to what's being displayed
-    rawGeoJSON = orgActivities.toGeoJSON()
-    // Create a filtered group layer and add to map, this layer group will be changed using filters
-    filteredGroup = L.layerGroup([orgActivities]).addTo(map);
-    updateDataPanels(filteredGroup, actDataDict, "False")
-    // create Leafet search for loaded geoJSON data
-    createSearchControl(filteredGroup);
-    popupAction(filteredGroup);
-    chartActData = binActData(filteredGroup, "count-btn");
-    createActivityChart(chartActData, "count-btn");
-    initTable(filteredGroup)
-    // chartActData = binActData(rawGeoJSON);
-    // populateChart(chartActData);
-    map.spin(false);
-  })
-  .on('error', function() {
-    alert("Data failed to load, please try again later.")
+  getActivityTopojsonS3Url(stravaTopojsonUrl).then(function(presignedTopojsonURL){
+    // Use Leaflet omnivore to import/process topoJSON data. This function passes the loaded data into a existing empty geoJSON layer.
+    // var originalTopoData = omnivore.topojson(jsonDataURL, null, orgActivities)
+    omnivore.topojson(presignedTopojsonURL, null, orgActivities).on('ready', function() {
+      console.log("topoJSON data has been loaded!")
+      // After data have loaded, create a original group layer containing all data, this won't be filtered/changed and is kept to hold original data
+      // originalGroup = L.layerGroup([orgActivities]);
+      // Create new raw geoJSON dataset using the original, un-aletered, geoJSON layer as dump source.
+      // There may be a better method than this, but I believe that L.geoJSON can only take raw geoJSON data, not an existing geoJSON layer.
+      // This requires a dump of geoJSON data into a new variable since the raw geoJSON data doesn't get stored automatically, its converted into a geoJSON layer.
+      // This may cause performance issues on some browsers/devices since this is effectively storing another copy of the data in addition to what's being displayed
+      rawGeoJSON = orgActivities.toGeoJSON()
+      // Create a filtered group layer and add to map, this layer group will be changed using filters
+      filteredGroup = L.layerGroup([orgActivities]).addTo(map);
+      updateDataPanels(filteredGroup, actDataDict, "False")
+      // create Leafet search for loaded geoJSON data
+      createSearchControl(filteredGroup);
+      popupAction(filteredGroup);
+      chartActData = binActData(filteredGroup, "count-btn");
+      createActivityChart(chartActData, "count-btn");
+      initTable(filteredGroup)
+      // chartActData = binActData(rawGeoJSON);
+      // populateChart(chartActData);
+      map.spin(false);
+    })
+    .on('error', function() {
+      alert("Data failed to load, please try again later.")
+    })
   })
 };
+
+function getActivityTopojsonS3Url(link){
+  return $.ajax({
+      url:link,
+      //https://stackoverflow.com/questions/47523265/jquery-ajax-no-access-control-allow-origin-header-is-present-on-the-requested
+      type: 'GET',
+      dataType: 'text'
+  });
+}
+
+function getActivityTopojsonData(presignedURL){
+  return $.ajax({
+    url:presignedURL,
+    //https://stackoverflow.com/questions/47523265/jquery-ajax-no-access-control-allow-origin-header-is-present-on-the-requested
+    headers: {  'Access-Control-Allow-Origin': 'https://stravastreamdata.s3-us-west-1.amazonaws.com' },
+    crossOrigin: true,
+    // data: {csvName:'4413728207.csv'},
+    type: 'GET',
+    dataType: 'json'
+  });
+}
 
 function initModal(){
   // Modal from https://www.w3schools.com/howto/tryit.asp?filename=tryhow_css_modal
@@ -80,6 +104,7 @@ function initModal(){
     }
   }
 };
+
 
 // Used to display singular activites only on map and in dashboard panels, such as when searched or selected
 function filterSingleActDisplay(actID) {
@@ -504,7 +529,8 @@ function initDateRange(){
         // Set preset date ranges to select from
         ranges: {
           'All Time (default)': [moment('2014-01-01'), moment().endOf('year')],
-          'Today': [moment().startOf('day'), moment().endOf('day')],
+          // 'Today': [moment().startOf('day'), moment().endOf('day')],
+          'Today': [moment(), moment()],
           'Last 7 Days': [moment().subtract(6, 'days'), moment()],
           'Last 30 Days': [moment().subtract(29, 'days'), moment()],
           'This Month': [moment().startOf('month'), moment().endOf('month')],
@@ -520,6 +546,8 @@ function initDateRange(){
     // Formats data in a proper date format
     userStart = picker.startDate.format();
     userEnd = picker.endDate.format();
+    // console.log(userStart)
+    // console.log(userEnd)
     // clear existing layers
     filteredGroup.clearLayers();
     // Re-add active layers with new daterange filter applied

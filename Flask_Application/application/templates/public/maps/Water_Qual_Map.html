@@ -147,6 +147,16 @@
 					</div>
 			 </div>
 		 </div>
+		 <div id="downloadPDF-modal" class="modal">
+			 <div class="modal-content-container">
+				<div id="downloadModalClose" class="close">&times;</div>
+				 <div class="modal-text">
+					 <p style="margin-top:0px;">
+							<b><br><a id="pdfDownloadLink" href=#><span id="downloadPDF-link-text">Download the PDF for <span id="downloadPDF"></span> here.</span></a></b>
+					 </p>
+					</div>
+				</div>
+			</div>
 			<!-- <div class="popupbuttontext"> Map Details
 			</div> -->
 		</div>
@@ -273,11 +283,12 @@
 						'<div class="spanbotbord"><b>' + feature.properties.Name + '</b></div>' +
 						'<span>PDF Report (Release) Date: <b>' + feature.properties.insDate + '</b></span>' +
 						'<br><span>Beach status: <b>' + colortext(feature.properties.BeachStatus) + '</b></span>' +
-						'<br><span>Fecal Coliform Count: <b>' + subten(feature.properties.FecColi) + '</b> (' + standards["Fecal Coliform State Health Standard"] + ')</span>' +
-						'<br><span>Total Coliform Count: <b>' + subten(feature.properties.TotColi) + '</b> (' + standards["Total Coliform State Health Standard"] + ')</span>' +
-						'<br><span>Enterococcus Count: <b>' + subten(feature.properties.Entero)    + '</b> (' + standards["Enterococcus State Health Standard"] + ')</span>' +
-						'<br><span>Exceeds Coliform Ratio: <b>' + subten(feature.properties.ExceedsRatio) + '</b></span>' +
-						'<br><span>Reporting week: <b>' +feature.properties.pdfDate + '</b></span>' +
+						'<br><span>Fecal Coliform Count: <b>' + subTenOrExceeds(feature.properties.FecColi,standards["Fecal Coliform State Health Standard"]) + '</b> (' + standards["Fecal Coliform State Health Standard"].toLocaleString() + ')</span>' +
+						'<br><span>Total Coliform Count: <b>' + subTenOrExceeds(feature.properties.TotColi,standards["Total Coliform State Health Standard"]) + '</b> (' + standards["Total Coliform State Health Standard"].toLocaleString() + ')</span>' +
+						'<br><span>Enterococcus Count: <b>' + subTenOrExceeds(feature.properties.Entero,standards["Enterococcus State Health Standard"]) + '</b> (' + standards["Enterococcus State Health Standard"].toLocaleString() + ')</span>' +
+						'<br><span>Exceeds Coliform Ratio: <b>' + subTenOrExceeds(feature.properties.ExceedsRatio) + '</b></span>' +
+						'<br><span>Reporting week: <b>' + feature.properties.pdfDate + '</b></span>' +
+						'<br><span>Report Link: <b><a href=' + feature.properties.s3PDFURL + '>Download PDF</a></b></span>' +
 						'<br><span><b>*</b>Results are given as MPN (most probable number), an approximation of bacteria per 100 ml of water.<span>' +
 						'<br><span><b>**</b>State Health Standards are enclosed with parentheses, (), as MPN.</span>' +
             '</div>' +

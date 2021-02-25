@@ -22,6 +22,8 @@ import logging
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
+
+
 # Setup logger
 logger = logging.getLogger(__name__)
 # Set time and message format of logs
@@ -66,7 +68,8 @@ from application import routes, routes_api
 from application.development import testingAndDevelopmentRoutes
 # from application.projects import location_tracker, strava_activities, water_quality
 from application.projects.water_quality import functionsWaterQual
-from application.projects.strava_activities import DBQueriesStrava
+from application.projects.strava_activities import DBQueriesStrava, StravaAWSS3
+
 # Setup APS scheduler instance
 sched = BackgroundScheduler(daemon=True, timezone=utc)
 
@@ -86,9 +89,10 @@ except Exception as e:
     application.logger.error("Failed to create parse pdfjob")
     application.logger.error(e)
 # Create local public Strava activities topoJSON file
-application.logger.debug("Initializing Strava activities TopoJSON.")
-# DBQueriesStrava.createStravaPublicActTopoJSON()
-application.logger.debug("Strava activities TopoJSON has been initialized.")
+# application.logger.debug("Initializing Strava activities TopoJSON.")
+# topoJSON = DBQueriesStrava.createStravaPublicActTopoJSON()
+# StravaAWSS3.uploadToS3(topoJSON)
+# application.logger.debug("Strava activities TopoJSON has been initialized.")
 
 
 # Shutdown cron thread if the web process is stopped

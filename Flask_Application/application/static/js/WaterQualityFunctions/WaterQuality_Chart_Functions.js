@@ -1,5 +1,5 @@
 function createChart(beachName){
-  console.log("Clicked history button!")
+  // console.log("Clicked history button!")
   // Query API for records
   getBeachHistory(beachName).then(function(beachHistory){
     // console.log("Creating beach history chart")
@@ -30,6 +30,16 @@ function createChart(beachName){
         }]
       },
       options: {
+        onClick: function(event, activeElements){
+          if (activeElements.length > 0){
+            var index = activeElements[0]._index
+            // console.log(index)
+            // console.log(parsedData)
+            // console.log(parsedData.pdfLink[index])
+            // console.log(parsedData.dataX[pdfLink])
+            openDownloadModal(parsedData.dataX[index],parsedData.pdfLink[index]);
+          }
+        },
         layout:{
           padding:{
             right: 15
@@ -37,7 +47,7 @@ function createChart(beachName){
         },
         title: {
           display: true,
-          text: beachName,
+          text: [beachName,"(Click Point to Download Report)"],
           padding: 15,
           fontSize: 15
         },
@@ -111,18 +121,22 @@ function getBeachHistory(beachName){
 function parseBeachData(beachHistory){
   dataY = []
   dataX = []
+  pdfLink = []
+  // pdfDate = []
   // console.log(beachHistory)
   for (i of Object.keys(beachHistory)){
     // console.log(beachHistory[i])
     // dataY.push(moment(beachHistory[i].date, 'DD-MM-YY').toDate());
     dataX.push(moment(beachHistory[i].date, 'YYYY-MM-DD').format("MMM-DD-YY"));
     dataY.push(beachHistory[i].status)
+    pdfLink.push(beachHistory[i].s3PDFURL)
+    // pdfDate.push(moment(beachHistory[i].date, 'YYYY-MM-DD').format("MMM-DD-YY"))
   }
   // console.log("Data X:")
   // console.log(dataX)
   // console.log("Data Y:")
   // console.log(dataY)
-  return {"dataX":dataX, "dataY":dataY}
+  return {"dataX":dataX, "dataY":dataY, "pdfLink":pdfLink}
 };
 
 function resizePopupforChart(){
@@ -135,3 +149,44 @@ function resizePopupforChart(){
   var textContent = document.getElementById('text-content');
   textContent.style.display = "none";
 }
+
+function openDownloadModal(pdfDate, downloadURL){
+
+  console.log(pdfDate)
+  // Modal from https://www.w3schools.com/howto/tryit.asp?filename=tryhow_css_modal
+  // Get the modal
+  var modal = document.getElementById("downloadPDF-modal");
+
+  // Set text
+
+  // Open modal
+  modal.style.display = "block";
+  // Get the button that opens the modal
+
+  // var btn = document.getElementById("btn");
+
+  // Get the <span> element that closes the modal
+  var spanClose = document.getElementById("downloadModalClose");
+  // Set text for downloadURL
+  var link = document.getElementById("pdfDownloadLink");
+  link.setAttribute("href", downloadURL);
+  // Set text for pdf date
+  document.getElementById("downloadPDF").innerHTML = pdfDate
+
+  // When the user clicks the button, open the modal
+  // btn.onclick = function() {
+  //   modal.style.display = "block";
+  // }
+
+  // When the user clicks on <span> (x), close the modal
+  spanClose.onclick = function() {
+    modal.style.display = "none";
+  }
+
+  // When the user clicks anywhere outside of the modal, close it
+  window.onclick = function(event) {
+    if (event.target == modal) {
+      modal.style.display = "none";
+    }
+  }
+};

@@ -1,6 +1,7 @@
 from sqlalchemy import create_engine, or_
 from sqlalchemy.orm import sessionmaker
-from application.projects.water_quality.modelsWaterQual import  beaches, waterQualityMD5, stateStandards, waterQuality
+from application.projects.water_quality.modelsWaterQual import beaches, waterQualityMD5, stateStandards, waterQuality
+from application.projects.water_quality.AWSS3Upload import create_presigned_url
 import os
 from datetime import datetime
 from application import application, Session
@@ -128,7 +129,6 @@ def insertWaterQual(beachDict, md5_fk):
     session.close()
     application.logger.debug("Data added to water quality table!")
 
-
 def getBeachWaterQual():
     """
     Queries Postgres AWS RDS to return the most recent water quality report data for each beach that is tested in SB
@@ -155,6 +155,7 @@ def getBeachWaterQual():
         .join(beaches) \
         .distinct(waterQuality.beach_id) \
         .order_by(waterQuality.beach_id, waterQualityMD5.insdate.desc()).all()
+
 
     # Can't close session here because these results are used in another function
     # session.close()
@@ -199,6 +200,7 @@ def getBeachResults(beach):
         resultDict[i[0].id] = {}
         resultDict[i[0].id]["status"] = i[0].BeachStatus
         resultDict[i[0].id]["date"] = i[1].pdfdate.isoformat()
+        resultDict[i[0].id]["s3PDFURL"] = create_presigned_url(i[1].pdfName)
         # print(i[0].FecColi)
 
     session.close()

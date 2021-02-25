@@ -17,7 +17,7 @@ def connectToS3():
                              aws_secret_access_key=os.getenv("BOTO3_Flask_KEY"))
     return s3_client
 
-def create_presigned_url(actID, expiration=300):
+def create_presigned_url(fileID, expiration=300):
     """Generate a presigned URL to share an S3 object
 
     :param expiration: Time in seconds for the presigned URL to remain valid
@@ -26,17 +26,19 @@ def create_presigned_url(actID, expiration=300):
     # Generate a presigned URL for the S3 object
     # print("Generating temp access URL")
     s3_client = connectToS3()
-    csvName = f"stream_{actID}.csv"
+
     try:
+        if fileID == "activitiesTopoJSON":
+            fileName = "topoJSONPublicActivities.json"
+        else:
+            fileName = f"stream_{fileID}.csv"
         response = s3_client.generate_presigned_url('get_object',
                                                     Params={'Bucket': os.getenv("S3_STREAM_BUCKET"),
-                                                            'Key': csvName},
+                                                            'Key': fileName},
                                                     ExpiresIn=expiration)
     except ClientError as e:
-        print("Error!")
         logging.error(e)
         return None
-
     # The response contains the presigned URL
     return response
 
@@ -65,14 +67,14 @@ def writeMemoryCSV(streamData):
     writer.writerows(zip(*dataDict.values()))
     return memOutput
 
-def uploadToS3(memCSV, actID):
+def uploadToS3(file, actID=None):
     """
 
     :param memCSV:
     :param actID:
     :return:
     """
-    fileName = f"stream_{actID}.csv"
+
     bucket = os.getenv("S3_STREAM_BUCKET")
     conn = connectToS3()
 
@@ -83,10 +85,16 @@ def uploadToS3(memCSV, actID):
         # https://stackoverflow.com/a/45700716
         # https://stackoverflow.com/a/60293770
         # conn.put_object(Body=memCSV.getvalue(), Bucket=bucket, Key=fileName, ContentType='application/vnd.ms-excel')
-        conn.put_object(Body=memCSV.getvalue(), Bucket=bucket, Key=fileName)
+        if actID:
+            fileName = f"stream_{actID}.csv"
+            conn.put_object(Body=file.getvalue(), Bucket=bucket, Key=fileName)
+        else:
+            fileName = "topoJSONPublicActivities.json"
+            conn.put_object(Body=file, Bucket=bucket, Key=fileName)
     except Exception as e:
         application.logger.error(f"Upload to S3 bucket failed in the error: {e}")
         errorEmail.sendErrorEmail(script="UploadToS3Bucket", exceptiontype=e.__class__.__name__, body=e)
     finally:
+        pass
         # Close in-memory buffer file, removing it from memory
-        memCSV.close()
+        # file.close()

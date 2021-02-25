@@ -4,6 +4,7 @@ from email.mime.text import MIMEText
 from application import logger
 from application import application
 from datetime import datetime
+import traceback
 
 port = 465  # For SSL
 # Get email settings from environmental variables
@@ -27,7 +28,8 @@ def sendErrorEmail(script, exceptiontype, body):
     Print statement.
     """
     # Convert error message and exception type to strings
-    body = str(body)
+    # body = str(body)
+    body = str(traceback.format_exc())
     exceptiontype = str(exceptiontype)
     try:
         application.logger.debug("Trying to send error email")

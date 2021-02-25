@@ -11,6 +11,7 @@ from urllib.request import urlretrieve
 from application import app, errorEmail, application
 from application.projects.water_quality import GoogleDriveUploadWaterQuality
 from application.projects.water_quality import DBQueriesWaterQuality
+from application.projects.water_quality import AWSS3Upload
 import os
 from application import logger
 from geojson import Point, Feature, FeatureCollection
@@ -97,6 +98,13 @@ def getWaterQualGeoJSON(records):
         resultDict[beachName]['Lon'] = round(records[i][-2], 5)
         resultDict[beachName]['Lat'] = round(records[i][-1], 5)
         resultDict[beachName]['Name'] = item.waterQuality.beach_rel.BeachName.rstrip()
+        resultDict[beachName]['pdfName'] = item.waterQuality.hash_rel.pdfName.rstrip()
+
+    # Create S3PDFURLS, this is done after the Postgres session is no longer needed since connecting to S3 through
+    # Boto3 would cause the SQL Alchemy session to break early for some reason, this problem was not tied to query times
+
+    for key in resultDict.keys():
+        resultDict[key]['s3PDFURL'] = AWSS3Upload.create_presigned_url(resultDict[key]['pdfName'])
     featList = []
     for key in resultDict.keys():
         # Point takes items as long, lat Point must have (())
@@ -110,7 +118,7 @@ def getWaterQualGeoJSON(records):
 
 def downloadPDF(url, pdfDest):
     """
-    Downloads the water quality PDF with a new name, using the current date, and places it in a destionation folder.
+    Downloads the water quality PDF with a new name, using the current date, and places it in a destination folder.
     The source URL and PDF name do not change, they are updates with new content.
     :param url:
     :param pdfDest:
@@ -173,8 +181,12 @@ def handlePDFStatus(pdfStatus, pdfLoc, hashedText, pdfDict, pdfName):
     else:
         # PDF is new, it contains re-sampled or data fill-ins, upload file to Google Drive
         try:
+
+            #TODO:
+            # Upload to S3 bucket
+            AWSS3Upload.uploadToS3(pdfName,pdfLoc)
             GoogleDriveUploadWaterQuality.addtoGDrive(pdfLoc, pdfName)
-            application.logger.debug("PDF uploaded to Google Drive")
+            application.logger.debug("PDF uploaded to Google Drive and AWSS3")
         except Exception as e:
             # print("Google Drive upload threw an error, emailing exception")
             application.logger.debug("Google drive upload failed, trying to send email report")

@@ -1,11 +1,15 @@
 // Change "0" to ""<10" and null results to "Results Pending"
-function subten(number){
+function subTenOrExceeds(number, standard){
   if (number == 0){
     return "<10"
   } else if (number == null) {
     return "Results Pending"
+  } else if (number > standard) {
+    return "<span style='color:#ff8400'>" + number.toLocaleString() + "</span>"
+  } else if (number == "Yes") {
+    return "<span style='color:#ff8400'>" + number + "</span>"
   } else {
-  return number
+    return number.toLocaleString()
   }
 };
 
