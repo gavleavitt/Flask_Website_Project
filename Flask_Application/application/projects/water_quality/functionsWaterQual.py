@@ -125,7 +125,7 @@ def downloadPDF(url, pdfDest):
     :return:
     """
     # url = quote(url)
-    urlretrieve(url, pdfDest)
+    return urlretrieve(url, pdfDest)
 
 
 def md5hash(text):
@@ -169,7 +169,8 @@ def handlePDFStatus(pdfStatus, pdfLoc, hashedText, pdfDict, pdfName):
     if pdfStatus == "Exists":
         # print("Already processed this pdf, removing local pdf and quitting!")
         # PDF has been processed, remove local file
-        application.logger.debug("Already processed PDF, removing local PDF")
+        application.logger.debug("Already processed PDF, quiting")
+        # quit()
         try:
             os.remove(pdfLoc)
         except:
@@ -184,14 +185,14 @@ def handlePDFStatus(pdfStatus, pdfLoc, hashedText, pdfDict, pdfName):
 
             #TODO:
             # Upload to S3 bucket
-            AWSS3Upload.uploadToS3(pdfName,pdfLoc)
+            AWSS3Upload.uploadToS3(pdfName, pdfLoc)
             GoogleDriveUploadWaterQuality.addtoGDrive(pdfLoc, pdfName)
             application.logger.debug("PDF uploaded to Google Drive and AWSS3")
         except Exception as e:
             # print("Google Drive upload threw an error, emailing exception")
-            application.logger.debug("Google drive upload failed, trying to send email report")
+            application.logger.debug("Cloud upload failed, trying to send email report")
             application.logger.debug(e)
-            errorEmail.sendErrorEmail(script="addtoGDrive", exceptiontype=e.__class__.__name__, body=e)
+            errorEmail.sendErrorEmail(script="UploadtoCloud", exceptiontype=e.__class__.__name__, body=e)
         # print("Finished with local PDF, removing it from system")
         os.remove(pdfLoc)
     if checkResamp(pdfDict['cleanedtext']) == True:
@@ -459,10 +460,12 @@ def parsePDF():
     downloadURL = "http://countyofsb.org/uploadedFiles/phd/PROGRAMS/EHS/Ocean%20Water%20Weekly%20Results.pdf"
     # Kick off script by downloading PDF
     application.logger.debug("Starting to parse PDF")
-    urlretrieve(downloadURL, pdfDest)
-    # downloadPDF(downloadURL, pdfDest)
+    # pdfFile = urlretrieve(downloadURL)
+    # urlretrieve(downloadURL, pdfDest)
+    downloadPDF(downloadURL, pdfDest)
     application.logger.debug("Downloaded PDF!")
     # Get pdf details
+    # pdfDict = getPDFContents(pdfFile)
     pdfDict = getPDFContents(pdfLoc)
     application.logger.debug("PDF contents have been extracted")
     # Hash text of pdf document, I believe encode is required for the hashing to work properly
@@ -473,6 +476,7 @@ def parsePDF():
     pdfstatus = DBQueriesWaterQuality.checkmd5(hashedText, pdfDict['pdfDate'])
     application.logger.debug(f"PDF md5 has been checked, PDF status is {pdfstatus}")
     # Handle the results of the md5 hash check and control generation of dictionaries and interactions with postgres
+    # handlePDFStatus(pdfstatus, pdfFile, hashedText, pdfDict, pdfName)
     handlePDFStatus(pdfstatus, pdfLoc, hashedText, pdfDict, pdfName)
     application.logger.debug("All done processing PDF!")
     return pdfName

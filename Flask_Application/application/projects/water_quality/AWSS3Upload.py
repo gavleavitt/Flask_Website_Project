@@ -62,5 +62,6 @@ def uploadToS3(fileName, filePath):
         application.logger.error(f"Upload water quality to S3 bucket failed in the error: {e}")
         errorEmail.sendErrorEmail(script="UploadWaterQualityToS3Bucket", exceptiontype=e.__class__.__name__, body=e)
     finally:
+        pass
         # Close in-memory buffer file, removing it from memory
-        filePath.close()
+        # filePath.close()
