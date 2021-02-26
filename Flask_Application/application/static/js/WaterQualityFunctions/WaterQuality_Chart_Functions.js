@@ -140,14 +140,28 @@ function parseBeachData(beachHistory){
 };
 
 function resizePopupforChart(){
+
+  // beachreports.eachLayer(function(layer){
+  //   // console.log(layer.getPopup())
+  //   latlng = layer.getLatLng()
+  //   console.log(latlng)
+  //   layer.getPopup().setLatLng(latlng)
+  // })
   var popupContent = document.getElementsByClassName('leaflet-popup-content-wrapper')
   var historyContent = document.getElementById('hist-content')
   popupContent[0].style.width = "500px";
   historyContent.style.width = "400px";
   popupContent[0].style.height = "300px";
   historyContent.style.height = "200px";
+  var contextArrow = document.getElementsByClassName('leaflet-popup-tip-container')[0]
+  contextArrow.style.marginLeft = "-101px";
   var textContent = document.getElementById('text-content');
   textContent.style.display = "none";
+  // see: https://leafletjs.com/reference-1.7.1.html#popup-update
+  // https://gis.stackexchange.com/a/244961
+  // Update popup to recalculate its size
+
+
 }
 
 function openDownloadModal(pdfDate, downloadURL){
