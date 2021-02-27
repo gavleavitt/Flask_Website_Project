@@ -360,6 +360,10 @@
 					if (currentActive[0].id == "current"){
 						// console.log("Clicked current tab")
 
+						// Reset context arrow location
+						var contextArrow = document.getElementsByClassName('leaflet-popup-tip-container')[0]
+						contextArrow.style.marginLeft = "-20px";
+
 						// Hide chart div
 						var historyChartContent = document.getElementById('hist-Tab');
 						historyChartContent.style.display = "none";

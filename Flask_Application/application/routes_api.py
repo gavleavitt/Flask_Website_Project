@@ -13,11 +13,11 @@ Created on Fri May 22 17:45:44 2020
 from application import app, application
 from flask import request, Response, copy_current_request_context
 from flask import jsonify
-from application import script_config
 from application.projects.location_tracker import DBQueriesTracker, objectGenerationTracker
 from application.flaskAuth.authentication import auth
 from application.projects.strava_activities import WebHookFunctionsStrava, DBQueriesStrava, StravaAWSS3
 from application.projects.water_quality import DBQueriesWaterQuality
+import os
 from threading import Thread
 
 # @app.route establishes the URL within the domain
@@ -92,7 +92,7 @@ def get_trackgeojson():
     return result
 
 
-@app.route(script_config.strava_callback_url, methods=['GET', 'POST'])
+@app.route(os.environ.get("strava_callback_url"), methods=['GET', 'POST'])
 def subCallback():
     """
     Strava subscription callback URL.

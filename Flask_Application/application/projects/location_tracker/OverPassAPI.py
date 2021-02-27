@@ -4,7 +4,6 @@ from shapely.ops import nearest_points
 import shapely.wkt
 from pyproj import Transformer
 import pyproj
-from application import script_config as dbconfig
 from shapely.geometry import Point
 from shapely.ops import transform
 
@@ -85,7 +84,7 @@ def handleNearestOSMWays(lat, lon, type):
                 nearestRoute = getNearestWay(cycleQ, project, inputCoord)
                 resDict["Route"] = nearestRoute
             # elif type in ("MTB", "Walk", "Hike", "Trail"):
-            elif type in dbconfig.settings["AOI_Outdoors"]:
+            elif type in ['Toro Park','Fort Ord', 'UCSC Trails', 'Soquel Demo','Kern Canyon']:
                 # same as road query but can catch all types of named ways
                 trailQ = api.get(f'way["name"](around:{rad},{lat},{lon})', verbosity='geom')
                 nearestTrail = getNearestWay(trailQ, project, inputCoord)

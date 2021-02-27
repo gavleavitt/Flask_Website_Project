@@ -8,7 +8,6 @@ Created on Sun May 24 22:25:08 2020
 """
 from datetime import datetime
 from geojson import Point, Feature, FeatureCollection
-from application import script_config as dbconfig
 from application.projects.location_tracker.modelsTracker import gpsPointModel, gpstracks, AOI, CaliforniaPlaces, CACounty
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
