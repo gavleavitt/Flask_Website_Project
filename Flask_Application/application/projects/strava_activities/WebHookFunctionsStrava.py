@@ -1,7 +1,6 @@
 import os
-from application import application, script_config, errorEmail
+from application import application, errorEmail
 from application.projects.strava_activities import OAuthStrava, DBQueriesStrava, APIFunctionsStrava, StravaAWSS3
-import time
 import json
 from threading import Thread
 
@@ -63,12 +62,13 @@ def createStravaWebhook(client):
         # as all calls to leavittmapping.com are redirected to HTTPS, consider making HTTP only mapping to domain.
         application.logger.debug(f"Attempting to create a new Strava webhook subscription with the values: client id: "
                                  f"{os.getenv('STRAVA_CLIENT_ID')} client_secret: {os.getenv('STRAVA_CLIENT_SECRET')}"
-                                 f"callback url: {(script_config.htttpSiteIndex + script_config.strava_callback_url)} "
+                                 f"callback url: {(os.getenv('httpSiteIndex') + os.getenv('strava_callback_url'))} "
                                  f"and the verify token: {os.getenv('STRAVA_VERIFY_TOKEN')}")
+
         response = client.create_subscription(client_id=os.getenv("STRAVA_CLIENT_ID"),
                                               client_secret=os.getenv("STRAVA_CLIENT_SECRET"),
                                               callback_url=(
-                                                      script_config.htttpSiteIndex + script_config.strava_callback_url),
+                                                      os.getenv('httpSiteIndex') + os.getenv('strava_callback_url')),
                                               verify_token=os.getenv("STRAVA_VERIFY_TOKEN"))
         application.logger.debug(f"Response id is {response.id}")
         # Update database with sub id

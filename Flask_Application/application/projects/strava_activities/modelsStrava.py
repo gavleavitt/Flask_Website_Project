@@ -20,7 +20,9 @@ class athletes(Base):
     scopes = Column(String)
     sub_id = Column(Integer)
     refresh_token = Column(String)
+    access_token_exp = Column(DateTime)
     athlete_name = Column(String)
+    access_token = Column(BigInteger)
 
 class sub_update(Base):
     __tablename__ = 'strava_webhook_updates'

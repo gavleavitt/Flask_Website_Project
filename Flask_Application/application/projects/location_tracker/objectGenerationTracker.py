@@ -10,7 +10,6 @@ from application.projects.location_tracker import DBQueriesTracker as trackerFun
 from application.projects.location_tracker import OverPassAPI as OPA
 from application.projects.location_tracker.modelsTracker import gpsPointModel, gpstracks
 from application import application
-from application import script_config as dbconfig
 from application import Session
 import time
 from datetime import datetime
@@ -98,7 +97,7 @@ def newGPSRecord(data, actStatus):
         gpsdatmodel object containing data to be inserted into DB.
 
     """
-    geomData = (f"SRID={dbconfig.settings['srid']};POINT({data['Longitude']} {data['Latitude']})")
+    geomData = (f"SRID=4326;POINT({data['Longitude']} {data['Latitude']})")
     queryData = handleTrackerQueries(geomData, data['Latitude'], data['Longitude'], data['Profile'].replace("+", " "))
     timeDict = convertTime(data['Timestamp'], data['Start_timestamp'], data['Time_Zone'])
     model = gpsPointModel(lat=data['Latitude'], lon=data['Longitude'], satellites=int(data['Satellites']),
@@ -165,7 +164,7 @@ def handleTrackerQueries(geomData, lat, lon, profile):
         res["dist_road"] = roadInfo["distance"]
         # Check if the AOI intersection returned a result in the AOI list, if so calcuate the nearest trail and distance to
         # trail
-        if res["AOI"] in dbconfig.settings["AOI_Outdoors"]:
+        if res["AOI"] in ['Toro Park','Fort Ord', 'UCSC Trails', 'Soquel Demo','Kern Canyon']:
             outdoors = trackerFunc.getNearestTrail(geomData)
             res["trail"] = outdoors['trail']
             res['dist_trail'] = outdoors['trail_distance']
@@ -218,7 +217,7 @@ def handleTracks(coordinate2, locationType):
             # print("Movement!")
             # Movement greater than 10m, returns dictionary with linestring formmated WKT record and activity type
             return {
-                'Linestring': f'SRID={dbconfig.settings["srid"]};'
+                'Linestring': f'SRID=4326;'
                               f'LINESTRING({record[recid[0]]["lon"]} {record[recid[0]]["lat"]}, {coordinate2})',
                 "activity": "Yes", "length": dist}
         else:
