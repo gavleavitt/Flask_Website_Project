@@ -59,7 +59,7 @@ class strava_activities(Base):
     end_latlng = Column(String(100))
     start_latitude = Column(Float)
     start_longitude = Column(Float)
-    device_name = Column(Float(100))
+    device_name = Column(String(100))
     achievement_count = Column(Integer)
     pr_count = Column(Integer)
     private = Column(String(50))
@@ -71,7 +71,14 @@ class strava_activities(Base):
     description = Column(String(255))
     workout_type = Column(String(100))
     calories = Column(Float)
+    ## Wahoo data and sensor data
     avgtemp = Column(Integer)
+    has_heartrate = Column(String(100))
+    max_heartrate = Column(Float)
+    average_heartrate = Column(Float)
+    average_cadence = Column(Float)
+
+    ##
     geom = Column(Geometry(geometry_type='LINESTRINGM', srid=4326, from_text = 'ST_GeomFromEWKT',  name='geometry',
                            dimension=3))
     gear_rel = relationship(strava_gear, backref="strava_gear")

@@ -147,6 +147,8 @@ def insertOriginalAct(actDict):
                                calories=actDict['calories'], device_name=actDict['device_name'],
                                manual=actDict['manual'], athlete_id=actDict['athlete_id'],
                                type_extended=actDict['type_extended'], avgtemp=actDict['average_temp'],
+                               has_heartrate=actDict['has_heartrate'], average_cadence=actDict["average_cadence"],
+                               average_heartrate=actDict['average_heartrate'], max_heartrate=actDict['max_heartrate'],
                                geom=actDict['geom_wkt'])
     session = Session()
     session.add(insert)
@@ -183,6 +185,10 @@ def createStravaPublicActTopoJSON():
                           strava_activities.average_speed,
                           strava_activities.max_speed,
                           strava_activities.type_extended,
+                          strava_activities.has_heartrate,
+                          strava_activities.average_cadence,
+                          strava_activities.max_heartrate,
+                          strava_activities.average_heartrate,
                           strava_gear.gear_name) \
         .join(strava_activities_masked.act_rel) \
         .join(strava_activities.gear_rel, isouter=True) \
@@ -197,7 +203,9 @@ def createStravaPublicActTopoJSON():
                     "average_speed": round(row.average_speed, 1), "max_speed": row.max_speed,
                     "gear_name": row.gear_name,
                     "type_extended": row.type_extended, "moving_time": row.moving_time.seconds,
-                    "average_watts": row.average_watts}
+                    "average_watts": row.average_watts,"has_heartrate":row.has_heartrate,
+                    "average_cadence":row.average_cadence, "max_heartrate":row.max_heartrate,
+                    "average_heartrate":row.average_heartrate}
         # Take ST_AsGeoJSON() result and load as geojson object
         geojsonGeom = geojson.loads(row[0])
         # Build the feature and add to feature list
