@@ -53,7 +53,8 @@ def writeMemoryCSV(streamData):
     # Create in-memory text buffer
     memOutput = StringIO()
     dataDict = {}
-    csvTypes = ['time', 'altitude', 'velocity_smooth', 'grade_smooth']
+    # Exclude latlng from CSV, these data will be shared to the public
+    csvTypes = ['time', 'altitude', 'velocity_smooth', 'grade_smooth', "distance", "heartrate", "cadence", "temp"]
     # Extract data from stream dictionary
     for streamType in csvTypes:
         dataDict[streamType] = streamData[streamType].data

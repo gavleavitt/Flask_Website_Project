@@ -46,11 +46,10 @@ def getFullDetails(client, actId):
     Log = logging.getLogger()
     Log.setLevel('ERROR')
     # Stream data to get from activity streams
-    types = ['time', 'latlng', 'altitude', 'velocity_smooth', 'grade_smooth']
+    types = ['time', 'latlng', 'altitude', 'velocity_smooth', 'grade_smooth', "distance", "heartrate", "cadence", "temp"]
     # Get activity details as a dictionary
     act = client.get_activity(actId).to_dict()
-    # Get starttime and convert to datetime object
-    # starttime = datetime.fromisoformat(act['start_date'])
+
     # Get the activity stream details for the activity id
     stream = client.get_activity_streams(actId, types=types)
     # Get athlete ID directly from API call, instead of digging into the nested result provided by get_activity
@@ -95,15 +94,17 @@ def getFullDetails(client, actId):
         act['type_extended'] = "Run"
     elif act['type'] == "Hike":
         act['type_extended'] = "Walk"
-    # Wahoo Bolt provides average temp, check if populated, if not set to null
-    if act['average_temp'] == "":
-        act['average_temp'] = None
+    # Wahoo Bolt provides additional data, check if populated, if not set to null
+    wahooList = ["average_temp", "has_heartrate", "max_heartrate", "average_heartrate", "average_cadence"]
+    for i in wahooList:
+        if act[i] == "":
+            act[i] = None
     # List of dictionary keys to remove, these are null or uninteresting
     remove_keys = ['guid', 'external_id', 'athlete', 'location_city', 'location_state', 'location_country',
                    'kudos_count', 'comment_count', 'athlete_count', 'photo_count', 'total_photo_count', 'map',
                    'trainer', 'commute', 'gear', 'device_watts', 'has_kudoed', 'best_efforts',
                    'segment_efforts', 'splits_metric', 'splits_standard', 'weighted_average_watts',
-                   'suffer_score', 'has_heartrate', 'average_heartrate', 'max_heartrate', 'average_cadence',
+                   'suffer_score',
                    'embed_token', 'trainer', 'photos', 'instagram_primary_photo', 'partner_logo_url',
                    'partner_brand_tag', 'from_accepted_tag', 'segment_leaderboard_opt_out', 'highlighted_kudosers',
                    'laps']
