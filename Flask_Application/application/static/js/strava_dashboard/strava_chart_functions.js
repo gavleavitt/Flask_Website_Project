@@ -110,6 +110,10 @@ function getS3CSVData(presignedURL){
 
 // Groups, zero-fills, and sorts activities by activity type and date to provide data that are formatted for use in Chart.JS. Format is: {ActivityType1:[{"x":x-value(dateValue),"y":y-value(distance, elevation, etc),"z":date-sorting value},...], ...}
 function binActData(filteredGroup, btnSelection){
+  //TODO
+  // if (clear == "Yes"){
+  //   geoJSONDat = null
+  // }
   geoJSONDat = filteredGroup.toGeoJSON()
   // console.log("raw geojson is:")
   // console.log(JSON.parse(JSON.stringify(geoJSONDat)))
@@ -327,7 +331,7 @@ function createStreamLineChart(){
     // Activate label nearest to the pointer
     hover: {
        mode: 'nearest',
-       intersect: false,
+       intersect: true,
        // see https://stackoverflow.com/a/58529907
        // place onHover in here with hover options so I can extend the functionality
        onHover: function(event, activeElements) {
@@ -352,6 +356,10 @@ function createStreamLineChart(){
       //     getDistanceAlongLine(portionAlong);
       //   }
       // },
+      tooltips: {
+        mode: 'index',
+        intersect: false,
+      },
       elements:{
         point:{
           radius:0,
@@ -470,17 +478,6 @@ function createActivityChart(chartData) {
   });
 };
 
-// function chartClickEvent(clickEvent, data){
-//   console.log(clickEvent);
-//   console.log(data);
-// };
-
-// function activateChartButton(){
-//   // When user picks a new date range or activity type, active the correct active chart type button
-//   console.log("Activating button for:")
-//   console.log(document.querySelector('.show-data').querySelectorAll(".chart-active")[0])
-//   document.querySelector('.show-data').querySelectorAll(".chart-active")[0].click()
-// }
 
 // Update chart labels and datasets based on user button selections
 function updateChart(filteredGroup,tabDataType){
@@ -490,6 +487,11 @@ function updateChart(filteredGroup,tabDataType){
   var actCount = parseInt(document.getElementById("actCount").innerText)
   // see https://stackoverflow.com/a/55972382 for div update method
   if (actCount == 0){
+    // TODO:
+    // chartData = binActData(filteredGroup, btnSelection);
+    // clear out binned actdata
+    // actDataDict = {"count":null, "dist":null, "elev":null, "calories":null, "totalTime":null, "speed":null, "moveTime":null}
+    geoJSONDat = null
     document.getElementById("chart-cont").classList.remove("show-data");
     document.getElementById("chart-cont").classList.add("no-data");
     document.getElementById("chart-line-cont").classList.remove("show-data");
