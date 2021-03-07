@@ -57,7 +57,7 @@ def uploadToS3(fileName, filePath):
         # https://stackoverflow.com/a/45700716
         # https://stackoverflow.com/a/60293770
         # conn.put_object(Body=memCSV.getvalue(), Bucket=bucket, Key=fileName, ContentType='application/vnd.ms-excel')
-        conn.put_object(Body=filePath.getvalue(), Bucket=bucket, Key=fileName)
+        conn.put_object(Body=filePath, Bucket=bucket, Key=fileName)
     except Exception as e:
         application.logger.error(f"Upload water quality to S3 bucket failed in the error: {e}")
         errorEmail.sendErrorEmail(script="UploadWaterQualityToS3Bucket", exceptiontype=e.__class__.__name__, body=e)

@@ -1,18 +1,45 @@
-zoomPlugin = {
-  zoom: {
-							pan: {
-								enabled: true,
-								mode: 'y'
-							},
-							zoom: {
-								enabled: true,
-								mode: 'y'
-							}
-						}
-}
+
+// zoom is slow, look into https://github.com/chartjs/chartjs-plugin-zoom/issues/356
+// zoomPlugin = {
+//   zoom: {
+// 							pan: {
+// 								enabled: true,
+// 								mode: 'y'
+// 							},
+// 							zoom: {
+// 								enabled: true,
+// 								mode: 'y'
+// 							}
+// 						}
+// }
 
 // Creates single activity chart in initial state with placeholder data, this allows for a better initial transition from the multi-activity bar plot
 function createStreamLineChart(){
+  // See: https://stackoverflow.com/a/45172506
+  // Method taken from: https://stackoverflow.com/a/45800841
+  // Adds vertical bar based on cursor location
+  Chart.plugins.register({
+     afterDatasetsDraw: function(chart) {
+        if (chart.tooltip._active && chart.tooltip._active.length) {
+           var activePoint = chart.tooltip._active[0],
+              ctx = chart.ctx,
+              y_axis = chart.scales['y-axis-0'],
+              x = activePoint.tooltipPosition().x,
+              topY = y_axis.top,
+              bottomY = y_axis.bottom;
+           // draw line
+           ctx.save();
+           ctx.beginPath();
+           ctx.moveTo(x, topY);
+           ctx.lineTo(x, bottomY);
+           ctx.lineWidth = 2;
+           ctx.strokeStyle = '#0f0f0f';
+           ctx.stroke();
+           ctx.restore();
+        }
+     }
+  });
+  // Consider using down-sample plugin to reduce data size: https://github.com/AlbinoDrought/chartjs-plugin-downsample
   var streamChart = document.getElementById('chart-line').getContext('2d');
   actStreamLineChart = new Chart(streamChart, {
     type: 'line',
@@ -21,14 +48,15 @@ function createStreamLineChart(){
       datasets:[{
         backgroundColor: 'rgb(255, 99, 132)',
         borderColor: 'rgb(255, 99, 132)',
-        data:[30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30]
-        // pointHitRadius: 50
+        data:[30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30],
+        pointHitRadius: 1
       },{
         backgroundColor: 'rgb(0, 0, 0, 0)',
-        borderColor: 'rgb(3, 140, 5, 0.8)',
+        borderColor: 'rgb(82, 82, 82, 0.8)',
         fill: false,
         borderWidth: 3,
-        data:[30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30]
+        data:[30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30],
+        pointHitRadius: 0
       }]
     },
     // Activate label nearest to the pointer
@@ -38,8 +66,8 @@ function createStreamLineChart(){
        // see https://stackoverflow.com/a/58529907
        // place onHover in here with hover options so I can extend the functionality
        onHover: function(event, activeElements) {
-         // console.log(e)
          if (activeElements.length > 0){
+           console.log(event)
            var index = activeElements[0]._index
            var totalRecords = actStreamLineChart.data.labels.length
            var portionAlong = (index/totalRecords)
@@ -49,19 +77,29 @@ function createStreamLineChart(){
        }
     },
     options:{
-      // onHover: function(event, activeElements) {
-      //   // console.log(e)
-      //   if (activeElements.length > 0){
-      //     var index = activeElements[0]._index
-      //     var totalRecords = actStreamLineChart.data.labels.length
-      //     var portionAlong = (index/totalRecords)
-      //     // Get total length of records
-      //     getDistanceAlongLine(portionAlong);
-      //   }
-      // },
       tooltips: {
         mode: 'index',
+        position: 'cursor',
         intersect: false,
+        // Filter out average bar tooltip information
+        filter: function (tooltipItem) {
+          // Get dataset index value
+          var dSet = tooltipItem.datasetIndex;
+          // Average dataset will always be dataset index 1
+          if (dSet == 1) {  // <-- dataset index
+              return false;
+          } else {
+              return true;
+          }
+        },
+        // Populate ancillary data in tooltip
+        callbacks: {
+           afterBody: function(t, d) {
+              // Get hover location index
+              index = t[0].index
+              return populateAncillaryData(index)
+           }
+        }
       },
       elements:{
         point:{
@@ -74,6 +112,17 @@ function createStreamLineChart(){
       },
       scales:{
         xAxes:[{
+          // Added, testing if zoom plugin works better with large data if x is set to time
+          // type: "time",
+          // time: {
+          //   format: 'HH:mm',
+          //    unit: 'minute',
+          //    // unit: 'hour',
+          //    displayFormats: {
+          //      minute: 'HH:mm'
+          //      // hour: 'HH:mm'
+          //    }
+          //  },
           scaleLabel:{
             display: true,
             labelString: "Time(HH:MM)",
@@ -99,9 +148,14 @@ function createStreamLineChart(){
           }
         }]
       },
-      plugins: zoomPlugin
+      // plugins: zoomPlugin
     }
   })
+  // see https://stackoverflow.com/questions/38072572/position-tooltip-based-on-mouse-position
+  // Tooltip draws at mouse cursor position, instead of at intersection point with dataset
+  Chart.Tooltip.positioners.cursor = function(chartElements, coordinates) {
+    return coordinates;
+   };
 }
 
 function getS3StreamURL(actID){
@@ -137,7 +191,7 @@ function handleStreamChartUpdate(streamType, filteredGroup){
         // This CSV has already been loaded, update existing table
         actID = feature.feature.properties.actID
         streamdata = populateStreamChartUpdateData(streamType);
-        updateStreamChart(streamdata["dataX"],streamdata["dataY"], actType, streamdata["dataYAvg"], streamdata["yLabel"], streamdata["xLabel"])
+        updateStreamChart(streamdata, actType);
       } else {
         // This CSV has not been loaded, load it
         actID = feature.feature.properties.actID
@@ -146,7 +200,8 @@ function handleStreamChartUpdate(streamType, filteredGroup){
         }).then(function(csvData){
           csvDatObject = $.csv.toObjects(csvData);
           streamdata = populateStreamChartUpdateData(streamType);
-          updateStreamChart(streamdata["dataX"],streamdata["dataY"], actType, streamdata["dataYAvg"], streamdata["yLabel"], streamdata["xLabel"])
+          // updateStreamChart(streamdata["dataX"],streamdata["dataY"], actType, streamdata["dataYAvg"], streamdata["yLabel"], streamdata["xLabel"])
+          updateStreamChart(streamdata, actType);
         })
       }
     })
@@ -157,13 +212,17 @@ function handleStreamChartUpdate(streamType, filteredGroup){
 // Callback function approach
 //https://stackoverflow.com/a/14220323
 //https://stackify.com/return-ajax-response-asynchronous-javascript-call/
-function updateStreamChart(dataX,dataY, actType, dataYAvg, yLabel, xLabel){
-  actStreamLineChart.data.labels = dataX
-  actStreamLineChart.data.datasets[0].data = dataY;
-  actStreamLineChart.data.datasets[0].label = yLabel
+function updateStreamChart(streamdata, actType){
+  // Update x, time, data
+  actStreamLineChart.data.labels = streamdata["dataX"]
+  // Update main, displayed, data
+  actStreamLineChart.data.datasets[0].data = streamdata["dataY"]
+  // Update Y-data label, used on mouseover tooltip
+  actStreamLineChart.data.datasets[0].label = streamdata["yLabel"]
+  // Turn off legend, not needed
   actStreamLineChart.options.legend.display = false
-  actStreamLineChart.options.scales.yAxes[0].scaleLabel.labelString = yLabel
-  // Color based on type
+  actStreamLineChart.options.scales.yAxes[0].scaleLabel.labelString = streamdata["yLabel"]
+  // Color based on activity type, backgroundColor is the fill under the data and borderColor is the line color
   if (actType=="Mountain Bike") {
     actStreamLineChart.data.datasets[0].backgroundColor = 'rgba(228, 26, 28, 0.4)'
     actStreamLineChart.data.datasets[0].borderColor = 'rgba(228, 26, 28)'
@@ -177,27 +236,73 @@ function updateStreamChart(dataX,dataY, actType, dataYAvg, yLabel, xLabel){
     actStreamLineChart.data.datasets[0].backgroundColor =  'rgba(152, 78, 163, 0.4)'
     actStreamLineChart.data.datasets[0].borderColor = 'rgba(152, 78, 163)'
   }
+
   // Add average data
-  actStreamLineChart.data.datasets[1].data = dataYAvg;
-  actStreamLineChart.data.datasets[1].label = "Average " + yLabel
+  actStreamLineChart.data.datasets[1].data = streamdata["dataYAvg"];
+  actStreamLineChart.data.datasets[1].label = "";
+  // Tooltip info for average bar, disabled for now
+  // actStreamLineChart.data.datasets[1].label = "Average " + streamdata["yLabel"]
+
   // actStreamLineChart.data.datasets[1].backgroundColor = 'rgba(3, 140, 5, 0.4)'
   // actStreamLineChart.data.datasets[1].borderColor = 'rgba(3, 140, 5)'
+
   // Issue data update
   actStreamLineChart.update();
 }
 
+// Formats ancillary data displayed in the single activity chart tooltip
+function populateAncillaryData(index){
+  // Get active button
+  var active = document.getElementsByClassName('singleAct chart-active')[0].id
+  // Get object details at index location
+  var ancilObj = csvDatObject[index];
+  // Return formatted text for tooltip depending on which stream dataset is active
+  if (active == "elevation-stream-btn"){
+    return checkAncillaryData("distance", ancilObj["distance"]) + "Elevation(Feet):" + ancilObj["altitude"] + "\n" + "Speed(mph):" + ancilObj["velocity_smooth"] + "\n" + "Grade(%):" + ancilObj["grade_smooth"] + "\n" + checkAncillaryData("cadence", ancilObj["cadence"]) + checkAncillaryData("heartrate",ancilObj["heartrate"])
+  } else if (active == "speed-stream-btn"){
+    return checkAncillaryData("distance", ancilObj["distance"]) + "Elevation(Feet):" + ancilObj["altitude"] + "\n" + "Grade(%):" + ancilObj["grade_smooth"] + "\n" + checkAncillaryData("cadence", ancilObj["cadence"]) + checkAncillaryData("heartrate",ancilObj["heartrate"])
+  } else if (active == "grade-stream-btn"){
+    return checkAncillaryData("distance", ancilObj["distance"]) + "Elevation(Feet):" + ancilObj["altitude"] + "\n" +  "Speed(mph):" + ancilObj["velocity_smooth"] + "\n" + checkAncillaryData("cadence", ancilObj["cadence"]) + checkAncillaryData("heartrate",ancilObj["heartrate"])
+  } else if (active == "cadence-stream-btn"){
+    return checkAncillaryData("distance", ancilObj["distance"]) + "Elevation(Feet):" + ancilObj["altitude"] + "\n" +  "Speed(mph):" + ancilObj["velocity_smooth"] + "\n" + "Grade(%):" + ancilObj["grade_smooth"] + "\n" + checkAncillaryData("heartrate",ancilObj["heartrate"])
+  } else if (active == "heartrate-stream-btn"){
+    return checkAncillaryData("distance", ancilObj["distance"]) + "Elevation(Feet):" + ancilObj["altitude"] + "\n" + "Speed(mph):" + ancilObj["velocity_smooth"] + "\n" + "Grade(%):" + ancilObj["grade_smooth"]  + "\n" + checkAncillaryData("cadence", ancilObj["cadence"])
+  } else if (active == "temperature-stream-btn"){
+    // Do nothing for now
+  }
+}
 
+function getDistanceAlongLine(portionAlong){
+  // Get active geometry from Leaflet
+  // variable holding active data
+  filteredGroup.eachLayer(function(layer){
+    console.log(layer)
+  })
+}
+
+// Check if Wahoo and other sensor data is available, if so set text, if not return empty text
+function checkAncillaryData(datType, sensorData){
+  if (typeof sensorData !== "undefined"){
+    if (datType == "cadence"){
+      return "Cadence(rpm):" + sensorData + "\n"
+    } else if (datType == "heartrate"){
+      return "Heart Rate(bpm):" + sensorData
+    } else if (datType == "distance"){
+        return "Distance(Miles):" + (sensorData*0.000189394).toFixed(1) + "\n"
+    }
+  } else {
+    return ""
+  }
+}
 
 function populateStreamChartUpdateData(streamType){
-  dataY = []
-  dataX = []
-  dataYAvg = []
-  // var count = null
-  // var max = null
+  var dataY = []
+  var dataX = []
+  var dataYAvg = []
   for (i of Object.keys(csvDatObject)){
     if (streamType == "elevation-stream-btn" || streamType === null){
       dataY.push(Math.round(parseFloat(csvDatObject[i].altitude)*3.28))
-      var yLabel = "Feet"
+      var yLabel = "Elevation(Feet)"
     } else if (streamType == "speed-stream-btn"){
       dataY.push((parseFloat(csvDatObject[i].velocity_smooth)*2.23694).toFixed(1))
       var yLabel = "Speed(mph)"
@@ -206,21 +311,20 @@ function populateStreamChartUpdateData(streamType){
       var yLabel = "Grade(%)"
     } else if (streamType == "cadence-stream-btn") {
       dataY.push(parseFloat(csvDatObject[i].cadence).toFixed(1))
-      var yLabel = "Cadence(RPM)"
+      var yLabel = "Cadence(rpm)"
     } else if (streamType == "heartrate-stream-btn") {
       dataY.push(parseFloat(csvDatObject[i].heartrate).toFixed(1))
-      var yLabel = "Heart Rate(BPM)"
+      var yLabel = "Heart Rate(bpm)"
     } else if (streamType == "temperature-stream-btn") {
       dataY.push((parseFloat(csvDatObject[i].temp)*1.8+32).toFixed(1))
       var yLabel = "Temperature(F)"
     }
     var xLabel = "Time"
-    // dataX.push(parseInt(csvDatObject[i].time))
+    // Populate x-axis (time data)
     dataX.push(new Date(parseInt(csvDatObject[i].time)*1000).toISOString().substr(11,5));
-    // count += 1
-    // if (parseInt(csvDatObject[i].time) > max){
-    //   max = parseInt(csvDatObject[i].time)
-    // }
+    // Momemt approach
+    // see https://stackoverflow.com/a/43787158
+    // dataX.push(moment.utc(csvDatObject[i].time*1000).format('HH:mm'));
   }
   // console.log(dataY)
   // Get total value
@@ -230,10 +334,9 @@ function populateStreamChartUpdateData(streamType){
   }
   // Calculate average
   var averageDat = totalValue/dataY.length
-  console.log(averageDat)
   // build average array
   for (i = 0; i < dataY.length; i++) {
     dataYAvg.push(averageDat.toFixed(1))
   }
-  return {"dataX":dataX, "dataY":dataY, "dataYAvg":dataYAvg, "yLabel":yLabel, "xLabel":xLabel}
+  return {"dataX":dataX, "xLabel":xLabel, "dataY":dataY, "yLabel":yLabel, "dataYAvg":dataYAvg}
 }
