@@ -57,18 +57,28 @@
 	<!-- jquery-csv -->
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-csv/1.0.11/jquery.csv.min.js"></script>
 
+	<!-- Load chartjs zoom plugin -->
+	<!-- https://github.com/chartjs/chartjs-plugin-zoom -->
+	<!-- <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.3"></script> -->
+	<script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8"></script>
+	<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@0.7.7"></script>
+
 	<!-- Tabulator -->
 	<link href="https://unpkg.com/tabulator-tables/dist/css/tabulator.min.css" rel="stylesheet">
 	<script type="text/javascript" src="https://unpkg.com/tabulator-tables/dist/js/tabulator.min.js"></script>
 
+	<!-- TurfJS -->
+	<script src='https://unpkg.com/@turf/turf@6.3.0/turf.min.js'></script>
 	<!--jquery adds "$." functionality-->
 	<!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script> -->
 
 	<!-- Local static files-->
 	<!-- Custom local javascript functions -->
 	<script src="{{ url_for('static', filename='js/strava_dashboard/strava_dashboard_functions.js') }}"></script>
+	<script src="{{ url_for('static', filename='js/strava_dashboard/strava_stream_chart_functions.js') }}"></script>
 	<script src="{{ url_for('static', filename='js/strava_dashboard/strava_chart_functions.js') }}"></script>
 	<script src="{{ url_for('static', filename='js/strava_dashboard/tabulator.js') }}"></script>
+
 
 	<!-- Custom CSS -->
 	<link rel="stylesheet" href="{{ url_for('static', filename='css/customCSS_strava_map.css') }}">
@@ -207,6 +217,9 @@
 						<span><button id="elevation-stream-btn" class="chartToggle singleAct chart-active" onclick="updateChartBtn('elevation-stream-btn','csv');updateChart(filteredGroup,'elevation-stream-btn');">Elevation</button></span>
 						<span><button id="speed-stream-btn" class="chartToggle singleAct" onclick="updateChartBtn('speed-stream-btn','csv');updateChart(filteredGroup,'speed-stream-btn');">Speed</button></span>
 						<span><button id="grade-stream-btn" class="chartToggle singleAct"  onclick="updateChartBtn('grade-stream-btn','csv');updateChart(filteredGroup,'grade-stream-btn');">Grade</button></span>
+						<span><button id="cadence-stream-btn" class="chartToggle singleAct wahoo-btn"  onclick="updateChartBtn('cadence-stream-btn','csv');updateChart(filteredGroup,'cadence-stream-btn');">Cadence</button></span>
+						<span><button id="heartrate-stream-btn" class="chartToggle singleAct wahoo-btn"  onclick="updateChartBtn('heartrate-stream-btn','csv');updateChart(filteredGroup,'heartrate-stream-btn');">Heart Rate</button></span>
+						<span><button id="temperature-stream-btn" class="chartToggle singleAct wahoo-btn"  onclick="updateChartBtn('temperature-stream-btn','csv');updateChart(filteredGroup,'temperature-stream-btn');">Temp.</button></span>
 					</div>
 					<canvas id="chart-line"></canvas>
 				</div>

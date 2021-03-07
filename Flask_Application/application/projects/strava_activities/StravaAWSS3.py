@@ -57,7 +57,10 @@ def writeMemoryCSV(streamData):
     csvTypes = ['time', 'altitude', 'velocity_smooth', 'grade_smooth', "distance", "heartrate", "cadence", "temp"]
     # Extract data from stream dictionary
     for streamType in csvTypes:
-        dataDict[streamType] = streamData[streamType].data
+        try:
+            dataDict[streamType] = streamData[streamType].data
+        except:
+            application.logger.debug(f"The stream type {streamType} doesn't exist, skipping")
     # See: https://stackoverflow.com/questions/23613426/write-dictionary-of-lists-to-a-csv-file
     # open buffer and populate with csv data
     writer = csv.writer(memOutput)

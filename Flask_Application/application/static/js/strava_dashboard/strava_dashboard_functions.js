@@ -323,7 +323,9 @@ function loadActivityBtnListener() {
         // if user clicks an active button that is not All, remove just that layer from display
         // A dictionary is used for lookup to select the correct layer using the target button's ID value
         } else {
+          console.log("Case B not All")
           filteredGroup.clearLayers();
+          // console.log(filteredGroup)
           // Add geojson data for all active buttons
           addActiveLayers();
           updateDataPanels(filteredGroup, actDataDict, "True")
@@ -546,8 +548,8 @@ function initDateRange(){
     // Formats data in a proper date format
     userStart = picker.startDate.format();
     userEnd = picker.endDate.format();
-    // console.log(userStart)
-    // console.log(userEnd)
+    console.log(userStart)
+    console.log(userEnd)
     // clear existing layers
     filteredGroup.clearLayers();
     // Re-add active layers with new daterange filter applied

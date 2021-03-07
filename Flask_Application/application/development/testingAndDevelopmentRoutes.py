@@ -2,11 +2,9 @@ from application import app, application
 from flask import request, Response, render_template
 from flask import jsonify
 import sys
-from application import script_config
 from sqlalchemy.ext.declarative import declarative_base
 import os
 from sqlalchemy import create_engine, or_
-from application import script_config
 from application.projects.location_tracker import DBQueriesTracker, objectGenerationTracker
 from application.flaskAuth.authentication import auth
 from application.projects.strava_activities import WebHookFunctionsStrava, DBQueriesStrava
