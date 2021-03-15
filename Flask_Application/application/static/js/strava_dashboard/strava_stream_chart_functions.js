@@ -13,6 +13,16 @@
 // 						}
 // }
 
+// function getDistanceAlongLine(portionAlong){
+//   // Get active geometry from Leaflet
+//   // variable holding active data
+//   console.log(portionAlong);
+//   // filteredGroup.eachLayer(function(layer){
+//   //   console.log(layer)
+//   // })
+// };
+
+
 // Creates single activity chart in initial state with placeholder data, this allows for a better initial transition from the multi-activity bar plot
 function createStreamLineChart(){
   // See: https://stackoverflow.com/a/45172506
@@ -49,36 +59,46 @@ function createStreamLineChart(){
         backgroundColor: 'rgb(255, 99, 132)',
         borderColor: 'rgb(255, 99, 132)',
         data:[30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30],
-        pointHitRadius: 1
+        pointHitRadius: 0,
+        pointHoverRadius: 0,
       },{
         backgroundColor: 'rgb(0, 0, 0, 0)',
         borderColor: 'rgb(82, 82, 82, 0.8)',
         fill: false,
         borderWidth: 3,
         data:[30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30],
-        pointHitRadius: 0
+        pointHitRadius: 0,
+        pointHoverRadius: 0,
       }]
     },
-    // Activate label nearest to the pointer
-    hover: {
-       mode: 'nearest',
-       intersect: true,
-       // see https://stackoverflow.com/a/58529907
-       // place onHover in here with hover options so I can extend the functionality
-       onHover: function(event, activeElements) {
-         if (activeElements.length > 0){
-           console.log(event)
-           var index = activeElements[0]._index
-           var totalRecords = actStreamLineChart.data.labels.length
-           var portionAlong = (index/totalRecords)
-           // Get total length of records
-           getDistanceAlongLine(portionAlong);
-         }
-       }
-    },
     options:{
+      hover: {
+         // mode: 'nearest',
+         // intersect: true,
+         mode: 'index',
+         intersect: false,
+         // see https://stackoverflow.com/a/58529907
+         // place onHover in here with hover options so I can extend the functionality
+         onHover: function(event, activeElements) {
+           if (activeElements.length > 0){
+             // Get index location of on hover event
+             var index = activeElements[0]._index;
+             // Get latlngs at cursor location
+             var latlng = csvDatObject[index]['latlng'].split(",");
+             //Clear any existing markers
+             markerGroup.clearLayers();
+             // close any open popups
+             map.closePopup();
+             // Add new marker to marker group
+             L.marker([latlng[0],latlng[1]]).addTo(markerGroup);
+           }
+         }
+      },
       tooltips: {
         mode: 'index',
+        caretPadding: 50,
+        // xAlign: "left",
+        // custom alighment: https://stackoverflow.com/a/54988724
         position: 'cursor',
         intersect: false,
         // Filter out average bar tooltip information
@@ -173,7 +193,7 @@ function getS3CSVData(presignedURL){
   return $.ajax({
     url:presignedURL,
     //https://stackoverflow.com/questions/47523265/jquery-ajax-no-access-control-allow-origin-header-is-present-on-the-requested
-    headers: {  'Access-Control-Allow-Origin': 'https://stravastreamdata.s3-us-west-1.amazonaws.com' },
+    headers: {  'Access-Control-Allow-Origin': 'https://trimmedstreamdata.s3-us-west-1.amazonaws.com' },
     crossOrigin: true,
     // data: {csvName:'4413728207.csv'},
     type: 'GET',
@@ -272,13 +292,6 @@ function populateAncillaryData(index){
   }
 }
 
-function getDistanceAlongLine(portionAlong){
-  // Get active geometry from Leaflet
-  // variable holding active data
-  filteredGroup.eachLayer(function(layer){
-    console.log(layer)
-  })
-}
 
 // Check if Wahoo and other sensor data is available, if so set text, if not return empty text
 function checkAncillaryData(datType, sensorData){

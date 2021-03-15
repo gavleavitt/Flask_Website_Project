@@ -2,6 +2,8 @@ from datetime import datetime, timedelta
 # from application.projects.strava_activities import OAuthStrava, DBQueriesStrava, StreamDataAWSS3
 # from application import application
 import logging
+import csv
+from io import StringIO
 
 def getListIds(client, days):
     """
@@ -114,6 +116,55 @@ def getFullDetails(client, actId):
             del (act[key])
     return {"act": act, "stream": stream}
 
+def formatStreamData(stream):
+    """
+
+    @param stream:
+    @return:
+    """
+    # Pull out latlngs
+    latlng = stream['latlng'].data
+    wktStr = f"SRID=4326;LINESTRING("
+    for c, i in enumerate(latlng):
+        lat, lng = latlng[c].split(",")
+        newEntry = f"{lat} {lng},"
+        wktStr += newEntry
+    # Remove last comma
+    wktStr = wktStr[:-1]
+    # Close out wktStr
+    wktStr += ")"
+    return wktStr
+
+def trimStreamCSV(coordList, memCSV):
+    """
+
+    @param coordList:
+    @param memCSV:
+    @return:
+    """
+
+    # see https://stackoverflow.com/a/41978062
+    # Reset seek to 0 for memory CSV, after writing it the file pointer is still at the end
+    memCSV.seek(0)
+    reader = csv.reader(memCSV)
+    # Create new memory CSV to hold results
+    trimmedMemOutput = StringIO()
+    trimmedWriter = csv.writer(trimmedMemOutput)
+
+    for c, row in enumerate(reader):
+        # Write header
+        if c == 0:
+            trimmedWriter.writerow(row)
+        else:
+            # print(row)
+            # # split row into [lat, lng]
+            coord = row[1].split(",")
+            # Check if lat or long exist in the coordinate list
+            latCheck = any(coord[0] in x for x in coordList)
+            lngCheck = any(coord[1] in x for x in coordList)
+            if not latCheck or not lngCheck:
+                trimmedWriter.writerow(row)
+    return trimmedMemOutput
 
 def getAthlete(client):
     athlete = client.get_athlete()

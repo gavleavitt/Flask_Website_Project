@@ -7,7 +7,7 @@ from sqlalchemy import func as sqlfunc
 import geojson
 from geojson import Feature, FeatureCollection, MultiLineString
 import topojson as tp
-
+import re
 
 def updateSubId(subId):
     """
@@ -338,3 +338,43 @@ def processActivitiesPublic(recordID):
         session.add(strava_activities_masked(actID=i[0], geom=i[1]))
     session.commit()
     session.close()
+
+def formatPointResponse(point):
+    """
+
+    @param point:
+    @return:
+    """
+    res = re.sub("|,|POINT|'|", "", str(point))
+    res = res.replace(" ", ",").replace("((", "").replace("))", "")
+    # listRes = res.split(",")
+    return res
+
+def getIntersectingPoints(wktStr):
+    """
+
+    @param wktStr:
+    @return:
+    """
+    geometricProj = 32610
+    collectionExtract = 3
+    # Open session
+    session = Session()
+    # Get coordinates from within privacy zones
+    try:
+        privacy_cte = session.query(
+            sqlfunc.ST_CollectionExtract(
+            sqlfunc.ST_Collect(AOI.geom), collectionExtract).label("ctelab")).filter(
+            AOI.privacy == "Yes").cte()
+        lineString = sqlfunc.ST_GeomFromEWKT(wktStr)
+        # testQuery = session.query(sqlfunc.ST_AsText(sqlfunc.ST_Intersection(lineString, privacy_cte.c.ctelab)))
+
+        # Dump points provides a point per iterative
+        pointQuery = session.query(sqlfunc.ST_AsText(sqlfunc.ST_DumpPoints(sqlfunc.ST_Intersection(lineString, privacy_cte.c.ctelab)).geom))
+        coordinateList = []
+        for i in pointQuery:
+            # strip out the WKT parts of the coordinates, only want lon,lat
+            coordinateList.append(formatPointResponse(i))
+    finally:
+        session.close()
+    return coordinateList

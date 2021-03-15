@@ -270,6 +270,8 @@
 		// streamDataType = "elevation-stream"
 		// Initialize Leaflet, panel, and chart with all activity data
 		initializeDisplay(jsonDataURL);
+		// Add empty layergroup to hold markers
+		var markerGroup = L.layerGroup().addTo(map);
 
 		// Initialize window, activity button, and map listeners
 		initializeListeners();

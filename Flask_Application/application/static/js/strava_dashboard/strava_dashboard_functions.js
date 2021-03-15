@@ -64,14 +64,15 @@ function getActivityTopojsonS3Url(link){
 }
 
 function getActivityTopojsonData(presignedURL){
+  console.log("Setting headers!")
   return $.ajax({
     url:presignedURL,
     //https://stackoverflow.com/questions/47523265/jquery-ajax-no-access-control-allow-origin-header-is-present-on-the-requested
-    headers: {  'Access-Control-Allow-Origin': 'https://stravastreamdata.s3-us-west-1.amazonaws.com' },
+    headers: {'Access-Control-Allow-Origin':'https://trimmedstreamdata.s3-us-west-1.amazonaws.com'},
     crossOrigin: true,
     // data: {csvName:'4413728207.csv'},
     type: 'GET',
-    dataType: 'json'
+    dataType: 'jsonp'
   });
 }
 
@@ -157,6 +158,8 @@ function createSearchControl(layerGroup) {
     // Select table row
     highlightRow(e.layer.feature.properties.actID)
     toggleFull();
+    // Clear any stream highlight markers
+    markerGroup.clearLayers();
   });
   // Search option activated
   searchControl.on('search:expanded', function(e) {
@@ -375,6 +378,8 @@ function loadActivityBtnListener() {
       // updateChart(filteredGroup,prevMultiActBtn);
       updateChart(filteredGroup)
       generateTableFormatedData(filteredGroup, "Update")
+      // Clear any stream highlight markers
+      markerGroup.clearLayers();
       // activateChartButton();
     });
   }
@@ -557,6 +562,8 @@ function initDateRange(){
     updateDataPanels(filteredGroup,actDataDict, "True");
     updateChart(filteredGroup);
     generateTableFormatedData(filteredGroup, "Update")
+    // Clear any stream highlight markers
+    markerGroup.clearLayers();
     // activateChartButton();
   });
 };

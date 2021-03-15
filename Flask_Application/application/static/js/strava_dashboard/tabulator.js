@@ -66,7 +66,8 @@ function initTable(groupedData){
       updateDataPanels(filteredGroup,actDataDict, clear="True");
       // Update chart
       filterSingleActDisplay(selectedID);
-
+      // Clear any stream highlight markers
+      markerGroup.clearLayers();
       // //get array of currently selected data.
       // var selectedID = table.getSelectedData()[0].id;
       // // console.log(selectedData)

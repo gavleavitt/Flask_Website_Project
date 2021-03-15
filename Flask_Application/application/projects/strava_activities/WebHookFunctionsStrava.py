@@ -14,10 +14,9 @@ def threadedActivityProcessing(client, update):
 
     try:
         application.logger.debug("Getting full activity details")
-        # Get activity details for newly created activity
+        # Get all activity details for newly created activity, including stream data
         activity = APIFunctionsStrava.getFullDetails(client, update.object_id)
         application.logger.debug("Inserting activity details")
-
         # Insert original, non-masked, coordinates and attribute details into Postgres/PostGIS
         DBQueriesStrava.insertOriginalAct(activity['act'])
         # Calculate masked, publicly sharable, activities and insert into Postgres masked table
@@ -25,8 +24,14 @@ def threadedActivityProcessing(client, update):
         DBQueriesStrava.processActivitiesPublic(activity["act"]["actId"])
         # Create in-memory buffer csv of stream data
         csvBuff = StravaAWSS3.writeMemoryCSV(activity["stream"])
-        # Upload buffer csv to AWS S3 bucket
-        StravaAWSS3.uploadToS3(csvBuff, activity["act"]["actId"])
+        # Get WKT formatted latlng stream data
+        wktStr = APIFunctionsStrava.formatStreamData(csvBuff)
+        # Get list of coordinates which cross privacy areas, these will be removed from the latlng stream CSV data
+        removeCoordList = DBQueriesStrava.getIntersectingPoints(wktStr)
+        # Trim/remove rows from latlng CSV stream which have coordinates that intersect the privacy areas
+        trimmedMemCSV = APIFunctionsStrava.trimStreamCSV(removeCoordList, csvBuff)
+        # Upload trimmed buffer csv to AWS S3 bucket
+        StravaAWSS3.uploadToS3(trimmedMemCSV, activity["act"]["actId"])
         # Create topojson file
         topoJSON = DBQueriesStrava.createStravaPublicActTopoJSON()
         # Upload topoJSON to AWS S3

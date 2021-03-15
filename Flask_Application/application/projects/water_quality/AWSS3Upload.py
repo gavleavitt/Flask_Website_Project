@@ -47,7 +47,7 @@ def uploadToS3(fileName, filePath):
     :return:
     """
 
-    bucket = os.getenv("S3_STREAM_BUCKET")
+    bucket = os.getenv("S3_WATERQUALPDF_BUCKET")
     conn = connectToS3()
 
     try:

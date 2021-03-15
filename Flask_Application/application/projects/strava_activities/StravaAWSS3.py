@@ -33,7 +33,7 @@ def create_presigned_url(fileID, expiration=300):
         else:
             fileName = f"stream_{fileID}.csv"
         response = s3_client.generate_presigned_url('get_object',
-                                                    Params={'Bucket': os.getenv("S3_STREAM_BUCKET"),
+                                                    Params={'Bucket': os.getenv("S3_TRIMMED_STREAM_BUCKET"),
                                                             'Key': fileName},
                                                     ExpiresIn=expiration)
     except ClientError as e:
@@ -53,14 +53,17 @@ def writeMemoryCSV(streamData):
     # Create in-memory text buffer
     memOutput = StringIO()
     dataDict = {}
-    # Exclude latlng from CSV, these data will be shared to the public
-    csvTypes = ['time', 'altitude', 'velocity_smooth', 'grade_smooth', "distance", "heartrate", "cadence", "temp"]
+    # stream types to include, latlngs in privacy zones will be removed
+    csvTypes =  ['time', 'latlng', 'altitude', 'velocity_smooth', 'grade_smooth', "distance", "heartrate", "cadence", "temp"]
     # Extract data from stream dictionary
     for streamType in csvTypes:
         try:
             dataDict[streamType] = streamData[streamType].data
         except:
             application.logger.debug(f"The stream type {streamType} doesn't exist, skipping")
+    # Iterate over latlngs, which is a list with lat lng, converting to string of lat,lng
+    for c, i in enumerate(dataDict['latlng']):
+        dataDict['latlng'][c] = ",".join(str(x) for x in i)
     # See: https://stackoverflow.com/questions/23613426/write-dictionary-of-lists-to-a-csv-file
     # open buffer and populate with csv data
     writer = csv.writer(memOutput)
@@ -73,26 +76,33 @@ def writeMemoryCSV(streamData):
 
 def uploadToS3(file, actID=None):
     """
+    Uploads file to S3 Bucket. This bucket is not public but all activities are accessible to the public through the API
+    with pre-signed temporary URLs. If the Act ID is none then the input is the TopoJSON file.
 
-    :param memCSV:
-    :param actID:
+    :param file: Buffer/memory file to be uploaded, either JSON or CSV.
+    :param actID: Strava Activity ID, used to name uploaded file, if empty then TopoJSON is assumed, which has a static
+    name
     :return:
+    Nothing, file is uploaded
     """
 
-    bucket = os.getenv("S3_STREAM_BUCKET")
+    # Get bucket details from environmental variable
+    bucket = os.getenv("S3_TRIMMED_STREAM_BUCKET")
+    # Establish connection to S3 API
     conn = connectToS3()
 
     try:
-        # Add in-memory buffer csv to bucket
-        # I think using getvalue and put_object on StringIO solves an issue with the StringIO object not being
-        # compatible with other boto3 object creation methods see:
-        # https://stackoverflow.com/a/45700716
-        # https://stackoverflow.com/a/60293770
         # conn.put_object(Body=memCSV.getvalue(), Bucket=bucket, Key=fileName, ContentType='application/vnd.ms-excel')
         if actID:
+            # Add in-memory buffer csv to bucket
+            # I think using getvalue and put_object on StringIO solves an issue with the StringIO object not being
+            # compatible with other boto3 object creation methods see:
+            # https://stackoverflow.com/a/45700716
+            # https://stackoverflow.com/a/60293770
             fileName = f"stream_{actID}.csv"
             conn.put_object(Body=file.getvalue(), Bucket=bucket, Key=fileName)
         else:
+            # Add in-memory buffer TopoJSON file to bucket, file name is static
             fileName = "topoJSONPublicActivities.json"
             conn.put_object(Body=file, Bucket=bucket, Key=fileName)
     except Exception as e:
