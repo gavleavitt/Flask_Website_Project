@@ -22,8 +22,6 @@ import logging
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-
-
 # Setup logger
 logger = logging.getLogger(__name__)
 # Set time and message format of logs
@@ -45,9 +43,12 @@ handler.setFormatter(formatter)
 application = app = Flask(__name__)
 # Attach logging handler to application
 application.logger.addHandler(handler)
-
+# Import shared assets
+# https://exploreflask.com/en/latest/static.html
+from .util import assets
+from .mainPages.mainRoutes import mainSite_BP
+app.register_blueprint(mainSite_BP)
 application.logger.debug("Python Flask debugger active!")
-
 
 # # Set up celery client, allows async tasks to be setup
 # app.config['CELERY_BROKER_URL'] = 'redis://localhost:6379/0'
@@ -60,40 +61,39 @@ application.logger.debug("Python Flask debugger active!")
 engine = create_engine(os.environ.get("DBCON"))
 Session = sessionmaker(bind=engine)
 
-
 # Import project files (initialize them?), imports from the application flask object have to be after flask
 # application is initialized to avoid circular imports
 # from application import routes, routes_api, models_tracker, parsePDF_WaterQual, StravaWebHook, TestingandDevelopmentRoutes
-from application import routes, routes_api
-from application.development import testingAndDevelopmentRoutes
+# from application import routes, routes_api
+# from application.development import testingAndDevelopmentRoutes
 # from application.projects import location_tracker, strava_activities, water_quality
-from application.projects.water_quality import functionsWaterQual
-from application.projects.strava_activities import DBQueriesStrava, StravaAWSS3
+# from application.projects.water_quality import functionsWaterQual
+# from application.projects.strava_activities import DBQueriesStrava, StravaAWSS3
 
-# Setup APS scheduler instance
-sched = BackgroundScheduler(daemon=True, timezone=utc)
-
-# Setup scheduled tasks
-try:
-    # Trigger every day at 9:30 am
-    # sched.add_job(parsePDF.pdfjob, trigger='cron', hour='9', minute='30')
-    # sched.add_job(parsePDF.pdfjob, trigger='cron', hour='15', minute='37')
-    # Add PDF parsing job to trigger daily at 4:30 pm UTC, 9:30 PST
-    sched.add_job(functionsWaterQual.pdfjob, trigger='cron', hour='16', minute='30')
-    # Trigger every minute
-    # sched.add_job(parsePDF.pdfjob, 'cron', minute='*')
-    # Start scheduled jobs
-    sched.start()
-    application.logger.debug("Scheduled task created")
-except Exception as e:
-    application.logger.error("Failed to create parse pdfjob")
-    application.logger.error(e)
-# Create local public Strava activities topoJSON file
-# application.logger.debug("Initializing Strava activities TopoJSON.")
-# topoJSON = DBQueriesStrava.createStravaPublicActTopoJSON()
-# StravaAWSS3.uploadToS3(topoJSON)
-# application.logger.debug("Strava activities TopoJSON has been initialized.")
-
-
-# Shutdown cron thread if the web process is stopped
-atexit.register(lambda: sched.shutdown(wait=False))
+# # Setup APS scheduler instance
+# sched = BackgroundScheduler(daemon=True, timezone=utc)
+#
+# # Setup scheduled tasks
+# try:
+#     # Trigger every day at 9:30 am
+#     # sched.add_job(parsePDF.pdfjob, trigger='cron', hour='9', minute='30')
+#     # sched.add_job(parsePDF.pdfjob, trigger='cron', hour='15', minute='37')
+#     # Add PDF parsing job to trigger daily at 4:30 pm UTC, 9:30 PST
+#     sched.add_job(functionsWaterQual.pdfjob, trigger='cron', hour='16', minute='30')
+#     # Trigger every minute
+#     # sched.add_job(parsePDF.pdfjob, 'cron', minute='*')
+#     # Start scheduled jobs
+#     sched.start()
+#     application.logger.debug("Scheduled task created")
+# except Exception as e:
+#     application.logger.error("Failed to create parse pdfjob")
+#     application.logger.error(e)
+# # Create local public Strava activities topoJSON file
+# # application.logger.debug("Initializing Strava activities TopoJSON.")
+# # topoJSON = DBQueriesStrava.createStravaPublicActTopoJSON()
+# # StravaAWSS3.uploadToS3(topoJSON)
+# # application.logger.debug("Strava activities TopoJSON has been initialized.")
+#
+#
+# # Shutdown cron thread if the web process is stopped
+# atexit.register(lambda: sched.shutdown(wait=False))
