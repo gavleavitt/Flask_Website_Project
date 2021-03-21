@@ -5,9 +5,9 @@ import sys
 from sqlalchemy.ext.declarative import declarative_base
 import os
 from sqlalchemy import create_engine, or_
-from application.projects.location_tracker import DBQueriesTracker, objectGenerationTracker
+from application.WebAppProjects.location_tracker import DBQueriesTracker, objectGenerationTracker
 from application.flaskAuth.authentication import auth
-from application.projects.strava_activities import WebHookFunctionsStrava, DBQueriesStrava
+from application.WebAppProjects.strava_activities import WebHookFunctionsStrava, DBQueriesStrava
 
 # @app.route("/admin/populatepublicactivitiesclip")
 # @auth.login_required(role='admin')

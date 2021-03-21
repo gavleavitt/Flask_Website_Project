@@ -36,5 +36,5 @@ def contact():
 # Apply login
 # @app.route("/templatetesting")
 # def template():
-#     return render_template("public/projects/project-template.html")
+#     return render_template("public/WebAppProjects/project-template.html")
 

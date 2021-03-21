@@ -44,15 +44,28 @@ application = app = Flask(__name__)
 # Attach logging handler to application
 application.logger.addHandler(handler)
 application.logger.debug("Python Flask debugger active!")
+
+# Setup SQLAlchemy engine sessionmaker factory
+engine = create_engine(os.environ.get("DBCON"))
+Session = sessionmaker(bind=engine)
+
+from application.util.flaskAuth.authentication import auth
+
 # Import shared assets
 from .util import assets
 # Import Blueprints
 from .mainPages.mainRoutes import mainSite_BP
 from .projectPages.projectPageRoutes import projectPages_BP
+from .WebAppProjects.LocationLiveTracker.routes import liveTracker_BP
+from .WebAppProjects.LocationLiveTracker.API_Routes import livetrackerAPI_BP
+from .WebAppProjects.StravaActivityViewer.routes import stravaActDash_BP
+# from .WebAppProjects.StravaActivityViewer.APIFunctionsStrava import
 # Register blueprints with application
 app.register_blueprint(mainSite_BP)
 app.register_blueprint(projectPages_BP)
-
+app.register_blueprint(liveTracker_BP)
+app.register_blueprint(livetrackerAPI_BP)
+app.register_blueprint(stravaActDash_BP)
 
 
 # # Set up celery client, allows async tasks to be setup
@@ -62,18 +75,16 @@ app.register_blueprint(projectPages_BP)
 # cel_client.conf.update(app.config)
 
 
-# Setup SQLAlchemy engine sessionmaker factory
-engine = create_engine(os.environ.get("DBCON"))
-Session = sessionmaker(bind=engine)
+
 
 # Import project files (initialize them?), imports from the application flask object have to be after flask
 # application is initialized to avoid circular imports
 # from application import routes, routes_api, models_tracker, parsePDF_WaterQual, StravaWebHook, TestingandDevelopmentRoutes
 # from application import routes, routes_api
 # from application.development import testingAndDevelopmentRoutes
-# from application.projects import location_tracker, strava_activities, water_quality
-# from application.projects.water_quality import functionsWaterQual
-# from application.projects.strava_activities import DBQueriesStrava, StravaAWSS3
+# from application.WebAppProjects import location_tracker, strava_activities, water_quality
+# from application.WebAppProjects.water_quality import functionsWaterQual
+# from application.WebAppProjects.strava_activities import DBQueriesStrava, StravaAWSS3
 
 # # Setup APS scheduler instance
 # sched = BackgroundScheduler(daemon=True, timezone=utc)

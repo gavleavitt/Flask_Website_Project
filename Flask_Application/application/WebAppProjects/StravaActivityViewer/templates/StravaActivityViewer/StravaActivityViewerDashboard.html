@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<!-- <meta name="viewport" content="width=device-width, initial-scale=1"> -->
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Strava Activity Map</title>
+	<!-- CDN files-->
+	<!-- Leaflet css-->
+	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css"/>
+	<!-- Other imports! -->
+	<!-- leaflet Javascript-->
+	<script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js"></script>
+
+	<!-- Load Esri Leaflet from CDN, stable -->
+	<script src="https://unpkg.com/esri-leaflet@2.4.0/dist/esri-leaflet.js"
+	integrity="sha512-kq0i5Xvdq0ii3v+eRLDpa++uaYPlTuFaOYrfQ0Zdjmms/laOwIvLMAxh7cj1eTqqGG47ssAcTY4hjkWydGt6Eg=="
+	crossorigin=""></script>
+	<!-- Esri Leaflet and Esri Leaflet Vector, experimential -->
+	<!-- <script src="https://unpkg.com/esri-leaflet/dist/esri-leaflet.js"></script>
+	<script src="https://unpkg.com/esri-leaflet-vector/dist/esri-leaflet-vector.js"></script> -->
+	<!-- Esri vector tiles relies on maxbo gl -->
+	<!-- <link rel="stylesheet" href="https://unpkg.com/mapbox-gl/dist/mapbox-gl.css"/>
+	<script src="https://unpkg.com/mapbox-gl/dist/mapbox-gl.js"></script> -->
+
+	<!-- load the latest release from the cdn automatically -->
+	<!-- <script src="https://unpkg.com/esri-leaflet-vector/dist/esri-leaflet-vector-debug.js"></script> -->
+
+	<!-- Leaflet Omnivore -->
+	<script src='//api.tiles.mapbox.com/mapbox.js/plugins/leaflet-omnivore/v0.3.1/leaflet-omnivore.min.js'></script>
+
+
+	<!-- Leaflet Table CSS -->
+	<!-- <link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.3/leaflet.css" /> -->
+	<!-- Leaflet Table JS -->
+	<!-- <script src="http://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.3/leaflet.js"></script> -->
+
+	<!-- Locate Control, geolocation -->
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"/>
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet.locatecontrol@0.72.0/dist/L.Control.Locate.min.css" />
+	<script src="https://cdn.jsdelivr.net/npm/leaflet.locatecontrol@0.72.0/dist/L.Control.Locate.min.js" charset="utf-8"></script>
+
+	<!-- Date range picker and requirements-->
+	<script type="text/javascript" src="https://cdn.jsdelivr.net/jquery/latest/jquery.min.js"></script>
+	<script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+	<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+	<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+
+	<!-- Chart.js JS-->
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.min.js"></script>
+	<!-- Chart.js CSS -->
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.min.css"/>
+	<!-- SheetJS -->
+	<!-- <script src="https://unpkg.com/browse/xlsx@0.16.9/xlsx.mini.js"></script> -->
+	<!-- chartJS plugin datasource - CSV support -->
+	<!-- <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datasource"></script> -->
+	<!-- jquery-csv -->
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-csv/1.0.11/jquery.csv.min.js"></script>
+
+	<!-- Load chartjs zoom plugin -->
+	<!-- https://github.com/chartjs/chartjs-plugin-zoom -->
+	<!-- <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.3"></script> -->
+	<script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8"></script>
+	<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@0.7.7"></script>
+
+	<!-- Tabulator -->
+	<link href="https://unpkg.com/tabulator-tables/dist/css/tabulator.min.css" rel="stylesheet">
+	<script type="text/javascript" src="https://unpkg.com/tabulator-tables/dist/js/tabulator.min.js"></script>
+
+	<!-- TurfJS -->
+	<script src='https://unpkg.com/@turf/turf@6.3.0/turf.min.js'></script>
+	<!--jquery adds "$." functionality-->
+	<!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script> -->
+
+	<!-- Local static files-->
+	<!-- Custom local javascript functions -->
+	<script src="{{ url_for('stravaActDash_BP.static', filename='StravaActivityViewer/js/strava_dashboard_functions.js') }}"></script>
+	<script src="{{ url_for('stravaActDash_BP.static', filename='StravaActivityViewer/js/strava_stream_chart_functions.js') }}"></script>
+	<script src="{{ url_for('stravaActDash_BP.static', filename='StravaActivityViewer/js/strava_chart_functions.js') }}"></script>
+	<script src="{{ url_for('stravaActDash_BP.static', filename='StravaActivityViewer/js/strava_tabulator_functions.js') }}"></script>
+
+
+	<!-- Custom CSS -->
+	<link rel="stylesheet" href="{{ url_for('stravaActDash_BP.static', filename='StravaActivityViewer/css/customCSS_strava_map.css') }}">
+	<!-- Search CSS-->
+	<link rel="stylesheet" href="{{ url_for('stravaActDash_BP.static', filename='css/leaflet-search.src.css') }}">
+	<!-- Search JS -->
+	<script src="{{ url_for('static', filename='js/lib/leaflet-search.src.js') }}"></script>
+	<!-- Spin JS -->
+	<script src="{{ url_for('static', filename='js/lib/spin/dist/spin.min.js') }}"></script>
+	<!-- leaflet spin JS -->
+	<script src="{{ url_for('static', filename='js/lib/leaflet.spin.min.js') }}"></script>
+	<!-- Leaflet fullscreen source: https://github.com/brunob/leaflet.fullscreen -->
+	<!-- Leaflet Fullscreen JS  -->
+	<script src="{{ url_for('static', filename='js/lib/Control.FullScreen.js') }}"></script>
+	<!-- Leaflet Fullscreen CSS  -->
+	<link rel="stylesheet" href="{{ url_for('static', filename='css/lib/Control.FullScreen.css') }}">
+
+	<!-- Favicon links -->
+	<link rel="apple-touch-icon" sizes="180x180" href="/static/images/apple-touch-icon.png">
+	<link rel="icon" type="image/png" sizes="32x32" href="/static/images//favicon-32x32.png">
+	<link rel="icon" type="image/png" sizes="16x16" href="/static/images/favicon-16x16.png">
+	<link rel="manifest" href="/static/images//site.webmanifest">
+	<link rel="mask-icon" href="/static/images//safari-pinned-tab.svg" color="#5bbad5">
+	<meta name="msapplication-TileColor" content="#da532c">
+	<meta name="theme-color" content="#ffffff">
+
+	<style>
+	/*
+		body {
+				 padding: 0;
+				 margin: 0;
+		 }
+		 */
+	 </style>
+</head>
+<body>
+	<div class="container sansserif">
+		<div class="item titlediv">
+			<div id = "Title" class="titletext">Strava Activity Viewer</div>
+			<div class="filter-btn-group" id="act-filter-group">
+				<button class="filterbtn active-btn" id="All">Remove<br>Layers</button>
+				<button class="filterbtn" id="MTB">Mountain<br>Biking</button>
+				<button class="filterbtn" id="Road">Road<br>Rides</button>
+				<button class="filterbtn" id="Walk">Walks</button>
+				<button class="filterbtn" id="Run">Runs</button>
+			</div>
+			<div class="calendarSelect">
+				<div id="reportrange">
+				    <i class="fa fa-calendar"></i>&nbsp;
+				    <span id="display-date"></span> <i class="fa fa-caret-down"></i>
+				</div>
+				<!-- <button id="reset" onclick="resetAll()">Reset All</button> -->
+			</div>
+			<div class="popupbuttontext">
+				<div class="map-home"><a class="home-link" href="/">Home</a></div>
+				<button class="headerbtn" id="btn">Map Details</button>
+			</div>
+			<!-- Modal -->
+			<!-- The Modal -->
+			<div id="myModal" class="modal">
+			  <div class="modal-content-container">
+			    <!-- <div class="close">&times;</div> -->
+					<div class="close">&times;</div>
+					<div class="modal-text">
+						<p style="margin-top:0px;"><b>Map Details</b>
+						<br>
+							This personal project displays my up-to-date <a href=https://www.strava.com/>Strava</a> activity information on a interactive mobile friendly data dashboard using Leaflet to display geographical data and Chart.JS to display graphical information. Data can be filtered and explored by using buttons, date selections, searches, and by selecting geographical data.
+						</p>
+						<p>
+							Histroic Strava data were initially pulled from the <a href=https://developers.strava.com/>Strava API</a> and processed using Python, then a webhook subscription was created which updates my server when new activities are available for processing. Strava activity data are processed in Python using PostGIS functions to remove private areas and to simplify geometries to reduce file sizes, at the cost of spatial accuracy. Data are pre-calculated and served to the Leaflet map in the TopoJSON format to further reduce file sizes and server response times.
+						</p>
+						<p>
+						Visit the <a href=/projects/stravamapserverside>server-side processing project page</a> for this dashboard to see a full description of the server side processing and data preparation steps.
+						</p>
+						<p><b>Contact Me</b>
+						<br>
+						If you have any questions, feature suggestions, comments, or notice any errors/bugs feel free to email me at <span id="emailaddr"></span>
+						</p>
+						<p>
+							You can see my other projects under the <a href=/#goto-proj>projects</a> section of this site.
+						</p>
+						<p>You can visit my GitHub repo for this project and others <a href=https://github.com/gavleavitt/Flask_Website_Project target="_blank">here</a>.
+						</p>
+					</div>
+			 </div>
+		 </div>
+		</div>
+		<div class="dashboard-content">
+			<div id='map' class="map-panel item"></div>
+			<div id = "count-div" class="item detail-panel-col">
+				<span class="detail-context">Activity Count</span>
+				<span id="actCount" class="detail-text">Loading</span>
+			</div>
+			<div id = "dist-div"class="item detail-panel-col">
+				<span class="detail-context">Total Distance</span>
+				<span id="totalDist" class="detail-text">Loading</span>
+			</div>
+			<div id = "elev-div" class="item detail-panel-col">
+				<span class="detail-context">Total Elevation</span>
+				<span id="totalElev" class="detail-text">Loading</span>
+			</div>
+			<div id ="calories-div" class="item detail-panel-col">
+				<span class="detail-context">Total Calories Burned</span>
+				<span id="totalCalories" class="detail-text">Loading</span>
+			</div>
+			<div id = "moving-div"class="item detail-panel-col">
+				<span class="detail-context">Moving Time</span>
+				<span id="movingTime" class="detail-text">Loading</span>
+				<!-- <span class="detail-context">Total Time</span>
+				<span id="totalTime" class="detail-text">Loading</span> -->
+			</div>
+			<div id = "avg-div" class="item detail-panel-col">
+				<span class="detail-context">Average Speed</span>
+				<span id="avgSpeed" class="detail-text">Loading</span>
+				<!-- <span class="detail-context">Max Speed</span>
+				<span id="maxSpeed" class="detail-text">Loading</span> -->
+			</div>
+			<div id="table-container">
+				<div id="datatable"></div>
+			</div>
+			<div class="item detail-panel-col chartPanel">
+				<!-- <div id="chart-cont" class="detail-panel-col actChart no-data show-data"> -->
+				<div id="chart-cont" class="detail-panel-col actChart show-data">
+					<div id="chart-Btns">
+						<span><button id="count-btn" class="chartToggle multiAct chart-active" onclick="updateChartBtn('count-btn','topoJSON');updateChart(filteredGroup,'count-btn');">Count</button></span>
+						<span><button id="distance-btn" class="chartToggle multiAct" onclick="updateChartBtn('distance-btn','topoJSON');updateChart(filteredGroup,'distance-btn');">Distance</button></span>
+						<span><button id="elevation-btn" class="chartToggle multiAct"  onclick="updateChartBtn('elevation-btn','topoJSON');updateChart(filteredGroup,'elevation-btn');">Elevation</button></span>
+						<span><button id="time-btn" class="chartToggle multiAct"  onclick="updateChartBtn('time-btn','topoJSON');updateChart(filteredGroup,'time-btn');">Time</button></span>
+						<!-- <span><button id ="avgspd-btn" class="chartToggle"  onclick="updateChart(filteredGroup,'Avg Speed');updateChartBtn('avgspd-btn')">Avg Speed</button></span> -->
+						<span><button id ="avgwatt-btn" class="chartToggle multiAct"  onclick="updateChartBtn('avgwatt-btn','topoJSON');updateChart(filteredGroup,'avgwatt-btn');">Avg Watts</button></span>
+					</div>
+					<canvas id="chart"></canvas>
+				</div>
+				<div id="chart-line-cont" class="detail-panel-col actChart no-data">
+					<div id="chart-Btns">
+						<span><button id="elevation-stream-btn" class="chartToggle singleAct chart-active" onclick="updateChartBtn('elevation-stream-btn','csv');updateChart(filteredGroup,'elevation-stream-btn');">Elevation</button></span>
+						<span><button id="speed-stream-btn" class="chartToggle singleAct" onclick="updateChartBtn('speed-stream-btn','csv');updateChart(filteredGroup,'speed-stream-btn');">Speed</button></span>
+						<span><button id="grade-stream-btn" class="chartToggle singleAct"  onclick="updateChartBtn('grade-stream-btn','csv');updateChart(filteredGroup,'grade-stream-btn');">Grade</button></span>
+						<span><button id="cadence-stream-btn" class="chartToggle singleAct wahoo-btn"  onclick="updateChartBtn('cadence-stream-btn','csv');updateChart(filteredGroup,'cadence-stream-btn');">Cadence</button></span>
+						<span><button id="heartrate-stream-btn" class="chartToggle singleAct wahoo-btn"  onclick="updateChartBtn('heartrate-stream-btn','csv');updateChart(filteredGroup,'heartrate-stream-btn');">Heart Rate</button></span>
+						<span><button id="temperature-stream-btn" class="chartToggle singleAct wahoo-btn"  onclick="updateChartBtn('temperature-stream-btn','csv');updateChart(filteredGroup,'temperature-stream-btn');">Temp.</button></span>
+					</div>
+					<canvas id="chart-line"></canvas>
+				</div>
+				<div id="no-data-text" class="detail-panel-col actChart no-data">
+					<span class="detail-context detail-panel-col">No Data</span>
+			</div>
+		</div>
+	<script>
+		// Initialize modal
+		initModal();
+		// Initialize modal for downloading histroic PDFs
+		// initDownloadModal();
+		// Set default start and end times of date range picker
+		var start = moment('2014-01-01');
+		var end = moment();
+		// Initialize daterangepicker and listener
+		initDateRange();
+		// Make basemaps
+		// var streetsnight = L.esri.Vector.basemap('StreetsNight');
+		var imageryesri = L.esri.basemapLayer('Imagery');
+		var osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+			 // attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'})
+			 })
+		// intilize Leaflet map with basemap:
+		var map = L.map('map',
+			{
+				layers: [osm],
+				fullscreenControl: true,
+  			fullscreenControlOptions: {
+    			position: 'topleft'
+  			}
+			}).setView([34.41,-119.86],12);
+
+		//Loading spinner
+		map.spin(true);
+
+		// Set topoJSON URL
+		// jsonDataURL = "/static/json/topoJSONPublicActivities.json"
+		jsonDataURL = "/api/v0.1/getstravatopojsonurl"
+		// Get screen size
+		dimen = {'width': window.innerWidth,'height':window.innerHeight};
+		// Dict to hold panel values
+	  var actDataDict = {"count":null, "dist":null, "elev":null, "calories":null, "totalTime":null, "speed":null, "moveTime":null}
+		// Global variable holding chart display type
+		tabDataType = "Count"
+		actID = null
+		csvDatObject = null
+		// streamDataType = "elevation-stream"
+		// Initialize Leaflet, panel, and chart with all activity data
+		initializeDisplay(jsonDataURL);
+		// Add empty layergroup to hold markers
+		var markerGroup = L.layerGroup().addTo(map);
+
+		// Initialize window, activity button, and map listeners
+		initializeListeners();
+		//Set email address using Javascript, harder for crawlers to grab
+		var email = "gav" + "lea" + "web" + "@g" + "mail" + ".com";
+		document.getElementById("emailaddr").innerHTML = "<a href='mailto:" + email + "'>" + email + "</a>"
+</script>
+</body>
+</html>
