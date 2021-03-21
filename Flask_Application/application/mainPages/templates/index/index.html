@@ -77,7 +77,7 @@
 			<div class="project-head">Projects</div>
 			<div class="project-grid">
 				<div class="grid-item">
-					<a class = "divlink" href = "/projects/stravamapserverside">
+					<a class = "divlink" href = "{{ url_for('projectPages_BP.stravaserversideprocessing') }}">
 						<img class="proj-img" src="{{ url_for('mainSite_BP.static', filename='index/icons_images/strava_dashboard_ex_comp.PNG') }}"></img>
 						<!-- The following allows nginx to grab file, not serve up from Flask I think -->
 						<!-- <img class="proj-img" src="/main/static/index/icons_images/strava_dashboard_ex_comp.PNG"></img> -->
@@ -87,7 +87,7 @@
 					</a>
 				</div>
 				<div class="grid-item">
-					<a class = "divlink" href = "/projects/sbcoceanquality">
+					<a class = "divlink" href = "{{ url_for('projectPages_BP.sbcwaterquality') }}">
 						<img class="proj-img" src="{{ url_for('mainSite_BP.static', filename='index/icons_images/SBCWQ_zoomed_comp.png') }}"></img>
 						<b>Santa Barbara County Ocean Water Quality Map</b>
 						<span>Personal project to create a Leaflet map displaying up-to-date water quality test results conducted by the Santa Barbara Public Health Department.</span>
@@ -95,7 +95,7 @@
 					</a>
 				</div>
 				<div class="grid-item">
-					<a class = "divlink" href = "/projects/livetrackingdashboard">
+					<a class = "divlink" href = "{{ url_for('projectPages_BP.livetrackingdash') }}">
 						<img class="proj-img" src="{{ url_for('mainSite_BP.static', filename='index/icons_images/tracker_ex4_comp.png') }}"></img>
 						<!-- <img class="proj-img" src="static/images/tracker_ex4_comp.png"></img> -->
 						<b>Live Tracking Dashboard</b>
@@ -104,7 +104,7 @@
 					</a>
 				</div>
 				<div class="grid-item">
-					<a class = "divlink" href = "/projects/sanitarysewertraceapp">
+					<a class = "divlink" href = "{{ url_for('projectPages_BP.sanitarysewertrace') }}">
 						<img class="proj-img" src="{{ url_for('mainSite_BP.static', filename='index/icons_images/sewerapp_grid_size_comp.png') }}"></img>
 						<!-- <img class="proj-img" src="static/images/sewerapp_grid_size_comp.png"></img> -->
 						<b>Sanitary Sewer Trace Application</b>
@@ -113,7 +113,7 @@
 					</a>
 				</div>
 				<div class="grid-item">
-					<a class = "divlink" href = "/projects/sanitaryewerstormdrainbuildout">
+					<a class = "divlink" href = "{{ url_for('projectPages_BP.sanitarysewerstormdrainbuildout') }}">
 						<img class="proj-img" src="{{ url_for('mainSite_BP.static', filename='index/icons_images/sanitarysewer_ex_comp.png') }}"  style="max-height:266px"></img>
 						<!-- <img class="proj-img" src="static/images/sanitarysewer_ex_comp.png" style="max-height:266px"></img> -->
 						<b><br>Sanitary Sewer and Storm Drain System GIS Build-out</b>
@@ -122,7 +122,7 @@
 					</a>
 				</div>
 				<div class="grid-item">
-					<a class = "divlink" href = "/projects/streetlightpolepermitting">
+					<a class = "divlink" href = "{{ url_for('projectPages_BP.streetlightpolepermitting') }}">
 						<img class="proj-img" src="{{ url_for('mainSite_BP.static', filename='index/icons_images/streetlightpole_permitting_edited_comp.png') }}"></img>
 						<!-- <img class="proj-img" src="static/images/streetlightpole_permitting_edited_comp.png"></img> -->
 						<b>Streetlight Pole 5G Deployment Permitting</b>
@@ -131,7 +131,7 @@
 					</a>
 				</div>
 				<div class="grid-item">
-					<a class = "divlink" href = "/projects/dashboardsmaps">
+					<a class = "divlink" href = "{{ url_for('projectPages_BP.dashboardsandmaps') }}">
 						<img class="proj-img" src="{{ url_for('mainSite_BP.static', filename='index/icons_images/MHRT_example_comp.png') }}"></img>
 						<!-- <img class="proj-img" src="static/images/MHRT_example_comp.png"></img> -->
 						<b>Esri Operations Dashboards and Various Maps</b>

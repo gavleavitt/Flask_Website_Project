@@ -43,12 +43,17 @@ handler.setFormatter(formatter)
 application = app = Flask(__name__)
 # Attach logging handler to application
 application.logger.addHandler(handler)
-# Import shared assets
-# https://exploreflask.com/en/latest/static.html
-from .util import assets
-from .mainPages.mainRoutes import mainSite_BP
-app.register_blueprint(mainSite_BP)
 application.logger.debug("Python Flask debugger active!")
+# Import shared assets
+from .util import assets
+# Import Blueprints
+from .mainPages.mainRoutes import mainSite_BP
+from .projectPages.projectPageRoutes import projectPages_BP
+# Register blueprints with application
+app.register_blueprint(mainSite_BP)
+app.register_blueprint(projectPages_BP)
+
+
 
 # # Set up celery client, allows async tasks to be setup
 # app.config['CELERY_BROKER_URL'] = 'redis://localhost:6379/0'

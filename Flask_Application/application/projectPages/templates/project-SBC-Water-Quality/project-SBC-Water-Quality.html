@@ -5,13 +5,20 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<title>Water Quality Project</title>
 
+	{% assets "home_js" %}
+			<script type="text/javascript" src="{{ ASSET_URL }}"></script>
+	{% endassets %}
+	{% assets "home_css" %}
+			<link rel="stylesheet" href="{{ ASSET_URL }}" />
+	{% endassets %}
+
 	<!--jquery adds "$." functionality-->
 	<!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script> -->
 
 	<!-- Custom local javascript functions -->
-	<script src="{{ url_for('static', filename='js/customfunctions.js') }}"></script>
+	<!-- <script src="{{ url_for('static', filename='js/customfunctions.js') }}"></script> -->
 	<!-- Custom CSS -->
-	<link rel="stylesheet" href="{{ url_for('static', filename='css/customCSS_main.css') }}">
+	<!-- <link rel="stylesheet" href="{{ url_for('static', filename='css/customCSS_main.css') }}"> -->
 	<!-- Set favicon -->
 
 	<!-- Favicon links -->
@@ -23,23 +30,23 @@
 	<meta name="msapplication-TileColor" content="#da532c">
 	<meta name="theme-color" content="#ffffff">
 
-<!-- Google Fonts -->
-<link href="https://fonts.googleapis.com/css2?family=Lato:wght@700&display=swap" rel="stylesheet">
-<link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@700&display=swap" rel="stylesheet">
-<link href='https://fonts.googleapis.com/css?family=Quicksand' rel='stylesheet'>
-<link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300&display=swap" rel="stylesheet">
+	<!-- Google Fonts -->
+	<link href="https://fonts.googleapis.com/css2?family=Lato:wght@700&display=swap" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@700&display=swap" rel="stylesheet">
+	<link href='https://fonts.googleapis.com/css?family=Quicksand' rel='stylesheet'>
+	<link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300&display=swap" rel="stylesheet">
 
-<!-- Font Awesome Social media icons -->
-<!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/brands.min.css"> -->
+	<!-- Font Awesome Social media icons -->
+	<!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/brands.min.css"> -->
 
-<!-- Font Awesome Kit -->
-<script src="https://kit.fontawesome.com/fd8b0845f1.js" crossorigin="anonymous"></script>
+	<!-- Font Awesome Kit -->
+	<script src="https://kit.fontawesome.com/fd8b0845f1.js" crossorigin="anonymous"></script>
 
-<!-- Highlight.js -->
-<link rel="stylesheet"
-      href="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.2.0/build/styles/default.min.css">
-<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.2.0/build/highlight.min.js"></script>
-<script>hljs.initHighlightingOnLoad();</script>
+	<!-- Highlight.js -->
+	<link rel="stylesheet"
+	      href="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.2.0/build/styles/default.min.css">
+	<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.2.0/build/highlight.min.js"></script>
+	<script>hljs.initHighlightingOnLoad();</script>
 
 </head>
 <body>
@@ -53,12 +60,12 @@
 					</div>
 				</a>
 			</div>
-      <div id="interactiveBarRight" class="navbarright">
-        <a class= "menu-option" href = "/">Home</a>
+			<div id="interactiveBarRight" class="navbarright">
+				<a class= "menu-option"  href="{{ url_for('mainSite_BP.index') }}">Home</a>
 				<a class= "menu-option" href = "/#goto-proj">Projects</a>
-        <a class= "menu-option" href = "/about">About</a>
-        <a class= "menu-option" href = "/resume">Resume</a>
-        <a class= "menu-option" href = "/contact">Contact</a>
+        <a class= "menu-option" href="{{ url_for('mainSite_BP.about') }}">About</a>
+        <a class= "menu-option" href="{{ url_for('mainSite_BP.resume') }}">Resume</a>
+        <a class= "menu-option" href = "{{ url_for('mainSite_BP.contact') }}">Contact</a>
 				<a href = "javascript:void(0);" class="menu-icon" onclick="navBarFunction()" onmouseover="menuHover();" onmouseout="menuUnhover();">
 						<img id="menu-icon-img" src="/static/images/menu-icon-gray.svg" style="width:35px;height:35px">
 				</a>
@@ -102,8 +109,8 @@
 				<p>
 				Here is an example of a standard PDF ocean water quality report with all beaches filled in:
 				<div class="centered-imgs">
-					<a href="/static/images/PDF_Ex_Filled_In_Comp.PNG" target="_blank">
-						<img src="/static/images/PDF_Ex_Filled_In_Comp.PNG" style="box-shadow: 5px 6px 8px #888;border-radius:10px;">
+					<a href="{{ url_for('projectPages_BP.static', filename='project-SBC-Water-Quality/icons_images/PDF_Ex_Filled_In_Comp.PNG') }}" target="_blank">
+						<img src="{{ url_for('projectPages_BP.static', filename='project-SBC-Water-Quality/icons_images/PDF_Ex_Filled_In_Comp.PNG') }}" style="box-shadow: 5px 6px 8px #888;border-radius:10px;">
 					</a>
 				</div>
 				</p>
@@ -320,11 +327,11 @@ def handlePDFStatus(pdfStatus, pdfLoc, hashedText, pdfDict, pdfName):
 				<p>
 					In this example, you can see a beach with an exceedance and two beaches missing results. The second image shows the PDF report from later in the week with re-sampling and data fill amendments.
 					<div class="centered-imgs">
-						<a href="/static/images/PDF_Ex_Exceed_highlight_comp.png" target="_blank">
-							<img src="/static/images/PDF_Ex_Exceed_highlight_comp.png" style="box-shadow: 5px 6px 8px #888;border-radius:10px;">
+						<a href="{{ url_for('projectPages_BP.static', filename='project-SBC-Water-Quality/icons_images/PDF_Ex_Exceed_highlight_comp.png') }}" target="_blank">
+							<img src="{{ url_for('projectPages_BP.static', filename='project-SBC-Water-Quality/icons_images/PDF_Ex_Exceed_highlight_comp.png') }}" style="box-shadow: 5px 6px 8px #888;border-radius:10px;">
 						</a>
-						<a href="/static/images/PDF_Ex_Resample_highlight_comp.png"  target="_blank">
-							<img src="/static/images/PDF_Ex_Resample_highlight_comp.png" style="box-shadow: 5px 6px 8px #888;border-radius:10px;">
+						<a href="{{ url_for('projectPages_BP.static', filename='project-SBC-Water-Quality/icons_images/PDF_Ex_Exceed_highlight_comp.png') }}"  target="_blank">
+							<img src="{{ url_for('projectPages_BP.static', filename='project-SBC-Water-Quality/icons_images/PDF_Ex_Exceed_highlight_comp.png') }}" style="box-shadow: 5px 6px 8px #888;border-radius:10px;">
 						</a>
 					</div>
 				</p>
@@ -492,13 +499,13 @@ def populateDict(tab, beachDict, resample):
 					</pre></code>
 				</p>
 				<p>
-					Finally, since its possible that the first report of the week will be missed or not processed properly, resulting a re-sampled PDF being the first report of the week processed, any beaches missing data in the final results dictionary need to be removed:
+					Finally, since its possible that the first report of the week will be missed or not processed properly, resulting in a re-sampled PDF being the first report of the week processed, any beaches missing data in the final results dictionary need to be removed:
 					<pre><code>
 def makeNull(beachDict):
   for i in list(beachDict.keys()):
       if not beachDict[i]["Total Coliform Results (MPN*)"]:
           beachDict.pop(i, None)
-					</pre>></code>
+					</pre></code>
 				</p>
 			<span id="data-storage" class="goto"></span>
 			<h3><a href=#data-storage>Data Storage - Postgres</a></h3>
@@ -508,17 +515,13 @@ def makeNull(beachDict):
 				<p>
 					Here is a quick visualization of the simple schema:
 					<p>
-					<a href="/static/images/Water_Quality_Diagram_Cropped_comp.png"  target="_blank">
-						<img src="/static/images/Water_Quality_Diagram_Cropped_comp.png" style="box-shadow: 5px 6px 8px #888;border-radius:10px;">
+					<a href="{{ url_for('projectPages_BP.static', filename='project-SBC-Water-Quality/icons_images/Water_Quality_Diagram_Cropped_comp.png') }}"  target="_blank">
+						<img src="{{ url_for('projectPages_BP.static', filename='project-SBC-Water-Quality/icons_images/Water_Quality_Diagram_Cropped_comp.png') }}" style="box-shadow: 5px 6px 8px #888;border-radius:10px;">
 					</a>
 					</p>
 				</p>
 				<p>
 					First the new MD5 hash value and PDF Dates are inserted into Postgres, water quality result records will use these entries as foreign keys:
-					<pre><code>
-					</pre></code>
-				</p>
-				<p>
 					<pre><code>
 def insmd5(MD5, pdfDate, pdfName):
   """

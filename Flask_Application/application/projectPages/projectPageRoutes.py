@@ -1,79 +1,37 @@
 from application import app
 from flask import render_template, Blueprint
 
-@app.route("/maps/stravamap")
-@app.route("/stravamap")
-@app.route("/strava")
-def stravaprojmap():
-    return render_template("public/maps/Strava_Map_Dashboard.html")
 
-@app.route("/maps/stravamaptesting")
-def stravatestingmap():
-    return render_template("public/maps/Strava_Map_Dashboard_Testing.html")
+projectPages_BP = Blueprint('projectPages_BP', __name__,
+                        template_folder='templates',
+                        url_prefix='/projectpages',
+                        static_folder='static')
 
-@app.route("/maps/sbcoceanwaterquality")
-@app.route("/waterquality")
-def waterQual():
-    """
-    Function to handle webpage requests of the Santa Barbara Ocean Water Quality web page.
-    Kicks off functions to get beach test results and returns a Jinja rendered HTML page with the
-    beach results passed into the template
 
-    Returns
-    -------
-    Jinja Rendered HTML webpage
-       Leaflet webpage with the beaches and water quality reports passed in a variables.
+@projectPages_BP.route("/sbcoceanquality")
+def sbcwaterquality():
+    return render_template("project-SBC-Water-Quality/project-SBC-Water-Quality.html")
 
-    """
-    beachresults = functionsWaterQual.handleBeaches()
-    beachqual = beachresults["waterqual"]
-    recentrec = beachresults["recent"]
-    standards = DBQueriesWaterQuality.getStandards()
-    return render_template("public/maps/Water_Qual_Map.html", beachgeojson=beachqual, standards=standards,
-                           recentdate=recentrec)
-@app.route("/dashboards/livetracker")
-@app.route("/livetracker")
-@app.route("/liveviewer")
-@app.route("/tracker")
-@app.route("/viewer")
-@auth.login_required(role='viewer')
-def liveGPS():
-    """
-    This HTML document contains Javascript to poll other APIs in this application, allowing for dynamic
-    data that updates automatically, so no data is passed through here.
-
-    Returns
-    -------
-    HTML webpage
-        Renders the live mobile GPS webpage and sends to the user.
-
-    """
-    return render_template("private/livertracker_dashboard.html")
-
-@app.route("/projects/sbcoceanquality")
-def waterqualproj():
-    return render_template("public/projects/project-Water-Quality.html")
-
-@app.route("/projects/livetrackingdashboard")
+@projectPages_BP.route("/livetrackingdashboard")
 def livetrackingdash():
-    return render_template("public/projects/project-Live-Tracking-Dashboard.html")
+    return render_template("project-Live-Tracking-Dashboard/project-Live-Tracking-Dashboard.html")
 
-@app.route("/projects/sanitarysewertraceapp")
+@projectPages_BP.route("/sanitarysewertraceapp")
 def sanitarysewertrace():
-    return render_template("public/projects/project-Sanitary-Sewer-Trace.html")
+    return render_template("project-Sanitary-Sewer-Trace/project-Sanitary-Sewer-Trace.html")
 
-@app.route("/projects/sanitaryewerstormdrainbuildout")
+@projectPages_BP.route("/sanitaryewerstormdrainbuildout")
 def sanitarysewerstormdrainbuildout():
-    return render_template("public/projects/project-Sanitary-Sewer-Storm-Drain-Builtout.html")
+    return render_template("project-Sanitary-Sewer-Storm-Drain-Builtout/project-Sanitary-Sewer-Storm-Drain-Builtout.html")
 
-@app.route("/projects/streetlightpolepermitting")
+@projectPages_BP.route("/streetlightpolepermitting")
 def streetlightpolepermitting():
-    return render_template("public/projects/project-Streetlight-Pole-Permitting.html")
+    return render_template("project-Streetlight-Pole-Permitting/project-Streetlight-Pole-Permitting.html")
 
-@app.route("/projects/dashboardsmaps")
-def dashboardsmaps():
-    return render_template("public/projects/project-Operations-Dashboards-Maps.html")
+@projectPages_BP.route("/dashboardsandmaps")
+def dashboardsandmaps():
+    return render_template("project-Operations-Dashboards-Maps/project-Operations-Dashboards-Maps.html")
 
-@app.route("/projects/stravamapserverside")
-def stravaactivitymap():
-    return render_template("public/projects/project-Strava-Activities-Server-Side.html")
+@projectPages_BP.route("/stravamapserverside")
+def stravaserversideprocessing():
+    return render_template("project-Strava-Activities-Server-Side/project-Strava-Activities-Server-Side.html")

@@ -5,13 +5,20 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<title>Sanitary Sewer Trace</title>
 
+	{% assets "home_js" %}
+			<script type="text/javascript" src="{{ ASSET_URL }}"></script>
+	{% endassets %}
+	{% assets "home_css" %}
+			<link rel="stylesheet" href="{{ ASSET_URL }}" />
+	{% endassets %}
+
 	<!--jquery adds "$." functionality-->
 	<!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script> -->
 
 	<!-- Custom local javascript functions -->
-	<script src="{{ url_for('static', filename='js/customfunctions.js') }}"></script>
+	<!-- <script src="{{ url_for('static', filename='js/customfunctions.js') }}"></script> -->
 	<!-- Custom CSS -->
-	<link rel="stylesheet" href="{{ url_for('static', filename='css/customCSS_main.css') }}">
+	<!-- <link rel="stylesheet" href="{{ url_for('static', filename='css/customCSS_main.css') }}"> -->
 	<!-- Set favicon -->
 
 	<!-- Favicon links -->
@@ -23,23 +30,23 @@
 	<meta name="msapplication-TileColor" content="#da532c">
 	<meta name="theme-color" content="#ffffff">
 
-<!-- Google Fonts -->
-<link href="https://fonts.googleapis.com/css2?family=Lato:wght@700&display=swap" rel="stylesheet">
-<link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@700&display=swap" rel="stylesheet">
-<link href='https://fonts.googleapis.com/css?family=Quicksand' rel='stylesheet'>
-<link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300&display=swap" rel="stylesheet">
+	<!-- Google Fonts -->
+	<link href="https://fonts.googleapis.com/css2?family=Lato:wght@700&display=swap" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@700&display=swap" rel="stylesheet">
+	<link href='https://fonts.googleapis.com/css?family=Quicksand' rel='stylesheet'>
+	<link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300&display=swap" rel="stylesheet">
 
-<!-- Font Awesome Social media icons -->
-<!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/brands.min.css"> -->
+	<!-- Font Awesome Social media icons -->
+	<!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/brands.min.css"> -->
 
-<!-- Font Awesome Kit -->
-<script src="https://kit.fontawesome.com/fd8b0845f1.js" crossorigin="anonymous"></script>
+	<!-- Font Awesome Kit -->
+	<script src="https://kit.fontawesome.com/fd8b0845f1.js" crossorigin="anonymous"></script>
 
-<!-- Highlight.js -->
-<link rel="stylesheet"
-      href="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.2.0/build/styles/default.min.css">
-<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.2.0/build/highlight.min.js"></script>
-<script>hljs.initHighlightingOnLoad();</script>
+	<!-- Highlight.js -->
+	<link rel="stylesheet"
+	      href="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.2.0/build/styles/default.min.css">
+	<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.2.0/build/highlight.min.js"></script>
+	<script>hljs.initHighlightingOnLoad();</script>
 
 </head>
 <body>
@@ -53,12 +60,12 @@
 					</div>
 				</a>
 			</div>
-      <div id="interactiveBarRight" class="navbarright">
-        <a class= "menu-option" href = "/">Home</a>
+			<div id="interactiveBarRight" class="navbarright">
+				<a class= "menu-option"  href="{{ url_for('mainSite_BP.index') }}">Home</a>
 				<a class= "menu-option" href = "/#goto-proj">Projects</a>
-        <a class= "menu-option" href = "/about">About</a>
-        <a class= "menu-option" href = "/resume">Resume</a>
-        <a class= "menu-option" href = "/contact">Contact</a>
+        <a class= "menu-option" href="{{ url_for('mainSite_BP.about') }}">About</a>
+        <a class= "menu-option" href="{{ url_for('mainSite_BP.resume') }}">Resume</a>
+        <a class= "menu-option" href = "{{ url_for('mainSite_BP.contact') }}">Contact</a>
 				<a href = "javascript:void(0);" class="menu-icon" onclick="navBarFunction()" onmouseover="menuHover();" onmouseout="menuUnhover();">
 						<img id="menu-icon-img" src="/static/images/menu-icon-gray.svg" style="width:35px;height:35px">
 				</a>
@@ -67,9 +74,9 @@
 		<div class="project-content">
 			<div class="title">Sanitary Sewer Trace Application</div>
 			<div class="separatorbar-title"></div>
-			<img src="../static/images/Sanitary_Sewer_App_Poser_shrunk_comp.jpg" style="margin-top:10px;">
+			<img src="{{ url_for('projectPages_BP.static', filename='project-Sanitary-Sewer-Trace/icons_images/Sanitary_Sewer_App_Poser_shrunk_comp.jpg') }}" style="margin-top:10px;">
 			<div class="fullsize-link">
-				<a href="../static/images/Sanitary_Sewer_App_Poser_shrunk_comp.jpg" target="_blank">View fullsize image</a>
+				<a href="{{ url_for('projectPages_BP.static', filename='project-Sanitary-Sewer-Trace/icons_images/Sanitary_Sewer_App_Poser_shrunk_comp.jpg') }}" target="_blank">View fullsize image</a>
 			</div>
 			<div class="separatorbar-title"></div>
 			<h2>
