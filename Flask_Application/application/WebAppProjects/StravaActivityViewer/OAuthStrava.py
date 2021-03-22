@@ -1,8 +1,8 @@
-from application.stravalib.client import Client
+from application.pythonLib.stravalib.client import Client
 import os
 import time
-from application import app, Session
-from application.WebAppProjects.strava_activities.modelsStrava import athletes
+from application import Session
+from application.WebAppProjects.StravaActivityViewer.modelsStrava import athletes
 
 def getAuth():
     """

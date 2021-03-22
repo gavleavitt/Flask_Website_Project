@@ -74,9 +74,9 @@
 		<div class="project-content">
 			<div class="title">Strava Activities Project - Data Preparation and Server Side Processing</div>
 			<div class="separatorbar-title"></div>
-			<iframe src="/maps/stravamap" style="border-radius:10px;"></iframe>
+			<iframe src="{{ url_for('stravaActDash_BP.stravaActivityViewerDashboard') }}" style="border-radius:10px;"></iframe>
 			<div class="fullsize-link">
-				<a href="/maps/stravamap" target="_blank">View fullpage dashboard for best experience</a>
+				<a href="{{ url_for('stravaActDash_BP.stravaActivityViewerDashboard') }}" target="_blank">View fullpage dashboard for best experience</a>
 			</div>
 			<div class="separatorbar-title"></div>
 			<span id="strava-summary" class="goto"></span>

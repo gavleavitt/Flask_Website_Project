@@ -49,8 +49,10 @@ application.logger.debug("Python Flask debugger active!")
 engine = create_engine(os.environ.get("DBCON"))
 Session = sessionmaker(bind=engine)
 
+# Import HTTP auth
 from application.util.flaskAuth.authentication import auth
-
+# Import error email reporting
+from application.util import errorEmail
 # Import shared assets
 from .util import assets
 # Import Blueprints
@@ -59,14 +61,16 @@ from .projectPages.projectPageRoutes import projectPages_BP
 from .WebAppProjects.LocationLiveTracker.routes import liveTracker_BP
 from .WebAppProjects.LocationLiveTracker.API_Routes import livetrackerAPI_BP
 from .WebAppProjects.StravaActivityViewer.routes import stravaActDash_BP
-# from .WebAppProjects.StravaActivityViewer.APIFunctionsStrava import
+from .WebAppProjects.StravaActivityViewer.API_Routes import stravaActDashAPI_BP
+from .WebAppProjects.WaterQualityViewer.routes import sbcWaterQuality_BP
 # Register blueprints with application
 app.register_blueprint(mainSite_BP)
 app.register_blueprint(projectPages_BP)
-app.register_blueprint(liveTracker_BP)
-app.register_blueprint(livetrackerAPI_BP)
-app.register_blueprint(stravaActDash_BP)
-
+app.register_blueprint(liveTracker_BP, url_prefix='/webapps/tracker')
+app.register_blueprint(livetrackerAPI_BP, url_prefix='/api/v1/tracker')
+app.register_blueprint(stravaActDash_BP, url_prefix='/webapps/stravapp')
+app.register_blueprint(stravaActDashAPI_BP, url_prefix='/api/v1/stravaactdashboard')
+app.register_blueprint(sbcWaterQuality_BP, url_prefix='/webapps/sbcwaterquality')
 
 # # Set up celery client, allows async tasks to be setup
 # app.config['CELERY_BROKER_URL'] = 'redis://localhost:6379/0'

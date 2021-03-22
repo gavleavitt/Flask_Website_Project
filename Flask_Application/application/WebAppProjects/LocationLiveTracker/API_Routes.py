@@ -5,7 +5,7 @@ from application.WebAppProjects.LocationLiveTracker import DBQueriesTracker, mod
 
 livetrackerAPI_BP = Blueprint('livetrackerAPI_BP', __name__,
                         template_folder='templates',
-                        url_prefix='/api/v1/tracker',
+                        # url_prefix='/api/v1/tracker',
                         static_folder='static')
 
 

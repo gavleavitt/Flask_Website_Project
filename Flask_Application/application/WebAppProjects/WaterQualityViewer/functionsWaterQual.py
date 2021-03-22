@@ -1,17 +1,10 @@
-from sqlalchemy import create_engine, or_
-from sqlalchemy.orm import sessionmaker
-# from settings import dbcon
-from application.WebAppProjects.water_quality.modelsWaterQual import beaches, waterQualityMD5, stateStandards, waterQuality
 import pdfplumber
 import unicodedata
 from datetime import datetime
 import hashlib
-from urllib.parse import quote
 from urllib.request import urlretrieve
 from application import app, errorEmail, application
-from application.WebAppProjects.water_quality import GoogleDriveUploadWaterQuality
-from application.WebAppProjects.water_quality import DBQueriesWaterQuality
-from application.WebAppProjects.water_quality import AWSS3Upload
+from application.WebAppProjects.WaterQualityViewer import GoogleDriveUploadWaterQuality, DBQueriesWaterQuality, AWSS3Upload
 import os
 from application import logger
 from geojson import Point, Feature, FeatureCollection

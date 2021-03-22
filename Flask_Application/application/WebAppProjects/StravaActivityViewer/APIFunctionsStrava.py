@@ -1,6 +1,4 @@
 from datetime import datetime, timedelta
-# from application.WebAppProjects.strava_activities import OAuthStrava, DBQueriesStrava, StreamDataAWSS3
-# from application import application
 import logging
 import csv
 from io import StringIO

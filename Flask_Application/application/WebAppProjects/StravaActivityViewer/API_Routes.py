@@ -1,14 +1,14 @@
-from application import app, application
+from application import app, application, auth
 from flask import Blueprint, Response, request
 import os
+from application.WebAppProjects.StravaActivityViewer import WebHookFunctionsStrava, DBQueriesStrava, StravaAWSS3
 
 stravaActDashAPI_BP = Blueprint('stravaActDashAPI', __name__,
                         template_folder='templates',
-                        url_prefix='/api/v1/tracker',
                         static_folder='static')
 
 
-@app.route(os.environ.get("strava_callback_url"), methods=['GET', 'POST'])
+@stravaActDashAPI_BP.route(os.environ.get("strava_callback_url"), methods=['GET', 'POST'])
 def subCallback():
     """
     Strava subscription callback URL.
@@ -26,20 +26,80 @@ def subCallback():
     application.logger.debug("Returning success code!")
     return Response(status=200)
 
-@app.route("/api/v0.1/stravaroutes", methods=['GET'])
+@stravaActDashAPI_BP.route("/stravaroutes", methods=['GET'])
 def stravaActAPI():
     actLimit = int(request.args.get("actlimit"))
     res = DBQueriesStrava.getStravaMaskedActGeoJSON(actLimit)
     return res
 
-@app.route("/api/v0.1/getstravastreamurl", methods=['GET'])
+@stravaActDashAPI_BP.route("/getstravastreamurl", methods=['GET'])
 def getsteamS3url():
     actID = str(request.args.get("actID"))
     # print(f"csvname is: {actID}")
     res = StravaAWSS3.create_presigned_url(actID)
     return res
 
-@app.route("/api/v0.1/getstravatopojsonurl", methods=['GET'])
-def stravaTopoJSON():
+@stravaActDashAPI_BP.route("/getstravatopojsonurl", methods=['GET'])
+def stravaTopoJSONURL():
     res = StravaAWSS3.create_presigned_url("activitiesTopoJSON")
     return res
+
+# @stravaActDashAPI_BP.route("/admin/stravacreatesub", methods=['POST'])
+# @auth.login_required(role='admin')
+# def handle_Create_Strava_Sub():
+#     """
+#     URL to handle creation of new webhook subscription. Requires that OAuth access has already been given, consider
+#     setting up a flow to prompt user to provide OAuth access and password protect at user role level.
+#
+#     Requires admin level access to visit.
+#
+#     Consider for future development:
+#     Have page prompt user for OAuth access, process Oauth creds, then create new webhook subscription including new user
+#     Maybe use Flask-Login to keep track of who is logged in and Oauth credentials.
+#
+#     Returns
+#     -------
+#     String. String containing new webhook subscription ID.
+#     """
+#     try:
+#         # Get application access credentials
+#         # client = stravaAuth.gettoken()
+#         # application.logger.debug("Client loaded with tokens!")
+#         # Handle webhook subscription and response
+#         response = StravaWebHook.create_Strava_Webhook(client)
+#         return f"Creation of new strava webhook subscription succeeded, new sub id is {response}!"
+#     except Exception as e:
+#         return f"Creation of new strava webhook subscription failed with the error {e}"
+#
+# @stravaActDashAPI_BP.route("/admin/listactivesubs", methods=['GET'])
+# @auth.login_required(role='admin')
+# def liststravasubs():
+#     """
+#     Lists application webhook subscriptions. Manually visited,
+#
+#     Requires admin level access.
+#
+#     Returns
+#     -------
+#     String. Message with webhook subscription IDs.
+#     """
+#     # Get application access credentials
+#     client = stravaAuth.gettoken()
+#     subIDs = StravaWebHook.listStravaSubIds(client)
+#     return f"Webhook subscriptions IDs are {subIDs}"
+#
+# @stravaActDashAPI_BP.route("/admin/deleteactivesub", methods=['POST'])
+# @auth.login_required(role='admin')
+# def deletestravasubs():
+#     """
+#     Deletes application webhook subscriptions. Manually visited, requires admin level access.
+#
+#     Returns
+#     -------
+#     String. Message with deleted webhook subscription IDs.
+#
+#     """
+#     # Get application access credentials
+#     client = stravaAuth.gettoken()
+#     subIDs = StravaWebHook.deleteStravaSubIds(client)
+#     return f"Deleted webhook subscriptions with the IDs: {subIDs}"

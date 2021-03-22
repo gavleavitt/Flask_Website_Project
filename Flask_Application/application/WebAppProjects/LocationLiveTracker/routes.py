@@ -1,11 +1,9 @@
-from application import app
 from flask import render_template, Blueprint
-# from application.util.flaskAuth.authentication import auth
 from application import auth
 
 liveTracker_BP = Blueprint('liveTracker_BP', __name__,
                         template_folder='templates',
-                        url_prefix='/webapps',
+                        # url_prefix='/webapps',
                         static_folder='static')
 
 @liveTracker_BP.route("/dashboards/livetracker")

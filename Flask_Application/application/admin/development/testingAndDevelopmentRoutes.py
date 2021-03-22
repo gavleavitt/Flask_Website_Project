@@ -103,60 +103,7 @@ from application.WebAppProjects.strava_activities import WebHookFunctionsStrava,
 #     # DQS.maskandInsertAct(actid)
 #     return "Success!"
 
-# @app.route(script_config.strava_create_sub_url, methods=['GET'])
-# @auth.login_required(role='admin')
-# def handle_Create_Strava_Sub():
-#     """
-#     URL to handle creation of new webhook subscription. Must visited by user who has already provided OAuth access.
-#     Requires admin level access to visit.
-#
-#     Consider for future development:
-#     Have page prompt user for OAuth access, process Oauth creds, then create new webhook subscription including new user
-#     Maybe use Flask-Login to keep track of who is logged in and Oauth credentials.
-#
-#     Returns
-#     -------
-#     String. String containing new webhook subscription ID.
-#     """
-#     try:
-#         # Get application access credentials
-#         client = stravaAuth.gettoken()
-#         application.logger.debug("Client loaded with tokens!")
-#         # Handle webhook subscription and response
-#         response = StravaWebHook.create_Strava_Webhook(client)
-#         return f"Creation of new strava webhook subscription succeeded, new sub id is {response}!"
-#     except Exception as e:
-#         return f"Creation of new strava webhook subscription failed with the error {e}"
-# @app.route(script_config.strava_list_subs_url, methods=['GET'])
-# @auth.login_required(role='admin')
-# def liststravasubs():
-#     """
-#     Lists application webhook subscriptions. Manually visited, requires admin level access.
-#
-#     Returns
-#     -------
-#     String. Message with webhook subscription IDs.
-#     """
-#     # Get application access credentials
-#     client = stravaAuth.gettoken()
-#     subIDs = StravaWebHook.listStravaSubIds(client)
-#     return f"Webhook subscriptions IDs are {subIDs}"
-#
-# @app.route(script_config.strava_delete_subs_url, methods=['GET'])
-# @auth.login_required(role='admin')
-# def deletestravasubs():
-#     """
-#     Deletes application webhook subscriptions. Manually visited, requires admin level access.
-#
-#     Returns
-#     -------
-#     String. Message with deleted webhook subscription IDs.
-#
-#     """
-#     # Get application access credentials
-#     client = stravaAuth.gettoken()
-#     subIDs = StravaWebHook.deleteStravaSubIds(client)
-#     return f"Deleted webhook subscriptions with the IDs: {subIDs}"
+
 
 
 # @app.route("/testmasking")

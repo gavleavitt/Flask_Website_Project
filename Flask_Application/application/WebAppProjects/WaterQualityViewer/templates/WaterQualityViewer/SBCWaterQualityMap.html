@@ -44,24 +44,30 @@
 	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet.locatecontrol@0.72.0/dist/L.Control.Locate.min.css" />
 	<script src="https://cdn.jsdelivr.net/npm/leaflet.locatecontrol@0.72.0/dist/L.Control.Locate.min.js" charset="utf-8"></script>
 
+	<!-- Leaflet Ajax -->
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-ajax/2.1.0/leaflet.ajax.min.js" integrity="sha512-Abr21JO2YqcJ03XGZRPuZSWKBhJpUAR6+2wH5zBeO4wAw4oksr8PRdF+BKIRsxvCdq+Mv4670rZ+dLnIyabbGw==" crossorigin="anonymous"></script>
+
+	<!-- Leaflet Search -->
+	<!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-search/2.9.9/leaflet-search.src.js" integrity="sha512-M+CrTqu3k5vVj/MsWmItLmIxmm8RWQWowcgH22/vxTs7X00J0tNrNrANDyCoEliOmdSBA1paXCJgG7nKff+RCg==" crossorigin="anonymous"></script> -->
+	<!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet-search/2.9.9/leaflet-search.min.css" integrity="sha512-8zuX58lcEgyZdtfTu5Iu9SDfadAirBVoZrJkmuZJ+/s80QZ/YTNVlEqPtE9iHqNXeCgd122pl+inU1Oxn9KXng==" crossorigin="anonymous" /> -->
 
 	<!-- Local static files-->
+	<!-- Global shared files -->
+	<!-- leaflet Ajax JS-->
+	<!-- <script src="{{ url_for('static', filename='lib/js/leaflet.ajax.min.js') }}"></script> -->
+	<!-- <script src="{{ url_for('static', filename='lib/js/leaflet.ajax.js') }}"></script> -->
 	<!-- leaflet Mouset Position JS-->
-	<!-- leaflet Ajax JS-->
-	<script src="{{ url_for('static', filename='js/leaflet.ajax.js') }}"></script>
-	<!-- leaflet Ajax JS-->
-	<script src="{{ url_for('static', filename='js/leaflet.ajax.min.js') }}"></script>
-	<!-- Custom local javascript functions -->
-	<script src="{{ url_for('static', filename='js/WaterQualityFunctions/WaterQuality_Chart_Functions.js') }}"></script>
-	<!--  -->
-	<script src="{{ url_for('static', filename='js/WaterQualityFunctions/WaterQuality_General_Functions.js') }}"></script>
-
-	<!-- Custom CSS -->
-	<link rel="stylesheet" href="{{ url_for('static', filename='css/customCSS_WaterQuality.css') }}">
 	<!-- Search CSS-->
-	<link rel="stylesheet" href="{{ url_for('static', filename='css/leaflet-search.src.css') }}">
+	<link rel="stylesheet" href="{{ url_for('static', filename='css/lib/leaflet-search.src.css') }}">
 	<!-- Search JS -->
-	<script src="{{ url_for('static', filename='js/leaflet-search.src.js') }}"></script>
+	<script src="{{ url_for('static', filename='js/lib/leaflet-search.src.js') }}"></script>
+
+
+	<!-- Custom local javascript functions -->
+	<script src="{{ url_for('sbcWaterQuality_BP.static', filename='WaterQualityViewer/js/WaterQuality_Chart_Functions.js') }}"></script>
+	<script src="{{ url_for('sbcWaterQuality_BP.static', filename='WaterQualityViewer/js/WaterQuality_General_Functions.js') }}"></script>
+	<!-- Custom CSS -->
+	<link rel="stylesheet" href="{{ url_for('sbcWaterQuality_BP.static', filename='WaterQualityViewer/css/customCSS_WaterQualityViewer.css') }}">
 
 
 	<!-- Favicon links -->
@@ -238,17 +244,17 @@
 			pointToLayer: function(feature, latlng){
 				if (feature.properties.BeachStatus == "Open"){
 					var beach_icon = L.icon({
-						iconUrl: '../static/images/beach_open.svg',
+						iconUrl: "{{ url_for('sbcWaterQuality_BP.static', filename='WaterQualityViewer/icons_images/beach_open.svg') }}",
 						iconSize: [50, 50]
 					});
 				}else if (feature.properties.BeachStatus == "Warning"){
 					var beach_icon = L.icon({
-						iconUrl: '../static/images/beach_warning.svg',
+						iconUrl: "{{ url_for('sbcWaterQuality_BP.static', filename='WaterQualityViewer/icons_images/beach_warning.svg') }}",
 						iconSize: [50, 50]
 					});
 				}else if (feature.properties.BeachStatus == "Closed"){
 					var beach_icon = L.icon({
-						iconUrl: '../static/images/beach_closed.svg',
+						iconUrl: "{{ url_for('sbcWaterQuality_BP.static', filename='WaterQualityViewer/icons_images/beach_closed.svg') }}",
 						iconSize: [50, 50]
 					});
 				}
@@ -435,9 +441,9 @@
 		legend.onAdd = function (map) {
 	    var div = L.DomUtil.create('div', 'infolegend');
 			div.innerHTML =  "<div class='legendheader spanbotbord'><b>Beach Status</b><span>"
-			div.innerHTML += "<div><img src='../static/images/beach_open.svg'    class='legendicon'><span class='legendtext'>Open</span></div>";
-			div.innerHTML += "<div><img src='../static/images/beach_warning.svg' class='legendicon'><span class='legendtext'>Warning</span></div>";
-			div.innerHTML += "<div><img src='../static/images/beach_closed.svg'  class='legendicon'><span class='legendtext'>Closed</span></div>";
+			div.innerHTML += "<div><img src='/webapps/sbcwaterquality/static/WaterQualityViewer/icons_images/beach_open.svg'    class='legendicon'><span class='legendtext'>Open</span></div>";
+			div.innerHTML += "<div><img src='/webapps/sbcwaterquality/static/WaterQualityViewer/icons_images/beach_warning.svg' class='legendicon'><span class='legendtext'>Warning</span></div>";
+			div.innerHTML += "<div><img src='/webapps/sbcwaterquality/static/WaterQualityViewer/icons_images/beach_closed.svg'  class='legendicon'><span class='legendtext'>Closed</span></div>";
 		  return div;
 		};
 		// Add legend to map

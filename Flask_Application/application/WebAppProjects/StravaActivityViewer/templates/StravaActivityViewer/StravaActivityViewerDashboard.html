@@ -81,9 +81,9 @@
 
 
 	<!-- Custom CSS -->
-	<link rel="stylesheet" href="{{ url_for('stravaActDash_BP.static', filename='StravaActivityViewer/css/customCSS_strava_map.css') }}">
+	<link rel="stylesheet" href="{{ url_for('stravaActDash_BP.static', filename='StravaActivityViewer/css/customCSS_StravaActivityViewer.css') }}">
 	<!-- Search CSS-->
-	<link rel="stylesheet" href="{{ url_for('stravaActDash_BP.static', filename='css/leaflet-search.src.css') }}">
+	<link rel="stylesheet" href="{{ url_for('static', filename='css/lib/leaflet-search.src.css') }}">
 	<!-- Search JS -->
 	<script src="{{ url_for('static', filename='js/lib/leaflet-search.src.js') }}"></script>
 	<!-- Spin JS -->
@@ -257,8 +257,8 @@
 		map.spin(true);
 
 		// Set topoJSON URL
-		// jsonDataURL = "/static/json/topoJSONPublicActivities.json"
-		jsonDataURL = "/api/v0.1/getstravatopojsonurl"
+		// jsonDataURL = "/api/v0.1/getstravatopojsonurl"
+		jsonDataURL = {{url_for('stravaActDashAPI_BP.stravaTopoJSONURL')}}
 		// Get screen size
 		dimen = {'width': window.innerWidth,'height':window.innerHeight};
 		// Dict to hold panel values

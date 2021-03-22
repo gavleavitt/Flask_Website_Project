@@ -1,18 +1,12 @@
 from sqlalchemy import create_engine, or_
 from sqlalchemy.orm import sessionmaker
-from application.WebAppProjects.water_quality.modelsWaterQual import beaches, waterQualityMD5, stateStandards, waterQuality
-from application.WebAppProjects.water_quality.AWSS3Upload import create_presigned_url
-import os
+from application.WebAppProjects.WaterQualityViewer.modelsWaterQual import beaches, waterQualityMD5, stateStandards, waterQuality
+from application.WebAppProjects.WaterQualityViewer.AWSS3Upload import create_presigned_url
 from datetime import datetime
 from application import application, Session
 from sqlalchemy import func as sqlfunc
 import pytz
 
-# def createSession():
-#     engine = create_engine(os.environ.get("DBCON"))
-#     Session = sessionmaker(bind=engine)
-#     session = Session()
-#     return session
 
 def checkmd5(hash, pdfDate):
     """

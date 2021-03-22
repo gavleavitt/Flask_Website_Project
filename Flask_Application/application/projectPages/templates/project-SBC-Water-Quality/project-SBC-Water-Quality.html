@@ -74,9 +74,9 @@
 		<div class="project-content">
 			<div class="title">Santa Barbara County Ocean Water Quality</div>
 			<div class="separatorbar-title"></div>
-			<iframe id="iframe1" src="/maps/sbcoceanwaterquality" style="border-radius:10px;"></iframe>
+			<iframe id="iframe1" src="{{ url_for('sbcWaterQuality_BP.sbcWaterQualityMap') }}" style="border-radius:10px;"></iframe>
 			<div class="fullsize-link">
-				<a href="/maps/sbcoceanwaterquality" target="_blank">View fullpage map</a>
+				<a href="{{ url_for('sbcWaterQuality_BP.sbcWaterQualityMap') }}" target="_blank">View fullpage map</a>
 			</div>
 			<div class="separatorbar-title"></div>
 			<span id="water-qual-summary" class="goto"></span>
