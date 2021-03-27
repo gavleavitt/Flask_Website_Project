@@ -25,7 +25,7 @@ def threadedActivityProcessing(client, update):
         # Create in-memory buffer csv of stream data
         csvBuff = StravaAWSS3.writeMemoryCSV(activity["stream"])
         # Get WKT formatted latlng stream data
-        wktStr = APIFunctionsStrava.formatStreamData(csvBuff)
+        wktStr = APIFunctionsStrava.formatStreamData(activity["stream"])
         # Get list of coordinates which cross privacy areas, these will be removed from the latlng stream CSV data
         removeCoordList = DBQueriesStrava.getIntersectingPoints(wktStr)
         # Trim/remove rows from latlng CSV stream which have coordinates that intersect the privacy areas

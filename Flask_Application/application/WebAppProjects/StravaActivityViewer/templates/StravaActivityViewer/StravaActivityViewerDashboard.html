@@ -258,7 +258,9 @@
 
 		// Set topoJSON URL
 		// jsonDataURL = "/api/v0.1/getstravatopojsonurl"
-		jsonDataURL = {{url_for('stravaActDashAPI_BP.stravaTopoJSONURL')}}
+		jsonDataURL = "{{url_for('stravaActDashAPI_BP.getstravatopojsonurl')}}"
+		csvAPIURL = "{{url_for('stravaActDashAPI_BP.getsteamS3url')}}"
+		// jsonDataURL = ".getstravatopojsonurl|tojson"
 		// Get screen size
 		dimen = {'width': window.innerWidth,'height':window.innerHeight};
 		// Dict to hold panel values

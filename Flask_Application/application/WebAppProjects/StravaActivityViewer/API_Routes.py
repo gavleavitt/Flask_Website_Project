@@ -3,9 +3,10 @@ from flask import Blueprint, Response, request
 import os
 from application.WebAppProjects.StravaActivityViewer import WebHookFunctionsStrava, DBQueriesStrava, StravaAWSS3
 
-stravaActDashAPI_BP = Blueprint('stravaActDashAPI', __name__,
+stravaActDashAPI_BP = Blueprint('stravaActDashAPI_BP', __name__,
                         template_folder='templates',
                         static_folder='static')
+
 
 
 @stravaActDashAPI_BP.route(os.environ.get("strava_callback_url"), methods=['GET', 'POST'])
@@ -40,9 +41,10 @@ def getsteamS3url():
     return res
 
 @stravaActDashAPI_BP.route("/getstravatopojsonurl", methods=['GET'])
-def stravaTopoJSONURL():
+def getstravatopojsonurl():
     res = StravaAWSS3.create_presigned_url("activitiesTopoJSON")
     return res
+
 
 # @stravaActDashAPI_BP.route("/admin/stravacreatesub", methods=['POST'])
 # @auth.login_required(role='admin')

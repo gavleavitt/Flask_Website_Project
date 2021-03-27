@@ -129,35 +129,35 @@ function batteryicon(battery){
 /**
 */
 if (battery >= 80){
-  return '/webapps/static/LocationLiveTracker/icons_images/battery-green.svg';
+  return '/webapps/tracker/static/LocationLiveTracker/icons_images/battery-green.svg';
 } else if (battery >= 60){
-  return '/webapps/static/LocationLiveTracker/icons_images/battery-yellow.svg';
+  return '/webapps/tracker/static/LocationLiveTracker/icons_images/battery-yellow.svg';
 } else if (battery >= 45){
-  return '/webapps/static/LocationLiveTracker/icons_images/battery-orange.svg';
+  return '/webapps/tracker/static/LocationLiveTracker/icons_images/battery-orange.svg';
 } else if (battery >= 10){
-  return '/webapps/static/LocationLiveTracker/icons_images/battery-red.svg';
+  return '/webapps/tracker/static/LocationLiveTracker/icons_images/battery-red.svg';
 } else {
-  return '/webapps/static/LocationLiveTracker/icons_images/battery-red-critical.svg';;
+  return '/webapps/tracker/static/LocationLiveTracker/icons_images/battery-red-critical.svg';;
 }};
 
 function activityicon(profile){
 if (profile == "MTB"){
   // document.getElementById('activity-icon').src = '../static/images/Downhill_sketch.svg';
-  document.getElementById('activity-icon').src = '/webapps/static/LocationLiveTracker/icons_images/Downhill_sketch.svg';
+  document.getElementById('activity-icon').src = '/webapps/tracker/static/LocationLiveTracker/icons_images/Downhill_sketch.svg';
 } else if (profile == "Road Biking"){
-  document.getElementById('activity-icon').src = '/webapps/static/LocationLiveTracker/icons_images/roadbike1.svg';
+  document.getElementById('activity-icon').src = '/webapps/tracker/static/LocationLiveTracker/icons_images/roadbike1.svg';
 } else if (profile == "Driving"){
-  document.getElementById('activity-icon').src = '/webapps/static/LocationLiveTracker/icons_images/fiesta-white.png';
+  document.getElementById('activity-icon').src = '/webapps/tracker/static/LocationLiveTracker/icons_images/fiesta-white.png';
   document.getElementById("activity-icon").style.width = "9vw";
   document.getElementById("activity-icon").style.height = "4vw";
 } else if (profile == "Walking"){
-  document.getElementById('activity-icon').src = '/webapps/static/LocationLiveTracker/icons_images/walk.svg';
+  document.getElementById('activity-icon').src = '/webapps/tracker/static/LocationLiveTracker/icons_images/walk.svg';
 } else if (profile == "Running"){
-  document.getElementById('activity-icon').src = '/webapps/static/LocationLiveTracker/icons_images/running-figure.svg';
+  document.getElementById('activity-icon').src = '/webapps/tracker/static/LocationLiveTracker/icons_images/running-figure.svg';
 } else if (profile == "Field Work"){
-  document.getElementById('activity-icon').src = '/webapps/static/LocationLiveTracker/icons_images/Field_Work_Icon.svg';
+  document.getElementById('activity-icon').src = '/webapps/tracker/static/LocationLiveTracker/icons_images/Field_Work_Icon.svg';
 } else {
-  document.getElementById('activity-icon').src = '/webapps/static/LocationLiveTracker/icons_images/ellipsis.svg';
+  document.getElementById('activity-icon').src = '/webapps/tracker/static/LocationLiveTracker/icons_images/ellipsis.svg';
 }
 };
 

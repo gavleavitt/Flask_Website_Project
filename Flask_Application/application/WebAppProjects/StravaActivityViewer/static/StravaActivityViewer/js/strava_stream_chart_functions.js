@@ -179,7 +179,7 @@ function createStreamLineChart(){
 }
 
 function getS3StreamURL(actID){
-  csvAPIURL = '/api/v0.1/getstravastreamurl'
+  // csvAPIURL = '/api/v0.1/getstravastreamurl'
   return $.ajax({
       url:csvAPIURL,
       //https://stackoverflow.com/questions/47523265/jquery-ajax-no-access-control-allow-origin-header-is-present-on-the-requested
