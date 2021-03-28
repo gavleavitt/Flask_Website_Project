@@ -1,0 +1,20 @@
+<div class = "navbar">
+  <div class ="navbarleft">
+    <a href = "/">
+      <div class="icon-home-link">
+        <img id="nav-icon" src = "/static/images/wheel_custom.png">
+        <div class="nav-name">Gavin Leavitt</div>
+      </div>
+    </a>
+  </div>
+  <div id="interactiveBarRight" class="navbarright">
+    <a class= "menu-option"  href="{{ url_for('mainSite_BP.index') }}">Home</a>
+    <a class= "menu-option" href = "/#goto-proj">Projects</a>
+    <a class= "menu-option" href="{{ url_for('mainSite_BP.about') }}">About</a>
+    <a class= "menu-option" href="{{ url_for('mainSite_BP.resume') }}">Resume</a>
+    <a class= "menu-option" href ="{{ url_for('mainSite_BP.contact') }}">Contact</a>
+    <a href = "javascript:void(0);" class="menu-icon" onclick="navBarFunction()" onmouseover="menuHover();" onmouseout="menuUnhover();">
+        <img id="menu-icon-img" src="/static/images/menu-icon-gray.svg" style="width:35px;height:35px">
+    </a>
+  </div>
+</div>

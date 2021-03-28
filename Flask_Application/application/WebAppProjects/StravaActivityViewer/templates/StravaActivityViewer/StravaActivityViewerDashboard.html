@@ -1,76 +1,38 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<meta charset="utf-8">
-	<!-- <meta name="viewport" content="width=device-width, initial-scale=1"> -->
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<title>Strava Activity Map</title>
-	<!-- CDN files-->
-	<!-- Leaflet css-->
-	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css"/>
-	<!-- Other imports! -->
-	<!-- leaflet Javascript-->
-	<script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js"></script>
+	{% include 'projectimports.html' %}
 
-	<!-- Load Esri Leaflet from CDN, stable -->
-	<script src="https://unpkg.com/esri-leaflet@2.4.0/dist/esri-leaflet.js"
-	integrity="sha512-kq0i5Xvdq0ii3v+eRLDpa++uaYPlTuFaOYrfQ0Zdjmms/laOwIvLMAxh7cj1eTqqGG47ssAcTY4hjkWydGt6Eg=="
-	crossorigin=""></script>
-	<!-- Esri Leaflet and Esri Leaflet Vector, experimential -->
-	<!-- <script src="https://unpkg.com/esri-leaflet/dist/esri-leaflet.js"></script>
-	<script src="https://unpkg.com/esri-leaflet-vector/dist/esri-leaflet-vector.js"></script> -->
-	<!-- Esri vector tiles relies on maxbo gl -->
-	<!-- <link rel="stylesheet" href="https://unpkg.com/mapbox-gl/dist/mapbox-gl.css"/>
-	<script src="https://unpkg.com/mapbox-gl/dist/mapbox-gl.js"></script> -->
-
-	<!-- load the latest release from the cdn automatically -->
-	<!-- <script src="https://unpkg.com/esri-leaflet-vector/dist/esri-leaflet-vector-debug.js"></script> -->
-
+	<!-- Project specific imports -->
 	<!-- Leaflet Omnivore -->
 	<script src='//api.tiles.mapbox.com/mapbox.js/plugins/leaflet-omnivore/v0.3.1/leaflet-omnivore.min.js'></script>
-
-
-	<!-- Leaflet Table CSS -->
-	<!-- <link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.3/leaflet.css" /> -->
-	<!-- Leaflet Table JS -->
-	<!-- <script src="http://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.3/leaflet.js"></script> -->
-
 	<!-- Locate Control, geolocation -->
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"/>
 	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet.locatecontrol@0.72.0/dist/L.Control.Locate.min.css" />
 	<script src="https://cdn.jsdelivr.net/npm/leaflet.locatecontrol@0.72.0/dist/L.Control.Locate.min.js" charset="utf-8"></script>
-
 	<!-- Date range picker and requirements-->
 	<script type="text/javascript" src="https://cdn.jsdelivr.net/jquery/latest/jquery.min.js"></script>
 	<script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
 	<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
 	<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
-
 	<!-- Chart.js JS-->
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.min.js"></script>
 	<!-- Chart.js CSS -->
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.min.css"/>
-	<!-- SheetJS -->
-	<!-- <script src="https://unpkg.com/browse/xlsx@0.16.9/xlsx.mini.js"></script> -->
-	<!-- chartJS plugin datasource - CSV support -->
-	<!-- <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datasource"></script> -->
 	<!-- jquery-csv -->
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-csv/1.0.11/jquery.csv.min.js"></script>
-
 	<!-- Load chartjs zoom plugin -->
 	<!-- https://github.com/chartjs/chartjs-plugin-zoom -->
 	<!-- <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.3"></script> -->
 	<script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8"></script>
 	<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@0.7.7"></script>
-
 	<!-- Tabulator -->
 	<link href="https://unpkg.com/tabulator-tables/dist/css/tabulator.min.css" rel="stylesheet">
 	<script type="text/javascript" src="https://unpkg.com/tabulator-tables/dist/js/tabulator.min.js"></script>
-
 	<!-- TurfJS -->
 	<script src='https://unpkg.com/@turf/turf@6.3.0/turf.min.js'></script>
-	<!--jquery adds "$." functionality-->
-	<!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script> -->
 
 	<!-- Local static files-->
 	<!-- Custom local javascript functions -->
@@ -78,41 +40,8 @@
 	<script src="{{ url_for('stravaActDash_BP.static', filename='StravaActivityViewer/js/strava_stream_chart_functions.js') }}"></script>
 	<script src="{{ url_for('stravaActDash_BP.static', filename='StravaActivityViewer/js/strava_chart_functions.js') }}"></script>
 	<script src="{{ url_for('stravaActDash_BP.static', filename='StravaActivityViewer/js/strava_tabulator_functions.js') }}"></script>
-
-
 	<!-- Custom CSS -->
 	<link rel="stylesheet" href="{{ url_for('stravaActDash_BP.static', filename='StravaActivityViewer/css/customCSS_StravaActivityViewer.css') }}">
-	<!-- Search CSS-->
-	<link rel="stylesheet" href="{{ url_for('static', filename='css/lib/leaflet-search.src.css') }}">
-	<!-- Search JS -->
-	<script src="{{ url_for('static', filename='js/lib/leaflet-search.src.js') }}"></script>
-	<!-- Spin JS -->
-	<script src="{{ url_for('static', filename='js/lib/spin/dist/spin.min.js') }}"></script>
-	<!-- leaflet spin JS -->
-	<script src="{{ url_for('static', filename='js/lib/leaflet.spin.min.js') }}"></script>
-	<!-- Leaflet fullscreen source: https://github.com/brunob/leaflet.fullscreen -->
-	<!-- Leaflet Fullscreen JS  -->
-	<script src="{{ url_for('static', filename='js/lib/Control.FullScreen.js') }}"></script>
-	<!-- Leaflet Fullscreen CSS  -->
-	<link rel="stylesheet" href="{{ url_for('static', filename='css/lib/Control.FullScreen.css') }}">
-
-	<!-- Favicon links -->
-	<link rel="apple-touch-icon" sizes="180x180" href="/static/images/apple-touch-icon.png">
-	<link rel="icon" type="image/png" sizes="32x32" href="/static/images//favicon-32x32.png">
-	<link rel="icon" type="image/png" sizes="16x16" href="/static/images/favicon-16x16.png">
-	<link rel="manifest" href="/static/images//site.webmanifest">
-	<link rel="mask-icon" href="/static/images//safari-pinned-tab.svg" color="#5bbad5">
-	<meta name="msapplication-TileColor" content="#da532c">
-	<meta name="theme-color" content="#ffffff">
-
-	<style>
-	/*
-		body {
-				 padding: 0;
-				 margin: 0;
-		 }
-		 */
-	 </style>
 </head>
 <body>
 	<div class="container sansserif">

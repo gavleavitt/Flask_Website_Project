@@ -1,68 +1,10 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<meta charset="utf-8">
-	<!-- <meta name="viewport" content="width=device-width, initial-scale=1"> -->
 	<title>Live Tracker</title>
-	<!-- CDN files-->
-	<!-- leaflet Javascript-->
-	<script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js"></script>
-	<!-- Leaflet css-->
-	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css"/>
-
-	<!--jquery adds "$." functionality-->
-	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-
-	<!-- Load Esri Leaflet from CDN, stable -->
-	<script src="https://unpkg.com/esri-leaflet@2.5.0/dist/esri-leaflet.js"
-	    integrity="sha512-ucw7Grpc+iEQZa711gcjgMBnmd9qju1CICsRaryvX7HJklK0pGl/prxKvtHwpgm5ZHdvAil7YPxI1oWPOWK3UQ=="
-	    crossorigin=""></script>
-	<!-- Esri Leaflet and Esri Leaflet Vector, experimential -->
-	<!-- <script src="https://unpkg.com/esri-leaflet/dist/esri-leaflet.js"></script> -->
-	<!-- <script src="https://unpkg.com/esri-leaflet-vector/dist/esri-leaflet-vector.js"></script> -->
-
-	<!-- Esri vector needs mapbox-gl to work -->
-	<!-- <link rel="stylesheet" href="https://unpkg.com/mapbox-gl/dist/mapbox-gl.css"/> -->
-	<!-- <script src="https://unpkg.com/mapbox-gl/dist/mapbox-gl.js"></script> -->
-	<!-- <script src="https://unpkg.com/mapbox-gl@1.13.0/dist/mapbox-gl.js"></script> -->
-
-	<!-- load the latest release from the cdn automatically -->
-	<!-- <script src="https://unpkg.com/esri-leaflet-vector/dist/esri-leaflet-vector-debug.js"></script> -->
-
-	<!-- esri Vector Tiles -->
-	<script src="https://unpkg.com/esri-leaflet-vector@2.0.2/dist/esri-leaflet-vector.js"
-	    integrity="sha512-keaVwrBxpBNq1XF5XEUvQ8NtoBbGPs/gKJJ3tp1qiudO3mTk9YEa6/uPpxX/G2HIjFrquj/xGg+p/c7nDp0wUg=="
-	    crossorigin=""></script>
-
-	<!-- Measure CSS -->
-	<link rel="stylesheet" type="text/css" href="https://cdn.rawgit.com/gokertanrisever/leaflet-ruler/master/src/leaflet-ruler.css">
-	<!--Measure Javascript -->
-	<script src="https://cdn.rawgit.com/gokertanrisever/leaflet-ruler/master/src/leaflet-ruler.js"></script>
-
-
-	<!-- Local static files-->
-	<!-- Leaflet rotate marker -->
-	<!-- <script src="{{ url_for('static', filename='js/leaflet.rotatedMarker.js') }}"></script> -->
-	<!-- leaflet realtime -->
-	<script src="{{ url_for('liveTracker_BP.static', filename='LocationLiveTracker/js/lib/leaflet-realtime.js') }}"></script>
-	<!-- leaflet Mouset Position JS-->
-	{% assets "mouse_position_js" %}
-		<script type="text/javascript" src="{{ ASSET_URL }}"></script>
-	{% endassets %}
-	<!-- leaflet Mouse Position css -->
-	{% assets "mouse_position_css" %}
-		<link rel="stylesheet" href="{{ ASSET_URL }}" />
-	{% endassets %}
-	<!-- leaflet Polyline Decorator JS-->
-	<script src="{{ url_for('liveTracker_BP.static', filename='LocationLiveTracker/js/lib/leaflet.polylineDecorator.js') }}"></script>
-	<!-- leaflet Ajax JS-->
-	<!-- <script src="{{ url_for('static', filename='js/leaflet.ajax.js') }}"></script> -->
-	<!-- leaflet Ajax JS-->
-	{% assets "leaflet_ajax" %}
-			<script type="text/javascript" src="{{ ASSET_URL }}"></script>
-	{% endassets %}
-	<!-- <script src="{{ url_for('static', filename='js/leaflet.ajax.min.js') }}"></script> -->
-	<!-- Custom local javascript functions -->
+	{% include 'projectimports.html' %}
+	<!-- Project specific imports -->
+	<!-- Custom local javascript -->
 	<script src="{{ url_for('liveTracker_BP.static', filename='LocationLiveTracker/js/customfunctions_livetracker.js') }}"></script>
 	<!-- Custom CSS -->
 	<link rel="stylesheet" href="{{ url_for('liveTracker_BP.static', filename='LocationLiveTracker/css/customCSS_LiveLocationTracker.css') }}">
@@ -70,30 +12,11 @@
 	<script src="{{ url_for('liveTracker_BP.static', filename='LocationLiveTracker/js/lib/L.Icon.Pulse.js') }}"></script>
 	<!-- Leaflet Pulse Icon CSS -->
 	<link rel="stylesheet" href="{{ url_for('liveTracker_BP.static', filename='LocationLiveTracker/css/lib//L.Icon.Pulse.css') }}">
-	<!-- leaflet dialog -->
-	<!-- <script src="leaflet/Javascript/leaflet.wms.js"></script> -->
-	<!-- <script src="leaflet/Javascript/Leaflet.Dialog.js"></script> -->
-	<!-- leaflet dialog css -->
-	<!-- <link rel="stylesheet" href="leaflet/CSS/Leaflet.Dialog.css"/> -->
-	<!-- <link rel="stylesheet" href="{{ url_for('static', filename='css/Leaflet.Dialog.css') }}" -->
+	<!-- leaflet realtime -->
+	<script src="{{ url_for('liveTracker_BP.static', filename='LocationLiveTracker/js/lib/leaflet-realtime.js') }}"></script>
+	<!-- leaflet Polyline Decorator JS-->
+	<script src="{{ url_for('liveTracker_BP.static', filename='LocationLiveTracker/js/lib/leaflet.polylineDecorator.js') }}"></script>
 
-	<!-- Favicon links -->
-	<link rel="apple-touch-icon" sizes="180x180" href="/static/images/apple-touch-icon.png">
-	<link rel="icon" type="image/png" sizes="32x32" href="/static/images//favicon-32x32.png">
-	<link rel="icon" type="image/png" sizes="16x16" href="/static/images/favicon-16x16.png">
-	<link rel="manifest" href="/static/images//site.webmanifest">
-	<link rel="mask-icon" href="/static/images//safari-pinned-tab.svg" color="#5bbad5">
-	<meta name="msapplication-TileColor" content="#da532c">
-	<meta name="theme-color" content="#ffffff">
-
-	<style>
-	/*
-		body {
-				 padding: 0;
-				 margin: 0;
-		 }
-		 */
-	 </style>
 </head>
 <body>
 	<div class="container sansserif">

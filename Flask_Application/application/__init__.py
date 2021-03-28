@@ -54,7 +54,7 @@ from application.util.flaskAuth.authentication import auth
 # Import error email reporting
 from application.util import errorEmail
 # Import shared assets
-from .util import assets
+# from .util import assets
 # Import Blueprints
 from .mainPages.mainRoutes import mainSite_BP
 from .projectPages.projectPageRoutes import projectPages_BP

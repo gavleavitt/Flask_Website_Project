@@ -12,8 +12,12 @@ body {
 
 html{
   height: 100%;
+  /* margin: 8px; */
 }
 
+p{
+  font-size: 16px;
+}
 .container {
   display: grid;
   width:100%;

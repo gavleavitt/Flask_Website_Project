@@ -1,0 +1,79 @@
+
+<!-- Set meta details -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- Favicon links -->
+<link rel="apple-touch-icon" sizes="180x180" href="/static/images/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/static/images/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/static/images/favicon-16x16.png">
+<link rel="manifest" href="/static/images//site.webmanifest">
+<link rel="mask-icon" href="/static/images//safari-pinned-tab.svg" color="#5bbad5">
+<meta name="msapplication-TileColor" content="#da532c">
+<meta name="theme-color" content="#ffffff">
+
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Lato:wght@700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@700&display=swap" rel="stylesheet">
+<link href='https://fonts.googleapis.com/css?family=Quicksand' rel='stylesheet'>
+<link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300&display=swap" rel="stylesheet">
+
+<script src="https://kit.fontawesome.com/fd8b0845f1.js" crossorigin="anonymous"></script>
+
+<!-- Highlight.js -->
+<link rel="stylesheet"
+      href="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.2.0/build/styles/default.min.css">
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.2.0/build/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+
+<!-- CDN files-->
+<!-- leaflet Javascript-->
+<script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js"></script>
+<!-- Leaflet css-->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css"/>
+
+<!--jquery adds "$." functionality-->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
+<!-- Load Esri Leaflet from CDN, stable -->
+<script src="https://unpkg.com/esri-leaflet@2.5.0/dist/esri-leaflet.js"
+    integrity="sha512-ucw7Grpc+iEQZa711gcjgMBnmd9qju1CICsRaryvX7HJklK0pGl/prxKvtHwpgm5ZHdvAil7YPxI1oWPOWK3UQ=="
+    crossorigin=""></script>
+
+<!-- esri Vector Tiles -->
+<script src="https://unpkg.com/esri-leaflet-vector@2.0.2/dist/esri-leaflet-vector.js"
+    integrity="sha512-keaVwrBxpBNq1XF5XEUvQ8NtoBbGPs/gKJJ3tp1qiudO3mTk9YEa6/uPpxX/G2HIjFrquj/xGg+p/c7nDp0wUg=="
+    crossorigin=""></script>
+<!-- Momentjs -->
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+<!-- Measure CSS -->
+  <link rel="stylesheet" type="text/css" href="https://cdn.rawgit.com/gokertanrisever/leaflet-ruler/master/src/leaflet-ruler.css">
+<!--Measure Javascript -->
+  <script src="https://cdn.rawgit.com/gokertanrisever/leaflet-ruler/master/src/leaflet-ruler.js"></script>
+
+<!-- Local static files-->
+<!-- Leaflet rotate marker -->
+<!-- <script src="{{ url_for('static', filename='js/leaflet.rotatedMarker.js') }}"></script> -->
+
+<!-- leaflet Mouset Position JS-->
+  <script type="text/javascript" src="{{ url_for('static', filename='js/lib/L.Control.MousePosition.js') }}"></script>
+<!-- leaflet Mouse Position css -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/lib/L.Control.MousePosition.css') }}">
+
+<!-- leaflet Ajax JS-->
+<script src="{{ url_for('static', filename='js/lib/leaflet.ajax.js') }}"></script>
+
+<!-- Spin JS -->
+<script src="{{ url_for('static', filename='js/lib/spin/dist/spin.min.js') }}"></script>
+<!-- leaflet spin JS -->
+<script src="{{ url_for('static', filename='js/lib/leaflet.spin.min.js') }}"></script>
+<!-- Leaflet fullscreen source: https://github.com/brunob/leaflet.fullscreen -->
+<!-- Leaflet Fullscreen JS  -->
+<script src="{{ url_for('static', filename='js/lib/Control.FullScreen.js') }}"></script>
+<!-- Leaflet Fullscreen CSS  -->
+<link rel="stylesheet" href="{{ url_for('static', filename='css/lib/Control.FullScreen.css') }}">
+
+<!-- Search CSS-->
+<link rel="stylesheet" href="{{ url_for('static', filename='css/lib/leaflet-search.src.css') }}">
+<!-- Search JS -->
+<script src="{{ url_for('static', filename='js/lib/leaflet-search.src.js') }}"></script>
