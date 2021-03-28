@@ -79,11 +79,10 @@
 				</div>
 		</div>
 	</div>
-	<!-- Set the url root -->
-	<script type=text/javascript>
-  	$SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
-	</script>
 	<script>
+
+		var server_livepts = "{{ url_for('livetrackerAPI_BP.getPointGeojson')}}"
+		var server_tracks = "{{ url_for('livetrackerAPI_BP.getTrackGeojson')}}"
 		// Make basemaps
 		// var streetsnight = L.esri.Vector.basemap('StreetsNight');
 		var imageryesri = L.esri.basemapLayer('Imagery');
@@ -124,8 +123,8 @@
 			position: "bottomright"
 		};
 		//var server = 'http://10.0.0.4:5000/getgeojson'
-		var server_livepts = '/api/v1/tracker/getpoint'
-		var server_tracks = '/api/v1/tracker/gettracks'
+		// var server_livepts = '/api/v1/tracker/getpoint'
+		// var server_tracks = '/api/v1/tracker/gettracks'
 		//console.log("############# Address is: " + server_livepts)
 		//console.log($SCRIPT_ROOT)
 		L.control.mousePosition(mousepos).addTo(map);
@@ -251,10 +250,8 @@
 				decimal: 2
 			}
 		};
-
 		//Add ruler to map
 		L.control.ruler(ruler_options).addTo(map);
-
 	</script>
 </body>
 </html>

@@ -87,9 +87,6 @@ beachreports = L.geoJSON(waterquality_geojson, {
     // 	// offset: [0, -30],
     // 	'className': 'beachLabel'
     // })
-
-
-
     // Init chart when user clicks a beach
     // layer.on('click', function(e){
     // 	createChart(feature.properties.Name);
@@ -212,7 +209,6 @@ beachreports.on('click', function(event){
 });
 
 
-
 // Basemaps dictionary used for layer control
 var basemaps = {
   "<span>Imagery (Raster)</span>": imageryesri,
@@ -260,9 +256,9 @@ var legend = L.control({position: 'bottomright'});
 legend.onAdd = function (map) {
   var div = L.DomUtil.create('div', 'infolegend');
   div.innerHTML =  "<div class='legendheader spanbotbord'><b>Beach Status</b><span>"
-  div.innerHTML += "<div><img src='/webapps/sbcwaterquality/static/WaterQualityViewer/icons_images/beach_open.svg'    class='legendicon'><span class='legendtext'>Open</span></div>";
-  div.innerHTML += "<div><img src='/webapps/sbcwaterquality/static/WaterQualityViewer/icons_images/beach_warning.svg' class='legendicon'><span class='legendtext'>Warning</span></div>";
-  div.innerHTML += "<div><img src='/webapps/sbcwaterquality/static/WaterQualityViewer/icons_images/beach_closed.svg'  class='legendicon'><span class='legendtext'>Closed</span></div>";
+  div.innerHTML += "<div><img src='" + beachOpenIconUrl + "' class='legendicon'><span class='legendtext'>Open</span></div>";
+  div.innerHTML += "<div><img src='" + beachWarningIconUrl + "'class='legendicon'><span class='legendtext'>Warning</span></div>";
+  div.innerHTML += "<div><img src='" + beachClosedIconUrl + "'class='legendicon'><span class='legendtext'>Closed</span></div>";
   return div;
 };
 // Add legend to map

@@ -27,8 +27,5 @@ from threading import Thread
 
 
 
-@app.route("/api/v0.1/getbeachhistory", methods=['GET'])
-def getWaterQualityHistory():
-    beachName = str(request.args.get("beachName"))
-    return DBQueriesWaterQuality.getBeachResults(beachName)
+
 

@@ -33,10 +33,6 @@ function createChart(beachName){
         onClick: function(event, activeElements){
           if (activeElements.length > 0){
             var index = activeElements[0]._index
-            // console.log(index)
-            // console.log(parsedData)
-            // console.log(parsedData.pdfLink[index])
-            // console.log(parsedData.dataX[pdfLink])
             openDownloadModal(parsedData.dataX[index],parsedData.pdfLink[index]);
           }
         },
@@ -108,7 +104,6 @@ function createChart(beachName){
 };
 
 function getBeachHistory(beachName){
-  beachHistoryURL = '/api/v0.1/getbeachhistory'
   return $.ajax({
       url:beachHistoryURL,
       //https://stackoverflow.com/questions/47523265/jquery-ajax-no-access-control-allow-origin-header-is-present-on-the-requested

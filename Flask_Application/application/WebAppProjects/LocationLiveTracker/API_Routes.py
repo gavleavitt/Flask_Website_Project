@@ -5,7 +5,6 @@ from application.WebAppProjects.LocationLiveTracker import DBQueriesTracker, mod
 
 livetrackerAPI_BP = Blueprint('livetrackerAPI_BP', __name__,
                         template_folder='templates',
-                        # url_prefix='/api/v1/tracker',
                         static_folder='static')
 
 
@@ -41,7 +40,7 @@ def handle_gps():
 
 @livetrackerAPI_BP.route("/getpoint", methods=['GET'])
 @auth.login_required(role='viewer')
-def get_pointgeojson():
+def getPointGeojson():
     """
     Handles HTTP GET requests of GPS points, kicks off the process to generate and return a geoson GPS data point.
 
@@ -62,7 +61,7 @@ def get_pointgeojson():
 
 @livetrackerAPI_BP.route("/gettracks", methods=['GET'])
 @auth.login_required(role='viewer')
-def get_trackgeojson():
+def getTrackGeojson():
     """
     Handles HTTP GET requests of GPS tracks, this is hard coded in the DB query helper function to only query the records for the same day.
 

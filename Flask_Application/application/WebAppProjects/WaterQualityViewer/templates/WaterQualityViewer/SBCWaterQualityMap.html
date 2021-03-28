@@ -98,6 +98,7 @@
 	var standards = {{standards|tojson}}
 	// set variable for the date of the most recent set of records
 	var recentrecord = {{recentdate|tojson}}
+	var beachHistoryURL = "{{url_for('sbcWaterQualityAPI_BP.getWaterQualityHistory')}}"
 	// Load icon URLS using Jinja
 	var beachOpenIconUrl = "{{ url_for('sbcWaterQuality_BP.static', filename='WaterQualityViewer/icons_images/beach_open.svg') }}"
 	var beachWarningIconUrl = "{{ url_for('sbcWaterQuality_BP.static', filename='WaterQualityViewer/icons_images/beach_warning.svg') }}"
