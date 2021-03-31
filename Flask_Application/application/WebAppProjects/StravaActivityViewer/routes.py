@@ -1,4 +1,5 @@
 from flask import render_template, Blueprint, url_for
+from application.util.flaskAuth.authentication import auth
 
 stravaActDash_BP = Blueprint('stravaActDash_BP', __name__,
                         template_folder='templates',
@@ -11,6 +12,11 @@ stravaActDash_BP = Blueprint('stravaActDash_BP', __name__,
 def stravaActivityViewerDashboard():
     # return render_template("StravaActivityViewer/StravaActivityViewerDashboard.html", topojsonurl=url_for(".getstravatopojsonurl"))
     return render_template("StravaActivityViewer/StravaActivityViewerDashboard.html")
+
+@auth.login_required(role='admin')
+@stravaActDash_BP.route("/admin")
+def stravaActivityAdmin():
+    return render_template("StravaActivityViewer/StravaActivityViewerAdminControls.html")
 # @stravaActDash_BP.route("/maps/stravamaptesting")
 # def stravatestingmap():
 #     return render_template("public/maps/Strava_Map_Dashboard_Testing.html")
