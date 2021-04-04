@@ -70,11 +70,11 @@ app.register_blueprint(mainSite_BP)
 app.register_blueprint(projectPages_BP)
 app.register_blueprint(liveTracker_BP, url_prefix='/webapps/tracker')
 app.register_blueprint(livetrackerAPI_BP, url_prefix='/api/v1/tracker')
-app.register_blueprint(stravaActDashAPI_BP, url_prefix='/api/v1/stravaactdashboard')
+app.register_blueprint(stravaActDashAPI_BP, url_prefix='/api/v1/activitydashboard')
 app.register_blueprint(stravaActDash_BP, url_prefix='/webapps/stravapp')
 app.register_blueprint(sbcWaterQuality_BP, url_prefix='/webapps/sbcwaterquality')
 app.register_blueprint(sbcWaterQualityAPI_BP, url_prefix='/api/v1/sbcwaterquality')
-app.register_blueprint(stravaActDashAPI_Admin_BP, url_prefix='/admin/api/v1/stravaactdashboard')
+app.register_blueprint(stravaActDashAPI_Admin_BP, url_prefix='/admin/api/v1/activitydashboard')
 # # Set up celery client, allows async tasks to be setup
 # app.config['CELERY_BROKER_URL'] = 'redis://localhost:6379/0'
 # # app.config['CELERY_RESULT_BACKEND'] = 'redis://localhost:6379/0'

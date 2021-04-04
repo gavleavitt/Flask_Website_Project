@@ -1,7 +1,70 @@
 from datetime import datetime, timedelta
-import logging
-import csv
+import logging, os, csv
 from io import StringIO
+from application import application, errorEmail
+from application.WebAppProjects.StravaActivityViewer import DBQueriesStrava, StravaAWSS3, OAuthStrava
+
+def singleActivityProcessing(client, actID):
+    """
+    Processes a single Strava Activity by placing the full activity in the database, making a simplified and masked public
+    version, and by creating a privacy masked stream CSV which is added to a S3 Bucket. Finally a TopoJSON of the
+    public activities is generated and uploaded to the S3 Bucket.
+
+    @param client: stravalib client instance with valid access token
+    @param actID: Int. ID of Strava Activity to be processed
+    @return: Email. Message states if process was successful or failed
+    """
+
+    try:
+        application.logger.debug("Getting full activity details")
+        # Get all activity details for newly created activity, including stream data
+        activity = getFullDetails(client, actID)
+        application.logger.debug("Inserting activity details")
+        # Insert original, non-masked, coordinates and attribute details into Postgres/PostGIS
+        DBQueriesStrava.insertOriginalAct(activity['act'])
+        # Calculate masked, publicly sharable, activities and insert into Postgres masked table
+        application.logger.debug("Processing and inserting masked geometries")
+        DBQueriesStrava.processActivitiesPublic(activity["act"]["actId"])
+        # Handle CSV stream processing
+        generateAndUploadCSVStream(client, actID, activity)
+        # Create topojson file
+        topoJSON = DBQueriesStrava.createStravaPublicActTopoJSON()
+        # Upload topoJSON to AWS S3
+        StravaAWSS3.uploadToS3(topoJSON)
+        # Send success email
+        errorEmail.sendSuccessEmail("Webhook Activity Update", f'The strava activity: {activity["act"]["actId"]}'
+                                                               f' has been processed, the activity can be'
+                                                               f' viewed on Strava at: '
+                                                               f'https://www.strava.com/activities/{activity["act"]["actId"]}')
+        application.logger.debug("Strava activity has been processed!")
+    except Exception as e:
+        application.logger.error(f"Handling and inserting new webhook activity inside a thread failed with the error {e}")
+        errorEmail.sendErrorEmail(script="Webhook Activity Threaded Task Update", exceptiontype=e.__class__.__name__, body=e)
+        # Raise another exception, this will signal the route function to return an error 500
+        raise()
+
+def generateAndUploadCSVStream(client, actID, activity=None):
+    """
+    Generates and uploads a privacy zone masked Strava Stream CSV.
+
+    @param client: stravalib client instance with valid access token
+    @param actID: Int. Activity ID of Strava activity to process
+    @param activity: Dictionary. Optional. Dictionary of full Strava Activity details, generated if not provided
+    @return: Nothing. Uploads file to S3 Bucket
+    """
+    if not activity:
+        # Get all activity details for newly created activity, including stream data
+        activity = getFullDetails(client, actID)
+    # Create in-memory buffer csv of stream data
+    csvBuff = StravaAWSS3.writeMemoryCSV(activity["stream"])
+    # Get WKT formatted latlng stream data
+    wktStr = formatStreamData(activity["stream"])
+    # Get list of coordinates which cross privacy areas, these will be removed from the latlng stream CSV data
+    removeCoordList = DBQueriesStrava.getIntersectingPoints(wktStr)
+    # Trim/remove rows from latlng CSV stream which have coordinates that intersect the privacy areas
+    trimmedMemCSV = trimStreamCSV(removeCoordList, csvBuff)
+    # Upload trimmed buffer csv to AWS S3 bucket
+    StravaAWSS3.uploadToS3(trimmedMemCSV, activity["act"]["actId"])
 
 def getListIds(client, days):
     """
@@ -49,7 +112,6 @@ def getFullDetails(client, actId):
     types = ['time', 'latlng', 'altitude', 'velocity_smooth', 'grade_smooth', "distance", "heartrate", "cadence", "temp"]
     # Get activity details as a dictionary
     act = client.get_activity(actId).to_dict()
-
     # Get the activity stream details for the activity id
     stream = client.get_activity_streams(actId, types=types)
     # Get athlete ID directly from API call, instead of digging into the nested result provided by get_activity
@@ -116,16 +178,22 @@ def getFullDetails(client, actId):
 
 def formatStreamData(stream):
     """
+    Formats Strava Activity Stream latlng data into a EWKT string.
 
-    @param stream:
-    @return:
+    @param stream: Strava Activity Stream with latlng data
+    @return: String. EWKT representation of Strava Activity Stream data.
     """
     # Pull out latlngs
     latlng = stream['latlng'].data
+    # Format first part of EWKT LINESTRING String, in 4326, WGS1984
     wktStr = f"SRID=4326;LINESTRING("
+    #  Iterate over latlng records
     for c, i in enumerate(latlng):
+        # Split based on comma
         lat, lng = latlng[c].split(",")
+        # Make string of new lat lng value
         newEntry = f"{lat} {lng},"
+        # Add new record to existing string
         wktStr += newEntry
     # Remove last comma
     wktStr = wktStr[:-1]
@@ -135,31 +203,36 @@ def formatStreamData(stream):
 
 def trimStreamCSV(coordList, memCSV):
     """
+    Trims out all records from the Strava stream CSV that fall within privacy zones, ensuring that the stream data do
+    not contain reveal locations within sensitive areas. Coordinates are included in the stream data such that they
+    can be used to draw point markers on the map on chart mouseover
 
-    @param coordList:
-    @param memCSV:
-    @return:
+    @param coordList: List. Coordinates which fall within privacy zones
+    @param memCSV: StringIO CSV. Contains original, unaltered activity stream details
+    @return: StringIO CSV. Memory CSV with sensitive locations removed
     """
 
     # see https://stackoverflow.com/a/41978062
-    # Reset seek to 0 for memory CSV, after writing it the file pointer is still at the end
+    # Reset seek to 0 for memory CSV, after writing it the file pointer is still at the end and must be reset
     memCSV.seek(0)
+    # Open original memory csv with a reader
     reader = csv.reader(memCSV)
     # Create new memory CSV to hold results
     trimmedMemOutput = StringIO()
+    # Create csv writer on memory csv
     trimmedWriter = csv.writer(trimmedMemOutput)
-
+    # Iterate over original CSV
     for c, row in enumerate(reader):
-        # Write header
+        # Write header row
         if c == 0:
             trimmedWriter.writerow(row)
         else:
-            # print(row)
-            # # split row into [lat, lng]
+            # split row into [lat, lng]
             coord = row[1].split(",")
             # Check if lat or long exist in the coordinate list
             latCheck = any(coord[0] in x for x in coordList)
             lngCheck = any(coord[1] in x for x in coordList)
+            # If neither lat or long are within a privacy zone, write the entire row into the trimmed csv
             if not latCheck or not lngCheck:
                 trimmedWriter.writerow(row)
     return trimmedMemOutput
@@ -168,3 +241,21 @@ def getAthlete(client):
     athlete = client.get_athlete()
     return athlete
 
+def deleteSingleActivity(actID):
+    """
+    Deletes a single Strava activity from database, removes S3 file, and regenerates the topoJSON file
+
+    @param actID: Int. Strava Activity ID
+    @return: Nothing
+    """
+    application.logger.debug(f"Deleting activity {actID}")
+    # Delete activity from database
+    DBQueriesStrava.removeActivityFromDB(actID)
+    # Delete from S3
+    # Get bucket details from environmental variable
+    bucket = os.getenv("S3_TRIMMED_STREAM_BUCKET")
+    StravaAWSS3.deleteFromS3(bucket, "trimmedCSV", actID)
+    # Create new topojson file
+    topoJSON = DBQueriesStrava.createStravaPublicActTopoJSON()
+    # Upload topoJSON to AWS S3
+    StravaAWSS3.uploadToS3(topoJSON)

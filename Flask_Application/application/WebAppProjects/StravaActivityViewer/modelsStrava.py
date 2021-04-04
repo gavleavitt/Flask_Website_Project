@@ -5,6 +5,14 @@ from geoalchemy2 import Geometry
 
 Base = declarative_base()
 
+class webhook_subs(Base):
+    __tablename__ = 'strava_webhook_subscriptions'
+
+    id = Column(Integer, primary_key=True)
+    sub_id = Column(BigInteger)
+    activesub = Column(String(10))
+    verify_token = Column(String(15))
+
 class strava_gear(Base):
     __tablename__ = "strava_gear"
     id = Column(Integer, primary_key=True)
@@ -18,11 +26,14 @@ class athletes(Base):
     id = Column(Integer, primary_key=True)
     athlete_id = Column(Integer)
     scopes = Column(String)
-    sub_id = Column(Integer)
+    sub_id = Column(Integer, ForeignKey("strava_webhook_subscriptions.id"))
     refresh_token = Column(String)
     access_token_exp = Column(DateTime)
     athlete_name = Column(String)
     access_token = Column(BigInteger)
+
+    # Relationship with webhook subscriptions table
+    sub_rel = relationship(webhook_subs, backref="strava_athletes")
 
 class sub_update(Base):
     __tablename__ = 'strava_webhook_updates'

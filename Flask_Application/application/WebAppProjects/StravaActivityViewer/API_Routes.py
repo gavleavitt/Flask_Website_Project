@@ -9,7 +9,7 @@ stravaActDashAPI_BP = Blueprint('stravaActDashAPI_BP', __name__,
 
 
 
-@stravaActDashAPI_BP.route(os.environ.get("strava_callback_url"), methods=['GET', 'POST'])
+@stravaActDashAPI_BP.route(os.environ.get("STRAVA_CALLBACK_URL"), methods=['GET', 'POST'])
 def subCallback():
     """
     Strava subscription callback URL.
@@ -90,18 +90,3 @@ def getstravatopojsonurl():
 #     subIDs = StravaWebHook.listStravaSubIds(client)
 #     return f"Webhook subscriptions IDs are {subIDs}"
 #
-# @stravaActDashAPI_BP.route("/admin/deleteactivesub", methods=['POST'])
-# @auth.login_required(role='admin')
-# def deletestravasubs():
-#     """
-#     Deletes application webhook subscriptions. Manually visited, requires admin level access.
-#
-#     Returns
-#     -------
-#     String. Message with deleted webhook subscription IDs.
-#
-#     """
-#     # Get application access credentials
-#     client = stravaAuth.gettoken()
-#     subIDs = StravaWebHook.deleteStravaSubIds(client)
-#     return f"Deleted webhook subscriptions with the IDs: {subIDs}"

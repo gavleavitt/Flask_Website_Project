@@ -1,5 +1,5 @@
 from application.WebAppProjects.StravaActivityViewer.modelsStrava import athletes, sub_update, strava_activities, \
-    strava_activities_masked, strava_gear, AOI
+    strava_activities_masked, strava_gear, AOI, webhook_subs
 from datetime import datetime
 from application import application, Session, errorEmail
 from sqlalchemy import func as sqlfunc
@@ -8,25 +8,23 @@ from geojson import Feature, FeatureCollection, MultiLineString
 import topojson as tp
 import re
 
-def updateSubId(subId):
+def updateSubId(subId, verifytoken):
     """
-    Updates all athlete records with the new strava webhook subscription id.
 
-    Method was taken from:
-    https://stackoverflow.com/a/278606
-
-    Parameters
-    ----------
-    subId: Integer. Provided by Strava following create subscription callback flow.
-
-    Returns
-    -------
-    Nothing
-
+    @param subId:
+    @param verifytoken:
+    @return:
     """
     session = Session()
     try:
-        session.query(athletes).update({athletes.sub_id: subId})
+        # Update recently created record which only has the verify token populated
+        session.query(webhook_subs.verify_token == verifytoken).update({webhook_subs.sub_id: subId,
+                                                                        webhook_subs.activesub: "Yes"})
+        session.commit()
+        # Get the primary key from the new webhook subscription
+        record = session.query(webhook_subs.verify_token == verifytoken).first()
+        # Update all athletes with the new subscription entry foreign key
+        session.query(athletes).update({athletes.sub_id: record.id})
         session.commit()
         session.close()
     except Exception as e:
@@ -377,3 +375,107 @@ def getIntersectingPoints(wktStr):
     finally:
         session.close()
     return coordinateList
+
+def removeActivityFromDB(actID):
+    """
+    Removes a activity from the original and public activities database tables.
+
+    @param actID:
+    @return: Nothing.
+    """
+    # Open session
+    session = Session()
+    # Delete from masked table
+    session.query(strava_activities_masked.actID == actID).delete()
+    # Delete from original DB table
+    session.query(strava_activities.actID == actID).delete()
+    # Commit changes
+    session.commit()
+    # Close session
+    session.close()
+
+def checkActID(actID):
+    """
+    Checks if the provided actID is already within the database.
+
+    @param actID: Int. Strava Activity ID
+    @return: String. "True" or "False" depending if record exists in databse
+    """
+    # Open session
+    session = Session()
+    # Query database
+    record = session.query(strava_activities.actID == actID).first()
+    session.close()
+    return record
+
+def checkAthleteAndSub(athID, subID):
+    """
+    Checks if provided athlete and subscription ID are in the database with an active subscription status
+    @param athID: Int. Strava athlete ID
+    @param subID: Int. Strava Webhook Subscription ID
+    @return: Object Instance. Instance of Athletes Model with results
+    """
+    # Open session
+    session = Session()
+    # Query database
+    record = session.query(athletes).\
+        join(webhook_subs).\
+        filter(athletes.athlete_id == athID, webhook_subs.sub_id == subID, webhook_subs.activesub == "Yes").first()
+    session.close()
+    return record
+
+def setWebhookInactive(subID):
+    """
+    Sets provided subscription to inactive status
+    @param subID:
+    @return: Nothing
+    """
+    # Open session
+    session = Session()
+    # Query webhook table
+    result = session.query(webhook_subs).filter(webhook_subs.sub_id == subID)
+    # Set active status to No
+    result.activesub = "No"
+    # Commit changes
+    session.commit()
+    # Close out session
+    session.close()
+
+def checkathleteID(athID):
+    """
+    Checks if the provided actID is already within the database.
+
+    @param actID: Int. Strava Activity ID
+    @return: String. "True" or "False" depending if record exists in databse
+    """
+    # Open session
+    session = Session()
+    # Query database
+    record = session.query(athletes.athlete_id == athID).first()
+    session.close()
+    return record
+
+def insertVerifyToken(token):
+    # Open session
+    session = Session()
+    # Create new record
+    newRec = webhook_subs(verify_token=token)
+    # Add new record to session
+    session.add(newRec)
+    session.commit()
+    session.close()
+
+def checkVerificationToken(token):
+    # Open session
+    session = Session()
+    # Query database, get most recent record in case the token is in the database multiple times
+    record = session.query(webhook_subs.verify_token == token).order_by(webhook_subs.id.desc()).first()
+    session.close()
+    return record
+
+def deleteVerifyTokenRecord(token):
+    # Open session
+    session = Session()
+    session.query(webhook_subs.verify_token == token).delete()
+    session.commit()
+    session.close()

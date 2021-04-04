@@ -112,3 +112,20 @@ def uploadToS3(file, actID=None):
         pass
         # Close in-memory buffer file, removing it from memory
         # file.close()
+
+def deleteFromS3(bucket, filetype, actID):
+    """
+
+    @param bucket:
+    @param fileName:
+    @return:
+    """
+    # Establish connection to S3 API
+    conn = connectToS3()
+    if filetype == "trimmedCSV":
+        # Create file name from ID
+        fileName = f"stream_{actID}.csv"
+        # Issue command to delete object
+        conn.delete_object(Bucket=bucket, Key=fileName)
+    else:
+        pass

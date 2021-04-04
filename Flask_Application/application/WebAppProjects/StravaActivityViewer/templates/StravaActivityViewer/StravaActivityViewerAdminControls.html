@@ -33,22 +33,34 @@
     <div id="requestLoader" class="loader"></div>
   </div>
   <h2>
-    Add New Activity to Database
+    Add/Remove Activity
   </h2>
   <div class="form-container">
-    <form id="addActivity" action="{{url_for('stravaActDashAPI_Admin_BP.addactivity')}}" method="post" autocomplete="off">
-      <label>Activity ID:</label><br>
+    <form id="processActivity" action="{{url_for('stravaActDashAPI_Admin_BP.processActivity')}}" method="post" autocomplete="off">
+      <label>Activity ID</label><br>
       <input type="text" id="actIDInput" name="actID" placeholder="Insert Activity ID"><br>
+      <label>Athlete ID</label><br>
+      <input type="text" id="athIDInput" name="athIDInput" value="7170058"><br>
+      <input type="radio" id="Add" name="actAction" value="Add" checked="checked">
+      <label for="Add">Add</label><br>
+      <input type="radio" id="Remove" name="actAction" value="Remove">
+      <label for="Remove">Remove</label><br>
+      <label for="scope">Choose processing scope</label><br>
+      <select id="scope" name="scope">
+        <option id="scopeFullActivity" value="FullActivity">Full Activity</option>
+        <option id="scopeCSV" value="CSV">Stream CSV</option>
+      </select><br>
       <input type="submit" value="Submit">
     </form>
   </div>
   <h2>
-    Remove Activity from Database
+    Regenerate TopoJSON File
   </h2>
   <div class="form-container">
-    <form id="removeActivity" action="{{url_for('stravaActDashAPI_Admin_BP.removeactivity')}}" method="post" autocomplete="off">
-      <label>Activity ID:</label><br>
-      <input type="text" id="actIDInput" name="actID" placeholder="Remove Activity ID"><br>
+    <form id="genTopoJSON" action="{{url_for('stravaActDashAPI_Admin_BP.genTopoJSON')}}" method="post" autocomplete="off">
+      <label>Athlete ID</label><br>
+      <input type="text" id="AthIDInput" name="AthIDInput" value="7170058"><br>
+      <label>Regenerate TopoJSON File</label><br>
       <input type="submit" value="Submit">
     </form>
   </div>
@@ -56,9 +68,11 @@
     Remove Strava Webhook subscription
   </h2>
   <div class="form-container">
-    <form id="removeWebHookSub" action="{{url_for('stravaActDashAPI_Admin_BP.removesub')}}" method="post" autocomplete="off">
+    <form id="removeWebHookSub" action="{{url_for('stravaActDashAPI_Admin_BP.removewebhooksub')}}" method="post" autocomplete="off">
       <label>Subscription ID:</label><br>
-      <input type="text" id="subIDInput" name="subID" placeholder="subscription to Remove"><br>
+      <input type="text" id="subIDInput" name="subIDInput" placeholder="Subscription to Remove"><br>
+      <label>Athlete ID</label><br>
+      <input type="text" id="removeSubAthIDInput" name="removeSubAthIDInput" value="7170058"><br>
       <input type="submit" value="Submit">
     </form>
   </div>
@@ -66,12 +80,15 @@
     Add Strava Webhook subscription
   </h2>
   <div class="form-container">
-    <form id="addWebHookSub" action="{{url_for('stravaActDashAPI_Admin_BP.addsub')}}" method="post" autocomplete="off">
-      <label>Subscription ID:</label><br>
-      <input type="text" id="subIDInput" name="subID" placeholder="subscription to Add"><br>
-      <input type="submit" value="Submit">
+    <form id="addWebHookSub" action="{{url_for('stravaActDashAPI_Admin_BP.addwebhooksub')}}" method="post" autocomplete="off">
+      <label>Athlete ID</label><br>
+      <input type="text" id="AddSubAthIDInput" name="AddSubAthIDInput" value="7170058"><br>
+      <input type="submit" value="Submit"><br>
+      <!-- <label>Callback URL</label><br>
+      <input type="text" id="callbackURLinput" name="callbackURLinput" placeholder="Callback URL"><br> -->
     </form>
   </div>
+
   <!-- Custom JS functions -->
   <script src="{{ url_for('stravaActDash_BP.static', filename='StravaActivityViewer/js/strava_admin_functions.js') }}"></script>
   <!-- Custom CSS -->
