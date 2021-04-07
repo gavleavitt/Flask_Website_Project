@@ -115,10 +115,11 @@ def uploadToS3(file, actID=None):
 
 def deleteFromS3(bucket, filetype, actID):
     """
+    Deletes existing file from S3 Bucket.
 
-    @param bucket:
-    @param fileName:
-    @return:
+    @param bucket: String. S3 Bucket name.
+    @param fileName: String. Filename of bucket object
+    @return: Nothing.
     """
     # Establish connection to S3 API
     conn = connectToS3()

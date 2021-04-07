@@ -24,8 +24,6 @@ def handleSubUpdate(client, updateContent):
     update = client.handle_subscription_update(updateContent)
     # Verify that the athlete(s) and subscription ID contained in the message are in Postgres
     if DBQueriesStrava.checkAthleteAndSub(update.owner_id, update.subscription_id):
-    # if update.owner_id in DBQueriesStrava.getAthleteList() and update.subscription_id in \
-    #         DBQueriesStrava.getSubIdList():
         application.logger.debug("Sub update from Strava appears valid")
         # Insert subscription update message details into Postgres
         DBQueriesStrava.insertSubUpdate(update)
@@ -33,16 +31,19 @@ def handleSubUpdate(client, updateContent):
         if update.aspect_type == "create" and update.object_type == "activity":
             application.logger.debug("This is a activity create event, creating thread to process activity")
             try:
+                # Create a thread to handle async processing of the activity and its derivatives
+                # Threading allows the activity to long process with a quick 200 code to be sent to the Strava API
                 Thread(target=APIFunctionsStrava.singleActivityProcessing, args=(client, update.object_id)).start()
             except Exception as e:
                 application.logger.error(f"Creating a thread to process new activity failed with in the error: {e}")
                 errorEmail.sendErrorEmail(script="Webhook Activity Threading", exceptiontype=e.__class__.__name__, body=e)
         elif update.aspect_type == "update" and update.object_type == "activity":
             application.logger.debug("This is a activity update event, updating existing record")
+            # Update existing activity title
             DBQueriesStrava.updateExistingActivity(update)
         else:
-            # Write logic to handle update and delete events
-            application.logger.debug("Sub update message contains an update or delete event, skipping request")
+            # Write logic to handle delete events
+            application.logger.debug("Sub update message contains an delete event, skipping request")
             pass
     else:
         application.logger.debug("POST request is invalid, user ID or subscription ID don't match those in database!")

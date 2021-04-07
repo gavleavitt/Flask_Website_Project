@@ -13,6 +13,10 @@ stravaActDashAPI_Admin_BP = Blueprint('stravaActDashAPI_Admin_BP', __name__,
 @stravaActDashAPI_Admin_BP.route("/processactivity", methods=['POST'])
 @auth.login_required(role='admin')
 def processActivity():
+    """
+    Processes a single Strava Activity, will add/remove the activity and all derivatives, or just the Stream data.
+    Called by Strava Activity admin page inputs.
+    """
     # Get POST request info
     actID = int(request.form['actID'])
     athID = int(request.form['athID'])
@@ -61,25 +65,15 @@ def processActivity():
     except:
         return Response(status=500)
 
-# @stravaActDashAPI_Admin_BP.route("/removeactivesubscription", methods=['POST'])
-# @auth.login_required(role='admin')
-# def removetravasubscription():
-#     """
-#     Deletes application webhook subscriptions. Manually visited, requires admin level access.
-#
-#     Returns
-#     -------
-#     String. Message with deleted webhook subscription IDs.
-#
-#     """
-#     # Get application access credentials
-#     client = stravaAuth.gettoken()
-#     subIDs = StravaWebHook.deleteStravaSubIds(client)
-#     return f"Deleted webhook subscriptions with the IDs: {subIDs}"
 
 @stravaActDashAPI_Admin_BP.route("/removesubscription", methods=['POST'])
 @auth.login_required(role='admin')
 def removewebhooksub():
+    """
+    Removes activate webhook subscription from database and Strava API. SubID is disabled and will no longer be accepted
+    by Flask.
+    Called by Strava Activity admin page inputs.
+    """
     # Get POST request info
     athID = int(request.form['athID'])
     subID = int(request.form['subID'])
@@ -97,6 +91,10 @@ def removewebhooksub():
 @stravaActDashAPI_Admin_BP.route("/addsubscription", methods=['POST'])
 @auth.login_required(role='admin')
 def addwebhooksub():
+    """
+    Adds a new Strava webhook subscription to the database and Strava API. Kicks off callback verification process.
+    Called by Strava Activity admin page inputs.
+    """
     # Get POST request info
     athID = int(request.form['athID'])
     # callbackurl = str(request.form['callbackURL'])
@@ -123,8 +121,59 @@ def addwebhooksub():
 @stravaActDashAPI_Admin_BP.route("/generatetopojson", methods=['POST'])
 @auth.login_required(role='admin')
 def genTopoJSON():
+    """
+    Generates a new TopoJSON file using all stored Strava activities and uploads to S3 Bucket, replaces existing file.
+    Called by Strava Activity admin page inputs.
+    """
     # Create topojson file
     topoJSON = DBQueriesStrava.createStravaPublicActTopoJSON()
     # Upload topoJSON to AWS S3
     StravaAWSS3.uploadToS3(topoJSON)
     return Response(status=200)
+
+
+
+# @stravaActDashAPI_BP.route("/admin/stravacreatesub", methods=['POST'])
+# @auth.login_required(role='admin')
+# def handle_Create_Strava_Sub():
+#     """
+#     URL to handle creation of new webhook subscription. Requires that OAuth access has already been given, consider
+#     setting up a flow to prompt user to provide OAuth access and password protect at user role level.
+#
+#     Requires admin level access to visit.
+#
+#     Consider for future development:
+#     Have page prompt user for OAuth access, process Oauth creds, then create new webhook subscription including new user
+#     Maybe use Flask-Login to keep track of who is logged in and Oauth credentials.
+#
+#     Returns
+#     -------
+#     String. String containing new webhook subscription ID.
+#     """
+#     try:
+#         # Get application access credentials
+#         # client = stravaAuth.gettoken()
+#         # application.logger.debug("Client loaded with tokens!")
+#         # Handle webhook subscription and response
+#         response = StravaWebHook.create_Strava_Webhook(client)
+#         return f"Creation of new strava webhook subscription succeeded, new sub id is {response}!"
+#     except Exception as e:
+#         return f"Creation of new strava webhook subscription failed with the error {e}"
+#
+# @stravaActDashAPI_BP.route("/admin/listactivesubs", methods=['GET'])
+# @auth.login_required(role='admin')
+# def liststravasubs():
+#     """
+#     Lists application webhook subscriptions. Manually visited,
+#
+#     Requires admin level access.
+#
+#     Returns
+#     -------
+#     String. Message with webhook subscription IDs.
+#     """
+#     # Get application access credentials
+#     client = stravaAuth.gettoken()
+#     subIDs = StravaWebHook.listStravaSubIds(client)
+#     return f"Webhook subscriptions IDs are {subIDs}"
+#

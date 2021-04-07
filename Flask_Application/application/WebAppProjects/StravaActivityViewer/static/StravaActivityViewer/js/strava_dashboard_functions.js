@@ -1,3 +1,4 @@
+// Initializes event listeners
 function initializeListeners(){
   // Leaflet fullscreen event listener, if full screen is exited and the device display is less than 600px, close any open popups
   map.on('exitFullscreen', function(){
@@ -6,14 +7,17 @@ function initializeListeners(){
       map.closePopup();
     }
   });
+  // After the window has loaded activte the activity filter button event listeners
   window.onload = function(){
     loadActivityBtnListener();
   }
+  // Sets text of charts and display depending on page size, not sure why this is set to a resize event, should probably be tied to page dimensions
   window.addEventListener('resize', setChartTextSizes);
   window.addEventListener('resize', setDisplaysize);
   // window.onresize = getChartTextSizes();
 }
 
+// Initializes the dashboard display by populating Leafet, ChartJS, Tabulator, Search, popups, and data panels
 function initializeDisplay(stravaTopojsonUrl){
   // see http://bl.ocks.org/marcellobenigno/9b09c24850def14250141dfe89f9a296
   // see https://docs.mapbox.com/mapbox.js/example/v1.0.0/omnivore-kml-tooltip/
@@ -54,6 +58,7 @@ function initializeDisplay(stravaTopojsonUrl){
   })
 };
 
+// Queries webserver API for the presigned S3 Bucket URL, grants temporary access
 function getActivityTopojsonS3Url(link){
   return $.ajax({
       url:link,
@@ -63,6 +68,7 @@ function getActivityTopojsonS3Url(link){
   });
 }
 
+// Use the presigned URL to query the full topoJSON file, this is a CORS request
 function getActivityTopojsonData(presignedURL){
   console.log("Setting headers!")
   return $.ajax({
@@ -76,6 +82,7 @@ function getActivityTopojsonData(presignedURL){
   });
 }
 
+// Functions to show/hide the modal
 function initModal(){
   // Modal from https://www.w3schools.com/howto/tryit.asp?filename=tryhow_css_modal
   // Get the modal
@@ -230,6 +237,7 @@ function onEachFeatureAct(feature,layer) {
   )
 };
 
+// Set text for watts
 function wattText (type, avgWatts){
   if (type == "Ride"){
     return "<div><b>Average Watts: " + avgWatts + "</b></div>";
@@ -509,14 +517,16 @@ function updateDataPanels(groupLayer, actDataDict, clear){
   // document.getElementById('maxSpeed').innerHTML = actDataDict["maxSpeed"]+ " mph";
 };
 
-
+// Initializes the datarangepicker functions
 function initDateRange(){
   // daterangepicker taken from  https://www.daterangepicker.com/
+  // Sets options for daterangepicker
   $(function() {
     // Set format of dates
     function cb(start, end) {
         $('#reportrange span').html(start.format('MMMM D, YYYY') + ' - ' + end.format('MMMM D, YYYY'));
     }
+    // Apply daterange picker settings
     $('#reportrange').daterangepicker({
         startDate: start,
         endDate: end,
@@ -559,8 +569,11 @@ function initDateRange(){
     filteredGroup.clearLayers();
     // Re-add active layers with new daterange filter applied
     addActiveLayers(picker.startDate.format(), picker.endDate.format());
+    // Update dashboard panels
     updateDataPanels(filteredGroup,actDataDict, "True");
+    // Update chart data
     updateChart(filteredGroup);
+    // Update data table
     generateTableFormatedData(filteredGroup, "Update")
     // Clear any stream highlight markers
     markerGroup.clearLayers();

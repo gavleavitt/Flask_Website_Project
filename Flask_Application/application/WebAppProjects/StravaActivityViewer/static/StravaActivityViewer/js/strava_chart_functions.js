@@ -22,6 +22,7 @@ function binActData(filteredGroup, btnSelection){
   var sortVal = null
   var featDate = null
   var count = 0
+  // Iterate over features in the raw geojson dataset and get the x and z values for the binned chart data based on the selected date type
   for (i of geoJSONDat.features) {
     var actType = i.properties.type_extended
     if (dateType == "default/year") {
@@ -41,6 +42,7 @@ function binActData(filteredGroup, btnSelection){
     //
     // console.log("Tab datatype is:")
     // console.log(tabDataType)
+    // Get the binned chart data y-value based on user selected button
     if (btnSelection == "count-btn"){
       var yValue = 1
     } else if (btnSelection == "distance-btn") {
@@ -56,11 +58,12 @@ function binActData(filteredGroup, btnSelection){
       var yValue = i.properties.average_watts;
       count = 1
     }
-    // Add activity to object if not yet added, use index location to determine existence
+    // Add activity to binnedActDataDict object if not yet added, use index location to determine existence in object
+    // Each activity is added seperately to the object, if the activity has already been added then add to existing, if not add it to the object
     if (Object.keys(binnedActDataDict).indexOf(actType) == -1) {
       binnedActDataDict[actType] = [{"x":featDate,"y":yValue, "z":sortVal, "count":count}];
     } else {
-      // Loop over all object entries checking if date matches, if so add feature's distance to it
+      // activity is already part of the binnedActDataDict object, loop over all object entries checking if date matches, if so add feature's distance to it
       // Use inDict to track if dateValue is already inside activity object
       var inDict = false
       for (a of binnedActDataDict[actType]){
@@ -72,14 +75,14 @@ function binActData(filteredGroup, btnSelection){
           break;
         }
       }
-      // If inDict is false then this date has not yet been added to the acttpye object, add date and distance to activity type object
+      // If inDict is false then this date has not yet been added to the acttype object, add date and distance to activity type object
       if (inDict == false){
         binnedActDataDict[actType].push({"x":featDate,"y":yValue, "z":sortVal, "count":count});
       }
     }
   }
   // console.log(JSON.parse(JSON.stringify(binnedActDataDict)))
-  // Average values if tabDataType is an average
+  // Average values if tabDataType is an average and set the y value
   if (btnSelection == "avgwatt-btn"){
     for (a of Object.keys(binnedActDataDict)) {
       for (i of Object.keys(binnedActDataDict[a])) {
@@ -87,7 +90,7 @@ function binActData(filteredGroup, btnSelection){
       }
     };
   }
-  // Convert seconds to hours
+  // Convert seconds to hours:minutes and set the y value
   if (btnSelection == "time-btn"){
     for (a of Object.keys(binnedActDataDict)) {
       for (i of Object.keys(binnedActDataDict[a])) {
