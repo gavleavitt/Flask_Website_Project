@@ -49,10 +49,20 @@ def getAthleteList():
     session.close()
     return athleteList
 
+def getActiveSubID():
+    """
+    Gets the active Strava webhook subscription ID from the database.
+    @return: Int. Active subscription ID
+    """
+    session = Session()
+    query = session.query(webhook_subs).filter(webhook_subs.activesub == "Yes").first()
+    session.close()
+    return int(query.sub_id)
 
 def getSubIdList():
     """
     Gets list of subscription webhook IDs from database.
+    Check if used, likely can delete
     Returns
     -------
     List. Subscription webhook IDs (Int) stored in database.
@@ -427,10 +437,8 @@ def setWebhookInactive(subID):
     """
     # Open session
     session = Session()
-    # Query webhook table
-    result = session.query(webhook_subs).filter(webhook_subs.sub_id == subID)
     # Set active status to No
-    result.activesub = "No"
+    session.query(webhook_subs).filter(webhook_subs.sub_id == subID).update({webhook_subs.activesub: "No"})
     # Commit changes
     session.commit()
     # Close out session
@@ -487,6 +495,6 @@ def deleteVerifyTokenRecord(token):
     """
     # Open session
     session = Session()
-    session.query(webhook_subs.verify_token == token).delete()
+    session.query(webhook_subs).filter(webhook_subs.verify_token == token).delete()
     session.commit()
     session.close()

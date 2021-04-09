@@ -13,8 +13,8 @@ def stravaActivityViewerDashboard():
     # return render_template("StravaActivityViewer/StravaActivityViewerDashboard.html", topojsonurl=url_for(".getstravatopojsonurl"))
     return render_template("StravaActivityViewer/StravaActivityViewerDashboard.html")
 
-@auth.login_required(role='admin')
 @stravaActDash_BP.route("/admin")
+@auth.login_required(role='admin')
 def stravaActivityAdmin():
     return render_template("StravaActivityViewer/StravaActivityViewerAdminControls.html")
 # @stravaActDash_BP.route("/maps/stravamaptesting")

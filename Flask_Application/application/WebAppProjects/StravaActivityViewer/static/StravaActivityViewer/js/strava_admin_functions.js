@@ -55,14 +55,13 @@ $("#removeWebHookSub").submit(function(event) {
   /* get the action attribute from the <form action=""> element, this is the POST URL */
   var url = $(this).attr('action');
   // Get athlete ID
-  var athID = $('#removeSubAthIDInput').val()
-  console.log(athID)
+  // var athID = $('#removeSubAthIDInput').val()
   // Get Subscription ID
-  var subID = $("#subIDInput").val();
+  // var subID = $("#subIDInput").val();
   // Send POST request
   var postRequest = $.post(url, {
-    subID:subID,
-    athID:athID
+    // subID:subID,
+    // athID:athID
   });
   //get modal
   modal = $('#ResultsModal')
@@ -75,7 +74,7 @@ $("#removeWebHookSub").submit(function(event) {
     // update title
     modal.find('#modalTitle').text('Success!');
     // update body
-    modal.find('#modalBody').html('The webhook subscription <b>' + athID + '</b> for athlete <b>' + athID + '</b> has been removed!');
+    modal.find('#modalBody').html('The webhook subscription has been removed!');
   });
   postRequest.fail(function(response) {
     // Hide loader
@@ -85,7 +84,7 @@ $("#removeWebHookSub").submit(function(event) {
     // update title
     modal.find('#modalTitle').text('Failure!');
     // update body
-    modal.find('#modalBody').html('The webhook subscription <b>' + athID + '</b> for athlete <b>' + athID + '</b> has failed to be added with the error code: ' + '<b>' + response.status + '</b>');
+    modal.find('#modalBody').html('The webhook subscription has failed to be added with the error code: ' + '<b>' + response.status + '</b>');
   });
 });
 
@@ -98,13 +97,13 @@ $("#addWebHookSub").submit(function(event) {
   /* get the action attribute from the <form action=""> element, this is the POST URL */
   var url = $(this).attr('action');
   // Get athlete ID
-  var athID = $('#AddSubAthIDInput').val()
+  // var athID = $('#AddSubAthIDInput').val()
   // Get callbackURL
-  var callbackURL = $('#callbackURLinput').val()
+  // var callbackURL = $('#callbackURLinput').val()
   // Send POST request
   var postRequest = $.post(url, {
-    athID:athID,
-    callbackURL:callbackURL
+    // athID:athID,
+    // callbackURL:callbackURL
   });
   //get modal
   modal = $('#ResultsModal')
@@ -117,7 +116,7 @@ $("#addWebHookSub").submit(function(event) {
     // update title
     modal.find('#modalTitle').text('Success!');
     // update body
-    modal.find('#modalBody').html('The activity ' + actID + ' has been added!');
+    modal.find('#modalBody').html('The webhook subscription has been added!');
   });
   postRequest.fail(function(response) {
     // Hide loader
@@ -127,7 +126,7 @@ $("#addWebHookSub").submit(function(event) {
     // update title
     modal.find('#modalTitle').text('Failure!');
     // update body
-    modal.find('#modalBody').html('Failed to add a new webhook subscription to the callbackURL <b>' + callbackURL + '</b> wih the code: ' + '<b>' + response.status + '</b>');
+    modal.find('#modalBody').html('Failed to add a new webhook subscription wih the code: ' + '<b>' + response.status + '</b>');
   });
 });
 

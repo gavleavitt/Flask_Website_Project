@@ -75,17 +75,23 @@ def removewebhooksub():
     Called by Strava Activity admin page inputs.
     """
     # Get POST request info
-    athID = int(request.form['athID'])
-    subID = int(request.form['subID'])
-    if DBQueriesStrava.checkAthleteAndSub(athID, subID):
-        # Get Strava API access credentials
-        client = OAuthStrava.getAuth()
-        # Send request to Strava to delete webhook subscription
+    # athID = int(request.form['athID'])
+    # subID = int(request.form['subID'])
+    # if DBQueriesStrava.checkAthleteAndSub(athID, subID):
+    # Get Strava API access credentials
+    client = OAuthStrava.getAuth()
+    # Send request to Strava to delete webhook subscription
+    # Get webhook subID
+    subID = DBQueriesStrava.getActiveSubID()
+    try:
+        application.logger.debug(f"Received request to remove the webhook subscription {subID}")
         client.delete_subscription(subID, os.getenv('STRAVA_CLIENT_ID'), os.getenv('STRAVA_CLIENT_SECRET'))
         # Set active webhook to inactive in database
         DBQueriesStrava.setWebhookInactive(subID)
+        application.logger.debug(f"webhook subscription {subID} has been set to inactive")
         return Response(status=200)
-    else:
+    except Exception as e:
+        application.logger.error(e)
         return Response(status=400)
 
 @stravaActDashAPI_Admin_BP.route("/addsubscription", methods=['POST'])
@@ -96,27 +102,31 @@ def addwebhooksub():
     Called by Strava Activity admin page inputs.
     """
     # Get POST request info
-    athID = int(request.form['athID'])
+    # athID = int(request.form['athID'])
     # callbackurl = str(request.form['callbackURL'])
-    # Verify that athlete is in database
-    if DBQueriesStrava.checkathleteID():
-        # Generate 15 character verify token string
-        verifytoken = secrets.token_hex(15)
-        # Insert token into database, will be updated if subID if successful, otherwise row will be deleted
-        DBQueriesStrava.insertVerifyToken(verifytoken)
-        # Get Strava API access credentials
-        client = OAuthStrava.getAuth()
-        try:
-            # Send request to create webhook subscription, will be given the new subscription ID in response
-            response = client.create_subscription(client_id=os.getenv("STRAVA_CLIENT_ID"),
-                                                  client_secret=os.getenv("STRAVA_CLIENT_SECRET"),
-                                                  callback_url=os.getenv('FULL_STRAVA_CALLBACK_URL'),
-                                                  verify_token=verifytoken)
-            application.logger.debug(f"Response id is {response.id}")
-            # Update database with new sub id
-            DBQueriesStrava.updateSubId(response.id, verifytoken)
-        except:
-            DBQueriesStrava.deleteVerifyTokenRecord(verifytoken)
+    # Generate 14 character verify token string
+    verifytoken = secrets.token_hex(7)
+    # Insert token into database, will be updated if subID if successful, otherwise row will be deleted
+    DBQueriesStrava.insertVerifyToken(verifytoken)
+    application.logger.debug(f"New verification token has been added to database")
+    # Get Strava API access credentials
+    client = OAuthStrava.getAuth()
+    try:
+        # Send request to create webhook subscription, will be given the new subscription ID in response
+        application.logger.debug(os.getenv('FULL_STRAVA_CALLBACK_URL'))
+        response = client.create_subscription(client_id=os.getenv("STRAVA_CLIENT_ID"),
+                                              client_secret=os.getenv("STRAVA_CLIENT_SECRET"),
+                                              callback_url=os.getenv('FULL_STRAVA_CALLBACK_URL'),
+                                              verify_token=verifytoken)
+        application.logger.debug(f"New sub id is {response.id}, updating database")
+        # Update database with new sub id
+        DBQueriesStrava.updateSubId(response.id, verifytoken)
+        application.logger.debug(f"New sub id {response.id} has been added to the database")
+        return Response(status=200)
+    except:
+        DBQueriesStrava.deleteVerifyTokenRecord(verifytoken)
+        return Response(status=400)
+
 
 @stravaActDashAPI_Admin_BP.route("/generatetopojson", methods=['POST'])
 @auth.login_required(role='admin')
@@ -126,9 +136,11 @@ def genTopoJSON():
     Called by Strava Activity admin page inputs.
     """
     # Create topojson file
+    application.logger.debug(f"Received request to generate a new TopoJSON")
     topoJSON = DBQueriesStrava.createStravaPublicActTopoJSON()
     # Upload topoJSON to AWS S3
     StravaAWSS3.uploadToS3(topoJSON)
+    application.logger.debug(f"New TopoJSON has been generated")
     return Response(status=200)
 
 

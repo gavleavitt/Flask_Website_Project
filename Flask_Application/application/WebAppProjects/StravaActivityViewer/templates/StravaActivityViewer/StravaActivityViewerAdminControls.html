@@ -2,6 +2,7 @@
 <html>
 <head>
   <title>Strava Activity API Admin</title>
+  {% include 'faviconsOnly.html' %}
   <!--jquery, adds "$." functionality-->
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
   <!-- Bootstrap, used for modal -->
@@ -69,10 +70,10 @@
   </h2>
   <div class="form-container">
     <form id="removeWebHookSub" action="{{url_for('stravaActDashAPI_Admin_BP.removewebhooksub')}}" method="post" autocomplete="off">
-      <label>Subscription ID:</label><br>
+      <!-- <label>Subscription ID:</label><br>
       <input type="text" id="subIDInput" name="subIDInput" placeholder="Subscription to Remove"><br>
       <label>Athlete ID</label><br>
-      <input type="text" id="removeSubAthIDInput" name="removeSubAthIDInput" value="7170058"><br>
+      <input type="text" id="removeSubAthIDInput" name="removeSubAthIDInput" value="7170058"><br> -->
       <input type="submit" value="Submit">
     </form>
   </div>
@@ -81,11 +82,11 @@
   </h2>
   <div class="form-container">
     <form id="addWebHookSub" action="{{url_for('stravaActDashAPI_Admin_BP.addwebhooksub')}}" method="post" autocomplete="off">
-      <label>Athlete ID</label><br>
+      <!-- <label>Athlete ID</label><br>
       <input type="text" id="AddSubAthIDInput" name="AddSubAthIDInput" value="7170058"><br>
-      <input type="submit" value="Submit"><br>
-      <!-- <label>Callback URL</label><br>
+      <label>Callback URL</label><br>
       <input type="text" id="callbackURLinput" name="callbackURLinput" placeholder="Callback URL"><br> -->
+      <input type="submit" value="Submit">
     </form>
   </div>
 
