@@ -6,11 +6,12 @@ from application.WebAppProjects.StravaActivityViewer.modelsStrava import athlete
 
 def getAuth():
     """
-    Loads Strava client object from Postgres. Checks if access token is expired, if so it is refreshed and updated.
+    Loads Strava client authentication details from Postgres and creates a authorized client instance.
+    Checks if access token is expired, if so it is refreshed and updated.
 
     Returns
     -------
-    client. Stravalib model client object. Contains access token to strava API for the user.
+    client. Stravalib model client instance. Contains access token to Strava API for the athlete, ID is hard coded for now.
     """
     # Build empty stravalib client instance
     client = Client()

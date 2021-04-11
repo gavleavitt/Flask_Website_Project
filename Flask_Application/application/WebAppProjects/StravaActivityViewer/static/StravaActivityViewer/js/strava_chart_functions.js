@@ -4,6 +4,7 @@ function binActData(filteredGroup, btnSelection){
   // if (clear == "Yes"){
   //   geoJSONDat = null
   // }
+  // Convert data in filtered group into GeoJSON format so its easier to process and extract details from
   geoJSONDat = filteredGroup.toGeoJSON()
   // console.log("raw geojson is:")
   // console.log(JSON.parse(JSON.stringify(geoJSONDat)))
@@ -310,6 +311,8 @@ function updateChart(filteredGroup,tabDataType){
     // chartData = binActData(filteredGroup, btnSelection);
     // setCSVStreamData(btnSelection,filteredGroup);
     handleStreamChartUpdate(btnSelection, filteredGroup);
+    // Export filtered group data to GeoJSON, this is a patch fix since this is needed for single activity processing.
+    // This step is normally called when actCount > 1, consider having this step occur before the actCount logic 
     // getCSVData(btnSelection, filteredGroup)
     // https://stackoverflow.com/a/43909756
     document.getElementById("chart-cont").classList.remove("show-data");

@@ -89,6 +89,21 @@
       <input type="submit" value="Submit">
     </form>
   </div>
+  <h2>
+    Bulk Processing - In progress
+  </h2>
+  <div class="form-container">
+    <form id="addWebHookSub" action="{{url_for('stravaActDashAPI_Admin_BP.bulkprocess')}}" method="post" autocomplete="off">
+      <label>Select which products to process</label><br>
+      <input type="checkbox" id="DB-Acts-checkbox" name="DB-Acts" value="DB-Acts">
+      <label for="DB-Acts"> All Database activities(private/masked)</label><br>
+      <input type="checkbox" id="streamdata-checkbox" name="streamdata-Acts" value="streamdata-Acts">
+      <label for="DB-Acts"> All Activity Stream Data</label><br>
+      <input type="checkbox" id="topoJSON-checkbox" name="topoJSON" value="topoJSON-Acts">
+      <label for="DB-Acts"> TopoJSON File</label><br>
+      <!-- <input type="submit" value="Submit"> -->
+    </form>
+  </div>
 
   <!-- Custom JS functions -->
   <script src="{{ url_for('stravaActDash_BP.static', filename='StravaActivityViewer/js/strava_admin_functions.js') }}"></script>

@@ -143,6 +143,13 @@ def genTopoJSON():
     application.logger.debug(f"New TopoJSON has been generated")
     return Response(status=200)
 
+@stravaActDashAPI_Admin_BP.route("/bulkprocess", methods=['POST'])
+@auth.login_required(role='admin')
+def bulkprocess():
+    """
+    """
+    # Create topojson file
+    application.logger.debug(f"Received request to bulk process!")
 
 
 # @stravaActDashAPI_BP.route("/admin/stravacreatesub", methods=['POST'])

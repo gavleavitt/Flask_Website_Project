@@ -109,9 +109,8 @@ def uploadToS3(file, actID=None):
         application.logger.error(f"Upload to S3 bucket failed in the error: {e}")
         errorEmail.sendErrorEmail(script="UploadToS3Bucket", exceptiontype=e.__class__.__name__, body=e)
     finally:
-        pass
         # Close in-memory buffer file, removing it from memory
-        # file.close()
+        file.close()
 
 def deleteFromS3(bucket, filetype, actID):
     """

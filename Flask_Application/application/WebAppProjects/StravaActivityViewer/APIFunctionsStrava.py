@@ -178,7 +178,8 @@ def getFullDetails(client, actId):
 
 def formatStreamData(stream):
     """
-    Formats Strava Activity Stream latlng data into a EWKT string.
+    Formats Strava Activity Stream latlng data into a EWKT string. The string is constructed using string manipulation,
+    consider finding a library which can convert a list of coordinates into EWKT or WKT.
 
     @param stream: Strava Activity Stream with latlng data
     @return: String. EWKT representation of Strava Activity Stream data.

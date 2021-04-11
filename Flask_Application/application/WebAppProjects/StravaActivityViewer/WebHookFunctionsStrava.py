@@ -108,8 +108,5 @@ def handleSubCallback(request):
             # Call function to handle update message and process new activity, if applicable
             handleSubUpdate(client, callbackContent)
             application.logger.debug("Inserted webhook update and activity details into postgres tables!")
-            # return success code, Strava expects this code
-            # return 200
         except Exception as e:
             application.logger.error(f"Strava subscription update failed with the error {e}")
-            # return 500

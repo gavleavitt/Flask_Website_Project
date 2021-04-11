@@ -563,8 +563,8 @@ function initDateRange(){
     // Formats data in a proper date format
     userStart = picker.startDate.format();
     userEnd = picker.endDate.format();
-    console.log(userStart)
-    console.log(userEnd)
+    // console.log(userStart)
+    // console.log(userEnd)
     // clear existing layers
     filteredGroup.clearLayers();
     // Re-add active layers with new daterange filter applied

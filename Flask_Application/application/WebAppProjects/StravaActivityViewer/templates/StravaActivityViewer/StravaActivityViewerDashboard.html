@@ -79,7 +79,7 @@
 							Histroic Strava data were initially pulled from the <a href=https://developers.strava.com/>Strava API</a> and processed using Python, then a webhook subscription was created which updates my server when new activities are available for processing. Strava activity data are processed in Python using PostGIS functions to remove private areas and to simplify geometries to reduce file sizes, at the cost of spatial accuracy. Data are pre-calculated and served to the Leaflet map in the TopoJSON format to further reduce file sizes and server response times.
 						</p>
 						<p>
-						Visit the <a href=/projects/stravamapserverside>server-side processing project page</a> for this dashboard to see a full description of the server side processing and data preparation steps.
+						Visit the <a href={{ url_for('projectPages_BP.stravaserversideprocessing')}}>server-side processing project page</a> for this dashboard to see a full description of the server side processing and data preparation steps.
 						</p>
 						<p><b>Contact Me</b>
 						<br>

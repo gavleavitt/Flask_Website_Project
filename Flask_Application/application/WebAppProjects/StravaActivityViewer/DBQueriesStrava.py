@@ -391,9 +391,9 @@ def removeActivityFromDB(actID):
     # Open session
     session = Session()
     # Delete from masked table
-    session.query(strava_activities_masked.actID == actID).delete()
+    session.query(strava_activities_masked).filter(strava_activities_masked.actID == actID).delete()
     # Delete from original DB table
-    session.query(strava_activities.actID == actID).delete()
+    session.query(strava_activities).filter(strava_activities.actID == actID).delete()
     # Commit changes
     session.commit()
     # Close session
