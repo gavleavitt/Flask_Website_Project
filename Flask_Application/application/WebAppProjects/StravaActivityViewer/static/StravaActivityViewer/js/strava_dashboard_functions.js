@@ -46,6 +46,8 @@ function initializeDisplay(stravaTopojsonUrl){
       createSearchControl(filteredGroup);
       popupAction(filteredGroup);
       chartActData = binActData(filteredGroup, "count-btn");
+      // Remove null entry, not where this is getting populated, this is a patch fix
+      delete chartActData.null
       createActivityChart(chartActData, "count-btn");
       initTable(filteredGroup)
       // chartActData = binActData(rawGeoJSON);

@@ -132,6 +132,7 @@ function binActData(filteredGroup, btnSelection){
     binnedActDataDict[actType].sort((a, b) => parseFloat(a.z) - parseFloat(b.z));
   }
   // console.log(JSON.parse(JSON.stringify(binnedActDataDict)))
+
   return binnedActDataDict
 };
 
@@ -312,7 +313,7 @@ function updateChart(filteredGroup,tabDataType){
     // setCSVStreamData(btnSelection,filteredGroup);
     handleStreamChartUpdate(btnSelection, filteredGroup);
     // Export filtered group data to GeoJSON, this is a patch fix since this is needed for single activity processing.
-    // This step is normally called when actCount > 1, consider having this step occur before the actCount logic 
+    // This step is normally called when actCount > 1, consider having this step occur before the actCount logic
     // getCSVData(btnSelection, filteredGroup)
     // https://stackoverflow.com/a/43909756
     document.getElementById("chart-cont").classList.remove("show-data");

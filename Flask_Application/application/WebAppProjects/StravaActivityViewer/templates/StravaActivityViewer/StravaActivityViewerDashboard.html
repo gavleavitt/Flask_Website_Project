@@ -125,11 +125,17 @@
 				<span id="maxSpeed" class="detail-text">Loading</span> -->
 			</div>
 			<div id="table-container">
+				<div id="chartTabToggle">
+					<button></button>
+				</div>
 				<div id="datatable"></div>
 			</div>
 			<div class="item detail-panel-col chartPanel">
 				<!-- <div id="chart-cont" class="detail-panel-col actChart no-data show-data"> -->
 				<div id="chart-cont" class="detail-panel-col actChart show-data">
+					<div id="chartTabToggle">
+						<button></button>
+					</div>
 					<div id="chart-Btns">
 						<span><button id="count-btn" class="chartToggle multiAct chart-active" onclick="updateChartBtn('count-btn','topoJSON');updateChart(filteredGroup,'count-btn');">Count</button></span>
 						<span><button id="distance-btn" class="chartToggle multiAct" onclick="updateChartBtn('distance-btn','topoJSON');updateChart(filteredGroup,'distance-btn');">Distance</button></span>

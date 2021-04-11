@@ -7,7 +7,7 @@ All the code for my personal projects, which use open source resources, are incl
 I started these projects as a means to expand my client and server side coding knowledge and to get some experience in GIS web development techniques. Most of my coding skills are self taught through research and trial and error. I have tried my best to code cleanly and document clearly (for myself), but I am still very much a beginner at web and GIS development and code may not be efficient or bug free. Feel free to fork my project or open a pull request! If you have any questions or comments you can find visit the [contact page](https://leavittmapping.com/contact) on my website.
 
 ## Strava Activities Dashboard
-I am currently actively working on this personal project to develop features and add functionality. The Python server-side code for this project can be found within this repo in its [folder](https://github.com/gavleavitt/Flask_Website_Project/tree/master/Flask_Application/application/projects/strava_activities). You can find a work-in-progress version of this map on my website [here](https://leavittmapping.com/stravamap), but note that it has not been thoroughly tested, isn't mobile friendly yet, and is prone to drastic changes. I do not yet have a long form description written for this project.
+The code for this project can be found within this repo in its [project folder](https://github.com/gavleavitt/Flask_Website_Project/tree/master/Flask_Application/application/WebAppProjects/StravaActivityViewer) and the web map and dashboard can be found [here](https://leavittmapping.com/webapps/stravapp/stravaviewer). 
 
 #### Summary
 This personal project displays my up-to-date Strava activity information on a interactive mobile friendly data dashboard using Leaflet to display geographical data and Chart.JS to display graphical information. Data can be filtered and explored by using buttons, date selections, searches, and by selecting geographical data.
@@ -15,7 +15,7 @@ This personal project displays my up-to-date Strava activity information on a in
 Underlining Strava data were initially pulled from the Strava API and processed using Python, then a webhook subscription was created to update my server when new activities are available for processing. Strava activity data are processed in Python using PostGIS functions to remove private areas and to simplify geometries to reduce file sizes at the cost of spatial accuracy. Data are pre-calculated and served to the Leaflet map in the TopoJSON format to further reduce file sizes and server response times.
 
 ## Santa Barbara County Ocean Water Quality Map
-The map can be found on my website [here](https://leavittmapping.com/maps/sbcoceanwaterquality) and a long form description can be found [here](https://leavittmapping.com/projects/sbcoceanquality). This project can be found within this repo in its [folder](https://github.com/gavleavitt/Flask_Website_Project/tree/master/Flask_Application/application/projects/water_quality).
+The map can be found on my website [here](https://leavittmapping.com/webapps/sbcwaterquality/sbcwaterqualityviewer) and a long form description can be found [here](https://leavittmapping.com/projects/sbcoceanquality). This project can be found within this repo in its [folder](https://github.com/gavleavitt/Flask_Website_Project/tree/master/Flask_Application/application/projects/water_quality).
 
 #### Summary
 
@@ -24,7 +24,7 @@ This is a personal project which uses a Leaflet map to display ocean water test 
 Water quality reports are posted as PDFs to the Ocean Water Monitoring page. Test result data are not otherwise accessible on the internet. I saw this as an opportunity to expand my Python, database management, and web design skills. I designed a workflow and web map to display these data in an easily usable and mobile friendly format. Report PDFs are downloaded, test result details are extracted, and data are inserted into a Postgres database. These data are then served to a Leaflet map which displays the most recent test results.
 
 ## Live GPS Tracking Dashboard
-This project can be found within this repo in its [folder](https://github.com/gavleavitt/Flask_Website_Project/tree/master/Flask_Application/application/projects/location_tracker). A long form description can be found on my website [here](https://leavittmapping.com/projects/livetrackingdashboard).
+This project can be found within this repo in its [folder](https://github.com/gavleavitt/Flask_Website_Project/tree/master/Flask_Application/application/WebAppProjects/LocationLiveTracker). A long form description can be found on my website [here](https://leavittmapping.com/projects/livetrackingdashboard).
 
 #### Summary
 This dashboard displays real-time mobile phone location information collected by the open source mobile application GPSLogger for Android as well other mobile phone details. This project was developed as a personal project to expand my web development and database management skills.

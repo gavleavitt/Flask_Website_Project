@@ -48,6 +48,10 @@ html{
     z-index: 1;
 }
 
+#chartTabToggle{
+  display: none;
+}
+
 /* #strava-display-container {
   grid-row: 2/4;
   grid-column: 1/1;
