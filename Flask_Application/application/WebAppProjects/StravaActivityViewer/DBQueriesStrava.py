@@ -23,14 +23,14 @@ def updateSubId(subId, verifytoken):
                                                                         webhook_subs.activesub: "Yes"})
         session.commit()
         # Get the primary key from the new webhook subscription
-        record = session.query(webhook_subs.verify_token == verifytoken).first()
+        record = session.query(webhook_subs).filter(webhook_subs.verify_token == verifytoken).first()
         # Update all athletes with the new subscription entry foreign key
         session.query(athletes).update({athletes.sub_id: record.id})
         session.commit()
         session.close()
     except Exception as e:
         application.logger.debug(f"Update Strava athlete sub Id failed with the exception: {e}")
-        errorEmail.sendErrorEmail(script="addtoGDrive", exceptiontype=e.__class__.__name__, body=e)
+        errorEmail.sendErrorEmail(script=updateSubId.__name__, exceptiontype=e.__class__.__name__, body=e)
 
 
 def getAthleteList():

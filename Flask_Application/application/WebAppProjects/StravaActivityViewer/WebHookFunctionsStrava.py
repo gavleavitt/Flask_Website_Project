@@ -87,15 +87,16 @@ def handleSubCallback(request):
         callBackResponse = {"hub.challenge": callBackContent}
         # Check if verification tokens match, i.e. if GET request is from Strava
         if DBQueriesStrava.checkVerificationToken(callBackVerifyToken):
-            application.logger.debug(f"Strava callback verification succeeded, responding with the challenge code"
-                                     f" message {callBackResponse}")
+            application.logger.debug(f"Strava callback verification succeeded, the request was: {request}, "
+                                     f" responding with the challenge code"
+                                     f" message: {callBackResponse}")
             # Verification succeeded, return challenge code as dict
             # Using Flask Response API automatically converts it to JSON with HTTP 200 success code
             return callBackResponse
         else:
             # Verification failed, raise error
             application.logger.error(f"Strava verification token doesn't match!")
-            raise ValueError('Strava token verification failed.')
+            raise ValueError('Strava token verification failed, no match found.')
     # POST request containing webhook subscription update message, new activity or other change to Strava account
     elif request.method == 'POST':
         application.logger.debug("New activity incoming! Got a POST callback request from Strava")

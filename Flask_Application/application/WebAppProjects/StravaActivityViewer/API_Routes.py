@@ -23,9 +23,12 @@ def subCallback():
         POST.
     """
     application.logger.debug("Got a callback request!")
-    WebHookFunctionsStrava.handleSubCallback(request)
+    res = WebHookFunctionsStrava.handleSubCallback(request)
     application.logger.debug("Returning success code!")
-    return Response(status=200)
+    if res:
+        return res
+    else:
+        return Response(status=200)
 
 # @stravaActDashAPI_BP.route("/stravaroutes", methods=['GET'])
 # def stravaActAPI():

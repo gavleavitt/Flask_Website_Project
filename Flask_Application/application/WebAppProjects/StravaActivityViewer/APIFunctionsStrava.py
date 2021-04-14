@@ -244,7 +244,7 @@ def getAthlete(client):
 
 def deleteSingleActivity(actID):
     """
-    Deletes a single Strava activity from database, removes S3 file, and regenerates the topoJSON file
+    Deletes a single Strava activity from database and removes S3 file
 
     @param actID: Int. Strava Activity ID
     @return: Nothing
@@ -255,8 +255,10 @@ def deleteSingleActivity(actID):
     # Delete from S3
     # Get bucket details from environmental variable
     bucket = os.getenv("S3_TRIMMED_STREAM_BUCKET")
+    application.logger.debug(f"Removing {actID} from S3 bucket")
     StravaAWSS3.deleteFromS3(bucket, "trimmedCSV", actID)
-    # Create new topojson file
-    topoJSON = DBQueriesStrava.createStravaPublicActTopoJSON()
-    # Upload topoJSON to AWS S3
-    StravaAWSS3.uploadToS3(topoJSON)
+    # # Create new topojson file
+    # application.logger.debug(f"Ge")
+    # topoJSON = DBQueriesStrava.createStravaPublicActTopoJSON()
+    # # Upload topoJSON to AWS S3
+    # StravaAWSS3.uploadToS3(topoJSON)

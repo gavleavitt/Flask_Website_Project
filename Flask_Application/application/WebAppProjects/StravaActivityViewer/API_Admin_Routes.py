@@ -108,12 +108,12 @@ def addwebhooksub():
     verifytoken = secrets.token_hex(7)
     # Insert token into database, will be updated if subID if successful, otherwise row will be deleted
     DBQueriesStrava.insertVerifyToken(verifytoken)
-    application.logger.debug(f"New verification token has been added to database")
+    application.logger.debug(f"New verification token {verifytoken} has been added to database")
     # Get Strava API access credentials
     client = OAuthStrava.getAuth()
     try:
         # Send request to create webhook subscription, will be given the new subscription ID in response
-        application.logger.debug(os.getenv('FULL_STRAVA_CALLBACK_URL'))
+        application.logger.debug(f"Callback url is {os.getenv('FULL_STRAVA_CALLBACK_URL')}")
         response = client.create_subscription(client_id=os.getenv("STRAVA_CLIENT_ID"),
                                               client_secret=os.getenv("STRAVA_CLIENT_SECRET"),
                                               callback_url=os.getenv('FULL_STRAVA_CALLBACK_URL'),
@@ -123,7 +123,8 @@ def addwebhooksub():
         DBQueriesStrava.updateSubId(response.id, verifytoken)
         application.logger.debug(f"New sub id {response.id} has been added to the database")
         return Response(status=200)
-    except:
+    except Exception as e:
+        application.logger.debug(f"Webhook creation process failed with the error {e}")
         DBQueriesStrava.deleteVerifyTokenRecord(verifytoken)
         return Response(status=400)
 
