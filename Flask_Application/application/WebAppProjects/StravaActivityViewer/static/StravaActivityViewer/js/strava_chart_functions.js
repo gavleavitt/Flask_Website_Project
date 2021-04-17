@@ -132,7 +132,8 @@ function binActData(filteredGroup, btnSelection){
     binnedActDataDict[actType].sort((a, b) => parseFloat(a.z) - parseFloat(b.z));
   }
   // console.log(JSON.parse(JSON.stringify(binnedActDataDict)))
-
+  // Patch fix, for some reason a null entry is coming through, may be stored as null in database
+  delete binnedActDataDict.null
   return binnedActDataDict
 };
 
@@ -240,7 +241,7 @@ function createActivityChart(chartData) {
           // console.log(y_value);
         },
         responsive: true,
-        // maintainAspectRatio: false,
+        maintainAspectRatio: false,
         title:{
           display: true,
           // text: tabDataType,

@@ -32,7 +32,8 @@
 	<script type="text/javascript" src="https://unpkg.com/tabulator-tables/dist/js/tabulator.min.js"></script>
 	<!-- TurfJS -->
 	<script src='https://unpkg.com/@turf/turf@6.3.0/turf.min.js'></script>
-
+	<!-- Google Fonts - Meterial Icons -->
+	<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 	<!-- Local static files-->
 	<!-- Custom local javascript functions -->
 	<script src="{{ url_for('stravaActDash_BP.static', filename='StravaActivityViewer/js/strava_dashboard_functions.js') }}"></script>
@@ -125,16 +126,16 @@
 				<span id="maxSpeed" class="detail-text">Loading</span> -->
 			</div>
 			<div id="table-container">
-				<div id="chartTabToggle">
-					<button></button>
+				<div>
+					<button id="chartgraphToggle" class="toggle-btn" onclick="toggleGraphOn()"><span class="material-icons">bar_chart</span></button>
 				</div>
 				<div id="datatable"></div>
 			</div>
 			<div class="item detail-panel-col chartPanel">
-				<!-- <div id="chart-cont" class="detail-panel-col actChart no-data show-data"> -->
 				<div id="chart-cont" class="detail-panel-col actChart show-data">
-					<div id="chartTabToggle">
-						<button></button>
+					<div class="toggle-cont" id="chartTabToggle">
+						<!-- <button><span class="material-icons-outlined">table_view&nbsp;</span></button> -->
+						<button class="toggle-btn" onclick="toggleTableOn()"><span class="material-icons">table_view</span></button>
 					</div>
 					<div id="chart-Btns">
 						<span><button id="count-btn" class="chartToggle multiAct chart-active" onclick="updateChartBtn('count-btn','topoJSON');updateChart(filteredGroup,'count-btn');">Count</button></span>
@@ -144,10 +145,16 @@
 						<!-- <span><button id ="avgspd-btn" class="chartToggle"  onclick="updateChart(filteredGroup,'Avg Speed');updateChartBtn('avgspd-btn')">Avg Speed</button></span> -->
 						<span><button id ="avgwatt-btn" class="chartToggle multiAct"  onclick="updateChartBtn('avgwatt-btn','topoJSON');updateChart(filteredGroup,'avgwatt-btn');">Avg Watts</button></span>
 					</div>
-					<canvas id="chart"></canvas>
+					<div class="chart-cont">
+						<canvas id="chart"></canvas>
+					</div>
 				</div>
 				<div id="chart-line-cont" class="detail-panel-col actChart no-data">
-					<div id="chart-Btns">
+					<div class="toggle-cont" id="toggleTableOn">
+						<!-- <button><span class="material-icons-outlined">table_view&nbsp;</span></button> -->
+						<button class="toggle-btn" onclick="toggleTableOn()"><span class="material-icons">table_view</span></button>
+					</div>
+					<div id="chart-Btns" class="stream-chart-btns">
 						<span><button id="elevation-stream-btn" class="chartToggle singleAct chart-active" onclick="updateChartBtn('elevation-stream-btn','csv');updateChart(filteredGroup,'elevation-stream-btn');">Elevation</button></span>
 						<span><button id="speed-stream-btn" class="chartToggle singleAct" onclick="updateChartBtn('speed-stream-btn','csv');updateChart(filteredGroup,'speed-stream-btn');">Speed</button></span>
 						<span><button id="grade-stream-btn" class="chartToggle singleAct"  onclick="updateChartBtn('grade-stream-btn','csv');updateChart(filteredGroup,'grade-stream-btn');">Grade</button></span>
@@ -155,7 +162,9 @@
 						<span><button id="heartrate-stream-btn" class="chartToggle singleAct wahoo-btn"  onclick="updateChartBtn('heartrate-stream-btn','csv');updateChart(filteredGroup,'heartrate-stream-btn');">Heart Rate</button></span>
 						<span><button id="temperature-stream-btn" class="chartToggle singleAct wahoo-btn"  onclick="updateChartBtn('temperature-stream-btn','csv');updateChart(filteredGroup,'temperature-stream-btn');">Temp.</button></span>
 					</div>
-					<canvas id="chart-line"></canvas>
+					<div class="chart-cont">
+						<canvas id="chart-line"></canvas>
+					</div>
 				</div>
 				<div id="no-data-text" class="detail-panel-col actChart no-data">
 					<span class="detail-context detail-panel-col">No Data</span>

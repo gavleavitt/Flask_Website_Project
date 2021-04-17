@@ -582,3 +582,36 @@ function initDateRange(){
     // activateChartButton();
   });
 };
+
+function toggleTableOn(){
+  // When screen is set to a mobile size, this function toggles the tabulator table on
+  // document.getElementById("chart-cont").style.display="none";
+  // document.getElementsByClassName("chartPanel")[0].style.display="none";
+  // Set charts to no-data class and removes show-data, hiding them
+  document.getElementById("chart-cont").classList.add("no-data");
+  document.getElementById("chart-cont").classList.remove("show-data");
+  document.getElementById("chart-line-cont").classList.add("no-data");
+  document.getElementById("chart-line-cont").classList.remove("show-data");
+  // Set the tabulator div to display
+  document.getElementById("table-container").style.display="block";
+  // Regenerate tabulator, this ensures that the data are properly formatted in the window
+  initTable(filteredGroup);
+
+}
+
+function toggleGraphOn(){
+  // When screen is set to a mobile size, this function toggles the appropriate graph on
+  // Get activity count, need to determine which chart to display
+  var actCount = parseInt(document.getElementById("actCount").innerText)
+  // Hide tabulator table
+  document.getElementById("table-container").style.display="none";
+  if (actCount == 1){
+    document.getElementById("chart-line-cont").classList.add("show-data");
+    document.getElementById("chart-line-cont").classList.remove("no-data");
+  } else {
+    document.getElementById("chart-cont").classList.add("show-data");
+    document.getElementById("chart-cont").classList.remove("no-data");
+  }
+  // document.getElementById("chart-cont").style.display="none";
+  // document.getElementsByClassName("chartPanel")[0].style.display="none";
+}

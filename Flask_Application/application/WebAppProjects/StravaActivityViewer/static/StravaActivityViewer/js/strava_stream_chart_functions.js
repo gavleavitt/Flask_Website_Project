@@ -72,6 +72,8 @@ function createStreamLineChart(){
       }]
     },
     options:{
+      responsive: true,
+      maintainAspectRatio: false,
       hover: {
          // mode: 'nearest',
          // intersect: true,
