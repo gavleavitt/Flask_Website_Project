@@ -805,14 +805,18 @@ def addwebhooksub():
     Adds a new Strava webhook subscription to the database and Strava API. Kicks off callback verification process.
     Called by Strava Activity admin page inputs.
     """
+    # Get POST request info
+    # athID = int(request.form['athID'])
+    # callbackurl = str(request.form['callbackURL'])
+    # Generate 14 character verify token string
     verifytoken = secrets.token_hex(7)
     # Insert token into database, will be updated if subID if successful, otherwise row will be deleted
     DBQueriesStrava.insertVerifyToken(verifytoken)
-    application.logger.debug(f"New verification token has been added to database")
     # Get Strava API access credentials
     client = OAuthStrava.getAuth()
     try:
         # Send request to create webhook subscription, will be given the new subscription ID in response
+        application.logger.debug(f"Callback url is {os.getenv('FULL_STRAVA_CALLBACK_URL')}")
         response = client.create_subscription(client_id=os.getenv("STRAVA_CLIENT_ID"),
                                               client_secret=os.getenv("STRAVA_CLIENT_SECRET"),
                                               callback_url=os.getenv('FULL_STRAVA_CALLBACK_URL'),
@@ -820,9 +824,8 @@ def addwebhooksub():
         application.logger.debug(f"New sub id is {response.id}, updating database")
         # Update database with new sub id
         DBQueriesStrava.updateSubId(response.id, verifytoken)
-        application.logger.debug(f"New sub id {response.id} has been added to the database")
         return Response(status=200)
-    except:
+    except Exception as e:
         DBQueriesStrava.deleteVerifyTokenRecord(verifytoken)
         return Response(status=400)
 				</pre></code>
@@ -870,10 +873,11 @@ def subCallback():
         Success code if data are successfully added to Postgres/PostGIS. Strava must receive a 200 code in response to
         POST.
     """
-    application.logger.debug("Got a callback request!")
-    WebHookFunctionsStrava.handleSubCallback(request)
-    application.logger.debug("Returning success code!")
-    return Response(status=200)
+    res = WebHookFunctionsStrava.handleSubCallback(request)
+    if res:
+        return res
+    else:
+        return Response(status=200)
 
 def handleSubCallback(request):
     """
@@ -906,7 +910,6 @@ def handleSubCallback(request):
     client = OAuthStrava.getAuth()
     # Check if request is a GET callback request, part of webhook subscription process
     if request.method == 'GET':
-        application.logger.debug("Got a GET callback request from Strava to verify webhook!")
         # Extract challenge and verification tokens
         callBackContent = request.args.get("hub.challenge")
         callBackVerifyToken = request.args.get("hub.verify_token")
@@ -914,27 +917,19 @@ def handleSubCallback(request):
         callBackResponse = {"hub.challenge": callBackContent}
         # Check if verification tokens match, i.e. if GET request is from Strava
         if DBQueriesStrava.checkVerificationToken(callBackVerifyToken):
-            application.logger.debug(f"Strava callback verification succeeded, responding with the challenge code"
-                                     f" message {callBackResponse}")
             # Verification succeeded, return challenge code as dict
             # Using Flask Response API automatically converts it to JSON with HTTP 200 success code
             return callBackResponse
         else:
             # Verification failed, raise error
-            application.logger.error(f"Strava verification token doesn't match!")
-            raise ValueError('Strava token verification failed.')
+            raise ValueError('Strava token verification failed, no match found.')
     # POST request containing webhook subscription update message, new activity or other change to Strava account
     elif request.method == 'POST':
-        application.logger.debug("New activity incoming! Got a POST callback request from Strava")
         try:
             # Convert JSON body to dict
             callbackContent = json.loads(request.data, strict=False)
-            application.logger.debug("JSON content has been extracted")
-            application.logger.debug(f"Update content is {callbackContent}")
-            # application.logger.debug(f"Update content dir is {dir(callbackContent)}")
             # Call function to handle update message and process new activity, if applicable
             handleSubUpdate(client, callbackContent)
-            application.logger.debug("Inserted webhook update and activity details into postgres tables!")
         except Exception as e:
             application.logger.error(f"Strava subscription update failed with the error {e}")
 				</pre></code>
