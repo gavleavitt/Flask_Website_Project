@@ -81,42 +81,33 @@ app.register_blueprint(stravaActDashAPI_Admin_BP, url_prefix='/admin/api/v1/acti
 # cel_client = Celery(app.name, broker=app.config['CELERY_BROKER_URL'])
 # cel_client.conf.update(app.config)
 
-
-
-
 # Import project files (initialize them?), imports from the application flask object have to be after flask
 # application is initialized to avoid circular imports
 # from application import routes, routes_api, models_tracker, parsePDF_WaterQual, StravaWebHook, TestingandDevelopmentRoutes
 # from application import routes, routes_api
 # from application.development import testingAndDevelopmentRoutes
 # from application.WebAppProjects import location_tracker, strava_activities, water_quality
-# from application.WebAppProjects.water_quality import functionsWaterQual
+from application.WebAppProjects.WaterQualityViewer import functionsWaterQual
 # from application.WebAppProjects.strava_activities import DBQueriesStrava, StravaAWSS3
 
-# # Setup APS scheduler instance
-# sched = BackgroundScheduler(daemon=True, timezone=utc)
-#
-# # Setup scheduled tasks
-# try:
-#     # Trigger every day at 9:30 am
-#     # sched.add_job(parsePDF.pdfjob, trigger='cron', hour='9', minute='30')
-#     # sched.add_job(parsePDF.pdfjob, trigger='cron', hour='15', minute='37')
-#     # Add PDF parsing job to trigger daily at 4:30 pm UTC, 9:30 PST
-#     sched.add_job(functionsWaterQual.pdfjob, trigger='cron', hour='16', minute='30')
-#     # Trigger every minute
-#     # sched.add_job(parsePDF.pdfjob, 'cron', minute='*')
-#     # Start scheduled jobs
-#     sched.start()
-#     application.logger.debug("Scheduled task created")
-# except Exception as e:
-#     application.logger.error("Failed to create parse pdfjob")
-#     application.logger.error(e)
-# # Create local public Strava activities topoJSON file
-# # application.logger.debug("Initializing Strava activities TopoJSON.")
-# # topoJSON = DBQueriesStrava.createStravaPublicActTopoJSON()
-# # StravaAWSS3.uploadToS3(topoJSON)
-# # application.logger.debug("Strava activities TopoJSON has been initialized.")
-#
-#
-# # Shutdown cron thread if the web process is stopped
-# atexit.register(lambda: sched.shutdown(wait=False))
+# Setup APS scheduler instance
+sched = BackgroundScheduler(daemon=True, timezone=utc)
+
+# Setup scheduled tasks
+try:
+    # Trigger every day at 9:30 am
+    # sched.add_job(parsePDF.pdfjob, trigger='cron', hour='9', minute='30')
+    # sched.add_job(parsePDF.pdfjob, trigger='cron', hour='15', minute='37')
+    # Add PDF parsing job to trigger daily at 4:30 pm UTC, 9:30 PST
+    sched.add_job(functionsWaterQual.pdfjob, trigger='cron', hour='16', minute='30')
+    # Trigger every minute
+    # sched.add_job(parsePDF.pdfjob, 'cron', minute='*')
+    # Start scheduled jobs
+    sched.start()
+    application.logger.debug("Scheduled task created")
+except Exception as e:
+    application.logger.error("Failed to create parse pdfjob")
+    application.logger.error(e)
+
+# Shutdown cron thread if the web process is stopped
+atexit.register(lambda: sched.shutdown(wait=False))
