@@ -449,7 +449,8 @@ def parsePDF():
     # set PDF name
     # pdfName = f"Ocean_Water_Quality_Report_{datetime.now().strftime('%Y%m%d')}.pdf"
     pdfName = f"Ocean_Water_Quality_Report_{datetime.now(pytz.timezone('America/Los_Angeles')).strftime('%Y%m%d')}.pdf"
-    pdfLoc = pdfDest = os.path.join(app.root_path, 'static', 'documents', 'Water_Qual_PDFs', pdfName)
+    pdfLoc = pdfDest = os.path.join(app.root_path, 'WebAppProjects', 'WaterQualityViewer', 'static',
+                                    'WaterQualityViewer', 'docs', pdfName)
     downloadURL = "http://countyofsb.org/uploadedFiles/phd/PROGRAMS/EHS/Ocean%20Water%20Weekly%20Results.pdf"
     # Kick off script by downloading PDF
     application.logger.debug("Starting to parse PDF")
