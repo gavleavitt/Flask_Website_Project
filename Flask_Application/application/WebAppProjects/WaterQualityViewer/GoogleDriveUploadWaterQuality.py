@@ -23,7 +23,7 @@ def addtoGDrive(pdfloc, pdfname):
         # Change location for client_secrets.json, application.py sits one level above this file and the file isn't
         # called properly when this function is called, but the file needs to stay in that location such that
         # quickstart.py can be called directly if needed
-        GoogleAuth.DEFAULT_SETTINGS['client_config_file'] = os.path.join(app.root_path, 'WebAppProjects', 'water_quality',
+        GoogleAuth.DEFAULT_SETTINGS['client_config_file'] = os.path.join(app.root_path, 'WebAppProjects', 'WaterQualityViewer',
                                                                          'credentials.json')
         # Use command line to auth, must connect to host, visit URL, login/auth with Google, then paste provided text
         # into terminal
@@ -31,7 +31,7 @@ def addtoGDrive(pdfloc, pdfname):
 
         # Create authenticated GoogleDrive instance using settings from the setting.yaml file to auto-authenticate with
         # saved credentials
-        gauth = GoogleAuth(settings_file=os.path.join(app.root_path, 'WebAppProjects', 'water_quality', 'settings.yaml'))
+        gauth = GoogleAuth(settings_file=os.path.join(app.root_path, 'WebAppProjects', 'WaterQualityViewer', 'settings.yaml'))
 
         # Establish connection with Google Drive API
         drive = GoogleDrive(gauth)
