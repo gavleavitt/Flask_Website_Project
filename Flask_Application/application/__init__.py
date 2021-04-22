@@ -21,7 +21,7 @@ from pytz import utc
 import logging
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-
+from flask_login import LoginManager
 # Setup logger
 logger = logging.getLogger(__name__)
 # Set time and message format of logs
@@ -41,6 +41,11 @@ handler.setFormatter(formatter)
 
 # Create flask application, I believe "application" has to be used to work properly on AWS EB
 application = app = Flask(__name__)
+
+# Set secret key, this is required for sessions, which allows the server to store user information between requests,
+# this is used to enable Flask-Login to function properly
+app.secret_key = os.environ.get("SECRET_KEY")
+
 # Attach logging handler to application
 application.logger.addHandler(handler)
 application.logger.debug("Python Flask debugger active!")
@@ -48,6 +53,14 @@ application.logger.debug("Python Flask debugger active!")
 # Setup SQLAlchemy engine sessionmaker factory
 engine = create_engine(os.environ.get("DBCON"))
 Session = sessionmaker(bind=engine)
+
+# Setup SQLAlchemy engine sessionmaker factory for localhost
+engineLocal = create_engine(os.environ.get("DBCON_LOCAL"))
+SessionLocal = sessionmaker(bind=engineLocal)
+
+# Setup login manager for Flask-Login
+login_manager = LoginManager()
+login_manager.init_app(app)
 
 # Import HTTP auth
 from application.util.flaskAuth.authentication import auth
@@ -65,6 +78,7 @@ from .WebAppProjects.StravaActivityViewer.routes import stravaActDash_BP
 from .WebAppProjects.StravaActivityViewer.API_Admin_Routes import stravaActDashAPI_Admin_BP
 from .WebAppProjects.WaterQualityViewer.routes import sbcWaterQuality_BP
 from .WebAppProjects.WaterQualityViewer.API_Routes import sbcWaterQualityAPI_BP
+from .util.flaskLogin.routes_login import flasklogin_BP
 # Register blueprints with application
 app.register_blueprint(mainSite_BP)
 app.register_blueprint(projectPages_BP)
@@ -75,6 +89,7 @@ app.register_blueprint(stravaActDash_BP, url_prefix='/webapps/stravapp')
 app.register_blueprint(sbcWaterQuality_BP, url_prefix='/webapps/sbcwaterquality')
 app.register_blueprint(sbcWaterQualityAPI_BP, url_prefix='/api/v1/sbcwaterquality')
 app.register_blueprint(stravaActDashAPI_Admin_BP, url_prefix='/admin/api/v1/activitydashboard')
+app.register_blueprint(flasklogin_BP, url_prefix='/authentication')
 # # Set up celery client, allows async tasks to be setup
 # app.config['CELERY_BROKER_URL'] = 'redis://localhost:6379/0'
 # # app.config['CELERY_RESULT_BACKEND'] = 'redis://localhost:6379/0'

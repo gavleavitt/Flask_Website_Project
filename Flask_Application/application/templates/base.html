@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Base</title>
+    {% include 'mainImports.html' %}
+</head>
+<body>
+  <div class="container-main sansserif">
+		{% include 'navBar.html' %}
+    {% block content %}
+    {% endblock %}
+  </div>
+</body>
+</html>
