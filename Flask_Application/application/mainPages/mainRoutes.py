@@ -5,6 +5,8 @@
 """
 
 from flask import render_template, Blueprint
+from flask_login import login_required
+
 
 mainSite_BP = Blueprint('mainSite_BP', __name__,
                         template_folder='templates',
@@ -32,6 +34,13 @@ def about():
 @mainSite_BP.route("/contactme")
 def contact():
     return render_template("contactme/contactme.html")
+
+# Login required test
+@mainSite_BP.route("/logintest")
+@login_required
+def index_test():
+    return render_template("index/index.html")
+
 
 # Apply login
 # @app.route("/templatetesting")

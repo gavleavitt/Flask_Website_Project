@@ -1,6 +1,9 @@
 from werkzeug.security import generate_password_hash, check_password_hash
 from application import Session
-from application.util.flaskLogin.models import User
+from application import login_manager
+from .models import User
+
+
 
 def verify_password(username, password):
     """

@@ -49,6 +49,9 @@ html{
   background-color: var(--Collactive);
 }
 
+.base-content-container{
+  grid-row: 2/3;
+}
 
 .coll-content {
   padding: 0 18px;

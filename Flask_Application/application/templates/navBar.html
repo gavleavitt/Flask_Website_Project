@@ -13,7 +13,11 @@
     <a class= "menu-option" href="{{ url_for('mainSite_BP.about') }}">About</a>
     <a class= "menu-option" href="{{ url_for('mainSite_BP.resume') }}">Resume</a>
     <a class= "menu-option" href ="{{ url_for('mainSite_BP.contact') }}">Contact</a>
-    <a class= "menu-option" href ="{{ url_for('flasklogin_BP.login') }}">Login</a>
+    {% if current_user.is_anonymous %}
+      <a class= "menu-option" href ="{{ url_for('flasklogin_BP.login') }}">Login</a>
+    {% else %}
+      <a href="{{ url_for('flasklogin_BP.logout') }}">Logout</a>
+    {% endif %}
     <a href = "javascript:void(0);" class="menu-icon" onclick="navBarFunction()" onmouseover="menuHover();" onmouseout="menuUnhover();">
         <img id="menu-icon-img" src="/static/images/menu-icon-gray.svg" style="width:35px;height:35px">
     </a>

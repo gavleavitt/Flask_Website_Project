@@ -19,6 +19,7 @@ import atexit
 from apscheduler.schedulers.background import BackgroundScheduler
 from pytz import utc
 import logging
+from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from flask_login import LoginManager
@@ -46,6 +47,24 @@ application = app = Flask(__name__)
 # this is used to enable Flask-Login to function properly
 app.secret_key = os.environ.get("SECRET_KEY")
 
+# Set database connection properties
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get("DBCON_LOCAL")
+# Disabling modification tracking
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+
+# set database to use SQLAlchemy
+db = SQLAlchemy()
+# Init flask sqlalchemy database with flask
+db.init_app(app)
+
+# Setup login manager for Flask-Login
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = 'flasklogin_BP.login'
+
+
+
+
 # Attach logging handler to application
 application.logger.addHandler(handler)
 application.logger.debug("Python Flask debugger active!")
@@ -58,17 +77,13 @@ Session = sessionmaker(bind=engine)
 engineLocal = create_engine(os.environ.get("DBCON_LOCAL"))
 SessionLocal = sessionmaker(bind=engineLocal)
 
-# Setup login manager for Flask-Login
-login_manager = LoginManager()
-login_manager.init_app(app)
-
+# Import project files (initialize them?), imports from the application flask object have to be after flask
+# application is initialized to avoid circular imports
 # Import HTTP auth
 from application.util.flaskAuth.authentication import auth
-# Import error email reporting
 from application.util import errorEmail
 # Import shared assets
 # from .util import assets
-# Import Blueprints
 from .mainPages.mainRoutes import mainSite_BP
 from .projectPages.projectPageRoutes import projectPages_BP
 from .WebAppProjects.LocationLiveTracker.routes import liveTracker_BP
@@ -78,7 +93,9 @@ from .WebAppProjects.StravaActivityViewer.routes import stravaActDash_BP
 from .WebAppProjects.StravaActivityViewer.API_Admin_Routes import stravaActDashAPI_Admin_BP
 from .WebAppProjects.WaterQualityViewer.routes import sbcWaterQuality_BP
 from .WebAppProjects.WaterQualityViewer.API_Routes import sbcWaterQualityAPI_BP
+from application.WebAppProjects.WaterQualityViewer import functionsWaterQual
 from .util.flaskLogin.routes_login import flasklogin_BP
+from .util.flaskLogin.models import User
 # Register blueprints with application
 app.register_blueprint(mainSite_BP)
 app.register_blueprint(projectPages_BP)
@@ -90,20 +107,8 @@ app.register_blueprint(sbcWaterQuality_BP, url_prefix='/webapps/sbcwaterquality'
 app.register_blueprint(sbcWaterQualityAPI_BP, url_prefix='/api/v1/sbcwaterquality')
 app.register_blueprint(stravaActDashAPI_Admin_BP, url_prefix='/admin/api/v1/activitydashboard')
 app.register_blueprint(flasklogin_BP, url_prefix='/authentication')
-# # Set up celery client, allows async tasks to be setup
-# app.config['CELERY_BROKER_URL'] = 'redis://localhost:6379/0'
-# # app.config['CELERY_RESULT_BACKEND'] = 'redis://localhost:6379/0'
-# cel_client = Celery(app.name, broker=app.config['CELERY_BROKER_URL'])
-# cel_client.conf.update(app.config)
 
-# Import project files (initialize them?), imports from the application flask object have to be after flask
-# application is initialized to avoid circular imports
-# from application import routes, routes_api, models_tracker, parsePDF_WaterQual, StravaWebHook, TestingandDevelopmentRoutes
-# from application import routes, routes_api
-# from application.development import testingAndDevelopmentRoutes
-# from application.WebAppProjects import location_tracker, strava_activities, water_quality
-from application.WebAppProjects.WaterQualityViewer import functionsWaterQual
-# from application.WebAppProjects.strava_activities import DBQueriesStrava, StravaAWSS3
+
 
 # Setup APS scheduler instance
 sched = BackgroundScheduler(daemon=True, timezone=utc)
@@ -126,3 +131,8 @@ except Exception as e:
 
 # Shutdown cron thread if the web process is stopped
 atexit.register(lambda: sched.shutdown(wait=False))
+# # Set up celery client, allows async tasks to be setup
+# app.config['CELERY_BROKER_URL'] = 'redis://localhost:6379/0'
+# # app.config['CELERY_RESULT_BACKEND'] = 'redis://localhost:6379/0'
+# cel_client = Celery(app.name, broker=app.config['CELERY_BROKER_URL'])
+# cel_client.conf.update(app.config)

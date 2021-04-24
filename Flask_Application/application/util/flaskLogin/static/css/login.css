@@ -1,0 +1,28 @@
+.login-pane{
+  display: flex;
+  /* padding-top: 40px;
+  padding-bottom: 40px; */
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  flex-direction: column;
+}
+
+.form-signin{
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+}
+
+.flash-message{
+  margin: 0px;
+  font-style: bold;
+  font-size: 20;
+  color: red;
+}
+
+.login-para{
+  margin-top: 5px;
+  margin-bottom: 5px;
+}
