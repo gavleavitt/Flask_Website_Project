@@ -41,10 +41,6 @@ def create_presigned_url(fileName, expiration=900):
 
 def uploadToS3(fileName, filePath):
     """
-
-    :param memCSV:
-    :param actID:
-    :return:
     """
 
     bucket = os.getenv("S3_WATERQUALPDF_BUCKET")
@@ -57,7 +53,9 @@ def uploadToS3(fileName, filePath):
         # https://stackoverflow.com/a/45700716
         # https://stackoverflow.com/a/60293770
         # conn.put_object(Body=memCSV.getvalue(), Bucket=bucket, Key=fileName, ContentType='application/vnd.ms-excel')
+        application.logger.debug(f"Uploading PDF {fileName} to AWS S3")
         conn.put_object(Body=filePath, Bucket=bucket, Key=fileName)
+        application.logger.debug(f"PDF {fileName} has been uploaded to AWS S3")
     except Exception as e:
         application.logger.error(f"Upload water quality to S3 bucket failed in the error: {e}")
         errorEmail.sendErrorEmail(script="UploadWaterQualityToS3Bucket", exceptiontype=e.__class__.__name__, body=e)

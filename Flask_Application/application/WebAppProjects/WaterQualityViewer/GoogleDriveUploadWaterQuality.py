@@ -44,7 +44,7 @@ def addtoGDrive(pdfloc, pdfname):
         newfile.SetContentFile(pdfloc)
         # Upload the file to Google Drive
         newfile.Upload()
-        print("File uploaded to Google Drive!")
+        # print("File uploaded to Google Drive!")
         application.logger.debug(f"File {pdfname} uploaded to Google Drive!")
     except Exception as e:
         print("GoogleDrive upload threw an error, emailing exception")

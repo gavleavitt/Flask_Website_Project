@@ -92,7 +92,8 @@ from application.WebAppProjects.WaterQualityViewer import functionsWaterQual
 
 # Setup APS scheduler instance
 sched = BackgroundScheduler(daemon=True, timezone=utc)
-
+# Set logging for APS scheduler
+logging.getLogger('apscheduler').setLevel(logging.DEBUG)
 # Setup scheduled tasks
 try:
     # Trigger every day at 9:30 am

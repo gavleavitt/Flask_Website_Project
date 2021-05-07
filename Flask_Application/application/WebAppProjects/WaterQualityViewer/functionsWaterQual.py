@@ -162,7 +162,7 @@ def handlePDFStatus(pdfStatus, pdfLoc, hashedText, pdfDict, pdfName):
     if pdfStatus == "Exists":
         # print("Already processed this pdf, removing local pdf and quitting!")
         # PDF has been processed, remove local file
-        application.logger.debug("Already processed PDF, quiting")
+        application.logger.debug(f"Already processed PDF {pdfName} which has the hash: {hashedText}, quiting")
         # quit()
         try:
             os.remove(pdfLoc)
@@ -175,12 +175,9 @@ def handlePDFStatus(pdfStatus, pdfLoc, hashedText, pdfDict, pdfName):
     else:
         # PDF is new, it contains re-sampled or data fill-ins, upload file to Google Drive
         try:
-
-            #TODO:
-            # Upload to S3 bucket
             AWSS3Upload.uploadToS3(pdfName, pdfLoc)
-            GoogleDriveUploadWaterQuality.addtoGDrive(pdfLoc, pdfName)
-            application.logger.debug("PDF uploaded to Google Drive and AWSS3")
+            # GoogleDriveUploadWaterQuality.addtoGDrive(pdfLoc, pdfName)
+            application.logger.debug("PDF uploaded to AWSS3")
         except Exception as e:
             # print("Google Drive upload threw an error, emailing exception")
             application.logger.debug("Cloud upload failed, trying to send email report")
