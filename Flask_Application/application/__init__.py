@@ -29,28 +29,31 @@ logger = logging.getLogger(__name__)
 formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
 # Set Logger to debug level
 logger.setLevel(logging.DEBUG)
+
+# Create flask application, I believe "application" has to be used to work properly on AWS EB
+application = app = Flask(__name__)
+# Set secret key, this is required for sessions, which allows the server to store user information between requests,
+# this is used to enable Flask-Login to function properly
+app.secret_key = os.environ.get("SECRET_KEY")
+
 # Set logging pathway depending on if Flask is running local or on AWS EB on Amazon Linux 2
-if "B:\\" in os.getcwd():
+if os.environ['FLASK_ENV'] == "development":
+# if "B:\\" in os.getcwd():
     dirname = os.path.dirname(__file__)
     # handler = RotatingFileHandler(os.path.join(dirname, '../logs/application.log'), maxBytes=1024, backupCount=5)
     handler = logging.FileHandler(os.path.join(dirname, '../logs/application.log'))
+    # Set database connection properties
+    app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get("DBCON_LOCAL")
+    # Disabling modification tracking
+    app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 else:
     # see https://stackoverflow.com/a/60549321
     # handler = RotatingFileHandler('/tmp/application.log', maxBytes=1024, backupCount=5)
     handler = logging.FileHandler('/tmp/application.log')
 handler.setFormatter(formatter)
-
-# Create flask application, I believe "application" has to be used to work properly on AWS EB
-application = app = Flask(__name__)
-
-# Set secret key, this is required for sessions, which allows the server to store user information between requests,
-# this is used to enable Flask-Login to function properly
-app.secret_key = os.environ.get("SECRET_KEY")
-
-# Set database connection properties
-app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get("DBCON_LOCAL")
-# Disabling modification tracking
-app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+# Attach logging handler to application
+application.logger.addHandler(handler)
+application.logger.debug("Python Flask debugger active")
 
 # set database to use SQLAlchemy
 db = SQLAlchemy()
@@ -62,12 +65,6 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'flasklogin_BP.login'
 
-
-
-
-# Attach logging handler to application
-application.logger.addHandler(handler)
-application.logger.debug("Python Flask debugger active!")
 
 # Setup SQLAlchemy engine sessionmaker factory
 engine = create_engine(os.environ.get("DBCON"))
@@ -97,6 +94,7 @@ from application.WebAppProjects.WaterQualityViewer import functionsWaterQual
 from .util.flaskLogin.routes_login import flasklogin_BP
 from .util.flaskLogin.models import User
 # Register blueprints with application
+apiPrefix = '/api/v1'
 app.register_blueprint(mainSite_BP)
 app.register_blueprint(projectPages_BP)
 app.register_blueprint(liveTracker_BP, url_prefix='/webapps/tracker')
@@ -107,7 +105,19 @@ app.register_blueprint(sbcWaterQuality_BP, url_prefix='/webapps/sbcwaterquality'
 app.register_blueprint(sbcWaterQualityAPI_BP, url_prefix='/api/v1/sbcwaterquality')
 app.register_blueprint(stravaActDashAPI_Admin_BP, url_prefix='/admin/api/v1/activitydashboard')
 app.register_blueprint(flasklogin_BP, url_prefix='/authentication')
-
+from application.util.ErrorHandling import exception_handler
+# Activate pluggable views
+from application.WebAppProjects.MaintenanceTracking.views import AssetRecAPI
+maintAPIPrefix = f'{apiPrefix}/maintenancetracking'
+# Add Asset view
+asset_view = exception_handler(AssetRecAPI.as_view('asset_api'))
+# Attach url routes and methods to the view function and register them with the application
+app.add_url_rule(f'{maintAPIPrefix}/asset/', defaults={'asset_id': None},
+                 view_func=asset_view, methods=['GET',])
+app.add_url_rule(f'{maintAPIPrefix}/asset/', view_func=asset_view, methods=['POST',])
+# Set route to handle requests for specific record IDs
+app.add_url_rule(f'{maintAPIPrefix}/asset/<int:asset_id>', view_func=asset_view,
+                 methods=['GET', 'PUT', 'DELETE'])
 
 
 # Setup APS scheduler instance
@@ -124,7 +134,7 @@ try:
     # sched.add_job(parsePDF.pdfjob, 'cron', minute='*')
     # Start scheduled jobs
     sched.start()
-    application.logger.debug("Scheduled task created")
+    application.logger.debug("Scheduled tasks created")
 except Exception as e:
     application.logger.error("Failed to create parse pdfjob")
     application.logger.error(e)

@@ -1,11 +1,25 @@
 from application import db
-from sqlalchemy import Column, String, Integer, DateTime
+from sqlalchemy import Column, String, Integer, DateTime, TIMESTAMP, text
 from sqlalchemy.sql import func
-from application.util.flaskLogin.models import User
+# from application.util.flaskLogin.models import User
+from datetime import datetime
 from sqlalchemy.sql import expression
 
 # flask-sqlalchemy server default: https://stackoverflow.com/a/44787117
 #https://stackoverflow.com/questions/13370317/sqlalchemy-default-datetime
+
+class Owner(db.Model):
+    __tablename__ = 'users'
+    __table_args__ = {'extend_existing': True}
+
+    id = Column(Integer, primary_key=True)
+    username = db.Column(String(100), unique=True)
+    hashpass = db.Column(String(255))
+    fullname = db.Column(String(100))
+    role = db.Column(String(255))
+    created_on = db.Column(db.DateTime(timezone=True), default=datetime.utcnow())
+    updated_on = db.Column(db.DateTime(timezone=True),  default=datetime.utcnow(), onupdate=datetime.utcnow())
+    assets_rel = db.relationship("Asset", backref="Owner")
 
 class Asset(db.Model):
     __tablename__ = 'assets'
@@ -20,12 +34,16 @@ class Asset(db.Model):
     wheelsize = db.Column(db.String(50), default="")
     type = db.Column(db.String(50), default="")
     retailprice = db.Column(db.Integer(), default=0)
+    purchaseprice = db.Column(db.Integer(), default=0)
     purchasetype = db.Column(db.String(20), default="")
     purchasesource = db.Column(db.String(100), default="")
     serial = db.Column(db.String(100), default="")
+    created_on = db.Column(db.DateTime(timezone=True), default=datetime.utcnow())
+    updated_on = db.Column(db.DateTime(timezone=True),  default=datetime.utcnow(), onupdate=datetime.utcnow())
+    # create relationship
     ownerfk = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    created_on = db.Column(DateTime(timezone=True), server_default=func.now())
-    updated_on = db.Column(DateTime(timezone=True), onupdate=func.now())
+    owner_rel = db.relationship(Owner,
+        backref=db.backref('assets', lazy=True))
 
 class maintRecord(db.Model):
     __tablename__= "maintenance_records"
@@ -39,8 +57,8 @@ class maintRecord(db.Model):
     workduration = db.Column(db.Float(), default=0.0)
     assetfk = db.Column(db.Integer, db.ForeignKey('assets.id'), nullable=False)
     partfk = db.Column(db.Integer, db.ForeignKey('partinstalls.id'), nullable=False)
-    created_on = db.Column(DateTime(timezone=True), server_default=func.now())
-    updated_on = db.Column(DateTime(timezone=True), onupdate=func.now())
+    created_on = db.Column(db.DateTime(timezone=True), default=datetime.utcnow())
+    updated_on = db.Column(db.DateTime(timezone=True),  default=datetime.utcnow(), onupdate=datetime.utcnow())
 
 class installs(db.Model):
     __tablename__= 'partinstalls'
@@ -58,5 +76,6 @@ class installs(db.Model):
     manuallink = db.Column(db.String(100), default="")
     parttype = db.Column(db.String(100), default="")
     partname = db.Column(db.String(100), default="")
-    created_on = db.Column(DateTime(timezone=True), server_default=func.now())
-    updated_on = db.Column(DateTime(timezone=True), onupdate=func.now())
+    created_on = db.Column(db.DateTime(timezone=True), default=datetime.utcnow())
+    updated_on = db.Column(db.DateTime(timezone=True),  default=datetime.utcnow(), onupdate=datetime.utcnow())
+

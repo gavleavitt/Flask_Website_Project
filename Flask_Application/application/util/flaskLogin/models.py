@@ -6,8 +6,8 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from sqlalchemy.sql import func
 from application import login_manager
 # Base = declarative_base()
-
-
+from datetime import datetime
+# from application.WebAppProjects.MaintenanceTracking.models import Asset
 
 # class User(Base):
 class User(UserMixin, db.Model):
@@ -18,7 +18,10 @@ class User(UserMixin, db.Model):
     hashpass = db.Column(String(255))
     fullname = db.Column(String(100))
     role = db.Column(String(255))
-    created_on = db.Column(DateTime(timezone=True), server_default=func.now())
+    created_on = db.Column(db.DateTime(timezone=True), default=datetime.utcnow())
+    updated_on = db.Column(db.DateTime(timezone=True),  default=datetime.utcnow(), onupdate=datetime.utcnow())
+
+    # assets_rel = db.relationship(Asset, backref='users', lazy=True)
 
     def check_password(self, password):
         """Check hashed password."""
