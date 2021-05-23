@@ -113,18 +113,24 @@ app.register_blueprint(flasklogin_BP, url_prefix='/authentication')
 
 # Activate pluggable views
 from application.util.ErrorHandling import exception_handler
-###TODO enable flask login required
-from application.WebAppProjects.MaintenanceTracking.views import AssetRecAPI
+
+from application.WebAppProjects.MaintenanceTracking.views import AssetRecAPI, MaintRecAPI
+from application.util.APIRegistration import register_api
 maintAPIPrefix = f'{apiPrefix}/maintenancetracking'
-# Add Asset view
-asset_view = exception_handler(AssetRecAPI.as_view('asset_api'))
-# Attach url routes and methods to the view function and register them with the application
-app.add_url_rule(f'{maintAPIPrefix}/asset/', defaults={'rec_id': None},
-                 view_func=asset_view, methods=['GET',])
-app.add_url_rule(f'{maintAPIPrefix}/asset/', view_func=asset_view, methods=['POST',])
-# Set route to handle requests for specific record IDs
-app.add_url_rule(f'{maintAPIPrefix}/asset/<int:rec_id>', view_func=asset_view,
-                 methods=['GET', 'PUT', 'DELETE'])
+# Add API views with registration function
+# Asset API
+register_api(view=AssetRecAPI, endpoint='asset_api', url=f'{maintAPIPrefix}/asset/', pk='rec_id')
+# Maintenance Record API
+register_api(view=MaintRecAPI, endpoint='maintRec_api', url=f'{maintAPIPrefix}/maintenance/', pk='rec_id')
+
+# asset_view = exception_handler(AssetRecAPI.as_view('asset_api'))
+# # Attach url routes and methods to the view function and register them with the application
+# app.add_url_rule(f'{maintAPIPrefix}/asset/', defaults={'rec_id': None},
+#                  view_func=asset_view, methods=['GET',])
+# app.add_url_rule(f'{maintAPIPrefix}/asset/', view_func=asset_view, methods=['POST',])
+# # Set route to handle requests for specific record IDs
+# app.add_url_rule(f'{maintAPIPrefix}/asset/<int:rec_id>', view_func=asset_view,
+#                  methods=['GET', 'PUT', 'DELETE'])
 
 
 # Setup APS scheduler instance

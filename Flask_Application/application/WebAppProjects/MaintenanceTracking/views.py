@@ -6,6 +6,7 @@ from application.WebAppProjects.MaintenanceTracking import models
 from application.util.flaskLogin.models import User
 from application import app, db, logger, apiPrefix
 from flask import jsonify, request, Response
+from application.util.ErrorHandling import exception_handler
 import json
 from application.util.ErrorHandling import exception_handler
 # Pluggable views
@@ -32,8 +33,30 @@ class apiMethod(MethodView):
     """
 
     """
-    def postData(self):
-        pass
+    # see https://stackoverflow.com/questions/59272322/flask-methodview-with-decorators-is-giving-error
+    # Add decorators to rest API
+    ###TODO enable flask login required
+    decorators = [exception_handler]
+
+    def postData(self, model, content):
+        """
+
+        @param model:
+        @param content:
+        @return:
+        """
+        newRec = model()
+        # Iterate over request dict keys and values
+        for key, value in content.items():
+            # Check if object has an attribute matching the content update key
+            if hasattr(newRec, key):
+                # Set the object attribute value based on the key:value pair, this allows for updating only
+                # certain values within the object
+                setattr(newRec, key, value)
+        db.session.add(newRec)
+        # Commit updates to database
+        db.session.commit()
+        return Response(status=201)
 
     def getData(self, rec_id, model, resultName):
         """
@@ -60,8 +83,11 @@ class apiMethod(MethodView):
                 return res.to_json()
             else:
                 return Response(status=404)
-    def deleteData(self, model):
-        pass
+    def deleteData(self, rec_id, model):
+        # Delete record
+        model.query.filter_by(id=rec_id).delete()
+        # Commit delete
+        db.session.commit()
 
     def putData(self, rec_id, model, content):
         """
@@ -90,13 +116,65 @@ class apiMethod(MethodView):
         else:
             return Response(status=404)
 
-    # def getOwnerFK(self, userName):
-    #     return loginModels.User.filter_by(userName=userName).first()
+
+##TODO: Build out maintenence request API
+class MaintRecAPI(apiMethod):
+    """
+    API for CRUD operations on maintenance information.
+    """
+    model = models.maintRecord
+    getName = "MaintenanceRecord"
+    def post(self):
+        """
+        POST request view, inserts the requested maintenance record into the database.
+        @return: Response Code
+        """
+        content = request.get_json(force=True)
+        # Check if assetFK matches an existing asset
+        asset = models.Asset.query.filter_by(id=content['assetfk']).first()
+        if asset:
+            # Create maintenance record
+            return self.postData(self.model, content)
+        else:
+            # Asset doesn't exist, return 404
+            return Response(status=404)
+
+    def put(self, rec_id):
+        """
+        PUT request view, allows updating individual maintenance records.
+        @param rec_id: Int. Asset record to be updated
+        @return: Response Code
+        """
+        # Get content, even if request isn't set to json
+        content = request.get_json(force=True)
+        # Set asset model as the model to receive update
+        return self.putData(rec_id, self.model, content)
+
+    def get(self, rec_id):
+        """
+        GET request view, allows selecting one or all records
+        @param rec_id: Int. Asset record to be returned
+        @return: JSON. Requested record(s).
+        """
+        return self.getData(rec_id, self.model, self.getName)
+
+    def delete(self, rec_id):
+        """
+        Delete request view, allows deleting a single record.
+        @param rec_id: Int. Asset record to be returned
+        @return: Response Code.
+        """
+        if rec_id:
+            return self.deleteData(rec_id, self.model)
+        else:
+            return Response(status=405)
 
 class AssetRecAPI(apiMethod):
     """
     API for CRUD operations on asset information.
     """
+    model = models.Asset
+    getName = "Assets"
     def post(self):
         """
         POST request view, inserts the requested asset record into the database.
@@ -105,18 +183,14 @@ class AssetRecAPI(apiMethod):
         content = request.get_json()
         # logger.debug(f"{request.path} Received post request: {content}")
         # Get ownerfk
-        ownerFK = models.Owner.query.filter_by(username=content['UserName']).first()
-        # logger.debug(f"FK is {ownerFK}")
-        newAsset = models.Asset(name=content['AssetName'], modelyear=content['ModelYear'],
-                                make=content['MakeName'], model=content['ModelName'], notes=content['Notes'],
-                                suspension=content['Suspension'], framesize=content['FrameSize'],
-                                wheelsize=content['WheelSize'], type=content['Type'], retailprice=content['RetailPrice'],
-                                purchaseprice=content['PurchasePrice'], purchasetype=content['PurchaseType'],
-                                purchasesource=content['PurchaseSource'], serial=content['Serial'],
-                                ownerfk=ownerFK.id)
-        db.session.add(newAsset)
-        db.session.commit()
-        return Response(status=201)
+        ownerFK = models.Owner.query.filter_by(username=content['username']).first()
+        if ownerFK:
+            # Add fk to content Dict
+            content['ownerfk'] = ownerFK.id
+            return self.postData(self.model, content)
+        else:
+            return Response(status=404)
+
     def put(self, rec_id):
         """
         PUT request view, allows updating individual asset records.
@@ -126,7 +200,7 @@ class AssetRecAPI(apiMethod):
         # Get content, even if request isn't set to json
         content = request.get_json(force=True)
         # Set asset model as the model to receive update
-        return self.putData(rec_id, models.Asset, content)
+        return self.putData(rec_id, self.model, content)
 
     def get(self, rec_id):
         """
@@ -134,23 +208,18 @@ class AssetRecAPI(apiMethod):
         @param rec_id: Int. Asset record to be returned
         @return: JSON. Requested record(s).
         """
-        return self.getData(rec_id, models.Asset, "Assets")
+        return self.getData(rec_id, self.model, self.getName)
 
-class maintRecAPI(apiMethod):
-    """
-
-    """
-    def post(self):
-        # Get request content
-        # request.json['abc']
-        # content = request.get_json()
-        newRec = models.maintRecord()
-        # Add record to session
-        db.session.add(newRec)
-        # Commit record to database
-        db.session.commit()
-        # Return success
-        return Response(status = 201)
+    def delete(self, rec_id):
+        """
+        Delete request view, allows deleting a single record.
+        @param rec_id: Int. Asset record to be returned
+        @return: Response Code.
+        """
+        if rec_id:
+            return self.deleteData(rec_id, self.model)
+        else:
+            return Response(status=405)
 
 ###TODO enable flask login required:
 # maint_view = user_required(maintRecAPI.as_view('maintenance_api'))

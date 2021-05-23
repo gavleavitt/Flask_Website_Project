@@ -50,17 +50,21 @@ class Asset(db.Model):
 class maintRecord(db.Model):
     __tablename__= "maintenance_records"
 
-    id = db.Column(db.Integer, primary_key=True)
-    worktype = db.Column(db.String(100), default="")
-    mainttime = db.Column(db.DateTime(timezone=True))
-    worknotes = db.Column(db.String(100), default="")
-    workcost = db.Column(db.Integer(), default=0)
-    shop = db.Column(db.String(100), default="")
-    workduration = db.Column(db.Float(), default=0.0)
-    assetfk = db.Column(db.Integer, db.ForeignKey('assets.id'), nullable=False)
-    partfk = db.Column(db.Integer, db.ForeignKey('partinstalls.id'), nullable=False)
-    created_on = db.Column(db.DateTime(timezone=True), default=datetime.utcnow())
-    updated_on = db.Column(db.DateTime(timezone=True),  default=datetime.utcnow(), onupdate=datetime.utcnow())
+    id = db.Column(db.Integer, primary_key=True, supports_json = True, supports_dict= True)
+    worktype = db.Column(db.String(100), default="", supports_json = True, supports_dict= True)
+    mainttime = db.Column(db.DateTime(timezone=True), supports_json = True, supports_dict= True)
+    worknotes = db.Column(db.String(100), default="", supports_json = True, supports_dict= True)
+    workcost = db.Column(db.Integer(), default=0, supports_json = True, supports_dict= True)
+    shop = db.Column(db.String(100), default="", supports_json = True, supports_dict= True)
+    workduration = db.Column(db.Float(), default=0.0, supports_json = True, supports_dict= True)
+    assetfk = db.Column(db.Integer, db.ForeignKey('assets.id'), nullable=False,
+                        supports_json = True, supports_dict= True)
+    partfk = db.Column(db.Integer, db.ForeignKey('partinstalls.id'), nullable=False,
+                       supports_json = True, supports_dict= True)
+    created_on = db.Column(db.DateTime(timezone=True), default=datetime.utcnow(),
+                           supports_json = True, supports_dict= True)
+    updated_on = db.Column(db.DateTime(timezone=True),  default=datetime.utcnow(), onupdate=datetime.utcnow(),
+                           supports_json = True, supports_dict= True)
 
 class installs(db.Model):
     __tablename__= 'partinstalls'
