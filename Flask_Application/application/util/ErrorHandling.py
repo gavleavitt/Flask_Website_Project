@@ -5,7 +5,10 @@ import traceback
 def exception_handler(func):
     def inner_function(*args, **kwargs):
         try:
-            return func(*args, **kwargs)
+            if func(*args, **kwargs):
+                return func(*args, **kwargs)
+            else:
+                return Response(status=200)
         except Exception as e:
             # Log error message
             logger.error(f" The function {func.__name__} failed with the error: {e}")

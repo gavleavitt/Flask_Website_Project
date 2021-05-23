@@ -23,27 +23,29 @@ class Owner(db.Model):
 
 class Asset(db.Model):
     __tablename__ = 'assets'
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100), default="")
-    modelyear = db.Column(db.String(100), default="")
-    make = db.Column(db.String(100), default="")
-    model = db.Column(db.String(100), default="")
-    notes = db.Column(db.String(500), default="")
-    suspension = db.Column(db.String(50), default="")
-    framesize = db.Column(db.String(50), default="")
-    wheelsize = db.Column(db.String(50), default="")
-    type = db.Column(db.String(50), default="")
-    retailprice = db.Column(db.Integer(), default=0)
-    purchaseprice = db.Column(db.Integer(), default=0)
-    purchasetype = db.Column(db.String(20), default="")
-    purchasesource = db.Column(db.String(100), default="")
-    serial = db.Column(db.String(100), default="")
-    created_on = db.Column(db.DateTime(timezone=True), default=datetime.utcnow())
-    updated_on = db.Column(db.DateTime(timezone=True),  default=datetime.utcnow(), onupdate=datetime.utcnow())
+    id = db.Column(db.Integer, primary_key=True, supports_json = True, supports_dict= True)
+    name = db.Column(db.String(100), default="", supports_json = True,supports_dict= True)
+    modelyear = db.Column(db.String(100), default="", supports_json = True, supports_dict= True)
+    make = db.Column(db.String(100), default="", supports_json = True, supports_dict= True)
+    model = db.Column(db.String(100), default="", supports_json = True, supports_dict= True)
+    notes = db.Column(db.String(500), default="", supports_json = True, supports_dict= True)
+    suspension = db.Column(db.String(50), default="", supports_json = True, supports_dict= True)
+    framesize = db.Column(db.String(50), default="", supports_json = True, supports_dict= True)
+    wheelsize = db.Column(db.String(50), default="", supports_json = True, supports_dict= True)
+    type = db.Column(db.String(50), default="", supports_json = True, supports_dict= True)
+    retailprice = db.Column(db.Integer(), default=0, supports_json = True, supports_dict= True)
+    purchaseprice = db.Column(db.Integer(), default=0, supports_json = True, supports_dict= True)
+    purchasetype = db.Column(db.String(20), default="", supports_json = True, supports_dict= True)
+    purchasesource = db.Column(db.String(100), default="", supports_json = True, supports_dict= True)
+    serial = db.Column(db.String(100), default="", supports_json = True, supports_dict= True)
+    created_on = db.Column(db.DateTime(timezone=True), default=datetime.utcnow(),
+                           supports_json = True, supports_dict= True)
+    updated_on = db.Column(db.DateTime(timezone=True),  default=datetime.utcnow(), onupdate=datetime.utcnow(),
+                           supports_json = True, supports_dict= True)
     # create relationship
     ownerfk = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     owner_rel = db.relationship(Owner,
-        backref=db.backref('assets', lazy=True))
+        backref=db.backref('assets', lazy=True),supports_json = True)
 
 class maintRecord(db.Model):
     __tablename__= "maintenance_records"

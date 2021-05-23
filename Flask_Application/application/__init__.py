@@ -19,6 +19,7 @@ import atexit
 from apscheduler.schedulers.background import BackgroundScheduler
 from pytz import utc
 import logging
+from sqlathanor import FlaskBaseModel, initialize_flask_sqlathanor
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -38,27 +39,31 @@ app.secret_key = os.environ.get("SECRET_KEY")
 
 # Set logging pathway depending on if Flask is running local or on AWS EB on Amazon Linux 2
 if os.environ['FLASK_ENV'] == "development":
-# if "B:\\" in os.getcwd():
     dirname = os.path.dirname(__file__)
     # handler = RotatingFileHandler(os.path.join(dirname, '../logs/application.log'), maxBytes=1024, backupCount=5)
     handler = logging.FileHandler(os.path.join(dirname, '../logs/application.log'))
     # Set database connection properties
     app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get("DBCON_LOCAL")
-    # Disabling modification tracking
-    app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 else:
     # see https://stackoverflow.com/a/60549321
     # handler = RotatingFileHandler('/tmp/application.log', maxBytes=1024, backupCount=5)
     handler = logging.FileHandler('/tmp/application.log')
+    app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get("DBCON_PROD")
+
+# Disabling modification tracking
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 handler.setFormatter(formatter)
 # Attach logging handler to application
 application.logger.addHandler(handler)
 application.logger.debug("Python Flask debugger active")
 
 # set database to use SQLAlchemy
-db = SQLAlchemy()
+# db = SQLAlchemy()
+# Setup SQLAthanor
+db = SQLAlchemy(app, model_class = FlaskBaseModel)
 # Init flask sqlalchemy database with flask
-db.init_app(app)
+# db.init_app(app)
+db = initialize_flask_sqlathanor(db)
 
 # Setup login manager for Flask-Login
 login_manager = LoginManager()
@@ -105,18 +110,20 @@ app.register_blueprint(sbcWaterQuality_BP, url_prefix='/webapps/sbcwaterquality'
 app.register_blueprint(sbcWaterQualityAPI_BP, url_prefix='/api/v1/sbcwaterquality')
 app.register_blueprint(stravaActDashAPI_Admin_BP, url_prefix='/admin/api/v1/activitydashboard')
 app.register_blueprint(flasklogin_BP, url_prefix='/authentication')
-from application.util.ErrorHandling import exception_handler
+
 # Activate pluggable views
+from application.util.ErrorHandling import exception_handler
+###TODO enable flask login required
 from application.WebAppProjects.MaintenanceTracking.views import AssetRecAPI
 maintAPIPrefix = f'{apiPrefix}/maintenancetracking'
 # Add Asset view
 asset_view = exception_handler(AssetRecAPI.as_view('asset_api'))
 # Attach url routes and methods to the view function and register them with the application
-app.add_url_rule(f'{maintAPIPrefix}/asset/', defaults={'asset_id': None},
+app.add_url_rule(f'{maintAPIPrefix}/asset/', defaults={'rec_id': None},
                  view_func=asset_view, methods=['GET',])
 app.add_url_rule(f'{maintAPIPrefix}/asset/', view_func=asset_view, methods=['POST',])
 # Set route to handle requests for specific record IDs
-app.add_url_rule(f'{maintAPIPrefix}/asset/<int:asset_id>', view_func=asset_view,
+app.add_url_rule(f'{maintAPIPrefix}/asset/<int:rec_id>', view_func=asset_view,
                  methods=['GET', 'PUT', 'DELETE'])
 
 
