@@ -4,15 +4,20 @@ from application import login_manager
 from flask_login import current_user
 from application.WebAppProjects.MaintenanceTracking import models
 from application.util.flaskLogin.models import User
+from sqlalchemy import and_, or_
 from application import app, db, logger, apiPrefix
-from flask import jsonify, request, Response
+from flask import jsonify, request, Response, abort
 from application.util.ErrorHandling import exception_handler
 import json
+import re
 from application.util.ErrorHandling import exception_handler
 # Pluggable views
 # https://flask.palletsprojects.com/en/2.0.x/views/
 # see https://stackoverflow.com/a/19376449
 # for using flask login with pluggable view
+
+# see https://stackoverflow.com/questions/31669864/date-in-flask-url
+# for using date range in url
 
 def user_required(f):
     """
@@ -38,6 +43,51 @@ class apiMethod(MethodView):
     ###TODO enable flask login required
     decorators = [exception_handler]
 
+    ## Helper Functions
+
+    def buildQuery(self, model, query, reqDict):
+        """
+        Builds a dynamic SQLAlchemy query based on GET request arguments.
+
+        ## see
+        # https://treyhunner.com/2018/04/keyword-arguments-in-python/
+        # https://www.reddit.com/r/learnpython/comments/7b9qqs/dynamically_generate_sqlalchemy_query_based_on/
+        # see https://stackoverflow.com/questions/27810523/sqlalchemy-elegant-way-to-deal-with-several-optional-filters
+
+        @param model:
+        @param query:
+        @param reqDict:
+        @return:
+        """
+        # Iterate over request dictionary building out query, each iteration will add a filter statement
+        for param, value in reqDict.items():
+            # Use regex to remove min and max from key name
+            reParam = re.sub("max|min", "", param)
+            # Use key name to get matching model attribute, this attribute will be used in query against the database
+            modelParam = getattr(model, reParam)
+            # Apply greater than or less than equal to if the request parameter contained min or max
+            if 'min' in param:
+                query = query.filter(modelParam >= value)
+            elif 'max' in param:
+                query = query.filter(modelParam <= value)
+            else:
+                query = query.filter(modelParam == value)
+        # Apply a limit to query
+        if reqDict['limit']:
+            query = query.limit(int(reqDict['limit']))
+        # Return formatted query, this query may be added to before being used to call on the database
+        return query
+
+    def formatMultiResponse(self, query):
+        query = query.all()
+        res = []
+        if not query:
+            return Response(status=404)
+        for i in query:
+            # Convert each object result to a dictionary and add to result list
+            res.append(i.to_dict())
+        return jsonify(res)
+
     def postData(self, model, content):
         """
 
@@ -58,31 +108,33 @@ class apiMethod(MethodView):
         db.session.commit()
         return Response(status=201)
 
-    def getData(self, rec_id, model, resultName):
+    # def getData(self, rec_id, model, idField=None, minDate=None, maxDate=None, workType=None, minCost=None,
+    #             maxCost=None, shop=None, minDuration=None, maxDuration=None):
+    def getData(self, rec_id, model, idField=None, dynamicQuery=None):
         """
         Executes an GET request on the input SQLAlchemy Model.
 
         @param rec_id: Int. Record to be updated.
         @param model: SQLAlchemy Model of database table.
-        @param resultName: String. Name of JSON array to be returned.
         @return: JSON formatted response.
         """
+        # Check if record ID is none
         if rec_id is None:
             # No record ID given, return all records
-            query = model.query.all()
-            # see https://stackoverflow.com/a/35958717
-            res = []
-            for i in query:
-                # Convert each object result to a dictionary and add to result list
-                res.append(i.to_dict())
-            return jsonify({resultName:res})
+            query = model.query
+            # res = self.formatMultiResponse(query)
+        # Check if a dynamic query has been generated
+        elif dynamicQuery:
+            query = dynamicQuery
+        # Return specific record or related records
         else:
-            # Return just the requested record, if it exists
-            res = model.query.filter_by(id=rec_id).first()
-            if res:
-                return res.to_json()
-            else:
-                return Response(status=404)
+            # Filter by record ID and idField given
+            # pass a dictionary into filter by then unpack it, forming proper request syntax
+            # query = model.query.filter_by(**{idField: rec_id})
+            query = model.query.filter_by((getattr(model, idField)) == rec_id)
+        # Get results of query and serialize them into json response
+        return self.formatMultiResponse(query)
+
     def deleteData(self, rec_id, model):
         # Delete record
         model.query.filter_by(id=rec_id).delete()
@@ -116,14 +168,19 @@ class apiMethod(MethodView):
         else:
             return Response(status=404)
 
+class PartInstallRecAPI(apiMethod):
+    pass
 
-##TODO: Build out maintenence request API
+
 class MaintRecAPI(apiMethod):
     """
     API for CRUD operations on maintenance information.
     """
     model = models.maintRecord
-    getName = "MaintenanceRecord"
+    # getName = "MaintenanceRecord"
+    # startDate = None
+    # endDate = None
+
     def post(self):
         """
         POST request view, inserts the requested maintenance record into the database.
@@ -152,11 +209,19 @@ class MaintRecAPI(apiMethod):
 
     def get(self, rec_id):
         """
-        GET request view, allows selecting one or all records
+        GET request view, allows selecting one or all records.
+
+        # Convert arguments to query directly:
+        https://stackoverflow.com/questions/19680103/flask-convert-request-args-to-dict
         @param rec_id: Int. Asset record to be returned
         @return: JSON. Requested record(s).
         """
-        return self.getData(rec_id, self.model, self.getName)
+        # Convert request to a dictionary
+        reqDict = request.args.to_dict()
+        # Build query with optional request parameters
+        query = self.buildQuery(model=self.model, query=self.model.query, reqDict=reqDict)
+        # Get the query results as a json
+        return self.getData(rec_id=rec_id, idField='assetfk', model=self.model, dynamicQuery=query)
 
     def delete(self, rec_id):
         """
@@ -174,7 +239,7 @@ class AssetRecAPI(apiMethod):
     API for CRUD operations on asset information.
     """
     model = models.Asset
-    getName = "Assets"
+    # getName = "Assets"
     def post(self):
         """
         POST request view, inserts the requested asset record into the database.
@@ -208,7 +273,7 @@ class AssetRecAPI(apiMethod):
         @param rec_id: Int. Asset record to be returned
         @return: JSON. Requested record(s).
         """
-        return self.getData(rec_id, self.model, self.getName)
+        return self.getData(rec_id=rec_id, idField='id', model=self.model)
 
     def delete(self, rec_id):
         """
@@ -219,7 +284,15 @@ class AssetRecAPI(apiMethod):
         if rec_id:
             return self.deleteData(rec_id, self.model)
         else:
-            return Response(status=405)
+            return Response(status=404)
+
+##TODO build out API to add/edit after market part/accessory installs
+
+
+
+
+##TODO build out API to query Strava for distance ridden since maintenance/part install
+
 
 ###TODO enable flask login required:
 # maint_view = user_required(maintRecAPI.as_view('maintenance_api'))

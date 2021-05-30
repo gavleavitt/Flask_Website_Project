@@ -37,7 +37,7 @@ application = app = Flask(__name__)
 # this is used to enable Flask-Login to function properly
 app.secret_key = os.environ.get("SECRET_KEY")
 
-# Set logging pathway depending on if Flask is running local or on AWS EB on Amazon Linux 2
+# Set logging pathway depending on if Flask is running local, in development mode, or on AWS EB on Amazon Linux 2
 if os.environ['FLASK_ENV'] == "development":
     dirname = os.path.dirname(__file__)
     # handler = RotatingFileHandler(os.path.join(dirname, '../logs/application.log'), maxBytes=1024, backupCount=5)
@@ -132,30 +132,31 @@ register_api(view=MaintRecAPI, endpoint='maintRec_api', url=f'{maintAPIPrefix}/m
 # app.add_url_rule(f'{maintAPIPrefix}/asset/<int:rec_id>', view_func=asset_view,
 #                  methods=['GET', 'PUT', 'DELETE'])
 
+# Set up background scheduled task if running in production mode
+if os.environ['FLASK_ENV'] != "development":
+    # Setup APS scheduler instance
+    sched = BackgroundScheduler(daemon=True, timezone=utc)
 
-# Setup APS scheduler instance
-sched = BackgroundScheduler(daemon=True, timezone=utc)
+    # Setup scheduled tasks
+    try:
+        # Trigger every day at 9:30 am
+        # sched.add_job(parsePDF.pdfjob, trigger='cron', hour='9', minute='30')
+        # sched.add_job(parsePDF.pdfjob, trigger='cron', hour='15', minute='37')
+        # Add PDF parsing job to trigger daily at 4:30 pm UTC, 9:30 PST
+        sched.add_job(functionsWaterQual.pdfjob, trigger='cron', hour='16', minute='30')
+        # Trigger every minute
+        # sched.add_job(parsePDF.pdfjob, 'cron', minute='*')
+        # Start scheduled jobs
+        sched.start()
+        application.logger.debug("Scheduled tasks created")
+    except Exception as e:
+        application.logger.error("Failed to create parse pdfjob")
+        application.logger.error(e)
 
-# Setup scheduled tasks
-try:
-    # Trigger every day at 9:30 am
-    # sched.add_job(parsePDF.pdfjob, trigger='cron', hour='9', minute='30')
-    # sched.add_job(parsePDF.pdfjob, trigger='cron', hour='15', minute='37')
-    # Add PDF parsing job to trigger daily at 4:30 pm UTC, 9:30 PST
-    sched.add_job(functionsWaterQual.pdfjob, trigger='cron', hour='16', minute='30')
-    # Trigger every minute
-    # sched.add_job(parsePDF.pdfjob, 'cron', minute='*')
-    # Start scheduled jobs
-    sched.start()
-    application.logger.debug("Scheduled tasks created")
-except Exception as e:
-    application.logger.error("Failed to create parse pdfjob")
-    application.logger.error(e)
-
-# Shutdown cron thread if the web process is stopped
-atexit.register(lambda: sched.shutdown(wait=False))
-# # Set up celery client, allows async tasks to be setup
-# app.config['CELERY_BROKER_URL'] = 'redis://localhost:6379/0'
-# # app.config['CELERY_RESULT_BACKEND'] = 'redis://localhost:6379/0'
-# cel_client = Celery(app.name, broker=app.config['CELERY_BROKER_URL'])
-# cel_client.conf.update(app.config)
+    # Shutdown cron thread if the web process is stopped
+    atexit.register(lambda: sched.shutdown(wait=False))
+    # # Set up celery client, allows async tasks to be setup
+    # app.config['CELERY_BROKER_URL'] = 'redis://localhost:6379/0'
+    # # app.config['CELERY_RESULT_BACKEND'] = 'redis://localhost:6379/0'
+    # cel_client = Celery(app.name, broker=app.config['CELERY_BROKER_URL'])
+    # cel_client.conf.update(app.config)
