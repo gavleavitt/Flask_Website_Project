@@ -30,3 +30,5 @@ logs/
 .platform
 *.pickle
 Flask_Application.zip
+Flask_Application/flaskrun.txt
+Flask_Application/flaskrun.bat

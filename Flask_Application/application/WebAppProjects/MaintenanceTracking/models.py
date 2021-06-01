@@ -48,7 +48,6 @@ class Asset(db.Model):
         backref=db.backref('assets', lazy=True),supports_json = True)
 
 class maintRecord(db.Model):
-    categoricalOptions = ['worktype','shop']
     __tablename__= "maintenance_records"
 
     id = db.Column(db.Integer, primary_key=True, supports_json = True, supports_dict= True)
@@ -77,6 +76,7 @@ class installs(db.Model):
     currentlyinstalled = db.Column(db.Boolean(), default=True)
     partnotes = db.Column(db.String(100), default="")
     assetfk = db.Column(db.Integer, db.ForeignKey('assets.id'), nullable=False)
+    maintfk = db.Column(db.Integer, db.ForeignKey('maintenance_records.id'), nullable=False)
     vendor = db.Column(db.String(100), default="")
     postinglink = db.Column(db.String(100), default="")
     s3objid = db.Column(db.String(100), default="")

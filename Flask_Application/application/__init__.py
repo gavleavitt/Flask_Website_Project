@@ -114,7 +114,7 @@ app.register_blueprint(flasklogin_BP, url_prefix='/authentication')
 # Activate pluggable views
 from application.util.ErrorHandling import exception_handler
 
-from application.WebAppProjects.MaintenanceTracking.views import AssetRecAPI, MaintRecAPI
+from application.WebAppProjects.MaintenanceTracking.views import AssetRecAPI, MaintRecAPI, PartInstallRecAPI
 from application.util.APIRegistration import register_api
 maintAPIPrefix = f'{apiPrefix}/maintenancetracking'
 # Add API views with registration function
@@ -122,6 +122,8 @@ maintAPIPrefix = f'{apiPrefix}/maintenancetracking'
 register_api(view=AssetRecAPI, endpoint='asset_api', url=f'{maintAPIPrefix}/asset/', pk='rec_id')
 # Maintenance Record API
 register_api(view=MaintRecAPI, endpoint='maintRec_api', url=f'{maintAPIPrefix}/maintenance/', pk='rec_id')
+# Part install API
+register_api(view=PartInstallRecAPI, endpoint='partRec_api', url=f'{maintAPIPrefix}/partinstall/', pk='rec_id')
 
 # asset_view = exception_handler(AssetRecAPI.as_view('asset_api'))
 # # Attach url routes and methods to the view function and register them with the application
