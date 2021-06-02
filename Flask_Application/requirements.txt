@@ -78,7 +78,7 @@ typing-extensions==3.7.4.3
 tzlocal==2.1
 units==0.7
 uritemplate==3.0.1
-urllib3==1.25.10
+urllib3==1.26.5
 vine==5.0.0
 virtualenv==20.0.25
 Wand==0.6.3
