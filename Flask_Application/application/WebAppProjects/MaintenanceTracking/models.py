@@ -66,6 +66,9 @@ class maintRecord(db.Model):
     updated_on = db.Column(db.DateTime(timezone=True),  default=datetime.utcnow(), onupdate=datetime.utcnow(),
                            supports_json = True, supports_dict= True)
 
+    asset_rel = db.relationship(Asset,
+        backref=db.backref('maintenance_records', lazy=True),supports_json = True)
+
 class installs(db.Model):
     __tablename__= 'partinstalls'
 
@@ -85,4 +88,31 @@ class installs(db.Model):
     partname = db.Column(db.String(100), default="")
     created_on = db.Column(db.DateTime(timezone=True), default=datetime.utcnow())
     updated_on = db.Column(db.DateTime(timezone=True),  default=datetime.utcnow(), onupdate=datetime.utcnow())
+
+    # maintRec_rel = db.relationship(maintRecord,
+    #     backref=db.backref('partinstalls', lazy=True), supports_json = True)
+
+class webhook_subs(db.Model):
+    __tablename__ = 'strava_webhook_subscriptions'
+
+    id = db.Column(db.Integer, primary_key=True)
+    sub_id = db.Column(db.BigInteger)
+    activesub = db.Column(db.String(10))
+    verify_token = db.Column(db.String(15))
+
+class athletes(db.Model):
+    __tablename__ = 'strava_athletes'
+
+    id = db.Column(db.Integer, primary_key=True)
+    athlete_id = db.Column(db.Integer)
+    scopes = db.Column(db.String)
+    sub_id = db.Column(Integer, db.ForeignKey("strava_webhook_subscriptions.id"))
+    refresh_token = db.Column(db.String)
+    access_token_exp = db.Column(db.DateTime)
+    athlete_name = db.Column(db.String)
+    access_token = db.Column(db.BigInteger)
+
+    # Relationship with webhook subscriptions table
+    sub_rel = db.relationship(webhook_subs, backref="strava_athletes")
+
 

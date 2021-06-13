@@ -3,40 +3,29 @@ from functools import wraps
 from application import login_manager
 from flask_login import current_user
 from application.WebAppProjects.MaintenanceTracking import models
-from application.util.flaskLogin.models import User
+from application.util.APIAuth import user_required
 from sqlalchemy import and_, or_
 from application import app, db, logger, apiPrefix
 from flask import jsonify, request, Response, abort
-from application.util.ErrorHandling import exception_handler
 import json
 import re
 from application.util.ErrorHandling import exception_handler
 
 
-# Pluggable views
-# https://flask.palletsprojects.com/en/2.0.x/views/
-# see https://stackoverflow.com/a/19376449
-# for using flask login with pluggable view
+
 
 # see https://stackoverflow.com/questions/31669864/date-in-flask-url
 # for using date range in url
 
-def user_required(f):
+
+class stravaRequest(MethodView):
     """
-
-    @param f:
-    @return:
+    Process all records between two provided dates and provide a summary of information.
     """
-
-    @wraps(f)
-    def decorator(*args, **kwargs):
-        if not current_user.is_authenticated():
-            return login_manager.unauthorized()
-            # or, if you're not using Flask-Login
-            # return redirect(url_for('login_page'))
-        return f(*args, **kwargs)
-
-    return decorator
+    pass
+    # Get Strava credentials
+    # req = request.getjson()
+    # Get username from session
 
 
 class apiMethod(MethodView):
@@ -50,7 +39,7 @@ class apiMethod(MethodView):
     # see https://stackoverflow.com/questions/59272322/flask-methodview-with-decorators-is-giving-error
     # Add decorators to rest API
     ###TODO enable flask login required
-    decorators = [exception_handler]
+    decorators = [exception_handler, user_required]
 
     ## Helper Functions
 
@@ -163,21 +152,26 @@ class apiMethod(MethodView):
         POST request view, inserts the requested part install record into the database.
         @return: Response Code
         """
-        try:
-            content = request.get_json(force=True)
-            # Iterate over request dict keys and values
-            for key, value in content.items():
-                # Check if object has an attribute matching the content update key
-                if hasattr(self.dbModel(), key):
-                    # Set the object attribute value based on the key:value pair, this allows for updating only
-                    # certain values within the object
-                    setattr(self.dbModel(), key, value)
-            db.session.add(self.dbModel())
-            # Commit updates to database
-            db.session.commit()
-            return Response(status=201)
-        except:
-            return Response(status=422)
+        # content = request.get_json(force=True)
+        # logger.debug(content)
+        # Test SQLAthanor de-serialization:
+        # Turn request JSON dict into a model, drop extra keys
+        deSerialModel = self.dbModel.new_from_dict(request.get_json(),
+                                                       error_on_extra_keys = False,
+                                                       drop_extra_keys = True)
+        # Iterate over request dict keys and values
+        # for key, value in content.items(content):
+        #     # Check if object has an attribute matching the content update key
+        #     if hasattr(self.dbModel(), key):
+        #         # Set the object attribute value based on the key:value pair, this allows for updating only
+        #         # certain values within the object
+        #         setattr(self.dbModel(), key, value)
+        # db.session.add(self.dbModel())
+        db.session.add(deSerialModel)
+        # Commit updates to database
+        db.session.commit()
+        logger.debug(f"Added a new record to {self.dbModel}: \n {deSerialModel.to_dict()}")
+        return Response(status=201)
 
     def delete(self, rec_id):
         """

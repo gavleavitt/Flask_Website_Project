@@ -56,7 +56,6 @@ handler.setFormatter(formatter)
 # Attach logging handler to application
 application.logger.addHandler(handler)
 application.logger.debug("Python Flask debugger active")
-
 # set database to use SQLAlchemy
 # db = SQLAlchemy()
 # Setup SQLAthanor

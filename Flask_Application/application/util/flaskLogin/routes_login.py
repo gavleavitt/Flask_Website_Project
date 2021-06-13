@@ -33,6 +33,7 @@ def login():
             return redirect(url_for('flasklogin_BP.login'))
         # Login succeeded, set active and set remember me status
         login_user(user, remember=form.remember_me.data)
+        logger.debug("User has been logged in!")
         return redirect(url_for('mainSite_BP.index'))
     return render_template('login.html', title='Sign In', form=form)
 
