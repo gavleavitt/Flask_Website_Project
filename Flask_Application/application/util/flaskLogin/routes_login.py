@@ -19,15 +19,20 @@ def login():
     if request.method == "POST":
         logger.debug("login request!")
     if current_user.is_authenticated:
+        logger.debug("User is already authenticated")
         return redirect(url_for('mainSite_BP.index'))
     # Get login form details
     form = LoginForm()
+    # logger.debug(dir(form))
+    # logger.debug(form.errors)
+    # logger.debug(form.data)
     # Validate login form when submitted
     if form.validate_on_submit():
         # Get submitted username
         user = User.query.filter_by(username=form.username.data).first()
         # Check if username exists in DB, if so hash it and compared to stored hash
         if user is None or not user.check_password(form.password.data):
+            logger.debug("User login failed!!")
             # Login failed, flash error message and reload login page
             flash('Invalid username or password')
             return redirect(url_for('flasklogin_BP.login'))
@@ -35,6 +40,7 @@ def login():
         login_user(user, remember=form.remember_me.data)
         logger.debug("User has been logged in!")
         return redirect(url_for('mainSite_BP.index'))
+    logger.debug("Form didnt validate!")
     return render_template('login.html', title='Sign In', form=form)
 
 

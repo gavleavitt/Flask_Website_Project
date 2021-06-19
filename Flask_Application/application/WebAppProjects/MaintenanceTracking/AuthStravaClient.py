@@ -1,10 +1,8 @@
-from application.pythonLib.stravalib.client import Client
 import os
-import time
-from application import Session
-from application.WebAppProjects.StravaActivityViewer.modelsStrava import athletes
+from application.pythonLib.stravalib.client import Client
 
-def getAuth(athleteID=7170058):
+
+def getAuth(userID):
     """
     Loads Strava client authentication details from Postgres and creates a authorized client instance.
     Checks if access token is expired, if so it is refreshed and updated.
@@ -13,10 +11,14 @@ def getAuth(athleteID=7170058):
     -------
     client. Stravalib model client instance. Contains access token to Strava API for the athlete, ID is hard coded for now.
     """
-    # Build empty stravalib client instance
+    # Get users access token, if not token then user hasnt activated Strava connection
+    accessToken = 2
+
+    # Build empty stravalib client instance to populate
     client = Client()
     # create db session
-    session = Session()
+
+
     # Hard coded athlete id
     # athleteID = 7170058
     authDict = {}

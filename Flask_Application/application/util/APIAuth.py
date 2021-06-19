@@ -16,7 +16,7 @@ def user_required(f):
 
     @wraps(f)
     def decorator(*args, **kwargs):
-        logger.debug(current_user)
+        # logger.debug(current_user)
         if not current_user.is_authenticated:
             logger.debug(f"Not logged in!")
             return login_manager.unauthorized()

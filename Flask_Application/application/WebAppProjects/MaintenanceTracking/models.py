@@ -4,11 +4,18 @@ from sqlalchemy.sql import func
 # from application.util.flaskLogin.models import User
 from datetime import datetime
 from sqlalchemy.sql import expression
-
+from flask_login import current_user
+from application import logger
 # flask-sqlalchemy server default: https://stackoverflow.com/a/44787117
 #https://stackoverflow.com/questions/13370317/sqlalchemy-default-datetime
 
+# def setUserID():
+#     # logger.debug(current_user.id)
+#     logger.debug("inside deserial!")
+#     # return int(current_user.id)
+#     pass
 class Owner(db.Model):
+
     __tablename__ = 'users'
     __table_args__ = {'extend_existing': True}
 
@@ -20,6 +27,7 @@ class Owner(db.Model):
     created_on = db.Column(db.DateTime(timezone=True), default=datetime.utcnow())
     updated_on = db.Column(db.DateTime(timezone=True),  default=datetime.utcnow(), onupdate=datetime.utcnow())
     assets_rel = db.relationship("Asset", backref="Owner")
+
 
 class Asset(db.Model):
     __tablename__ = 'assets'
@@ -42,10 +50,11 @@ class Asset(db.Model):
                            supports_json = True, supports_dict= True)
     updated_on = db.Column(db.DateTime(timezone=True),  default=datetime.utcnow(), onupdate=datetime.utcnow(),
                            supports_json = True, supports_dict= True)
+    stravaid = db.Column(db.Integer())
     # create relationship
     ownerfk = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     owner_rel = db.relationship(Owner,
-        backref=db.backref('assets', lazy=True),supports_json = True)
+        backref=db.backref('assets', lazy=True),supports_json = False)
 
 class maintRecord(db.Model):
     __tablename__= "maintenance_records"
@@ -65,9 +74,14 @@ class maintRecord(db.Model):
                            supports_json = True, supports_dict= True)
     updated_on = db.Column(db.DateTime(timezone=True),  default=datetime.utcnow(), onupdate=datetime.utcnow(),
                            supports_json = True, supports_dict= True)
-
+    ownerfk = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    # create relationships
     asset_rel = db.relationship(Asset,
         backref=db.backref('maintenance_records', lazy=True),supports_json = True)
+
+    owner_rel = db.relationship(Owner,
+        backref=db.backref('assets', lazy=True),supports_json = False)
+
 
 class installs(db.Model):
     __tablename__= 'partinstalls'
@@ -88,7 +102,11 @@ class installs(db.Model):
     partname = db.Column(db.String(100), default="")
     created_on = db.Column(db.DateTime(timezone=True), default=datetime.utcnow())
     updated_on = db.Column(db.DateTime(timezone=True),  default=datetime.utcnow(), onupdate=datetime.utcnow())
+    ownerfk = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
 
+    # create relationship
+    owner_rel = db.relationship(Owner,
+        backref=db.backref('assets', lazy=True),supports_json = False)
     # maintRec_rel = db.relationship(maintRecord,
     #     backref=db.backref('partinstalls', lazy=True), supports_json = True)
 
@@ -111,8 +129,10 @@ class athletes(db.Model):
     access_token_exp = db.Column(db.DateTime)
     athlete_name = db.Column(db.String)
     access_token = db.Column(db.BigInteger)
-
+    userfk = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     # Relationship with webhook subscriptions table
     sub_rel = db.relationship(webhook_subs, backref="strava_athletes")
+    # Relationship with owner/users
+    user_rel = db.relationship(Owner,backref=db.backref('assets', lazy=True))
 
 

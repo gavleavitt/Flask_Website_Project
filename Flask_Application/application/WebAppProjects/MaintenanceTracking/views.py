@@ -10,10 +10,11 @@ from flask import jsonify, request, Response, abort
 import json
 import re
 from application.util.ErrorHandling import exception_handler
-
-
-
-
+from application.pythonLib.stravalib.client import Client
+import time
+import os
+from application.pythonLib.stravalib.client import Client
+from datetime import datetime
 # see https://stackoverflow.com/questions/31669864/date-in-flask-url
 # for using date range in url
 
@@ -22,10 +23,60 @@ class stravaRequest(MethodView):
     """
     Process all records between two provided dates and provide a summary of information.
     """
-    pass
-    # Get Strava credentials
-    # req = request.getjson()
-    # Get username from session
+
+    def get(self):
+        # Get request date arguments
+        #TODO: Consider getting asset, maintenance, or part install PK from request, then using this to query database
+        # to get the time since maintenance
+        dateStart = datetime.fromisoformat(request.args.get("startdate"))
+        dateEnd = datetime.fromisoformat(request.args.get('endDate'))
+        # Get request asset ID
+        assetID = request.args.get("AssetID")
+        # Get authorized client
+        client = self.getAuthedClient()
+        if not client:
+            # Auth process failed, user has not activated Strava on application through OAuth
+            return Response(status=401)
+        # Query all activities between dates
+        activities = client.get_activities(after=dateStart, before=dateEnd)
+        # Empty list to hold activities
+        assetList = []
+        # Iterate over activities, extract just the activities matching the asset
+        for i in activities:
+            if i.gear_id == assetID:
+                assetList.append(i)
+        logger.debug(assetList)
+
+    def getAuthedClient(self):
+        # Get user's Strava API token details from relationship
+        authDetails = models.athletes.user_rel.query.filter(models.Owner.id == current_user.id).first()
+        if authDetails:
+            # Build empty stravalib client instance to populate
+            client = Client()
+            # Check if the access token has expired
+            if time.time() > authDetails.access_token_exp:
+                # Access token has expired, refresh
+                refresh_response = client.refresh_access_token(client_id=int(os.environ.get('STRAVA_CLIENT_ID')),
+                                                               client_secret=os.environ.get('STRAVA_CLIENT_SECRET'),
+                                                               refresh_token=authDetails.refresh_token)
+                # Update access token and expiration date
+                update = models.athletes.user_rel.query.filter(models.Owner.id == current_user.id).update({
+                    models.athletes.access_token: refresh_response['access_token'],
+                    models.athletes.access_token_exp: refresh_response['expires_at']})
+                # Commit updates to database
+                db.session.commit()
+                # Set Strava auth details
+                client.access_token = refresh_response['access_token']
+                client.refresh_token = authDetails.refresh_token
+                client.token_expires_at = refresh_response['expires_at']
+            else:
+                # Access token is fresh, set details
+                client.access_token = authDetails.access_token
+                client.refresh_token = authDetails.refresh_token
+                client.token_expires_at = authDetails.access_token_exp
+            return client
+
+
 
 
 class apiMethod(MethodView):
@@ -35,7 +86,9 @@ class apiMethod(MethodView):
 
     def __init__(self):
         self.dbModel = self.model
-
+        # Get the PK for the current user,
+        # TODO: test how this works with different accounts logged in at once
+        self.userID = current_user.id
     # see https://stackoverflow.com/questions/59272322/flask-methodview-with-decorators-is-giving-error
     # Add decorators to rest API
     ###TODO enable flask login required
@@ -123,50 +176,48 @@ class apiMethod(MethodView):
         else:
             # Filter by record ID and idField given
             query = self.dbModel.query.filter((getattr(self.dbModel, self.idField)) == rec_id)
+        # Get current user ID from session
+        query = query.filter(self.dbModel.ownerfk == self.userID)
         # Get results of query and serialize them into json response
         return self.formatMultiResponse(query)
 
-    def postData(self, model, content):
-        """
-        Converts POST data into a create/insert call on the database. Each key in the content dictionary is checked
-        against the model before being used to set attributes.
-        @param model:
-        @param content: Dict.
-        @return: HTTP Response 201.
-        """
-        newRec = model()
-        # Iterate over request dict keys and values
-        for key, value in content.items():
-            # Check if object has an attribute matching the content update key
-            if hasattr(newRec, key):
-                # Set the object attribute value based on the key:value pair, this allows for updating only
-                # certain values within the object
-                setattr(newRec, key, value)
-        db.session.add(newRec)
-        # Commit updates to database
-        db.session.commit()
-        return Response(status=201)
+    # def postData(self, model, content):
+    #     """
+    #     Converts POST data into a create/insert call on the database. Each key in the content dictionary is checked
+    #     against the model before being used to set attributes.
+    #     @param model:
+    #     @param content: Dict.
+    #     @return: HTTP Response 201.
+    #     """
+    #     newRec = model()
+    #     # Iterate over request dict keys and values
+    #     for key, value in content.items():
+    #         # Check if object has an attribute matching the content update key
+    #         if hasattr(newRec, key):
+    #             # Set the object attribute value based on the key:value pair, this allows for updating only
+    #             # certain values within the object
+    #             setattr(newRec, key, value)
+    #     db.session.add(newRec)
+    #     # Commit updates to database
+    #     db.session.commit()
+    #     return Response(status=201)
 
     def post(self):
         """
-        POST request view, inserts the requested part install record into the database.
+        POST request view, inserts the requested record into the database.
         @return: Response Code
         """
         # content = request.get_json(force=True)
         # logger.debug(content)
         # Test SQLAthanor de-serialization:
         # Turn request JSON dict into a model, drop extra keys
+        # logger.debug(current_user.id)
         deSerialModel = self.dbModel.new_from_dict(request.get_json(),
                                                        error_on_extra_keys = False,
                                                        drop_extra_keys = True)
-        # Iterate over request dict keys and values
-        # for key, value in content.items(content):
-        #     # Check if object has an attribute matching the content update key
-        #     if hasattr(self.dbModel(), key):
-        #         # Set the object attribute value based on the key:value pair, this allows for updating only
-        #         # certain values within the object
-        #         setattr(self.dbModel(), key, value)
-        # db.session.add(self.dbModel())
+        # Set ownerFK value based on session user id
+        deSerialModel.ownerfk = self.userID
+        # logger.debug(deSerialModel.ownerfk)
         db.session.add(deSerialModel)
         # Commit updates to database
         db.session.commit()
@@ -175,15 +226,16 @@ class apiMethod(MethodView):
 
     def delete(self, rec_id):
         """
-        Delete request view, allows deleting a single record.
+        Delete request view, allows deleting a single record owned by the current session user.
         @param rec_id: Int. Asset record to be returned
         @return: Response Code.
         """
         if rec_id:
-            self.dbModel.query.filter_by(id=rec_id).delete()
-        else:
-            return Response(status=404)
+            # self.dbModel.query.filter_by(id=rec_id).delete()
+            self.dbModel.query.filter(self.dbModel.id == rec_id, self.dbModel.ownerfk == self.userID).delete()
+        return Response(status=404)
 
+    #TODO: Change to Patch request instead?
     def put(self, rec_id):
         """
         Executes an UPDATE request on the input SQLAlchemy Model.
@@ -194,7 +246,7 @@ class apiMethod(MethodView):
         # Get content
         content = request.get_json(force=True)
         # Query record
-        query = self.model.query.filter_by(id=rec_id).first()
+        query = self.model.query.filter(self.model.id == rec_id, self.model.ownerfk == self.userID).first()
         # Check if any records match
         if query:
             # Iterate over request dict keys and values
