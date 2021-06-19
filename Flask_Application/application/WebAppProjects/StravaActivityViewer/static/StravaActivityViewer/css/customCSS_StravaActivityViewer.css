@@ -57,7 +57,10 @@ html{
 }
 
 .material-icons{
-  font-size: 20px;
+  font-size: 25px;
+  color: #555;
+  border-right: 1px solid #aaa;
+  border-bottom: 1px solid #aaa;
 }
 /* #strava-display-container {
   grid-row: 2/4;
@@ -675,7 +678,9 @@ This targets only fine pointers (mouse) for hover behavior, this prevents the ho
     top:2px;
     left:2px;
     z-index: 2;
-    background-color: #e6e6e6
+    background-color: #e6e6e6;
+    padding: 0px !important;
+    height: 26px;
   }
   .map-panel{
     /* grid-column: 1/8; */

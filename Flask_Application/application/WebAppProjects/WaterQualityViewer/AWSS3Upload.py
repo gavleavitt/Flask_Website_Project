@@ -47,19 +47,10 @@ def uploadToS3(fileName, filePath):
     conn = connectToS3()
 
     try:
-        # Add in-memory buffer csv to bucket
-        # I think using getvalue and put_object on StringIO solves an issue with the StringIO object not being
-        # compatible with other boto3 object creation methods see:
-        # https://stackoverflow.com/a/45700716
-        # https://stackoverflow.com/a/60293770
-        # conn.put_object(Body=memCSV.getvalue(), Bucket=bucket, Key=fileName, ContentType='application/vnd.ms-excel')
-        application.logger.debug(f"Uploading PDF {fileName} to AWS S3")
-        conn.put_object(Body=filePath, Bucket=bucket, Key=fileName)
+        application.logger.debug(f"Uploading PDF {fileName} located at {filePath} to AWS S3")
+        # conn.put_object(Body=filePath, Bucket=bucket, Key=fileName, ContentType="application/pdf")
+        conn.upload_file(Filename=filePath, Bucket=bucket, Key=fileName)
         application.logger.debug(f"PDF {fileName} has been uploaded to AWS S3")
     except Exception as e:
         application.logger.error(f"Upload water quality to S3 bucket failed in the error: {e}")
         errorEmail.sendErrorEmail(script="UploadWaterQualityToS3Bucket", exceptiontype=e.__class__.__name__, body=e)
-    finally:
-        pass
-        # Close in-memory buffer file, removing it from memory
-        # filePath.close()

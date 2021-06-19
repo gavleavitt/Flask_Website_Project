@@ -248,7 +248,7 @@ def cleanText(textList):
         elif item == "<10":
             item = "0"
         elif ">" in item:
-            item = item.replace(">","")
+            item = item.replace(">","").replace(",","")
         elif item is not None:
             item = unicodedata.normalize("NFKD", item).replace("\n", "").replace("‐", "-").replace(",", "")
             if item == 'Results not available':
@@ -324,6 +324,7 @@ def genReSampleDict(tab, pdfDate):
             # print(f"Testing {tab[row][0]}")
             resampRow = tab[row]
             resampRow[0] = resampRow[0].split(' Re')[0].rstrip(" ")
+            logger.debug(f"Adding {resampRow[0]} to resample beach list")
             # print(f"Adding {resamprow[0]} to resample beach list")
             # Add to resample beach list
             resampBeaches.append(resampRow[0])
@@ -419,11 +420,12 @@ def populateDict(tab, beachDict, resample):
     # print("Inside pop dict func")
     for row in range(1, len(tab)):
         # print(f"Working on row {tab[row]}")
+        logger.debug(f"Processing {tab[row]}")
         # For every row in the table, iterate over the columns, ignoring the first column (beach name),
         # since this is the key value. Use the column index to call on the column names list, which acts as a lookup
         # for the dictionary key value (column name) to be added to the 2nd level dictionary
         for i in range(1, (len(tab[row]))):
-            # print(f"Filling key {beachDict[tab[row][0]][col[i-1]]} with value {tab[row][i]}")
+            logger.debug(f"Filling key {beachDict[tab[row][0]][col[i-1]]} with value {tab[row][i]}")
             # col[i-1] is needed since the loop is starting at index 1 to avoid iterating over the beach name in the
             # original list (table), this index is needed to grab the proper column name(key) starting at index 0,
             # so its decreased by 1 to maintain proper index location for filling in data
