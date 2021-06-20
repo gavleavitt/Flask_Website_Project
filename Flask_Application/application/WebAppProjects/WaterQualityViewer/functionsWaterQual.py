@@ -40,6 +40,23 @@ def makeNull(beachDict):
         if not beachDict[i]["Total Coliform Results (MPN*)"]:
             beachDict.pop(i, None)
 
+def makeZero(beachDict):
+    """
+    Iterates over nested dictionary values and turns any "<10" values to "0" and removes "," from any values. This is a
+    patch quick fix, this function should not be needed as this process already occurs prior in the script flow,
+    however for some reason it is not being performed properly when processing a resampled PDF. This will need to be
+    revisited.
+
+    @param beachDict: Nested dict of ocean water quality results
+    @return: Nothing. Mutates input dict.
+    """
+    for i in beachDict.keys():
+        for k in beachDict[i]:
+            if beachDict[i][k] == "<10":
+                beachDict[i][k] = "0"
+            elif "," in beachDict[i][k]:
+                beachDict[i][k] = beachDict[i][k].replace(",","")
+
 def recentRecord(records):
     maxRec = 0
     for i in records:
@@ -183,11 +200,9 @@ def handlePDFStatus(pdfStatus, pdfLoc, hashedText, pdfDict, pdfName):
             application.logger.debug("Cloud upload failed, trying to send email report")
             application.logger.debug(e)
             errorEmail.sendErrorEmail(script="UploadtoCloud", exceptiontype=e.__class__.__name__, body=e)
-        # print("Finished with local PDF, removing it from system")
         os.remove(pdfLoc)
     if checkResamp(pdfDict['cleanedtext']) == True:
         # PDF contains re-sample results
-        # print("This PDF contains re-sampled results")
         application.logger.debug("PDF contains re-sampled results, generating resample dict")
         # Create dictionary with re-sampled and data fill-ins
         beachDict = genReSampleDict(pdfDict['cleanedtext'], pdfDict['pdfDate'])
@@ -217,6 +232,8 @@ def handlePDFStatus(pdfStatus, pdfLoc, hashedText, pdfDict, pdfName):
     application.logger.debug("Getting hash id")
     # Mutate beachDict to replace empty strings with None values
     makeNull(beachDict)
+    # Mutate beachDict to find "<10" values and replace them with "0", this is a quick fix and shouldn't be needed
+    makeZero(beachDict)
     # Insert MD5 hash into Postgres
     hashid = DBQueriesWaterQuality.insmd5(hashedText, pdfDict['pdfDate'], pdfName)
     application.logger.debug(f"Hash id is {hashid}, inserting into postgres")
@@ -310,6 +327,9 @@ def genReSampleDict(tab, pdfDate):
     Nested dictionary containing re-sampled records and filled-in records, with beach names as keys
     """
     application.logger.debug("Generating beach dictionary with resampled and data fill-ins")
+    # Pass the resample list back through the cleantext function, for some reason it doesnt appear to be processed
+    # properly
+    # tab = cleanText(tab)
     resampBeaches = []
     combinedBeaches = []
     resampTab = [tab[0]]
@@ -325,7 +345,6 @@ def genReSampleDict(tab, pdfDate):
             resampRow = tab[row]
             resampRow[0] = resampRow[0].split(' Re')[0].rstrip(" ")
             logger.debug(f"Adding {resampRow[0]} to resample beach list")
-            # print(f"Adding {resamprow[0]} to resample beach list")
             # Add to resample beach list
             resampBeaches.append(resampRow[0])
             # Add to resample table
@@ -425,7 +444,7 @@ def populateDict(tab, beachDict, resample):
         # since this is the key value. Use the column index to call on the column names list, which acts as a lookup
         # for the dictionary key value (column name) to be added to the 2nd level dictionary
         for i in range(1, (len(tab[row]))):
-            logger.debug(f"Filling key {beachDict[tab[row][0]][col[i-1]]} with value {tab[row][i]}")
+            logger.debug(f"Filling key {beachDict[tab[row][0]][col[i - 1]]} with value {tab[row][i]}")
             # col[i-1] is needed since the loop is starting at index 1 to avoid iterating over the beach name in the
             # original list (table), this index is needed to grab the proper column name(key) starting at index 0,
             # so its decreased by 1 to maintain proper index location for filling in data
