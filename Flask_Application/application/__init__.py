@@ -126,7 +126,8 @@ register_api(view=MaintRecAPI, endpoint='maintRec_api', url=f'{maintAPIPrefix}/m
 register_api(view=PartInstallRecAPI, endpoint='partRec_api', url=f'{maintAPIPrefix}/partinstall/', pk='rec_id')
 # Strava distance API
 # register_api(view=stravaRequest, endpoint='stravadistance_api', url=f'{maintAPIPrefix}/stravadistance/', pk='rec_id')
-app.add_url_rule(f'{maintAPIPrefix}/stravadistance/', view_func=stravaRequest, methods=['GET',])
+stravaRequestView = stravaRequest.as_view('stravaDistance_api')
+app.add_url_rule(f'{maintAPIPrefix}/stravadistance/', view_func=stravaRequestView, methods=['GET',])
 
 # asset_view = exception_handler(AssetRecAPI.as_view('asset_api'))
 # # Attach url routes and methods to the view function and register them with the application

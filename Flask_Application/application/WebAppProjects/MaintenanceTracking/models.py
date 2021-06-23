@@ -26,8 +26,8 @@ class Owner(db.Model):
     role = db.Column(String(255))
     created_on = db.Column(db.DateTime(timezone=True), default=datetime.utcnow())
     updated_on = db.Column(db.DateTime(timezone=True),  default=datetime.utcnow(), onupdate=datetime.utcnow())
-    assets_rel = db.relationship("Asset", backref="Owner")
-
+    assets_rel = db.relationship("Asset", backref="users")
+    athlete_rel = db.relationship("athletes", backref="users")
 
 class Asset(db.Model):
     __tablename__ = 'assets'
@@ -53,8 +53,8 @@ class Asset(db.Model):
     stravaid = db.Column(db.Integer())
     # create relationship
     ownerfk = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    owner_rel = db.relationship(Owner,
-        backref=db.backref('assets', lazy=True),supports_json = False)
+    # owner_rel = db.relationship(Owner,
+    #     backref=db.backref('assets', lazy=True),supports_json = False)
 
 class maintRecord(db.Model):
     __tablename__= "maintenance_records"
@@ -79,8 +79,8 @@ class maintRecord(db.Model):
     asset_rel = db.relationship(Asset,
         backref=db.backref('maintenance_records', lazy=True),supports_json = True)
 
-    owner_rel = db.relationship(Owner,
-        backref=db.backref('assets', lazy=True),supports_json = False)
+    # owner_rel = db.relationship(Owner,
+    #     backref=db.backref('assets', lazy=True),supports_json = False)
 
 
 class installs(db.Model):
@@ -105,8 +105,8 @@ class installs(db.Model):
     ownerfk = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
 
     # create relationship
-    owner_rel = db.relationship(Owner,
-        backref=db.backref('assets', lazy=True),supports_json = False)
+    # owner_rel = db.relationship(Owner,
+    #     backref=db.backref('assets', lazy=True),supports_json = False)
     # maintRec_rel = db.relationship(maintRecord,
     #     backref=db.backref('partinstalls', lazy=True), supports_json = True)
 
@@ -133,6 +133,6 @@ class athletes(db.Model):
     # Relationship with webhook subscriptions table
     sub_rel = db.relationship(webhook_subs, backref="strava_athletes")
     # Relationship with owner/users
-    user_rel = db.relationship(Owner,backref=db.backref('assets', lazy=True))
+    user_rel = db.relationship('Owner', backref=db.backref('strava_athletes', lazy=True))
 
 

@@ -28,29 +28,41 @@ class stravaRequest(MethodView):
         # Get request date arguments
         #TODO: Consider getting asset, maintenance, or part install PK from request, then using this to query database
         # to get the time since maintenance
-        dateStart = datetime.fromisoformat(request.args.get("startdate"))
-        dateEnd = datetime.fromisoformat(request.args.get('endDate'))
+        dateStart = datetime.fromisoformat(request.args.get("StartDate"))
+        # dateEnd = datetime.fromisoformat(request.args.get('endDate'))
         # Get request asset ID
         assetID = request.args.get("AssetID")
         # Get authorized client
         client = self.getAuthedClient()
         if not client:
+            logger.debug(f"Authentication of user {current_user.id} failed, has the user activated Strava?")
             # Auth process failed, user has not activated Strava on application through OAuth
             return Response(status=401)
         # Query all activities between dates
-        activities = client.get_activities(after=dateStart, before=dateEnd)
+        # activities = client.get_activities(after=dateStart, before=dateEnd)
+        activities = client.get_activities(after=dateStart)
         # Empty list to hold activities
         assetList = []
         # Iterate over activities, extract just the activities matching the asset
         for i in activities:
-            if i.gear_id == assetID:
-                assetList.append(i)
+            # Check if gear ID matches, Strava adds a letter to the start of the ID, remove it, if no gear was added
+            # then a None is returned
+            logger.debug(dir(i))
+            quit()
+            if i.gear_id:
+                if int(i.gear_id[1:]) == assetID:
+                    assetList.append(i)
         logger.debug(assetList)
+        return Response(status=200)
 
     def getAuthedClient(self):
         # Get user's Strava API token details from relationship
-        authDetails = models.athletes.user_rel.query.filter(models.Owner.id == current_user.id).first()
+        authQuery = models.athletes.query. \
+            filter(models.athletes.userfk == current_user.id)
+        authDetails = authQuery.first()
         if authDetails:
+            logger.debug(f"Started building authentication client for user {current_user.id} with the Strava user ID:"
+                         f"{authDetails.athlete_id}")
             # Build empty stravalib client instance to populate
             client = Client()
             # Check if the access token has expired
@@ -60,7 +72,7 @@ class stravaRequest(MethodView):
                                                                client_secret=os.environ.get('STRAVA_CLIENT_SECRET'),
                                                                refresh_token=authDetails.refresh_token)
                 # Update access token and expiration date
-                update = models.athletes.user_rel.query.filter(models.Owner.id == current_user.id).update({
+                authQuery.update({
                     models.athletes.access_token: refresh_response['access_token'],
                     models.athletes.access_token_exp: refresh_response['expires_at']})
                 # Commit updates to database
