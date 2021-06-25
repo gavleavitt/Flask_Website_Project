@@ -54,7 +54,7 @@ def makeZero(beachDict):
         for k in beachDict[i]:
             if beachDict[i][k] == "<10":
                 beachDict[i][k] = "0"
-            elif not isinstance(beachDict[i][k], int):
+            elif isinstance(beachDict[i][k], str):
                 if "," in beachDict[i][k]:
                     beachDict[i][k] = beachDict[i][k].replace(",","")
 
