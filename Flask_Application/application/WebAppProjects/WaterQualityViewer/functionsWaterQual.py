@@ -54,8 +54,9 @@ def makeZero(beachDict):
         for k in beachDict[i]:
             if beachDict[i][k] == "<10":
                 beachDict[i][k] = "0"
-            elif "," in beachDict[i][k]:
-                beachDict[i][k] = beachDict[i][k].replace(",","")
+            elif not isinstance(beachDict[i][k], int):
+                if "," in beachDict[i][k]:
+                    beachDict[i][k] = beachDict[i][k].replace(",","")
 
 def recentRecord(records):
     maxRec = 0
