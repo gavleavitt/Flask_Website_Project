@@ -268,7 +268,8 @@ def cleanText(textList):
         elif ">" in item:
             item = item.replace(">","").replace(",","")
         elif item is not None:
-            item = unicodedata.normalize("NFKD", item).replace("\n", "").replace("‐", "-").replace(",", "")
+            item = unicodedata.normalize("NFKD", item).replace("\n", "").replace("‐", "-").replace(",", "").\
+                replace("*", "")
             if item == 'Results not available':
                 item = None
         # print(f"cleaned item is {item}")
