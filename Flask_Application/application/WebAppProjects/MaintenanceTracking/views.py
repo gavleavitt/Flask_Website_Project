@@ -15,6 +15,7 @@ import time
 import os
 from application.pythonLib.stravalib.client import Client
 from datetime import datetime
+from datetime import timedelta
 # see https://stackoverflow.com/questions/31669864/date-in-flask-url
 # for using date range in url
 
@@ -40,69 +41,56 @@ class stravaMaintRequest(MethodView):
     """
 
     def get(self):
-        # Get request date arguments
-        #TODO: Consider getting asset, maintenance, or part install PK from request, then using this to query database
-        # to get the time since maintenance
-
         # dateEnd = datetime.fromisoformat(request.args.get('endDate'))
-        # Get pk of maintenance record
-        maintID = request.args.get('maintID')
         # Get request asset ID
         assetID = request.args.get("AssetID")
         # Get current user ID
         userID = current_user.id
-        # q = session.query(User).join(
-        #     subq, User.id == subq.c.user_id
-        # )
+        # Result dictionary that contains ride summary data
+        resDict = {"totalDist": 0, "totalMovingTimeSeconds": 0, "totalElevGain": 0, "count": 0, "secondsSinceMaint":0,
+                  "rideIDs": []}
+        # Build base query, will return summarized information about all rides by the user for the given assetID
         assetQ = models.strava_activities.query.\
             join(models.Asset, models.strava_activities.gear_id == models.Asset.stravaid). \
             join(models.Owner, models.Owner.id == models.Asset.ownerfk). \
             join(models.maintRecord, models.maintRecord.assetfk == models.Asset.id).\
             filter(models.Owner.id == userID).\
             filter(models.Asset.id == assetID)
-        # assetQ = models.strava_activities.query.\
-        #     join(models.strava_activities.gear_id, models.Asset.stravaid).\
-        #     join(models.Asset.ownerfk, models.Owner.id).\
-        #     join(models.Asset.id, models.maintRecord.assetfk).\
-        #     filter(models.Owner.id == userID).\
-        #     filter(models.Asset.id == assetID)
+        # Check if the optional startDate parameter was provided, if so return summarized information about rides
+        # since after the given date
         if request.args.get("StartDate"):
             dateStart = datetime.fromisoformat(request.args.get("StartDate"))
+            # Get seconds since startdate and current time
+            secondsDiff = int((datetime.utcnow() - dateStart).total_seconds())
+            resDict["secondsSinceMaint"] = secondsDiff
             assetQ = assetQ.filter(models.strava_activities.start_date >= dateStart)
-        # Get pk of maintenance record
+        # check if the optional maintenance record ID parameter is given, if so provide summarized info about all rides
+        # since the given maintenance record
         elif request.args.get("maintID"):
             maintID = request.args.get('maintID')
-            ## TODO: Query all activitiy records since the mainttime of the given maintenance record
             # Create a subquery to get the maintenance date of the given maintenanceID
-            # assetQ = assetQ.filter(models.maintRecord.id == maintID)
-            assetQ = assetQ.filter
-        count = 0
+            # maintQ = models.maintRecord.query.filter(models.maintRecord.id == maintID).cte("cte")
+            # Use the CTE query to filter by all rides since the maintenance time
+            # assetQ = assetQ.filter(models.strava_activities.start_date >= maintQ.c.mainttime)
+            maintQ = models.maintRecord.query.filter(models.maintRecord.id == maintID).first().mainttime
+            assetQ = assetQ.filter(models.strava_activities.start_date >= maintQ)
+            resDict["secondsSinceMaint"] = int((datetime.utcnow() - maintQ).total_seconds())
         for i in assetQ:
-            count += 1
-            print(i.distance)
-        logger.debug(count)
+            resDict["totalDist"] += i.distance
+            # move_time is a timedelta object type, convert to seconds
+            resDict["totalMovingTimeSeconds"] += i.moving_time.seconds
+            resDict["count"] += 1
+            resDict["totalElevGain"] += i.total_elevation_gain
+            resDict["rideIDs"].append(i.actID)
+
         # Get authorized client
         # client = self.getAuthedClient()
         # if not client:
         #     logger.debug(f"Authentication of user {current_user.id} failed, has the user activated Strava?")
         #     # Auth process failed, user has not activated Strava on application through OAuth
         #     return Response(status=401)
-        # Query all activities between dates
-        # activities = client.get_activities(after=dateStart, before=dateEnd)
-        # activities = client.get_activities(after=dateStart)
         # # Empty list to hold activities
-        # assetList = []
-        # # Iterate over activities, extract just the activities matching the asset
-        # for i in activities:
-        #     # Check if gear ID matches, Strava adds a letter to the start of the ID, remove it, if no gear was added
-        #     # then a None is returned
-        #     logger.debug(i.__dict__)
-        #     quit()
-        #     if i.gear_id:
-        #         if int(i.gear_id[1:]) == assetID:
-        #             assetList.append(i)
-        # logger.debug(assetList)
-        return Response(status=200)
+        return resDict
 
     def getAuthedClient(self):
         # Get user's Strava API token details from relationship
