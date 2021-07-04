@@ -114,7 +114,7 @@ app.register_blueprint(flasklogin_BP, url_prefix='/authentication')
 from application.util.ErrorHandling import exception_handler
 
 from application.WebAppProjects.MaintenanceTracking.views import AssetRecAPI, MaintRecAPI, PartInstallRecAPI, \
-    stravaRequest
+    stravaMaintRequest
 from application.util.APIRegistration import register_api
 maintAPIPrefix = f'{apiPrefix}/maintenancetracking'
 # Add API views with registration function
@@ -126,7 +126,7 @@ register_api(view=MaintRecAPI, endpoint='maintRec_api', url=f'{maintAPIPrefix}/m
 register_api(view=PartInstallRecAPI, endpoint='partRec_api', url=f'{maintAPIPrefix}/partinstall/', pk='rec_id')
 # Strava distance API
 # register_api(view=stravaRequest, endpoint='stravadistance_api', url=f'{maintAPIPrefix}/stravadistance/', pk='rec_id')
-stravaRequestView = stravaRequest.as_view('stravaDistance_api')
+stravaRequestView = stravaMaintRequest.as_view('stravaDistance_api')
 app.add_url_rule(f'{maintAPIPrefix}/stravadistance/', view_func=stravaRequestView, methods=['GET',])
 
 # asset_view = exception_handler(AssetRecAPI.as_view('asset_api'))

@@ -1,7 +1,11 @@
 import os
 from application.pythonLib.stravalib.client import Client
-
-
+import os
+def getAuthURL():
+    client = Client()
+    url = client.authorization_url(client_id=int(os.environ.get('STRAVA_CLIENT_ID')),
+                                   redirect_uri = 'http://127.0.0.1:5000/maintenance/authorization')
+    return url
 def getAuth(userID):
     """
     Loads Strava client authentication details from Postgres and creates a authorized client instance.

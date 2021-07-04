@@ -18,8 +18,23 @@ from datetime import datetime
 # see https://stackoverflow.com/questions/31669864/date-in-flask-url
 # for using date range in url
 
+@app.route("/maintenance/authorization")
+def handleAuthCallBack():
+    # Get code from Strava
+    code = request.get('code')
+    # Create client instance
+    client = Client()
+    #  Get access token using the code provided by Strava
+    token_response = client.exchange_code_for_token(client_id=int(os.environ.get("STRAVA_CLIENT_ID")),
+                                                    client_secret=(os.environ.get("STRAVA_CLIENT_SECRET")), code=code)
+    access_token = token_response['access_token']
+    refresh_token = token_response['refresh_token']
+    expires_at = token_response['expires_at']
+    athlete = token_response["athlete"]
 
-class stravaRequest(MethodView):
+
+
+class stravaMaintRequest(MethodView):
     """
     Process all records between two provided dates and provide a summary of information.
     """
@@ -28,31 +43,65 @@ class stravaRequest(MethodView):
         # Get request date arguments
         #TODO: Consider getting asset, maintenance, or part install PK from request, then using this to query database
         # to get the time since maintenance
-        dateStart = datetime.fromisoformat(request.args.get("StartDate"))
+
         # dateEnd = datetime.fromisoformat(request.args.get('endDate'))
+        # Get pk of maintenance record
+        maintID = request.args.get('maintID')
         # Get request asset ID
         assetID = request.args.get("AssetID")
+        # Get current user ID
+        userID = current_user.id
+        # q = session.query(User).join(
+        #     subq, User.id == subq.c.user_id
+        # )
+        assetQ = models.strava_activities.query.\
+            join(models.Asset, models.strava_activities.gear_id == models.Asset.stravaid). \
+            join(models.Owner, models.Owner.id == models.Asset.ownerfk). \
+            join(models.maintRecord, models.maintRecord.assetfk == models.Asset.id).\
+            filter(models.Owner.id == userID).\
+            filter(models.Asset.id == assetID)
+        # assetQ = models.strava_activities.query.\
+        #     join(models.strava_activities.gear_id, models.Asset.stravaid).\
+        #     join(models.Asset.ownerfk, models.Owner.id).\
+        #     join(models.Asset.id, models.maintRecord.assetfk).\
+        #     filter(models.Owner.id == userID).\
+        #     filter(models.Asset.id == assetID)
+        if request.args.get("StartDate"):
+            dateStart = datetime.fromisoformat(request.args.get("StartDate"))
+            assetQ = assetQ.filter(models.strava_activities.start_date >= dateStart)
+        # Get pk of maintenance record
+        elif request.args.get("maintID"):
+            maintID = request.args.get('maintID')
+            ## TODO: Query all activitiy records since the mainttime of the given maintenance record
+            # Create a subquery to get the maintenance date of the given maintenanceID
+            # assetQ = assetQ.filter(models.maintRecord.id == maintID)
+            assetQ = assetQ.filter
+        count = 0
+        for i in assetQ:
+            count += 1
+            print(i.distance)
+        logger.debug(count)
         # Get authorized client
-        client = self.getAuthedClient()
-        if not client:
-            logger.debug(f"Authentication of user {current_user.id} failed, has the user activated Strava?")
-            # Auth process failed, user has not activated Strava on application through OAuth
-            return Response(status=401)
+        # client = self.getAuthedClient()
+        # if not client:
+        #     logger.debug(f"Authentication of user {current_user.id} failed, has the user activated Strava?")
+        #     # Auth process failed, user has not activated Strava on application through OAuth
+        #     return Response(status=401)
         # Query all activities between dates
         # activities = client.get_activities(after=dateStart, before=dateEnd)
-        activities = client.get_activities(after=dateStart)
-        # Empty list to hold activities
-        assetList = []
-        # Iterate over activities, extract just the activities matching the asset
-        for i in activities:
-            # Check if gear ID matches, Strava adds a letter to the start of the ID, remove it, if no gear was added
-            # then a None is returned
-            logger.debug(dir(i))
-            quit()
-            if i.gear_id:
-                if int(i.gear_id[1:]) == assetID:
-                    assetList.append(i)
-        logger.debug(assetList)
+        # activities = client.get_activities(after=dateStart)
+        # # Empty list to hold activities
+        # assetList = []
+        # # Iterate over activities, extract just the activities matching the asset
+        # for i in activities:
+        #     # Check if gear ID matches, Strava adds a letter to the start of the ID, remove it, if no gear was added
+        #     # then a None is returned
+        #     logger.debug(i.__dict__)
+        #     quit()
+        #     if i.gear_id:
+        #         if int(i.gear_id[1:]) == assetID:
+        #             assetList.append(i)
+        # logger.debug(assetList)
         return Response(status=200)
 
     def getAuthedClient(self):
@@ -183,6 +232,7 @@ class apiMethod(MethodView):
         # Check if record ID is none
         elif rec_id is None:
             # No record ID given, return all records
+            logger.debug("Returning all records!")
             query = self.dbModel.query
         # Return specific record
         else:

@@ -15,6 +15,8 @@ def singleActivityProcessing(client, actID):
     @return: Email. Message states if process was successful or failed
     """
 
+    # Check if update is for
+
     try:
         application.logger.debug("Getting full activity details")
         # Get all activity details for newly created activity, including stream data

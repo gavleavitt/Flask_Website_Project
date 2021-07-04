@@ -28,6 +28,7 @@ class Owner(db.Model):
     updated_on = db.Column(db.DateTime(timezone=True),  default=datetime.utcnow(), onupdate=datetime.utcnow())
     assets_rel = db.relationship("Asset", backref="users")
     athlete_rel = db.relationship("athletes", backref="users")
+    # activities_rel = db.relationship("strava_activities", backref="users")
 
 class Asset(db.Model):
     __tablename__ = 'assets'
@@ -50,7 +51,7 @@ class Asset(db.Model):
                            supports_json = True, supports_dict= True)
     updated_on = db.Column(db.DateTime(timezone=True),  default=datetime.utcnow(), onupdate=datetime.utcnow(),
                            supports_json = True, supports_dict= True)
-    stravaid = db.Column(db.Integer())
+    stravaid = db.Column(db.String(50), default="", supports_json = True, supports_dict= True)
     # create relationship
     ownerfk = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     # owner_rel = db.relationship(Owner,
@@ -74,6 +75,7 @@ class maintRecord(db.Model):
                            supports_json = True, supports_dict= True)
     updated_on = db.Column(db.DateTime(timezone=True),  default=datetime.utcnow(), onupdate=datetime.utcnow(),
                            supports_json = True, supports_dict= True)
+    worktitle = db.Column(db.String(255), default="", supports_json = True, supports_dict= True)
     ownerfk = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     # create relationships
     asset_rel = db.relationship(Asset,
@@ -86,23 +88,27 @@ class maintRecord(db.Model):
 class installs(db.Model):
     __tablename__= 'partinstalls'
 
-    id = db.Column(db.Integer, primary_key=True)
-    partnum = db.Column(db.String(100), default="")
-    partserial = db.Column(db.String(100), default="")
-    partcost = db.Column(db.Integer(), default=0)
-    currentlyinstalled = db.Column(db.Boolean(), default=True)
-    partnotes = db.Column(db.String(100), default="")
-    assetfk = db.Column(db.Integer, db.ForeignKey('assets.id'), nullable=False)
-    maintfk = db.Column(db.Integer, db.ForeignKey('maintenance_records.id'), nullable=False)
-    vendor = db.Column(db.String(100), default="")
-    postinglink = db.Column(db.String(100), default="")
-    s3objid = db.Column(db.String(100), default="")
-    manuallink = db.Column(db.String(100), default="")
-    parttype = db.Column(db.String(100), default="")
-    partname = db.Column(db.String(100), default="")
-    created_on = db.Column(db.DateTime(timezone=True), default=datetime.utcnow())
+    id = db.Column(db.Integer, primary_key=True, supports_json = True, supports_dict= True)
+    partnum = db.Column(db.String(100), default="", supports_json = True, supports_dict= True)
+    partserial = db.Column(db.String(100), default="", supports_json = True, supports_dict= True)
+    partcost = db.Column(db.Integer(), default=0, supports_json = True, supports_dict= True)
+    currentlyinstalled = db.Column(db.Boolean(), default=True, supports_json = True, supports_dict= True)
+    partnotes = db.Column(db.String(100), default="", supports_json = True, supports_dict= True)
+    assetfk = db.Column(db.Integer, db.ForeignKey('assets.id'), nullable=False, supports_json = True,
+                        supports_dict= True)
+    maintfk = db.Column(db.Integer, db.ForeignKey('maintenance_records.id'), nullable=False, supports_json = True,
+                        supports_dict= True)
+    vendor = db.Column(db.String(100), default="", supports_json = True, supports_dict= True)
+    postinglink = db.Column(db.String(100), default="", supports_json = True, supports_dict= True)
+    s3objid = db.Column(db.String(100), default="", supports_json = True, supports_dict= True)
+    manuallink = db.Column(db.String(100), default="", supports_json = True, supports_dict= True)
+    parttype = db.Column(db.String(100), default="", supports_json = True, supports_dict= True)
+    partname = db.Column(db.String(100), default="", supports_json = True, supports_dict= True)
+    created_on = db.Column(db.DateTime(timezone=True), default=datetime.utcnow(), supports_json = True,
+                           supports_dict= True)
     updated_on = db.Column(db.DateTime(timezone=True),  default=datetime.utcnow(), onupdate=datetime.utcnow())
-    ownerfk = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    ownerfk = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False, supports_json = True,
+                        supports_dict= True)
 
     # create relationship
     # owner_rel = db.relationship(Owner,
@@ -136,3 +142,19 @@ class athletes(db.Model):
     user_rel = db.relationship('Owner', backref=db.backref('strava_athletes', lazy=True))
 
 
+class strava_activities(db.Model):
+    __tablename__ = "strava_act_trimmed"
+
+    id = db.Column(db.Integer, primary_key=True)
+    actID = db.Column(db.BigInteger, unique=True)
+    athlete_id = db.Column(db.Integer, db.ForeignKey("strava_athletes.athlete_id"))
+    distance = db.Column(db.Float)
+    moving_time = db.Column(db.Interval)
+    total_elevation_gain = db.Column(db.Float)
+    type = db.Column(db.String(50))
+    start_date = db.Column(db.DateTime)
+    start_date_local = db.Column(db.DateTime)
+    timezone = db.Column(db.String(50))
+    utc_offset = db.Column(db.Float)
+    gear_id = db.Column(db.String(50))
+    workout_type = db.Column(db.String(100))

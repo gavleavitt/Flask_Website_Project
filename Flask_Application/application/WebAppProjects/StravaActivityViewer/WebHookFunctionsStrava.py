@@ -27,24 +27,30 @@ def handleSubUpdate(client, updateContent):
         application.logger.debug("Sub update from Strava appears valid")
         # Insert subscription update message details into Postgres
         DBQueriesStrava.insertSubUpdate(update)
-        # Verify that the update is a activity creation event
-        if update.aspect_type == "create" and update.object_type == "activity":
-            application.logger.debug("This is a activity create event, creating thread to process activity")
-            try:
-                # Create a thread to handle async processing of the activity and its derivatives
-                # Threading allows the activity to long process with a quick 200 code to be sent to the Strava API
-                Thread(target=APIFunctionsStrava.singleActivityProcessing, args=(client, update.object_id)).start()
-            except Exception as e:
-                application.logger.error(f"Creating a thread to process new activity failed with in the error: {e}")
-                errorEmail.sendErrorEmail(script="Webhook Activity Threading", exceptiontype=e.__class__.__name__, body=e)
-        elif update.aspect_type == "update" and update.object_type == "activity":
-            application.logger.debug("This is a activity update event, updating existing record")
-            # Update existing activity title
-            DBQueriesStrava.updateExistingActivity(update)
+        if update.owner_id == 7170058:
+            # Verify that the update is a activity creation event
+            if update.aspect_type == "create" and update.object_type == "activity":
+                # Check if update event is for me, if so process full details
+                application.logger.debug("This is a activity create event, creating thread to process activity")
+                try:
+                    # Create a thread to handle async processing of the activity and its derivatives
+                    # Threading allows the activity to long process with a quick 200 code to be sent to the Strava API
+                    Thread(target=APIFunctionsStrava.singleActivityProcessing, args=(client, update.object_id)).start()
+                except Exception as e:
+                    application.logger.error(f"Creating a thread to process new activity failed with in the error: {e}")
+                    errorEmail.sendErrorEmail(script="Webhook Activity Threading", exceptiontype=e.__class__.__name__, body=e)
+            elif update.aspect_type == "update" and update.object_type == "activity":
+                application.logger.debug("This is a activity update event, updating existing record")
+                # Update existing activity title
+                DBQueriesStrava.updateExistingActivity(update)
+            else:
+                # Write logic to handle delete events
+                application.logger.debug("Sub update message contains an delete event, skipping request")
+                pass
         else:
-            # Write logic to handle delete events
-            application.logger.debug("Sub update message contains an delete event, skipping request")
             pass
+            #TODO write logic to handle sub updates for other users, will only store the meta details for each
+            # activity, no geometry
     else:
         application.logger.debug("POST request is invalid, user ID or subscription ID don't match those in database!")
 
