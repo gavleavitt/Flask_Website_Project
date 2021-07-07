@@ -75,8 +75,7 @@ def handleSubCallback(request):
         Success code if data are successfully added to Postgres/PostGIS. Strava must receive a 200 code in response to
         POST.
     """
-    # Get application access credentials
-    client = OAuthStrava.getAuth()
+    application.logger.debug(f"Request to Strava callback url. Request is: {request}")
     # Check if request is a GET callback request, part of webhook subscription process
     if request.method == 'GET':
         application.logger.debug("Got a GET callback request from Strava to verify webhook!")
@@ -107,6 +106,8 @@ def handleSubCallback(request):
             application.logger.debug(f"Update content is {callbackContent}")
             # application.logger.debug(f"Update content dir is {dir(callbackContent)}")
             # Call function to handle update message and process new activity, if applicable
+            # Get application access credentials
+            client = OAuthStrava.getAuth()
             handleSubUpdate(client, callbackContent)
             application.logger.debug("Inserted webhook update and activity details into postgres tables!")
         except Exception as e:

@@ -9,7 +9,7 @@ stravaActDashAPI_BP = Blueprint('stravaActDashAPI_BP', __name__,
 
 
 
-@stravaActDashAPI_BP.route(os.environ.get("STRAVA_CALLBACK_URL"), methods=['GET', 'POST'])
+@stravaActDashAPI_BP.route("/webhookcallback", methods=['GET', 'POST'])
 def subCallback():
     """
     Strava subscription callback URL.
@@ -24,11 +24,11 @@ def subCallback():
     """
     application.logger.debug("Got a callback request!")
     res = WebHookFunctionsStrava.handleSubCallback(request)
-    application.logger.debug("Returning success code!")
+    application.logger.debug("Returning code!")
     if res:
         return res
     else:
-        return Response(status=200)
+        return Response(status=400)
 
 # @stravaActDashAPI_BP.route("/stravaroutes", methods=['GET'])
 # def stravaActAPI():

@@ -126,7 +126,7 @@ def addwebhooksub():
     except Exception as e:
         application.logger.debug(f"Webhook creation process failed with the error {e}")
         DBQueriesStrava.deleteVerifyTokenRecord(verifytoken)
-        return Response(status=400)
+        return Response(status=400, response=str(e))
 
 
 @stravaActDashAPI_Admin_BP.route("/generatetopojson", methods=['POST'])
