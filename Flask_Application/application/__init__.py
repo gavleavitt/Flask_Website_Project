@@ -21,7 +21,8 @@ from pytz import utc
 import logging
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-
+from sqlathanor import FlaskBaseModel, initialize_flask_sqlathanor
+from flask_sqlalchemy import SQLAlchemy
 
 # Create flask application, I believe "application" has to be used to work properly on AWS EB
 application = app = Flask(__name__)
@@ -36,28 +37,50 @@ logger.setLevel(logging.DEBUG)
 # Set logging pathway depending on if Flask is running local or on AWS EB on Amazon Linux 2
 application.logger.debug(f"Flask is running in {application.config['ENV']} mode")
 # if "B:\\" in os.getcwd():
+# Set logging and SQL DB connection settings based on if in production or development mocde
 if application.config['ENV'] == "development":
-    application.logger.debug('Development mode, setting logging to Windows directory')
+    # Localhost development testing
+    application.logger.debug('Development mode')
     dirname = os.path.dirname(__file__)
     # handler = RotatingFileHandler(os.path.join(dirname, '../logs/application.log'), maxBytes=1024, backupCount=5)
     handler = logging.FileHandler(os.path.join(dirname, '../logs/application.log'))
+    app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get("DBCON_LOCAL")
+    # engine = create_engine(os.environ.get("DBCON_LOCAL"))
     localurl = "leavitttesting.com:5000"
     application.logger.debug(f"Setting up local development server name: {localurl}")
     app.config['SERVER_NAME'] = localurl
 else:
+    # Live deployment
     # see https://stackoverflow.com/a/60549321
     # handler = RotatingFileHandler('/tmp/application.log', maxBytes=1024, backupCount=5)
+    application.logger.debug('Production mode')
     handler = logging.FileHandler('/tmp/application.log')
+    app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get("DBCON_PROD")
+    # engine = create_engine(os.environ.get("DBCON"))
+# Set logging handler
 handler.setFormatter(formatter)
-
-
-# Attach logging handler to application
-application.logger.addHandler(handler)
-application.logger.debug("Python Flask debugger active!")
 
 # Setup SQLAlchemy engine sessionmaker factory
 engine = create_engine(os.environ.get("DBCON"))
 Session = sessionmaker(bind=engine)
+
+
+
+# Disabling modification tracking
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+# Setup SQLAthanor
+db = SQLAlchemy(app, model_class = FlaskBaseModel)
+# Init flask sqlalchemy database with flask
+# db.init_app(app)
+db = initialize_flask_sqlathanor(db)
+
+# Setup SQLAlchemy engine sessionmaker factory for localhost
+engineLocal = create_engine(os.environ.get("DBCON_LOCAL"))
+SessionLocal = sessionmaker(bind=engineLocal)
+
+# Attach logging handler to application
+application.logger.addHandler(handler)
+application.logger.debug("Python Flask debugger active!")
 
 # Import HTTP auth
 from application.util.flaskAuth.authentication import auth
