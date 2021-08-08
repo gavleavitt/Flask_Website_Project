@@ -15,10 +15,12 @@ def handletracerequest():
     # Get lon, x
     lon = float(request.args.get("longitude"))
     coords = {"lat":lat, "lon":lon}
-    coord = f"{lat},{lon}"
-    application.logger.debug(f"Lat,lon: {lat},{lon}")
-    upstreamSQL = "'SELECT id, source, target, -1 as cost, reverse_cost FROM storm_network'"
-    downstreamSQL = "'SELECT id, source, target, cost, -1 as reverse_cost FROM storm_network'"
+    # Coordinates to use in SQL query, must be in x, y / lon, lat
+    coord = (lon, lat)
+    application.logger.debug(f"Lat,lon: {coord}")
+    application.logger.debug(f"ST_Point({coord})")
+    upstreamSQL = 'SELECT id, source, target, -1 as cost, reverse_cost FROM storm_network'
+    downstreamSQL = 'SELECT id, source, target, cost, -1 as reverse_cost FROM storm_network'
     if str(request.args.get("direction")) == "upstream":
         directionSQL = upstreamSQL
     elif str(request.args.get("direction")) == "downstream":
@@ -34,12 +36,12 @@ with sc AS (
 	from 
 		storm_network_vertices_pgr as node
 	where
-		st_intersects(ST_Snap(ST_Transform(ST_SetSRID( ST_Point(:coord), 4326),2226),node.the_geom, 100), node.the_geom)
+		st_intersects(ST_Snap(ST_Transform(ST_SetSRID(ST_Point(:lon, :lat), 4326),2229),node.the_geom, 100), node.the_geom)
 	ORDER BY 
-		node.the_geom <-> ST_Transform(ST_SetSRID( ST_Point(:cord), 4326),2226)
+		node.the_geom <-> ST_Transform(ST_SetSRID(ST_Point(:lon, :lat), 4326),2229)
 	LIMIT 1
 )
-SELECT sc.id, i.uuid as inlet_uuid, ST_AsGeoJSON(i.geom) as inletgeom, mh.uuid as mh_uuid, ST_AsGeoJSON(mh.geom) as mhgeom,
+SELECT sc.id,  ST_AsGeoJSON(sc.geom) as startgeom, i.uuid as inlet_uuid, ST_AsGeoJSON(i.geom) as inletgeom, mh.uuid as mh_uuid, ST_AsGeoJSON(mh.geom) as mhgeom,
 ol.uuid as outlet_uuid, ST_AsGeoJSON(ol.geom) as outletgeom,
 lat.uuid as lat_uuid, ST_AsGeoJSON(lat.geom) as latgeom, gm.uuid as gm_uuid, ST_AsGeoJSON(gm.geom) as gmgeom,
 fm.uuid as fm_uuid, ST_AsGeoJSON(fm.geom) as fmgeom,
@@ -79,9 +81,10 @@ on
     # Lists to hold point and line results
     pointfeatures = []
     linefeatures =[]
-    results = db.session.execute(sql, {"coord": coord, "direction":directionSQL})
+    results = db.session.execute(sql, {"lat": lat, "lon": lon, "directionSQL":directionSQL})
     startpoint = None
     for i in results:
+        application.logger.debug(i)
         propDict = {}
         if i.cost == 0.0:
             # The snapped point will have a cost of 0 and all geoms will be null besides startgeom
@@ -90,7 +93,7 @@ on
             geojsonGeom = geojson.loads(geom)
             startpoint = Feature(geometry=Point(geojsonGeom), properties=propDict)
             break
-        if i.inletgeom or i.mhgeom or i.olgeom:
+        if i.inletgeom or i.mhgeom or i.outletgeom:
         # Record is a point feature, populate point features list
             if i.inletgeom:
                 propDict['id'] = i.inlet_uuid
@@ -100,7 +103,7 @@ on
                 propDict['id'] = i.mh_uuid
                 propDict['type'] = "manhole"
                 geom = i.mhgeom
-            elif i.olgeom:
+            elif i.outletgeom:
                 propDict['id'] = i.outlet_uuid
                 propDict['type'] = "outlet"
                 geom = i.outletgeom
@@ -130,4 +133,4 @@ on
         linefeatures.append(Feature(geometry=MultiLineString(geojsonGeom), properties=propDict))
     # Format json response, will have nested goejson data
     response = {"startpoint": startpoint, "lines": linefeatures, "points": pointfeatures}
-    return reponse
+    return response
