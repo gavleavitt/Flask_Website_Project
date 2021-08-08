@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <title>LA County Stormwater System Trace Application</title>
+
+    <style>
+      html,
+      body,
+      #viewDiv {
+        padding: 0;
+        margin: 0;
+        height: 100%;
+        width: 100%;
+      }
+      .button-grp{
+        display: flex;
+        /* flex-flow: row wrap; */
+        justify-content: center;
+      }
+      .flex-line2{
+        width: 100%
+      }
+      .tool-btn{
+        padding:5px;
+      }
+      .line-break {
+        width: 100%;
+      }
+    </style>
+    <link rel="stylesheet" href="https://js.arcgis.com/4.20/esri/themes/light/main.css">
+    <script src="https://js.arcgis.com/4.20/"></script>
+
+    <!-- Calcite -->
+    <script type="module" src="https://js.arcgis.com/calcite-components/1.0.0-beta.52/calcite.esm.js"></script>
+    <script nomodule="" src="https://js.arcgis.com/calcite-components/1.0.0-beta.52/calcite.js"></script>
+    <link rel="stylesheet" type="text/css" href="https://js.arcgis.com/calcite-components/1.0.0-beta.52/calcite.css" />
+
+    <script>
+      require(["esri/config","esri/Map",  "esri/layers/VectorTileLayer", "esri/views/MapView", "esri/layers/TileLayer",    "esri/Graphic",
+    "esri/layers/GraphicsLayer", "esri/layers/WebTileLayer"],
+      function (esriConfig,Map, VectorTileLayer, MapView, TileLayer, Graphic, GraphicsLayer, WebTileLayer) {
+          esriConfig.apiKey = "AAPK5f601af9967543d6bc498db5a6b0f84bpHLpA-1hb11KUYm2IfzgmzBATsNlgD24Rjueqj2sKqaVsz3d6vU-6-l1yb-0YTi3";
+          console.log("Loading vector tiles!")
+          const gravitymainstiles = new VectorTileLayer({
+             url: "https://vectortileservices3.arcgis.com/NfAw5Z474Q8vyMGv/arcgis/rest/services/GravityMains_Stylized/VectorTileServer"
+           });
+
+          const map = new Map({
+            basemap: "arcgis-topographic", // Basemap layer service
+            layers: [gravitymainstiles] // vector tile layer
+          });
+          const view = new MapView({
+            map: map,
+            center: [-118.167416, 33.784257], // Longitude, latitude
+            zoom: 13, // Zoom level
+            container: "viewDiv", // Div element
+          });
+
+
+          const graphicsLayer = new GraphicsLayer();
+          map.add(graphicsLayer);
+
+          const point = { //Create a point
+           type: "point",
+           longitude:-118.167416,
+           latitude:33.784257
+          };
+          const simpleMarkerSymbol = {
+             type: "simple-marker",
+             color: [226, 119, 40],  // Orange
+             outline: {
+                 color: [255, 255, 255], // White
+                 width: 10
+             }
+          };
+          const pointGraphic = new Graphic({
+             geometry: point,
+             symbol: simpleMarkerSymbol
+          });
+          graphicsLayer.add(pointGraphic);
+
+
+          // User selection layer
+          const selectionLayer = new GraphicsLayer();
+          map.add(selectionLayer);
+
+          const selectionMarkerSymbol = {
+             type: "simple-marker",
+             style: "x",
+             color: "blue",
+             size:"20px",
+             outline: {
+                 color: "blue", // White
+                 width: "10px"
+             }
+          };
+
+          view.ui.add("traceDiv", "top-left");
+
+          view.on("click", (event) => {
+            console.log("click event: ", event);
+            console.log("x:", event.mapPoint.longitude.toFixed(5));
+            console.log("y:", event.mapPoint.latitude.toFixed(5));
+            console.log("x:", event.mapPoint.x.toFixed(2));
+            console.log("y:", event.mapPoint.y.toFixed(2));
+            // Set global variables of user's selection:
+            var userLong = event.mapPoint.longitude
+            var userLat = event.mapPoint.latitude
+            // If the Select button is active add a point to cursor location then
+            // deactive it
+            if (document.querySelector('#selBtn').classList.contains('active')){
+              console.log("Selection is active!")
+              const selectionpoint = new Graphic({
+                 geometry: {
+                   type: "point",
+                   longitude: event.mapPoint.longitude,
+                   latitude: event.mapPoint.latitude
+                 },
+                 symbol: selectionMarkerSymbol
+              });
+
+              selectionLayer.add(selectionpoint);
+
+              document.querySelector('#selBtn').classList.remove('active')
+            }
+          });
+
+
+          view.on("pointer-move", function (event){
+            if (document.querySelector('#selBtn').classList.contains('active')){
+              document.body.style.cursor = "crosshair"
+            } else{
+                document.body.style.cursor = "default"
+              }
+            });
+      });
+      window.onload = function(e){
+          // console.log("loaded!")
+          document.querySelector('#selBtn')
+        };
+      function activeSelection(btn){
+          console.log("selection active!")
+          // Clear out existing graphic layers
+          selectionLayer.removeall()
+          // Add active status to select button
+          document.getElementById(btn).classList.add('active')
+          // On click remove active status
+        };
+      function submitCoordinates(){
+          // Get coordinates from GraphicsLayer
+          console.log(userLat)
+          console.log(userLong)
+          var url = new URL('localhost:8000')
+
+          var params = {lat:userLat, long:userLong} // or:
+          url.search = new URLSearchParams(params).toString();
+          fetch(url)
+          .then(r => {
+            console.log(r.json())
+          })
+          .catch(error =>{
+            console.log("Server request error!")
+          })
+        };
+    </script>
+  </head>
+  <body>
+    <div id="viewDiv"></div>
+    <div id="traceDiv">
+      <calcite-block collapsible heading="Trace" open summary="Select Trace Direction">
+        <calcite-radio-button-group layout="vertical" name="TraceType" >
+            <calcite-radio-button checked value="downstream">Downstream</calcite-radio-button>
+            <calcite-radio-button value="upstream">Upstream</calcite-radio-button>
+        </calcite-radio-button-group>
+        <div class="button-grp">
+          <calcite-button id="selBtn" button-alignment="center" round width="half" scale="s" icon-start="object-detection" color="blue" class="tool-btn" onclick="activeSelection('selBtn')">Select Location</calcite-button>
+          <calcite-button button-alignment="center" round width="half" scale="s" icon-start="submit" color="red" class="tool-btn" onclick="submitCoordinates()">Run</calcite-button>
+          <calcite-button button-alignment="center" round width="half" scale="s" icon-start="reset" color="neutral" class="tool-btn">Clear</calcite-button>
+        </div>
+      </calcite-block>
+    </div>
+  </body>
+</html>
