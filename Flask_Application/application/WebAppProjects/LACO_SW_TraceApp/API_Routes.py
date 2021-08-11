@@ -14,7 +14,6 @@ def handletracerequest():
     lat = float(request.args.get("latitude"))
     # Get lon, x
     lon = float(request.args.get("longitude"))
-    coords = {"lat":lat, "lon":lon}
     # Coordinates to use in SQL query, must be in x, y / lon, lat
     coord = (lon, lat)
     application.logger.debug(f"Lat,lon: {coord}")
@@ -41,10 +40,13 @@ with sc AS (
 		node.the_geom <-> ST_Transform(ST_SetSRID(ST_Point(:lon, :lat), 4326),2229)
 	LIMIT 1
 )
-SELECT sc.id,  ST_AsGeoJSON(sc.geom) as startgeom, i.uuid as inlet_uuid, ST_AsGeoJSON(i.geom) as inletgeom, mh.uuid as mh_uuid, ST_AsGeoJSON(mh.geom) as mhgeom,
-ol.uuid as outlet_uuid, ST_AsGeoJSON(ol.geom) as outletgeom,
-lat.uuid as lat_uuid, ST_AsGeoJSON(lat.geom) as latgeom, gm.uuid as gm_uuid, ST_AsGeoJSON(gm.geom) as gmgeom,
-fm.uuid as fm_uuid, ST_AsGeoJSON(fm.geom) as fmgeom,
+SELECT sc.id,  ST_AsGeoJSON(st_transform(sc.geom, 4326)) as startgeom, 
+i.uuid as inlet_uuid, ST_AsGeoJSON(st_transform(i.geom, 4326)) as inletgeom, 
+mh.uuid as mh_uuid, ST_AsGeoJSON(st_transform(mh.geom, 4326)) as mhgeom,
+ol.uuid as outlet_uuid, ST_AsGeoJSON(st_transform(ol.geom, 4326)) as outletgeom,
+lat.uuid as lat_uuid, ST_AsGeoJSON(st_transform(lat.geom, 4326)) as latgeom, 
+gm.uuid as gm_uuid, ST_AsGeoJSON(st_transform(gm.geom, 4326)) as gmgeom,
+fm.uuid as fm_uuid, ST_AsGeoJSON(st_transform(fm.geom, 4326)) as fmgeom,
 nodes.* FROM sc, pgr_drivingDistance(
         :directionSQL,
         sc.id, 999999, true) AS nodes
@@ -81,56 +83,74 @@ on
     # Lists to hold point and line results
     pointfeatures = []
     linefeatures =[]
+    # Execute raw SQL query with parameters
     results = db.session.execute(sql, {"lat": lat, "lon": lon, "directionSQL":directionSQL})
     startpoint = None
     for i in results:
         application.logger.debug(i)
+        # Dictionary to hold data for each loop
         propDict = {}
+        application.logger.debug(propDict)
         if i.cost == 0.0:
             # The snapped point will have a cost of 0 and all geoms will be null besides startgeom
-            propDict['type'] = "start"
+            # TODO: verify if this is correct, a point with a cost of 0.0 is also the first node
+            propDict['factype'] = "start"
             geom = i.startgeom
             geojsonGeom = geojson.loads(geom)
             startpoint = Feature(geometry=Point(geojsonGeom), properties=propDict)
-            break
+            # break
         if i.inletgeom or i.mhgeom or i.outletgeom:
-        # Record is a point feature, populate point features list
+            application.logger.debug("Non null point geom!")
+            # Record is a point feature, populate point features list depending on which geometry is not null
             if i.inletgeom:
+                application.logger.debug("Inlet!")
                 propDict['id'] = i.inlet_uuid
-                propDict['type'] = "inlet"
+                propDict['factype'] = "inlet"
                 geom = i.inletgeom
             elif i.mhgeom:
+                application.logger.debug("MH!")
                 propDict['id'] = i.mh_uuid
-                propDict['type'] = "manhole"
+                propDict['factype'] = "manhole"
                 geom = i.mhgeom
             elif i.outletgeom:
+                application.logger.debug("Outlet!")
                 propDict['id'] = i.outlet_uuid
-                propDict['type'] = "outlet"
+                propDict['factype'] = "outlet"
                 geom = i.outletgeom
             else:
                 propDict = None
                 geom = None
+            # Set the cost property, not currently used
             propDict['cost'] = i.cost
+            # Load st_asgeojson result as a geojson object
             geojsonGeom = geojson.loads(geom)
+            # Create a point feature using the geometry and properties, append to point features list
+            application.logger.debug(propDict)
             pointfeatures.append(Feature(geometry=Point(geojsonGeom), properties=propDict))
         # Populate line features, only one should always be populated
+        # A single record can have both a line and a point geom so these are not in a else statement with the prior
+        # if statement.
         if i.gmgeom:
             propDict['id'] = i.gm_uuid
-            propDict['type'] = "gravitymain"
+            propDict['factype'] = "gravitymain"
             geom = i.gmgeom
         elif i.latgeom:
             propDict['id'] = i.lat_uuid
-            propDict['type'] = "lateral"
+            propDict['factype'] = "lateral"
             geom = i.latgeom
         elif i.fmgeom:
             propDict['id'] = i.fm_uuid
-            propDict['type'] = "forcedmain"
+            propDict['factype'] = "forcedmain"
             geom = i.fmgeom
         else:
+            break
             propDict = None
             geom = None
         geojsonGeom = geojson.loads(geom)
         linefeatures.append(Feature(geometry=MultiLineString(geojsonGeom), properties=propDict))
     # Format json response, will have nested goejson data
-    response = {"startpoint": startpoint, "lines": linefeatures, "points": pointfeatures}
+    lineCollection = FeatureCollection(linefeatures)
+    pointsCollection = FeatureCollection(pointfeatures)
+    response = jsonify({"startpoint": startpoint, "lines": lineCollection, "points": pointsCollection})
+    response.headers.add('Access-Control-Allow-Origin', '*')
     return response

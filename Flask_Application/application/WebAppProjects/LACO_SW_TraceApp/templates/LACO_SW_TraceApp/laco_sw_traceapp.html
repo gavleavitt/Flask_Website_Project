@@ -4,7 +4,8 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no" />
     <title>LA County Stormwater System Trace Application</title>
-
+    <!-- Custom local javascript -->
+    <script src="{{ url_for('lacoSWTraceapp_API_BP.static', filename='SBCO_SW_TraceApp/js/renderers.js') }}"></script>
     <style>
       html,
       body,
@@ -38,146 +39,208 @@
     <link rel="stylesheet" type="text/css" href="https://js.arcgis.com/calcite-components/1.0.0-beta.52/calcite.css" />
 
     <script>
-      require(["esri/config","esri/Map",  "esri/layers/VectorTileLayer", "esri/views/MapView", "esri/layers/TileLayer",    "esri/Graphic",
-    "esri/layers/GraphicsLayer", "esri/layers/WebTileLayer"],
-      function (esriConfig,Map, VectorTileLayer, MapView, TileLayer, Graphic, GraphicsLayer, WebTileLayer) {
-          esriConfig.apiKey = "AAPK5f601af9967543d6bc498db5a6b0f84bpHLpA-1hb11KUYm2IfzgmzBATsNlgD24Rjueqj2sKqaVsz3d6vU-6-l1yb-0YTi3";
-          console.log("Loading vector tiles!")
-          const gravitymainstiles = new VectorTileLayer({
-             url: "https://vectortileservices3.arcgis.com/NfAw5Z474Q8vyMGv/arcgis/rest/services/GravityMains_Stylized/VectorTileServer"
-           });
+      var btnActive = null
+      var userLat = null
+      var userlon = null
+      var geojsonData = null
+      require(["esri/config","esri/Map",  "esri/layers/VectorTileLayer", "esri/views/MapView", "esri/layers/TileLayer", "esri/Graphic",
+        "esri/layers/GraphicsLayer", "esri/layers/WebTileLayer", "esri/layers/GeoJSONLayer", "esri/symbols/SimpleMarkerSymbol", "esri/renderers/UniqueValueRenderer"],
+        function (esriConfig,Map, VectorTileLayer, MapView, TileLayer, Graphic, GraphicsLayer, WebTileLayer, GeoJSONLayer, SimpleMarkerSymbol, UniqueValueRenderer) {
+            esriConfig.apiKey = "AAPK5f601af9967543d6bc498db5a6b0f84bpHLpA-1hb11KUYm2IfzgmzBATsNlgD24Rjueqj2sKqaVsz3d6vU-6-l1yb-0YTi3";
+            console.log("Loading vector tiles!")
+            const gravitymainstiles = new VectorTileLayer({
+               url: "https://vectortileservices3.arcgis.com/NfAw5Z474Q8vyMGv/arcgis/rest/services/GravityMains_Stylized/VectorTileServer"
+             });
 
-          const map = new Map({
-            basemap: "arcgis-topographic", // Basemap layer service
-            layers: [gravitymainstiles] // vector tile layer
-          });
-          const view = new MapView({
-            map: map,
-            center: [-118.167416, 33.784257], // Longitude, latitude
-            zoom: 13, // Zoom level
-            container: "viewDiv", // Div element
-          });
-
-
-          const graphicsLayer = new GraphicsLayer();
-          map.add(graphicsLayer);
-
-          const point = { //Create a point
-           type: "point",
-           longitude:-118.167416,
-           latitude:33.784257
-          };
-          const simpleMarkerSymbol = {
-             type: "simple-marker",
-             color: [226, 119, 40],  // Orange
-             outline: {
-                 color: [255, 255, 255], // White
-                 width: 10
-             }
-          };
-          const pointGraphic = new Graphic({
-             geometry: point,
-             symbol: simpleMarkerSymbol
-          });
-          graphicsLayer.add(pointGraphic);
-
-
-          // User selection layer
-          const selectionLayer = new GraphicsLayer();
-          map.add(selectionLayer);
-
-          const selectionMarkerSymbol = {
-             type: "simple-marker",
-             style: "x",
-             color: "blue",
-             size:"20px",
-             outline: {
-                 color: "blue", // White
-                 width: "10px"
-             }
-          };
-
-          view.ui.add("traceDiv", "top-left");
-
-          view.on("click", (event) => {
-            console.log("click event: ", event);
-            console.log("x:", event.mapPoint.longitude.toFixed(5));
-            console.log("y:", event.mapPoint.latitude.toFixed(5));
-            console.log("x:", event.mapPoint.x.toFixed(2));
-            console.log("y:", event.mapPoint.y.toFixed(2));
-            // Set global variables of user's selection:
-            var userLong = event.mapPoint.longitude
-            var userLat = event.mapPoint.latitude
-            // If the Select button is active add a point to cursor location then
-            // deactive it
-            if (document.querySelector('#selBtn').classList.contains('active')){
-              console.log("Selection is active!")
-              const selectionpoint = new Graphic({
-                 geometry: {
-                   type: "point",
-                   longitude: event.mapPoint.longitude,
-                   latitude: event.mapPoint.latitude
-                 },
-                 symbol: selectionMarkerSymbol
-              });
-
-              selectionLayer.add(selectionpoint);
-
-              document.querySelector('#selBtn').classList.remove('active')
-            }
-          });
-
-
-          view.on("pointer-move", function (event){
-            if (document.querySelector('#selBtn').classList.contains('active')){
-              document.body.style.cursor = "crosshair"
-            } else{
-                document.body.style.cursor = "default"
-              }
+            const map = new Map({
+              basemap: "arcgis-topographic", // Basemap layer service
+              layers: [gravitymainstiles] // vector tile layer
             });
-      });
-      window.onload = function(e){
-          // console.log("loaded!")
-          document.querySelector('#selBtn')
-        };
-      function activeSelection(btn){
-          console.log("selection active!")
-          // Clear out existing graphic layers
-          selectionLayer.removeall()
-          // Add active status to select button
-          document.getElementById(btn).classList.add('active')
-          // On click remove active status
-        };
-      function submitCoordinates(){
-          // Get coordinates from GraphicsLayer
-          console.log(userLat)
-          console.log(userLong)
-          var url = new URL('localhost:8000')
+            const view = new MapView({
+              map: map,
+              center: [-118.167416, 33.784257], // Longitude, latitude
+              zoom: 13, // Zoom level
+              container: "viewDiv", // Div element
+            });
 
-          var params = {lat:userLat, long:userLong} // or:
-          url.search = new URLSearchParams(params).toString();
-          fetch(url)
-          .then(r => {
-            console.log(r.json())
-          })
-          .catch(error =>{
-            console.log("Server request error!")
-          })
-        };
+
+            const graphicsLayer = new GraphicsLayer();
+            map.add(graphicsLayer);
+
+            const point = { //Create a point
+             type: "point",
+             longitude:-118.167416,
+             latitude:33.784257
+            };
+            const simpleMarkerSymbol = {
+               type: "simple-marker",
+               color: [226, 119, 40],  // Orange
+               outline: {
+                   color: [255, 255, 255], // White
+                   width: 10
+               }
+            };
+            const pointGraphic = new Graphic({
+               geometry: point,
+               symbol: simpleMarkerSymbol
+            });
+            graphicsLayer.add(pointGraphic);
+
+
+            // User selection layer, will be populated with points
+            // const selectionLayer = new GraphicsLayer();
+            var selectionLayer = new GraphicsLayer();
+            // Add empty selection layer to map
+            map.add(selectionLayer);
+
+            const selectionMarkerSymbol = {
+               type: "simple-marker",
+               style: "x",
+               color: "blue",
+               size:"20px",
+               outline: {
+                   color: "blue", // White
+                   width: "10px"
+               }
+            };
+
+            view.ui.add("traceDiv", "top-left");
+
+            view.on("click", (event) => {
+              console.log("click event: ", event);
+              console.log("x:", event.mapPoint.longitude.toFixed(5));
+              console.log("y:", event.mapPoint.latitude.toFixed(5));
+              console.log("x:", event.mapPoint.x.toFixed(2));
+              console.log("y:", event.mapPoint.y.toFixed(2));
+              // Set global variables of user's selection:
+              userLong = event.mapPoint.longitude
+              userLat = event.mapPoint.latitude
+              if (btnActive === "active"){
+                console.log("Selection is active!")
+                const selectionpoint = new Graphic({
+                   geometry: {
+                     type: "point",
+                     longitude: event.mapPoint.longitude,
+                     latitude: event.mapPoint.latitude
+                   },
+                   symbol: selectionMarkerSymbol
+                });
+
+                selectionLayer.add(selectionpoint);
+                btnActive = null
+              }
+              // view.on("pointer-move", (event)=>{
+              //   console.log(btnActive);
+              //   if (btnActive === "active"){
+              //     document.body.style.cursor = "crosshair"
+              //   } else {
+              //       document.body.style.cursor = "default"
+              //     }
+              //   });
+                document.addEventListener("pointermove", function(){
+                  if (btnActive === "active"){
+                    document.body.style.cursor = "crosshair"
+                  } else {
+                      document.body.style.cursor = "default"
+                    }
+                });
+              // If the Select button is active add a point to cursor location then
+              // deactive it
+              // if (document.querySelector('#selBtn').classList.contains('active')){
+              //   console.log("Selection is active!")
+              //   const selectionpoint = new Graphic({
+              //      geometry: {
+              //        type: "point",
+              //        longitude: event.mapPoint.longitude,
+              //        latitude: event.mapPoint.latitude
+              //      },
+              //      symbol: selectionMarkerSymbol
+              //   });
+              //
+              //   selectionLayer.add(selectionpoint);
+              //
+              //   document.querySelector('#selBtn').classList.remove('active')
+              // }
+            });
+            document.getElementById("selBtn").addEventListener("click", function(){
+                  console.log("selection active!")
+                  // Clear out existing graphic layers
+                  selectionLayer.removeAll()
+                  userLat = null
+                  userlon = null
+                  // Add active status to select button
+                  // document.getElementById(btn).classList.add('active')
+                  btnActive = "active"
+                  console.log(btnActive)
+                  // On click remove active status
+            });
+            document.getElementById("clearBtn").addEventListener("click", function(){
+                  // Clear out existing graphic layers
+                  selectionLayer.removeAll()
+                  userLat = null
+                  userlon = null
+                  btnActive = null
+            });
+            document.getElementById("submitBtn").addEventListener("click", function(){
+                  // Clear out existing graphic layers
+                  // Get coordinates from user selection
+                  // Get the active radio selection to determine flow direction
+                  radioGrp = document.querySelector('#directionGrp');
+                  traceDirection = radioGrp.querySelectorAll(":checked")[0].defaultValue;
+                  console.log(userLat)
+                  console.log(userLong)
+                  console.log(traceDirection)
+                  var url = new URL('http://api.leavitttesting.com:5000/api/v1/trace/lacostormwater')
+                  // var url = new URL('/api/v1/trace/lacostormwater')
+                  var params = {"latitude":userLat, "longitude":userLong, "direction":traceDirection}
+                  url.search = new URLSearchParams(params).toString();
+                  // console.log(url);
+                  fetch(url, {method: "GET",
+                    mode: 'cors'})
+                  .then(r => {
+                    // Returns data
+                    return r.json();
+                  })
+                  .then(function(data){
+                    // Process data, this needs to be a separate .then() to get the data out of the Promise object
+                    console.log(data);
+                    // geojsonData = data
+                    // load geojson data as a layer
+                    // see https://gis.stackexchange.com/questions/373811/create-geojson-layer-based-on-remote-server-request-arcgis-js-api
+                    const lineblob = new Blob([JSON.stringify(data['lines'])], {type: "application/json"});
+                    const lineurl  = URL.createObjectURL(lineblob);
+                    const resultLines = new GeoJSONLayer({
+                      url:lineurl
+                    });
+                    map.add(resultLines);
+                    const pointblob = new Blob([JSON.stringify(data['points'])], {type: "application/json"});
+                    const pointurl  = URL.createObjectURL(pointblob);
+                    const resultpoints = new GeoJSONLayer({
+                      url:pointurl,
+                      renderer: pointResultRenderer
+                    });
+                    map.add(resultpoints);
+                  })
+                  .catch(error =>{
+                    console.log(error)
+                    console.log("Server request error!")
+                  });
+            });
+        });
     </script>
   </head>
   <body>
     <div id="viewDiv"></div>
     <div id="traceDiv">
       <calcite-block collapsible heading="Trace" open summary="Select Trace Direction">
-        <calcite-radio-button-group layout="vertical" name="TraceType" >
+        <calcite-radio-button-group id="directionGrp" layout="vertical" name="TraceType" >
             <calcite-radio-button checked value="downstream">Downstream</calcite-radio-button>
             <calcite-radio-button value="upstream">Upstream</calcite-radio-button>
         </calcite-radio-button-group>
         <div class="button-grp">
-          <calcite-button id="selBtn" button-alignment="center" round width="half" scale="s" icon-start="object-detection" color="blue" class="tool-btn" onclick="activeSelection('selBtn')">Select Location</calcite-button>
-          <calcite-button button-alignment="center" round width="half" scale="s" icon-start="submit" color="red" class="tool-btn" onclick="submitCoordinates()">Run</calcite-button>
-          <calcite-button button-alignment="center" round width="half" scale="s" icon-start="reset" color="neutral" class="tool-btn">Clear</calcite-button>
+          <calcite-button id="selBtn" button-alignment="center" round width="half" scale="s" icon-start="object-detection" color="blue" class="tool-btn">Select Location</calcite-button>
+          <calcite-button id="submitBtn" button-alignment="center" round width="half" scale="s" icon-start="submit" color="red" class="tool-btn">Run</calcite-button>
+          <calcite-button id="clearBtn" button-alignment="center" round width="half" scale="s" icon-start="reset" color="neutral" class="tool-btn">Clear</calcite-button>
         </div>
       </calcite-block>
     </div>
