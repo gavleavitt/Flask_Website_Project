@@ -442,6 +442,13 @@ p{
 }
 
 @media screen and (max-width: 550px) {
+
+  .leaflet-popup-content{
+    margin: 13px 2px;
+  }
+  .content{
+    padding: 2px !important;
+  }
   .titlediv{
     grid-template-rows: 1fr;
   }

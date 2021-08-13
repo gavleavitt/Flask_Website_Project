@@ -41,8 +41,10 @@ document.getElementById("emailaddr").innerHTML = "<a href='mailto:" + email + "'
 // Make basemaps
 // var streetsnight = L.esri.Vector.basemap('StreetsNight');
 var imageryesri = L.esri.basemapLayer('Imagery');
-var osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-   attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'})
+
+var osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png')
+// var osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+//    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'})
 
 var pointstyle = {
   radius: 8,
@@ -56,7 +58,10 @@ var pointstyle = {
 var map = L.map('map',
   {layers: [osm]}).setView([34.7,-119.86],10);
 // Add flaticon attribution
-map.attributionControl.addAttribution("Icons made by <a href='https://www.flaticon.com/authors/freepik' title='Freepik'>Freepik</a> taken from <a href='https://www.flaticon.com/' title='Flaticon'> www.flaticon.com</a> and edited by Gavin Leavitt")
+if (window.innerWidth > 500){
+  map.attributionControl.addAttribution("Icons made by <a href='https://www.flaticon.com/authors/freepik' title='Freepik'>Freepik</a> taken from <a href='https://www.flaticon.com/' title='Flaticon'> www.flaticon.com</a> and edited by Gavin Leavitt")
+}
+// map.attributionControl.addAttribution("Icons made by <a href='https://www.flaticon.com/authors/freepik' title='Freepik'>Freepik</a> taken from <a href='https://www.flaticon.com/' title='Flaticon'> www.flaticon.com</a> and edited by Gavin Leavitt")
 // Add beach report records as geoJSON to map
 beachreports = L.geoJSON(waterquality_geojson, {
 // Create custom icons for each point, depending on its open status

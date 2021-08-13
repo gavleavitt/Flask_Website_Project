@@ -16,6 +16,22 @@ function createChart(beachName){
       }
     resizePopupforChart()
     var parsedData = parseBeachData(beachHistory);
+
+
+    // Set size variables depending on screen size
+
+    if (window.innerWidth <= 500){
+      titlesize = 12
+      pointradius = 9
+      axespadding = 2
+      axesfontsize = 10
+    } else {
+      titlesize = 15
+      pointradius = 10
+      axespadding = 10
+      axesfontsize = 12
+    };
+
     // https://stackoverflow.com/questions/43090102/chartjs-mapping-non-numeric-y-and-x
     // console.log("Creating new chart!")
     historyChart = new Chart(historyChartDiv, {
@@ -45,7 +61,7 @@ function createChart(beachName){
           display: true,
           text: [beachName,"(Click Point to Download Report)"],
           padding: 15,
-          fontSize: 15
+          fontSize: titlesize
         },
         legend: {
           display: false
@@ -55,7 +71,8 @@ function createChart(beachName){
           xAxes: [{
             ticks:{
               fontStyle: 'bold',
-              padding: 10
+              padding: axespadding,
+              fontSize: axesfontsize
             }
           }],
           yAxes:[{
@@ -63,14 +80,15 @@ function createChart(beachName){
             position: "left",
             ticks:{
               labels: ["Open","Warning", "Closed"],
-              padding: 10,
-              fontStyle: 'bold'
+              padding: axespadding,
+              fontStyle: 'bold',
+              fontSize: axesfontsize
             }
           }]
         },
         elements:{
           point:{
-            radius: 10,
+            radius: pointradius,
             hoverRadius: 15,
             pointStyle: function(context){
               var index = context.dataIndex;
@@ -119,9 +137,15 @@ function parseBeachData(beachHistory){
   pdfLink = []
   // pdfDate = []
   // console.log(beachHistory)
-  for (i of Object.keys(beachHistory)){
+  beacharray = Object.keys(beachHistory)
+  if (window.innerWidth <= 500){
+    // Limit results to 5 if on a small screen
+    beacharray = beacharray .slice(4,9)
+  };
+  for (i of beacharray){
     // console.log(beachHistory[i])
     // dataY.push(moment(beachHistory[i].date, 'DD-MM-YY').toDate());
+
     dataX.push(moment(beachHistory[i].date, 'YYYY-MM-DD').format("MMM-DD-YY"));
     dataY.push(beachHistory[i].status)
     pdfLink.push(beachHistory[i].s3PDFURL)
@@ -144,12 +168,25 @@ function resizePopupforChart(){
   // })
   var popupContent = document.getElementsByClassName('leaflet-popup-content-wrapper')
   var historyContent = document.getElementById('hist-content')
-  popupContent[0].style.width = "500px";
-  historyContent.style.width = "400px";
+  var contextArrow = document.getElementsByClassName('leaflet-popup-tip-container')[0]
+  if (window.innerWidth <= 500){
+    popupContent[0].style.width = "350px";
+    contextArrow.style.marginLeft = "-41px";
+    historyContent.style.width = "340px";
+  } else {
+    popupContent[0].style.width = "500px";
+    contextArrow.style.marginLeft = "-101px";
+    historyContent.style.width = "400px";
+
+  };
+
+  // popupContent[0].style.width = "500px";
+  // historyContent.style.width = "400px";
   popupContent[0].style.height = "300px";
   historyContent.style.height = "200px";
-  var contextArrow = document.getElementsByClassName('leaflet-popup-tip-container')[0]
-  contextArrow.style.marginLeft = "-101px";
+  // historyContent.style.width = "400px";
+
+
   var textContent = document.getElementById('text-content');
   textContent.style.display = "none";
   // see: https://leafletjs.com/reference-1.7.1.html#popup-update
