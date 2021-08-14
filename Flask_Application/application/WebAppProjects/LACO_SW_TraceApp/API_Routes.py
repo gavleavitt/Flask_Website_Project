@@ -34,13 +34,13 @@ INTO TEMP TABLE sp
 FROM
 	storm_network_vertices_pgr as node
 WHERE
-	st_intersects(ST_Snap(ST_SetSRID( ST_Point(6466816.860,1847607.920), 2229),node.the_geom, 100), node.the_geom)
+	st_intersects(ST_Snap(ST_Transform(ST_SetSRID(ST_Point(:lon, :lat), 4326),2229),node.the_geom, 100), node.the_geom)
 ORDER BY 
-	node.the_geom <-> ST_SetSRID( ST_Point(6466816.860,1847607.920), 2229)
+	node.the_geom <-> ST_Transform(ST_SetSRID(ST_Point(:lon, :lat), 4326),2229)
 LIMIT 1;
 
 SELECT sp.id, nodes.*  INTO TEMP TABLE traceresults from sp, pgr_drivingDistance(
-        'SELECT id, source, target, -1 as cost, reverse_cost FROM storm_network',
+        :directionSQL,
         sp.id, 999999, true) AS nodes;
 		
 SELECT
@@ -90,10 +90,12 @@ FROM
     # Execute raw SQL query with parameters
     results = db.session.execute(sql, {"lat": lat, "lon": lon, "directionSQL":directionSQL})
     startpoint = None
+    id = 1
     for i in results:
         propDict = {}
         propDict['factype'] = i.factype
-        propDict['id'] = i.uuid
+        # propDict['id'] = i.uuid
+        propDict['id'] = id
         # propDict['factype'] = "g1234"
         propDict['cost'] = i.cost
         geojsonGeom = geojson.loads(i.geojson)
@@ -103,6 +105,7 @@ FROM
             pointfeatures.append(Feature(geometry=Point(geojsonGeom), properties=propDict))
         elif i.geomtype == "LINESTRING":
             linefeatures.append(Feature(geometry=MultiLineString(geojsonGeom), properties=propDict))
+        id += 1
     # Format json response, will have nested geojson data
     lineCollection = FeatureCollection(linefeatures)
     pointsCollection = FeatureCollection(pointfeatures)

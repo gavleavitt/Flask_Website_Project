@@ -10,9 +10,9 @@ const pointResultRenderer = {
     label: "Inlet",
     symbol: {
       type: "simple-marker",  // autocasts as new SimpleMarkerSymbol()
-      size: 4,
+      size: 8,
       style: "square",
-      color: "blue"
+      color: "#0007cf"
       // outline: {  // autocasts as new SimpleLineSymbol()
       //   width: 1,
       //   color: "white"
@@ -23,24 +23,30 @@ const pointResultRenderer = {
     label: "Maintenance Holes",
     symbol: {
       type: "simple-marker",  // autocasts as new SimpleMarkerSymbol()
-      size: 4,
-      color: "red",
+      size: 10,
+      color:  [235, 227, 0],
       outline: {  // autocasts as new SimpleLineSymbol()
-        width: 1,
-        color: "white"
+        width: 4,
+        color: "black"
       }
     }
-    // symbol: getUniqueValueSymbol("/static/icons_images/manhole_yellow.svg")
+    // fix link to make work:
+    // symbol:{
+    //   type: 'picture-marker',
+    //   url: "/static/icons_images/manhole_yellow.svg",
+    //   width: '20px',
+    //   height: '20px'
+    // }
   }, {
     value: "Outlets",
     label: "Outlet",
     symbol: {
       type: "simple-marker",  // autocasts as new SimpleMarkerSymbol()
-      size: 4,
+      size: 14,
       color: "red",
       outline: {  // autocasts as new SimpleLineSymbol()
-        width: 1,
-        color: "white"
+        width: 4,
+        color: "black"
       }
     }
   }]
@@ -57,17 +63,21 @@ const lineResultRenderer = {
     label: "Laterals",
     symbol: {
       type: "simple-line",
-      color: "#1bcc4a",
-      width: "6px",
-      style: "solid"
+      // color: "#1bcc4a",
+      color: [0, 207, 65, 0.25],
+      width: "8px",
+      style: "solid",
+      opacity: "0.75"
     }
   }, {
     value: "Gravity Mains",
     label: "Gravity Mains",
     symbol: {
       type: "simple-line",
-      color: "#0f1cd4",
-      width: "6px",
+      join: "miter",
+      // color: "209, 6, 20",
+      color: [209, 6, 20, 0.25],
+      width: "8px",
       style: "solid"
     }
   },{
@@ -77,7 +87,22 @@ const lineResultRenderer = {
       type: "simple-line",
       color: "#d40f0f",
       width: "6px",
-      style: "solid"
+      style: "solid",
+      opacity: "0.5"
     }
   }]
+};
+
+let startrenderer = {
+  type: "simple",  // autocasts as new SimpleRenderer()
+  symbol: {
+    type: "simple-marker",  // autocasts as new SimpleMarkerSymbol()
+    size: 20,
+    style: "x",
+    color: "red",
+    outline: {  // autocasts as new SimpleLineSymbol()
+      width: 10,
+      color: "red"
+    }
+  }
 };

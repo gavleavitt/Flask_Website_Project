@@ -43,9 +43,12 @@
       var userLat = null
       var userlon = null
       var geojsonData = null
+      var map = null
+      var view = null
       require(["esri/config","esri/Map",  "esri/layers/VectorTileLayer", "esri/views/MapView", "esri/layers/TileLayer", "esri/Graphic",
-        "esri/layers/GraphicsLayer", "esri/layers/WebTileLayer", "esri/layers/GeoJSONLayer", "esri/symbols/SimpleMarkerSymbol", "esri/renderers/UniqueValueRenderer"],
-        function (esriConfig,Map, VectorTileLayer, MapView, TileLayer, Graphic, GraphicsLayer, WebTileLayer, GeoJSONLayer, SimpleMarkerSymbol, UniqueValueRenderer) {
+        "esri/layers/GraphicsLayer", "esri/layers/WebTileLayer", "esri/layers/GeoJSONLayer", "esri/symbols/SimpleMarkerSymbol", "esri/renderers/UniqueValueRenderer", "esri/renderers/SimpleRenderer", "esri/widgets/LayerList", "esri/layers/GroupLayer"],
+        function (esriConfig,Map, VectorTileLayer, MapView, TileLayer, Graphic, GraphicsLayer, WebTileLayer,
+          GeoJSONLayer, SimpleMarkerSymbol, UniqueValueRenderer, SimpleRenderer, LayerList, GroupLayer) {
             esriConfig.apiKey = "AAPK5f601af9967543d6bc498db5a6b0f84bpHLpA-1hb11KUYm2IfzgmzBATsNlgD24Rjueqj2sKqaVsz3d6vU-6-l1yb-0YTi3";
             console.log("Loading vector tiles!")
             const gravitymainstiles = new VectorTileLayer({
@@ -62,36 +65,6 @@
               zoom: 13, // Zoom level
               container: "viewDiv", // Div element
             });
-
-
-            const graphicsLayer = new GraphicsLayer();
-            map.add(graphicsLayer);
-
-            const point = { //Create a point
-             type: "point",
-             longitude:-118.167416,
-             latitude:33.784257
-            };
-            const simpleMarkerSymbol = {
-               type: "simple-marker",
-               color: [226, 119, 40],  // Orange
-               outline: {
-                   color: [255, 255, 255], // White
-                   width: 10
-               }
-            };
-            const pointGraphic = new Graphic({
-               geometry: point,
-               symbol: simpleMarkerSymbol
-            });
-            graphicsLayer.add(pointGraphic);
-
-
-            // User selection layer, will be populated with points
-            // const selectionLayer = new GraphicsLayer();
-            var selectionLayer = new GraphicsLayer();
-            // Add empty selection layer to map
-            map.add(selectionLayer);
 
             const selectionMarkerSymbol = {
                type: "simple-marker",
@@ -118,25 +91,23 @@
               if (btnActive === "active"){
                 console.log("Selection is active!")
                 const selectionpoint = new Graphic({
-                   geometry: {
+                  title:"Start Point",
+                  geometry: {
                      type: "point",
                      longitude: event.mapPoint.longitude,
                      latitude: event.mapPoint.latitude
                    },
                    symbol: selectionMarkerSymbol
                 });
-
-                selectionLayer.add(selectionpoint);
+                const selectionLayer = new GraphicsLayer({
+                  id: "selectionLayer",
+                  title: "Selected Start Point",
+                  graphics: [selectionpoint]
+                });
+                // selectionLayer.add(selectionpoint);
+                map.add(selectionLayer)
                 btnActive = null
               }
-              // view.on("pointer-move", (event)=>{
-              //   console.log(btnActive);
-              //   if (btnActive === "active"){
-              //     document.body.style.cursor = "crosshair"
-              //   } else {
-              //       document.body.style.cursor = "default"
-              //     }
-              //   });
                 document.addEventListener("pointermove", function(){
                   if (btnActive === "active"){
                     document.body.style.cursor = "crosshair"
@@ -144,52 +115,53 @@
                       document.body.style.cursor = "default"
                     }
                 });
-              // If the Select button is active add a point to cursor location then
-              // deactive it
-              // if (document.querySelector('#selBtn').classList.contains('active')){
-              //   console.log("Selection is active!")
-              //   const selectionpoint = new Graphic({
-              //      geometry: {
-              //        type: "point",
-              //        longitude: event.mapPoint.longitude,
-              //        latitude: event.mapPoint.latitude
-              //      },
-              //      symbol: selectionMarkerSymbol
-              //   });
-              //
-              //   selectionLayer.add(selectionpoint);
-              //
-              //   document.querySelector('#selBtn').classList.remove('active')
-              // }
             });
             document.getElementById("selBtn").addEventListener("click", function(){
                   console.log("selection active!")
                   // Clear out existing graphic layers
-                  selectionLayer.removeAll()
+                  // if (typeof selectionLayer != "undefined"){
+                  //   selectionLayer.removeAll();
+                  // };
+                  map.removeLayer(map.getLayer("selectionLayer"));
+                  map.removeLayer(map.getLayer("resultslayer"));
                   userLat = null
                   userlon = null
-                  // Add active status to select button
-                  // document.getElementById(btn).classList.add('active')
                   btnActive = "active"
-                  console.log(btnActive)
-                  // On click remove active status
             });
             document.getElementById("clearBtn").addEventListener("click", function(){
                   // Clear out existing graphic layers
-                  selectionLayer.removeAll()
+                  map.removeLayer(map.getLayer("selectionLayer"));
+                  map.removeLayer(map.getLayer("resultslayer"));
+                  console.log(map);
+                  // map.removeLayer(selectionLayer);
+                  // map.removeLayer(resultslayer);
+                  // if (typeof resultslayer != "undefined"){
+                  //   console.log("results layer exists, removing")
+                  //   // selectionpoint.removeAll();
+                  //   map.removeLayer(selectionpoint);
+                  //   map.removeLayer(resultslayer);
+                  //   // resultslayer.removeAll();
+                  // };
                   userLat = null
                   userlon = null
                   btnActive = null
             });
+
+            const layerList = new LayerList({
+              view
+            });
+
+            view.ui.add(layerList, "top-right");
+
             document.getElementById("submitBtn").addEventListener("click", function(){
                   // Clear out existing graphic layers
                   // Get coordinates from user selection
                   // Get the active radio selection to determine flow direction
                   radioGrp = document.querySelector('#directionGrp');
                   traceDirection = radioGrp.querySelectorAll(":checked")[0].defaultValue;
-                  console.log(userLat)
-                  console.log(userLong)
-                  console.log(traceDirection)
+                  // console.log(userLat)
+                  // console.log(userLong)
+                  // console.log(traceDirection)
                   var url = new URL('http://api.leavitttesting.com:5000/api/v1/trace/lacostormwater')
                   // var url = new URL('/api/v1/trace/lacostormwater')
                   var params = {"latitude":userLat, "longitude":userLong, "direction":traceDirection}
@@ -207,19 +179,37 @@
                     // geojsonData = data
                     // load geojson data as a layer
                     // see https://gis.stackexchange.com/questions/373811/create-geojson-layer-based-on-remote-server-request-arcgis-js-api
+
                     const lineblob = new Blob([JSON.stringify(data['lines'])], {type: "application/json"});
                     const lineurl  = URL.createObjectURL(lineblob);
                     const resultLines = new GeoJSONLayer({
-                      url:lineurl
+                      url:lineurl,
+                      title:"Underground Drainage Results",
+                      renderer:lineResultRenderer
                     });
-                    map.add(resultLines);
+                    // map.add(resultLines);
                     const pointblob = new Blob([JSON.stringify(data['points'])], {type: "application/json"});
                     const pointurl  = URL.createObjectURL(pointblob);
                     const resultpoints = new GeoJSONLayer({
                       url:pointurl,
+                      title: "Structure Results",
                       renderer: pointResultRenderer
                     });
-                    map.add(resultpoints);
+                    // map.add(resultpoints);
+                    const startblob = new Blob([JSON.stringify(data['startpoint'])], {type: "application/json"});
+                    const starturl  = URL.createObjectURL(startblob);
+                    const startpoint = new GeoJSONLayer({
+                      url:starturl,
+                      title: "Trace Start Point",
+                      renderer: startrenderer
+                    });
+                    // map.add(startpoints);
+                    const resultslayer = new GroupLayer({
+                      id: "resultslayer",
+                      title: "Trace Results",
+                      layers: [startpoint, resultpoints, resultLines]
+                    });
+                    map.add(resultslayer);
                   })
                   .catch(error =>{
                     console.log(error)
