@@ -1,0 +1,32 @@
+html,
+body,
+#viewDiv {
+  padding: 0;
+  margin: 0;
+  height: 100%;
+  width: 100%;
+}
+.button-grp{
+  display: flex;
+  /* flex-flow: row wrap; */
+  justify-content: center;
+}
+.flex-line2{
+  width: 100%
+}
+.tool-btn{
+  padding:5px;
+}
+.line-break {
+  width: 100%;
+}
+#query-text{
+  display: none;
+}
+#accordion-grp{
+  display: none;
+}
+
+calcite-block{
+  margin-bottom: 0px;
+}

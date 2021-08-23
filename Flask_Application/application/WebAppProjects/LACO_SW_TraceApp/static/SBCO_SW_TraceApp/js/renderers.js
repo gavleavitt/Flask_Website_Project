@@ -64,8 +64,8 @@ const lineResultRenderer = {
     symbol: {
       type: "simple-line",
       // color: "#1bcc4a",
-      color: [0, 207, 65, 0.25],
-      width: "8px",
+      color: [0, 207, 65, 0.50],
+      width: "10px",
       style: "solid",
       opacity: "0.75"
     }
@@ -76,8 +76,8 @@ const lineResultRenderer = {
       type: "simple-line",
       join: "miter",
       // color: "209, 6, 20",
-      color: [209, 6, 20, 0.25],
-      width: "8px",
+      color: [209, 6, 20, 0.50],
+      width: "10px",
       style: "solid"
     }
   },{

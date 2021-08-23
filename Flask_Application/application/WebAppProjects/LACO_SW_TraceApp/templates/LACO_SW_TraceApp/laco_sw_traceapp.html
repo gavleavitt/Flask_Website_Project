@@ -6,37 +6,18 @@
     <title>LA County Stormwater System Trace Application</title>
     <!-- Custom local javascript -->
     <script src="{{ url_for('lacoSWTraceapp_API_BP.static', filename='SBCO_SW_TraceApp/js/renderers.js') }}"></script>
-    <style>
-      html,
-      body,
-      #viewDiv {
-        padding: 0;
-        margin: 0;
-        height: 100%;
-        width: 100%;
-      }
-      .button-grp{
-        display: flex;
-        /* flex-flow: row wrap; */
-        justify-content: center;
-      }
-      .flex-line2{
-        width: 100%
-      }
-      .tool-btn{
-        padding:5px;
-      }
-      .line-break {
-        width: 100%;
-      }
-    </style>
+    <!-- Custom local CSS -->
+    <link rel="stylesheet" href="{{ url_for('lacoSWTraceapp_API_BP.static', filename='SBCO_SW_TraceApp/css/customCSS.css') }}">
+
     <link rel="stylesheet" href="https://js.arcgis.com/4.20/esri/themes/light/main.css">
     <script src="https://js.arcgis.com/4.20/"></script>
 
     <!-- Calcite -->
-    <script type="module" src="https://js.arcgis.com/calcite-components/1.0.0-beta.52/calcite.esm.js"></script>
+    <!-- <script type="module" src="https://js.arcgis.com/calcite-components/1.0.0-beta.52/calcite.esm.js"></script> -->
     <script nomodule="" src="https://js.arcgis.com/calcite-components/1.0.0-beta.52/calcite.js"></script>
-    <link rel="stylesheet" type="text/css" href="https://js.arcgis.com/calcite-components/1.0.0-beta.52/calcite.css" />
+    <script type="module" src=https://js.arcgis.com/calcite-components/1.0.0-beta.61/calcite.esm.js></script>
+    <!-- <link rel="stylesheet" type="text/css" href="https://js.arcgis.com/calcite-components/1.0.0-beta.52/calcite.css" /> -->
+    <link rel="stylesheet" type="text/css" href=https://js.arcgis.com/calcite-components/1.0.0-beta.61/calcite.css />
 
     <script>
       var btnActive = null
@@ -45,19 +26,67 @@
       var geojsonData = null
       var map = null
       var view = null
+      var layerList = null
+      // var selectionLayer = null
+      // var resultslayer = null
       require(["esri/config","esri/Map",  "esri/layers/VectorTileLayer", "esri/views/MapView", "esri/layers/TileLayer", "esri/Graphic",
         "esri/layers/GraphicsLayer", "esri/layers/WebTileLayer", "esri/layers/GeoJSONLayer", "esri/symbols/SimpleMarkerSymbol", "esri/renderers/UniqueValueRenderer", "esri/renderers/SimpleRenderer", "esri/widgets/LayerList", "esri/layers/GroupLayer"],
         function (esriConfig,Map, VectorTileLayer, MapView, TileLayer, Graphic, GraphicsLayer, WebTileLayer,
           GeoJSONLayer, SimpleMarkerSymbol, UniqueValueRenderer, SimpleRenderer, LayerList, GroupLayer) {
             esriConfig.apiKey = "AAPK5f601af9967543d6bc498db5a6b0f84bpHLpA-1hb11KUYm2IfzgmzBATsNlgD24Rjueqj2sKqaVsz3d6vU-6-l1yb-0YTi3";
             console.log("Loading vector tiles!")
-            const gravitymainstiles = new VectorTileLayer({
-               url: "https://vectortileservices3.arcgis.com/NfAw5Z474Q8vyMGv/arcgis/rest/services/GravityMains_Stylized/VectorTileServer"
-             });
+
+            var selectionLayer = new GraphicsLayer();
+            var resultslayer = new GroupLayer();
+
+            // const gravitymainstiles2 = new VectorTileLayer({
+            //   title: "Gravity Mains",
+            //   url: "https://vectortileservices3.arcgis.com/NfAw5Z474Q8vyMGv/arcgis/rest/services/GravityMains_Stylized/VectorTileServer"
+            //  });
+
+            // const gravitymainstiles3 = new VectorTileLayer({
+            //   title: "Gravity Mains",
+            //   url: "https://vectortileservices3.arcgis.com/NfAw5Z474Q8vyMGv/arcgis/rest/services/laco_gravitymains_vt/VectorTileServer"
+            //  });
+
+             const gravitymainstiles = new VectorTileLayer({
+               title: "Gravity Mains",
+               url: "https://vectortileservices3.arcgis.com/NfAw5Z474Q8vyMGv/arcgis/rest/services/LACO_GravityMains_VTL/VectorTileServer"
+              });
+
+             const lateraltiles = new VectorTileLayer({
+               title: "Laterals",
+              url: "https://vectortileservices3.arcgis.com/NfAw5Z474Q8vyMGv/arcgis/rest/services/Laterals/VectorTileServer"
+              });
+
+              const inlettiles = new VectorTileLayer({
+                title: "Inlets",
+                url: "https://vectortileservices3.arcgis.com/NfAw5Z474Q8vyMGv/arcgis/rest/services/Inlets/VectorTileServer",
+                minScale: 29356
+               });
+
+               const mhtiles = new VectorTileLayer({
+                 title: "Maintenance Holes",
+                 url: "https://vectortileservices3.arcgis.com/NfAw5Z474Q8vyMGv/arcgis/rest/services/MaintenanceH_oles/VectorTileServer",
+                 minScale: 29356
+                });
+
+                const ottiles = new VectorTileLayer({
+                  title: "Outlets",
+                  url: "https://vectortileservices3.arcgis.com/NfAw5Z474Q8vyMGv/arcgis/rest/services/Outlets/VectorTileServer",
+                  minScale: 29356
+                 });
+
+
+            const networklayer = new GroupLayer({
+                id: "networklayer",
+                title: "Storm Network",
+                layers: [gravitymainstiles, lateraltiles, inlettiles, mhtiles, ottiles]
+              });
 
             const map = new Map({
               basemap: "arcgis-topographic", // Basemap layer service
-              layers: [gravitymainstiles] // vector tile layer
+              layers: [networklayer] // vector tile layer
             });
             const view = new MapView({
               map: map,
@@ -85,6 +114,7 @@
               console.log("y:", event.mapPoint.latitude.toFixed(5));
               console.log("x:", event.mapPoint.x.toFixed(2));
               console.log("y:", event.mapPoint.y.toFixed(2));
+              document.getElementById("NoSelAlert").removeAttribute('active')
               // Set global variables of user's selection:
               userLong = event.mapPoint.longitude
               userLat = event.mapPoint.latitude
@@ -99,7 +129,7 @@
                    },
                    symbol: selectionMarkerSymbol
                 });
-                const selectionLayer = new GraphicsLayer({
+                selectionLayer = new GraphicsLayer({
                   id: "selectionLayer",
                   title: "Selected Start Point",
                   graphics: [selectionpoint]
@@ -122,32 +152,37 @@
                   // if (typeof selectionLayer != "undefined"){
                   //   selectionLayer.removeAll();
                   // };
-                  map.removeLayer(map.getLayer("selectionLayer"));
-                  map.removeLayer(map.getLayer("resultslayer"));
+                  // map.removeLayer(map.getLayer("selectionLayer"));
+                  // map.removeLayer(map.getLayer("resultslayer"));
+                  // const removelayers = map.allLayers.find(function(layer) {
+                  //   return layer.title === "Selected Start Point";
+                  // });
+                  const removelayers = map.allLayers.find(function(layer) {
+                    map.remove(layer.title === "Selected Start Point");
+                    map.remove(layer.title === "Trace Results");
+                    // return [layer.title === "Selected Start Point",
+                    //   layer.title === "Trace Results"]
+                  });
+                  map.removeMany(removelayers)
+                  // console.log(foundLayer);
+                  // map.removeMany([selectionLayer, resultslayer])
                   userLat = null
                   userlon = null
                   btnActive = "active"
             });
             document.getElementById("clearBtn").addEventListener("click", function(){
-                  // Clear out existing graphic layers
-                  map.removeLayer(map.getLayer("selectionLayer"));
-                  map.removeLayer(map.getLayer("resultslayer"));
-                  console.log(map);
-                  // map.removeLayer(selectionLayer);
-                  // map.removeLayer(resultslayer);
-                  // if (typeof resultslayer != "undefined"){
-                  //   console.log("results layer exists, removing")
-                  //   // selectionpoint.removeAll();
-                  //   map.removeLayer(selectionpoint);
-                  //   map.removeLayer(resultslayer);
-                  //   // resultslayer.removeAll();
-                  // };
+
+                  map.remove(selectionLayer);
+                  map.remove(resultslayer);
+                  view.graphics.remove(selectionLayer);
+                  view.graphics.remove(resultslayer);
+                  document.getElementById("NoSelAlert").removeAttribute('active');
                   userLat = null
                   userlon = null
                   btnActive = null
             });
 
-            const layerList = new LayerList({
+            layerList = new LayerList({
               view
             });
 
@@ -155,6 +190,17 @@
 
             document.getElementById("submitBtn").addEventListener("click", function(){
                   // Clear out existing graphic layers
+                  map.remove(selectionLayer);
+                  map.remove(resultslayer);
+                  // Check if a point has been clicked, if not return message
+                  if (userLat === null){
+                    //Turn alert on
+                    console.log("No selection!")
+                    // document.getElementById("NoSelAlert").classList.add("is-active");
+                    document.getElementById("NoSelAlert").setAttribute('active','')
+                    return;
+                  }
+                  document.getElementById("NoSelAlert").removeAttribute('active')
                   // Get coordinates from user selection
                   // Get the active radio selection to determine flow direction
                   radioGrp = document.querySelector('#directionGrp');
@@ -167,6 +213,8 @@
                   var params = {"latitude":userLat, "longitude":userLong, "direction":traceDirection}
                   url.search = new URLSearchParams(params).toString();
                   // console.log(url);
+                  // Set Query text to active
+                  document.querySelector('#query-text').style.display = "block";
                   fetch(url, {method: "GET",
                     mode: 'cors'})
                   .then(r => {
@@ -175,7 +223,7 @@
                   })
                   .then(function(data){
                     // Process data, this needs to be a separate .then() to get the data out of the Promise object
-                    console.log(data);
+                    // console.log(data);
                     // geojsonData = data
                     // load geojson data as a layer
                     // see https://gis.stackexchange.com/questions/373811/create-geojson-layer-based-on-remote-server-request-arcgis-js-api
@@ -204,22 +252,40 @@
                       renderer: startrenderer
                     });
                     // map.add(startpoints);
-                    const resultslayer = new GroupLayer({
+                    resultslayer = new GroupLayer({
                       id: "resultslayer",
                       title: "Trace Results",
-                      layers: [startpoint, resultpoints, resultLines]
+                      layers: [resultLines, startpoint, resultpoints]
                     });
                     map.add(resultslayer);
+                    console.log(resultLines)
+                    resultLines.queryExtent().then((response) => {
+                      view.goTo(response.extent);
+                    });
+                    // Set Query text to inactive
+                    document.querySelector('#query-text').style.display = "none";
                   })
                   .catch(error =>{
                     console.log(error)
                     console.log("Server request error!")
+                    // Set query text to error
+                    document.querySelector('#query-text').style.display = "none";
                   });
             });
         });
     </script>
   </head>
   <body>
+    <div>
+      <calcite-alert id="NoSelAlert" icon="information">
+        <div slot="title">Error - No Map Selection</div>
+        <div slot="message">Please select a map location before running the Trace Tool!</div>
+      </calcite-alert>
+      <calcite-alert id="NoResultAlert" color="red" icon="exclamation-mark-triangle">
+          <div slot="title">Error - No Data</div>
+          <div slot="message">No data was returned from the server, verify that the start location is near a point asset. If the error persists then the server may be unresponsive.</div>
+      </calcite-alert>
+    </div>
     <div id="viewDiv"></div>
     <div id="traceDiv">
       <calcite-block collapsible heading="Trace" open summary="Select Trace Direction">
@@ -231,6 +297,28 @@
           <calcite-button id="selBtn" button-alignment="center" round width="half" scale="s" icon-start="object-detection" color="blue" class="tool-btn">Select Location</calcite-button>
           <calcite-button id="submitBtn" button-alignment="center" round width="half" scale="s" icon-start="submit" color="red" class="tool-btn">Run</calcite-button>
           <calcite-button id="clearBtn" button-alignment="center" round width="half" scale="s" icon-start="reset" color="neutral" class="tool-btn">Clear</calcite-button>
+        </div>
+        <div id="query-text">
+          <b>Sending request to server</b>
+        </div>
+        <div id="accordion-grp">
+          <calcite-accordion>
+            <calcite-accordion-item icon="plane" item-title="Outlets" item-subtitle="">
+              Feature Count
+            </calcite-accordion-item>
+            <calcite-accordion-item icon="embark" item-title="Inlets" item-subtitle="">
+              Feature Count
+            </calcite-accordion-item>
+            <calcite-accordion-item icon="car" item-title="Maintenance Holes" item-subtitle="">
+              Feature Count
+            </calcite-accordion-item>
+            <calcite-accordion-item icon="plane" item-title="Gravity Mains" item-subtitle="">
+              Feature Count
+            </calcite-accordion-item>
+            <calcite-accordion-item icon="plane" item-title="Laterals" item-subtitle="">
+              Feature Count
+            </calcite-accordion-item>
+          </calcite-accordion>
         </div>
       </calcite-block>
     </div>
