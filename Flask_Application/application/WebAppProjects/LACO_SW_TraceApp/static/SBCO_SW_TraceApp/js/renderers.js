@@ -12,7 +12,8 @@ const pointResultRenderer = {
       type: "simple-marker",  // autocasts as new SimpleMarkerSymbol()
       size: 8,
       style: "square",
-      color: "#0007cf"
+      // color: "#0007cf"
+      color: [0, 7, 209, 0.60]
       // outline: {  // autocasts as new SimpleLineSymbol()
       //   width: 1,
       //   color: "white"
@@ -24,7 +25,7 @@ const pointResultRenderer = {
     symbol: {
       type: "simple-marker",  // autocasts as new SimpleMarkerSymbol()
       size: 10,
-      color:  [235, 227, 0],
+      color:  [235, 227, 0, 0.60],
       outline: {  // autocasts as new SimpleLineSymbol()
         width: 4,
         color: "black"

@@ -2,6 +2,8 @@ from flask import Blueprint, request, jsonify, Response
 from application import application, Session, db
 import geojson
 from geojson import Feature, FeatureCollection, MultiLineString, Point
+from application.WebAppProjects.LACO_SW_TraceApp import DomainLookUps
+
 
 lacoSWTraceapp_API_BP = Blueprint('lacoSWTraceapp_API_BP', __name__,
                         template_folder='templates',
@@ -44,42 +46,42 @@ SELECT sp.id, nodes.*  INTO TEMP TABLE traceresults from sp, pgr_drivingDistance
         sp.id, 999999, true) AS nodes;
 		
 SELECT
-	mh.uuid, st_asgeojson(st_transform(mh.geom, 4326)) as geojson, mh.factype as factype, tr.cost as cost, GeometryType(mh.geom) as geomtype
+	mh.uuid, st_asgeojson(st_transform(mh.geom, 4326)) as geojson, mh.factype as factype,  tr.cost as cost, "DWGNO" as dwgno, NULL as size, "EQNUM" as facid, NULL as material, CAST("SUBTYPE" as text) as subtype, GeometryType(mh.geom) as geomtype
 FROM 
 	maintenanceholes mh, traceresults as tr
 WHERE
 	(mh.node_fk = tr.node)
 UNION
 select 
-	i.uuid, st_asgeojson(st_transform(i.geom, 4326)) as geojson, i.factype as factype, tr.cost as cost, GeometryType(i.geom) as geomtype
+	i.uuid, st_asgeojson(st_transform(i.geom, 4326)) as geojson, i.factype as factype, tr.cost as cost, dwgno, NULL as size, eqnum as facid, NULL as material, CAST(stnd_plan as text) as subtype, GeometryType(i.geom) as geomtype
 FROM 
 	inlets i, traceresults as tr
 WHERE
 	(i.node_fk = tr.node)
 UNION
 select 
-	ol.uuid, st_asgeojson(st_transform(ol.geom, 4326)) as geojson, ol.factype as factype, tr.cost as cost, GeometryType(ol.geom) as geomtype 
+	ol.uuid, st_asgeojson(st_transform(ol.geom, 4326)) as geojson, ol.factype as factype, tr.cost as cost, dwgno, CAST(diameter_h as text) as size, outfall_id as facid, CAST(material as text) as material, CAST(cross_sect as text) as subtype, GeometryType(ol.geom) as geomtype 
 FROM 
 	outlets ol, traceresults as tr
 WHERE
 	(ol.node_fk = tr.node)
 UNION
 SELECT
-	gm.uuid, st_asgeojson(st_transform(gm.geom, 4326)) as geojson, gm.factype as factype,  tr.cost as cost, GeometryType(gm.geom) as geomtype
+	gm.uuid, st_asgeojson(st_transform(gm.geom, 4326)) as geojson, gm.factype as factype,  tr.cost as cost, NULL as dwgno, CAST(diameter_h as text) as size, eqnum as facid,CAST(material as text) as material, CAST(subtype as text) as subtype, GeometryType(gm.geom) as geomtype
 FROM 
 	gravitymainssplit gm, traceresults as tr
 WHERE
 	(gm.edge_fk = tr.edge)
 UNION
 SELECT
-	l.uuid, st_asgeojson(st_transform(l.geom, 4326)) as geojson, l.factype as factype,  tr.cost as cost, GeometryType(l.geom) as geomtype  
+	l.uuid, st_asgeojson(st_transform(l.geom, 4326)) as geojson, l.factype as factype,  tr.cost as cost, "DWGNO" as dwgno, CAST("DIAMETER_H" as text) as size, "EQNUM" as facid, CAST("MATERIAL" as text) as material, CAST("SUBTYPE" as text) as subtype, GeometryType(l.geom) as geomtype  
 FROM 
 	laterals l, traceresults as tr
 WHERE
 	(l.edge_fk = tr.edge)
 UNION
 SELECT
-	NULL as uuid, st_asgeojson(st_transform(sp.geom, 4326)) as geojson, 'startpoint' as factype,  '0' as cost, GeometryType(sp.geom) as geomtype
+	NULL as uuid, st_asgeojson(st_transform(sp.geom, 4326)) as geojson, 'startpoint' as factype,  '0' as cost, NULL as dwgno, NULL as size, NULL as facid, NULL as material, NULL as subtype, GeometryType(sp.geom) as geomtype
 FROM
 	sp
     """)
@@ -92,13 +94,27 @@ FROM
     startpoint = None
     id = 1
     for i in results:
+        # Populate properties for each feature
         propDict = {}
         propDict['factype'] = i.factype
-        # propDict['id'] = i.uuid
+        if i.factype == "Inlet":
+            application.logger.debug(str(i.subtype))
+            propDict['facsubtype'] = DomainLookUps.inletPlanLookUp(str(i.subtype))
+        else:
+            propDict['facsubtype'] = i.subtype
+        propDict['size'] = i.size
+        propDict['dwgno'] = i.dwgno
+        propDict['material'] = i.material
         propDict['id'] = id
-        # propDict['factype'] = "g1234"
+        if not i.facid:
+            propDict['facid'] = "Unknown"
+        else:
+            propDict['facid'] = i.facid
         propDict['cost'] = i.cost
+        propDict['uuid'] = i.uuid
+        # Load st_asgeojson query results as geojson data
         geojsonGeom = geojson.loads(i.geojson)
+        # Add to feature collection depending on factype, will return 3 geojson results
         if i.factype == "startpoint":
             startpoint = Feature(geometry=Point(geojsonGeom), properties=propDict)
         elif i.geomtype == "POINT":
@@ -109,6 +125,8 @@ FROM
     # Format json response, will have nested geojson data
     lineCollection = FeatureCollection(linefeatures)
     pointsCollection = FeatureCollection(pointfeatures)
+    # jsonify response to have 3 nested geojson results
     response = jsonify({"startpoint": startpoint, "lines": lineCollection, "points": pointsCollection})
+    # Add header to allow CORS
     response.headers.add('Access-Control-Allow-Origin', '*')
     return response

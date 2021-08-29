@@ -1,3 +1,8 @@
+:root {
+  --calcite-panel-max-height: 400px;
+  --calcite-panel-max-width: 300px
+}
+
 html,
 body,
 #viewDiv {
@@ -6,6 +11,28 @@ body,
   height: 100%;
   width: 100%;
 }
+
+#InletsWindow{
+  overflow: auto;
+}
+
+#InletsWindow calcite-icon{
+  color: #1400ff;
+}
+
+
+#MH-Window calcite-icon{
+  color: #b6c702;
+}
+
+#GM-Window calcite-icon{
+  color: #ed5151;
+}
+
+#Lat-Window calcite-icon{
+  color: #0070ff;
+}
+
 .button-grp{
   display: flex;
   /* flex-flow: row wrap; */
@@ -23,7 +50,7 @@ body,
 #query-text{
   display: none;
 }
-#accordion-grp{
+#results-grp{
   display: none;
 }
 
