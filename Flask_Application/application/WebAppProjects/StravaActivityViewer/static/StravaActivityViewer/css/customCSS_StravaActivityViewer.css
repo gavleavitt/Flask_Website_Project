@@ -656,9 +656,13 @@ This targets only fine pointers (mouse) for hover behavior, this prevents the ho
   }
 } */
 
+#chartgraphToggle{
+  display:none;
+}
 
 
 @media screen and (max-width: 1050px) {
+
   .chartToggle{
     padding-left: 6px;
     padding-right: 6px;
