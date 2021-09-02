@@ -151,6 +151,8 @@ def bulkprocess():
     """
     # Create topojson file
     application.logger.debug(f"Received request to bulk process!")
+    actionType = str(request.form['actionType'])
+    application.logger.debug(actionType)
 
 
 # @stravaActDashAPI_BP.route("/admin/stravacreatesub", methods=['POST'])

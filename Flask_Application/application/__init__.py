@@ -44,7 +44,8 @@ if application.config['ENV'] == "development":
     dirname = os.path.dirname(__file__)
     # handler = RotatingFileHandler(os.path.join(dirname, '../logs/application.log'), maxBytes=1024, backupCount=5)
     handler = logging.FileHandler(os.path.join(dirname, '../logs/application.log'))
-    app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get("DBCON_LOCAL")
+    # app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get("DBCON_LOCAL")
+    app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get("DBCON_PROD")
     # engine = create_engine(os.environ.get("DBCON_LOCAL"))
     localurl = "leavitttesting.com:5000"
     application.logger.debug(f"Setting up local development server name: {localurl}")

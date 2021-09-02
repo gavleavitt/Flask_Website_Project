@@ -169,3 +169,46 @@ $("#genTopoJSON").submit(function(event) {
     modal.find('#modalBody').html('Failed to update the TopoJSON for athlete <b>' + athID + '</b> wih the code: ' + response.status);
   });
 });
+
+// Re-process all Strava Stream Data
+$("#bulkProcess").submit(function(event) {
+  // Show loader
+  document.getElementById("loader-container").style.display = "block";
+  /* stop form from submitting normally, stops page from reloading */
+  event.preventDefault();
+  /* get the action attribute from the <form action=""> element, this is the POST URL */
+  var url = $(this).attr('action');
+  // Get athlete ID
+  var athID = $('#athIDInput').val()
+  // Get action type
+  var type = $("#bulkProcess input[type='checkbox']:checked").val();
+  // Send POST request
+  var postRequest = $.post(url, {
+    athID:athID,
+    actionType:type
+  });
+  //get modal
+  modal = $('#ResultsModal')
+  // Open modal with results
+  postRequest.done(function(data) {
+    // Hide loader
+    document.getElementById("loader-container").style.display = "none";
+    // Show modal
+    modal.modal('show');
+    // update title
+    modal.find('#modalTitle').text('Success!');
+    // update body
+    // modal.find('#modalBody').text('The TopoJSON for athelete ' + athID + 'has been updated!');
+    modal.find('#modalBody').html('The Stream Data for athelete <b>' + athID + '</b> has been re-generated!');
+  });
+  postRequest.fail(function(response) {
+    // Hide loader
+    document.getElementById("loader-container").style.display = "none";
+    // Show modal
+    modal.modal('show');
+    // update title
+    modal.find('#modalTitle').text('Failure!');
+    // update body
+    modal.find('#modalBody').html('Failed to regenerate the Strean Data for athlete <b>' + athID + '</b> wih the code: ' + response.status);
+  });
+});

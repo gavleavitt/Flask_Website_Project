@@ -12,6 +12,9 @@ from flask_httpauth import HTTPBasicAuth
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
 import os
+
+import application
+from application import application
 from application.util.flaskAuth.modelsAuth import Roles, User
 from application import Session
 # Sets up auth object, is modified by decorators further down the script and called when a 
@@ -103,10 +106,11 @@ def getroles(username):
     """
     session = Session()
     query = session.query(Roles.roles).filter(Roles.user == username).all()
-    res = ()
+    res = []
+    application.logger.debug(query)
     # Add query object results to tuple
     for row in query:
-        res += row
+        res.append(row[0])
     if len(res) == 0:
         res = None
     # Roles are stored as comma seperated strings
