@@ -33,7 +33,7 @@
     </div>
     <div id="viewDiv"></div>
     <div id="traceDiv">
-      <calcite-block collapsible heading="Trace" open summary="Select Trace Direction">
+      <calcite-block id="TraceToolTitle" collapsible heading="Trace Tool" open summary="Select Trace Direction">
         <calcite-radio-button-group id="directionGrp" layout="vertical" name="TraceType" >
             <calcite-radio-button checked value="downstream">Downstream</calcite-radio-button>
             <calcite-radio-button value="upstream">Upstream</calcite-radio-button>
@@ -49,11 +49,11 @@
         <!-- <calcite-flow id="results-grp"> -->
         <calcite-panel id="results-grp">
           <calcite-panel id="results" heading="Results">
-              <calcite-block heading="Outlets" collapsible>
+              <calcite-block id="OutletsWindow" heading="Outlets" collapsible>
                 <calcite-icon scale="s" slot="icon" icon="circle-f"></calcite-icon>
-                  <calcite-notice active>
-                      <!-- <div slot="message"></div> -->
-                  </calcite-notice>
+                  <!-- <calcite-notice active>
+                      <div slot="message"></div>
+                  </calcite-notice> -->
               </calcite-block>
               <calcite-block id="InletsWindow" heading="Inlets" collapsible>
                  <calcite-icon scale="s" slot="icon" icon="square-area"></calcite-icon>
@@ -63,19 +63,19 @@
               </calcite-block>
               <calcite-block id="MH-Window" heading="Maintenance Holes" collapsible>
                 <calcite-icon scale="s" slot="icon" icon="circle-area"></calcite-icon>
-                  <calcite-notice active>
-                      <!-- <div slot="message"></div> -->
-                  </calcite-notice>
+                  <!-- <calcite-notice active>
+                      <div slot="message"></div>
+                  </calcite-notice> -->
               </calcite-block>
               <calcite-block  id="GM-Window" heading="Gravity Mains" collapsible>
                 <calcite-icon scale="s" slot="icon" icon="line-solid"></calcite-icon>
-                  <calcite-notice active>
-                  </calcite-notice>
+                  <!-- <calcite-notice active>
+                  </calcite-notice> -->
               </calcite-block>
               <calcite-block id="Lat-Window" heading="Laterals" collapsible>
                 <calcite-icon scale="s" slot="icon" icon="line-solid"></calcite-icon>
-                  <calcite-notice active>
-                  </calcite-notice>
+                  <!-- <calcite-notice active>
+                  </calcite-notice> -->
               </calcite-block>
           </calcite-panel>
         </calcite-panel>

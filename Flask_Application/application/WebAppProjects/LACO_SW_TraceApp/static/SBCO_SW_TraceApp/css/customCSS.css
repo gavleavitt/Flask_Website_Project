@@ -20,6 +20,9 @@ body,
   color: #1400ff;
 }
 
+#TraceToolTitle .header{
+  font-size: 30px; 
+}
 
 #MH-Window calcite-icon{
   color: #b6c702;
@@ -30,7 +33,7 @@ body,
 }
 
 #Lat-Window calcite-icon{
-  color: #0070ff;
+  color: #02c718;
 }
 
 .button-grp{

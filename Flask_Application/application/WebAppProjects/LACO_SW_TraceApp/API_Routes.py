@@ -46,7 +46,7 @@ SELECT sp.id, nodes.*  INTO TEMP TABLE traceresults from sp, pgr_drivingDistance
         sp.id, 999999, true) AS nodes;
 		
 SELECT
-	mh.uuid, st_asgeojson(st_transform(mh.geom, 4326)) as geojson, mh.factype as factype,  tr.cost as cost, "DWGNO" as dwgno, NULL as size, "EQNUM" as facid, NULL as material, CAST("SUBTYPE" as text) as subtype, GeometryType(mh.geom) as geomtype
+	mh.uuid, st_asgeojson(st_transform(mh.geom, 4326)) as geojson, mh.factype as factype,  tr.cost as cost, "DWGNO" as dwgno, NULL as size, "JHSRC" as facid, CAST("MATERIAL" as text) as material, CAST("STND_PLAN" as text) as subtype, GeometryType(mh.geom) as geomtype
 FROM 
 	maintenanceholes mh, traceresults as tr
 WHERE
@@ -74,7 +74,7 @@ WHERE
 	(gm.edge_fk = tr.edge)
 UNION
 SELECT
-	l.uuid, st_asgeojson(st_transform(l.geom, 4326)) as geojson, l.factype as factype,  tr.cost as cost, "DWGNO" as dwgno, CAST("DIAMETER_H" as text) as size, "EQNUM" as facid, CAST("MATERIAL" as text) as material, CAST("SUBTYPE" as text) as subtype, GeometryType(l.geom) as geomtype  
+	l.uuid, st_asgeojson(st_transform(l.geom, 4326)) as geojson, l.factype as factype,  tr.cost as cost, "DWGNO" as dwgno, CAST("DIAMETER_H" as text) as size, "JHSRC" as facid, CAST("MATERIAL" as text) as material, CAST("SUBTYPE" as text) as subtype, GeometryType(l.geom) as geomtype  
 FROM 
 	laterals l, traceresults as tr
 WHERE
@@ -98,13 +98,22 @@ FROM
         propDict = {}
         propDict['factype'] = i.factype
         if i.factype == "Inlet":
-            application.logger.debug(str(i.subtype))
             propDict['facsubtype'] = DomainLookUps.inletPlanLookUp(str(i.subtype))
+        elif i.factype in ("Gravity Mains", "Laterals"):
+            propDict['facsubtype'] = DomainLookUps.gravityMainsMaterialLookup(str(i.subtype))
+        elif i.factype == "Maintenance Holes":
+            propDict['facsubtype'] = DomainLookUps.maintenanceHolePlanLookUp(str(i.subtype))
         else:
             propDict['facsubtype'] = i.subtype
-        propDict['size'] = i.size
+        if i.size:
+            propDict['size'] = i.size
+        else:
+            propDict['size'] = "Unknown"
         propDict['dwgno'] = i.dwgno
-        propDict['material'] = i.material
+        if i.material:
+            propDict['material'] = i.material
+        else:
+            propDict['material'] = "Unknown"
         propDict['id'] = id
         if not i.facid:
             propDict['facid'] = "Unknown"

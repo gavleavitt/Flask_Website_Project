@@ -29,19 +29,19 @@ require(["esri/config", "esri/Map", "esri/layers/VectorTileLayer", "esri/views/M
       const inlettiles = new VectorTileLayer({
           title: "Inlets",
           url: "https://vectortileservices3.arcgis.com/NfAw5Z474Q8vyMGv/arcgis/rest/services/Inlets/VectorTileServer",
-          minScale: 20000
+          minScale: 15000
          });
 
       const mhtiles = new VectorTileLayer({
            title: "Maintenance Holes",
            url: "https://vectortileservices3.arcgis.com/NfAw5Z474Q8vyMGv/arcgis/rest/services/MaintenanceH_oles/VectorTileServer",
-           minScale: 20000
+           minScale: 15000
           });
 
       const ottiles = new VectorTileLayer({
             title: "Outlets",
             url: "https://vectortileservices3.arcgis.com/NfAw5Z474Q8vyMGv/arcgis/rest/services/Outlets/VectorTileServer",
-            minScale: 20000
+            minScale: 15000
            });
 
 
@@ -237,8 +237,6 @@ require(["esri/config", "esri/Map", "esri/layers/VectorTileLayer", "esri/views/M
               resultpoints.queryFeatures(inletQuery)
               .then(function(response){
                   // Get object of results
-                  // console.log(response)
-                  // console.log(response.features)
                   // Get record count
                   inletResults.count = Object.keys(response.features).length
                   console.log(inletResults.count)
@@ -268,13 +266,11 @@ require(["esri/config", "esri/Map", "esri/layers/VectorTileLayer", "esri/views/M
               // ###### Outlet Results ######
               var outletResults = new Object();
               outletQuery = new Query();
-              outletQuery.where = "factype = 'Outlet'";
+              outletQuery.where = "factype = 'Outlets'";
               outletQuery.outFields = [ "factype", "id", "size", "facid", "material", "facsubtype"];
               resultpoints.queryFeatures(outletQuery)
               .then(function(response){
                 // Get object of results
-                // console.log(response)
-                // console.log(response.features)
                 // Get record count
                 outletResults.count = Object.keys(response.features).length
                 features = response.features;
@@ -288,20 +284,116 @@ require(["esri/config", "esri/Map", "esri/layers/VectorTileLayer", "esri/views/M
                   item.setAttribute("value", index);
                   // Add to service results
                   // type = `Inlet Type: ${attr[facsubtype]}`;
-                  type = `Inlet Type: ${attr.facsubtype}`;
-                  // size =  `Inlet Size: ${attr[size]}`;
-                  // description = type + "\n" + size;
-                  description = type
+                  type = `Outlet Type: ${attr.facsubtype}`;
+                  size =  `Size: ${attr.size}`;
+                  material = `Material ${attr.material}`
+                  description = type + "\n" + size + " " + material;
                   item.setAttribute("description", description);
                   // Add event listenr to pick list item, opens popup for feature
                   // item.addEventListener("click", traceResultClickHandler);
                   // Append to existing results panel
                   document.getElementById("OutletsWindow").appendChild(item);
                 });
-               });
+              });
+
+              // ###### Maintenance Hole Results ######
+              var mhResults = new Object();
+              mhQuery = new Query();
+              mhQuery.where = "factype = 'Maintenance Holes'";
+              mhQuery.outFields = [ "factype", "id", "facid", "facsubtype"];
+              resultpoints.queryFeatures(mhQuery)
+              .then(function(response){
+                // Get object of results
+                // Get record count
+                mhResults.count = Object.keys(response.features).length
+                features = response.features;
+                // Update accordian title to show Count
+                document.getElementById("MH-Window").setAttribute("heading", `Maintenance Holes (${mhResults.count})`)
+                // Loop over each feature in result
+                features.forEach((result, index)=>{
+                  attr = result.attributes;
+                  item = document.createElement("calcite-pick-list-item");
+                  item.setAttribute("label", attr.facid);
+                  item.setAttribute("value", index);
+                  // Add to service results
+                  // type = `Inlet Type: ${attr[facsubtype]}`;
+                  type = `Maintenance Hole Type: ${attr.facsubtype}`;
+                  description = type
+                  item.setAttribute("description", description);
+                  // Add event listenr to pick list item, opens popup for feature
+                  // item.addEventListener("click", traceResultClickHandler);
+                  // Append to existing results panel
+                  document.getElementById("MH-Window").appendChild(item);
+                });
+              });
+
+              // ###### Gravity Mains Results ######
+              var gmResults = new Object();
+              gmQuery = new Query();
+              gmQuery.where = "factype = 'Gravity Mains'";
+              gmQuery.outFields = ["factype", "id", "facid", "size", "material", "facsubtype"];
+              resultLines.queryFeatures(gmQuery)
+              .then(function(response){
+                // Get object of results
+                // Get record count
+                gmResults.count = Object.keys(response.features).length
+                features = response.features;
+                // Update accordian title to show Count
+                document.getElementById("GM-Window").setAttribute("heading", `Gravity Mains (${gmResults.count})`)
+                // Loop over each feature in result
+                features.forEach((result, index)=>{
+                  attr = result.attributes;
+                  item = document.createElement("calcite-pick-list-item");
+                  item.setAttribute("label", attr.facid);
+                  item.setAttribute("value", index);
+                  // Add to service results
+                  // type = `Inlet Type: ${attr[facsubtype]}`;
+                  type = `Gravity Main Type: ${attr.facsubtype}`;
+                  size = `Size: ${attr.size}`
+                  description = type + "\n" + size
+                  item.setAttribute("description", description);
+                  // Add event listenr to pick list item, opens popup for feature
+                  // item.addEventListener("click", traceResultClickHandler);
+                  // Append to existing results panel
+                  document.getElementById("GM-Window").appendChild(item);
+                });
+              });
+
+              // ###### Laterals Results ######
+              var latResults = new Object();
+              latQuery = new Query();
+              latQuery.where = "factype = 'Laterals'";
+              latQuery.outFields = [ "factype", "id", "facid", "size", "material", "facsubtype"];
+              resultLines.queryFeatures(latQuery)
+              .then(function(response){
+                // Get object of results
+                // Get record count
+                latResults.count = Object.keys(response.features).length
+                features = response.features;
+                // Update accordian title to show Count
+                document.getElementById("Lat-Window").setAttribute("heading", `Laterals (${latResults.count})`)
+                // Loop over each feature in result
+                features.forEach((result, index)=>{
+                  attr = result.attributes;
+                  item = document.createElement("calcite-pick-list-item");
+                  item.setAttribute("label", attr.facid);
+                  item.setAttribute("value", index);
+                  // Add to service results
+                  // type = `Inlet Type: ${attr[facsubtype]}`;
+                  type = `Lateral Type: ${attr.facsubtype}`;
+                  size = `Size: ${attr.size}`
+                  // material = `Material: ${attr.material}`
+                  description = type + "\n" + size
+                  item.setAttribute("description", description);
+                  // Add event listenr to pick list item, opens popup for feature
+                  // item.addEventListener("click", traceResultClickHandler);
+                  // Append to existing results panel
+                  document.getElementById("Lat-Window").appendChild(item);
+                });
+              });
               // Set result group to display
               document.getElementById("results-grp").style.display = "block";
-            })
+               })
             .catch(error =>{
               console.log(error)
               console.log("Server request error!")
