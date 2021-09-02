@@ -1,0 +1,7 @@
+Open Anaconda within the this directory ../Flask_Application
+
+Activate conda venv in Anaconda:
+conda activate flaskenv
+
+Run in Anaconda:
+flask run --no-reload

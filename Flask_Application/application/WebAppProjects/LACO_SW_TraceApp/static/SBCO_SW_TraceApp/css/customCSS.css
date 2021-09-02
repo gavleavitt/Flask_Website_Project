@@ -1,0 +1,62 @@
+:root {
+  --calcite-panel-max-height: 400px;
+  --calcite-panel-max-width: 300px
+}
+
+html,
+body,
+#viewDiv {
+  padding: 0;
+  margin: 0;
+  height: 100%;
+  width: 100%;
+}
+
+#InletsWindow{
+  overflow: auto;
+}
+
+#InletsWindow calcite-icon{
+  color: #1400ff;
+}
+
+#TraceToolTitle .header{
+  font-size: 30px; 
+}
+
+#MH-Window calcite-icon{
+  color: #b6c702;
+}
+
+#GM-Window calcite-icon{
+  color: #ed5151;
+}
+
+#Lat-Window calcite-icon{
+  color: #02c718;
+}
+
+.button-grp{
+  display: flex;
+  /* flex-flow: row wrap; */
+  justify-content: center;
+}
+.flex-line2{
+  width: 100%
+}
+.tool-btn{
+  padding:5px;
+}
+.line-break {
+  width: 100%;
+}
+#query-text{
+  display: none;
+}
+#results-grp{
+  display: none;
+}
+
+calcite-block{
+  margin-bottom: 0px;
+}

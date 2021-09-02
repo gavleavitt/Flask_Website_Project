@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <title>LA County Stormwater System Trace Application</title>
+    <link rel="stylesheet" href="https://js.arcgis.com/4.20/esri/themes/light/main.css">
+    <script src="https://js.arcgis.com/4.20/"></script>
+
+    <!-- Custom local javascript -->
+    <script src="{{ url_for('lacoSWTraceapp_API_BP.static', filename='SBCO_SW_TraceApp/js/renderers.js') }}"></script>
+    <script src="{{ url_for('lacoSWTraceapp_API_BP.static', filename='SBCO_SW_TraceApp/js/customJS.js') }}"></script>
+    <!-- Custom local CSS -->
+    <link rel="stylesheet" href="{{ url_for('lacoSWTraceapp_API_BP.static', filename='SBCO_SW_TraceApp/css/customCSS.css') }}">
+
+    <!-- Calcite -->
+    <!-- <script type="module" src="https://js.arcgis.com/calcite-components/1.0.0-beta.52/calcite.esm.js"></script> -->
+    <script nomodule="" src="https://js.arcgis.com/calcite-components/1.0.0-beta.52/calcite.js"></script>
+    <script type="module" src=https://js.arcgis.com/calcite-components/1.0.0-beta.61/calcite.esm.js></script>
+    <!-- <link rel="stylesheet" type="text/css" href="https://js.arcgis.com/calcite-components/1.0.0-beta.52/calcite.css" /> -->
+    <link rel="stylesheet" type="text/css" href=https://js.arcgis.com/calcite-components/1.0.0-beta.61/calcite.css />
+  </head>
+  <body>
+    <div>
+      <calcite-alert id="NoSelAlert" icon="information">
+        <div slot="title">Error - No Map Selection</div>
+        <div slot="message">Please select a map location before running the Trace Tool!</div>
+      </calcite-alert>
+      <calcite-alert id="NoResultAlert" color="red" icon="exclamation-mark-triangle">
+          <div slot="title">Error - No Data</div>
+          <div slot="message">No data was returned from the server, verify that the start location is near a point asset. If the error persists then the server may be unresponsive.</div>
+      </calcite-alert>
+    </div>
+    <div id="viewDiv"></div>
+    <div id="traceDiv">
+      <calcite-block id="TraceToolTitle" collapsible heading="Trace Tool" open summary="Select Trace Direction">
+        <calcite-radio-button-group id="directionGrp" layout="vertical" name="TraceType" >
+            <calcite-radio-button checked value="downstream">Downstream</calcite-radio-button>
+            <calcite-radio-button value="upstream">Upstream</calcite-radio-button>
+        </calcite-radio-button-group>
+        <div class="button-grp">
+          <calcite-button id="selBtn" button-alignment="center" round width="half" scale="s" icon-start="object-detection" color="blue" class="tool-btn">Select Location</calcite-button>
+          <calcite-button id="submitBtn" button-alignment="center" round width="half" scale="s" icon-start="submit" color="red" class="tool-btn">Run</calcite-button>
+          <calcite-button id="clearBtn" button-alignment="center" round width="half" scale="s" icon-start="reset" color="neutral" class="tool-btn">Clear</calcite-button>
+        </div>
+        <div id="query-text">
+          <b>Sending request to server</b>
+        </div>
+        <!-- <calcite-flow id="results-grp"> -->
+        <calcite-panel id="results-grp">
+          <calcite-panel id="results" heading="Results">
+              <calcite-block id="OutletsWindow" heading="Outlets" collapsible>
+                <calcite-icon scale="s" slot="icon" icon="circle-f"></calcite-icon>
+                  <!-- <calcite-notice active>
+                      <div slot="message"></div>
+                  </calcite-notice> -->
+              </calcite-block>
+              <calcite-block id="InletsWindow" heading="Inlets" collapsible>
+                 <calcite-icon scale="s" slot="icon" icon="square-area"></calcite-icon>
+                  <!-- <calcite-notice active>
+                      <div slot="message"></div>
+                  </calcite-notice> -->
+              </calcite-block>
+              <calcite-block id="MH-Window" heading="Maintenance Holes" collapsible>
+                <calcite-icon scale="s" slot="icon" icon="circle-area"></calcite-icon>
+                  <!-- <calcite-notice active>
+                      <div slot="message"></div>
+                  </calcite-notice> -->
+              </calcite-block>
+              <calcite-block  id="GM-Window" heading="Gravity Mains" collapsible>
+                <calcite-icon scale="s" slot="icon" icon="line-solid"></calcite-icon>
+                  <!-- <calcite-notice active>
+                  </calcite-notice> -->
+              </calcite-block>
+              <calcite-block id="Lat-Window" heading="Laterals" collapsible>
+                <calcite-icon scale="s" slot="icon" icon="line-solid"></calcite-icon>
+                  <!-- <calcite-notice active>
+                  </calcite-notice> -->
+              </calcite-block>
+          </calcite-panel>
+        </calcite-panel>
+        <!-- </calcite-flow> -->
+
+
+        <!-- <div id="accordion-grp">
+          <calcite-accordion>
+            <calcite-accordion-item icon="plane" item-title="Outlets-accord" item-subtitle="">
+              Feature Count
+            </calcite-accordion-item>
+            <calcite-accordion-item id="InletsWindow" icon="square-area" item-title="Inlets" item-subtitle="">
+            </calcite-accordion-item>
+            <calcite-accordion-item icon="car" item-title="Maintenance Holes" item-subtitle="">
+              Feature Count
+            </calcite-accordion-item>
+            <calcite-accordion-item icon="plane" item-title="Gravity Mains" item-subtitle="">
+              Feature Count
+            </calcite-accordion-item>
+            <calcite-accordion-item icon="plane" item-title="Laterals" item-subtitle="">
+              Feature Count
+            </calcite-accordion-item>
+          </calcite-accordion>
+        </div> -->
+      </calcite-block>
+    </div>
+  </body>
+</html>
