@@ -367,14 +367,20 @@ def getIntersectingPoints(wktStr):
             sqlfunc.ST_CollectionExtract(
             sqlfunc.ST_Collect(AOI.geom), collectionExtract).label("ctelab")).filter(
             AOI.privacy == "Yes").cte()
+        # points_cte = session.query(sqlfunc.ST_DumpPoints(sqlfunc.st_geomfromewkt(wktStr)))
         # Take provided EWKT string and convert to GeoAlchemy geometry
-        lineString = sqlfunc.ST_GeomFromEWKT(wktStr)
-
+        # lineString = sqlfunc.ST_GeomFromEWKT(wktStr)
+        # application.logger.debug(f"Geoalchemy Geom is: \n{dir(lineString)}")
         # Get a list of points from the linestring which fall inside the privacy zone
         # ST_DumpPoints provides a point geometry per iterative loop which is converted to a text representation using As_Text
-        pointQuery = session.query(sqlfunc.ST_AsText(sqlfunc.ST_DumpPoints(sqlfunc.ST_Intersection(lineString, privacy_cte.c.ctelab)).geom))
+        pointQuery = session.query(sqlfunc.ST_AsText(sqlfunc.ST_DumpPoints(sqlfunc.ST_Intersection(sqlfunc.ST_GeomFromEWKT(wktStr), privacy_cte.c.ctelab)).geom))
+        # pointQuery = session.query(sqlfunc.ST_AsText(
+        #     sqlfunc.ST_DumpPoints(sqlfunc.ST_Intersection(sqlfunc.ST_GeomFromEWKT(wktStr),
+        #     privacy_cte.c.ctelab)).geom)).filter(privacy_cte.c.ctelab.
+        #     ST_Intersects(sqlfunc.ST_GeomFromEWKT(wktStr)))
         coordinateList = []
         for i in pointQuery:
+            # application.logger.debug(f"Point query response is: {i}")
             # strip out the WKT parts of the coordinates, only want list of [lon,lat]
             coordinateList.append(formatPointResponse(i))
     finally:

@@ -59,8 +59,10 @@ def generateAndUploadCSVStream(client, actID, activity=None):
     csvBuff = StravaAWSS3.writeMemoryCSV(activity["stream"])
     # Get WKT formatted latlng stream data
     wktStr = formatStreamData(activity["stream"])
+    # application.logger.debug(f"wktSTR is: \n {wktStr}")
     # Get list of coordinates which cross privacy areas, these will be removed from the latlng stream CSV data
     removeCoordList = DBQueriesStrava.getIntersectingPoints(wktStr)
+    # application.logger.debug(f"Remove cord list is: \n {removeCoordList}")
     # Trim/remove rows from latlng CSV stream which have coordinates that intersect the privacy areas
     trimmedMemCSV = trimStreamCSV(removeCoordList, csvBuff)
     # Upload trimmed buffer csv to AWS S3 bucket
@@ -192,8 +194,9 @@ def formatStreamData(stream):
     for c, i in enumerate(latlng):
         # Split based on comma
         lat, lng = latlng[c].split(",")
-        # Make string of new lat lng value
-        newEntry = f"{lat} {lng},"
+        # Make string of new long lat value
+        newEntry = f"{lng} {lat},"
+        # newEntry = f"{lat} {lng},"
         # Add new record to existing string
         wktStr += newEntry
     # Remove last comma
@@ -235,7 +238,10 @@ def trimStreamCSV(coordList, memCSV):
             lngCheck = any(coord[1] in x for x in coordList)
             # If neither lat or long are within a privacy zone, write the entire row into the trimmed csv
             if not latCheck or not lngCheck:
+                # Not within privacy zone, write CSV
                 trimmedWriter.writerow(row)
+            # else:
+            #     application.logger.debug(f"Coordinates: {coord[0]},{coord[1]} are within a privacy zone!")
     return trimmedMemOutput
 
 def getAthlete(client):

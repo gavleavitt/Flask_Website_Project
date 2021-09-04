@@ -101,6 +101,7 @@ def uploadToS3(file, actID=None):
             # https://stackoverflow.com/a/60293770
             fileName = f"stream_{actID}.csv"
             conn.put_object(Body=file.getvalue(), Bucket=bucket, Key=fileName)
+            application.logger.debug(f"CSV {fileName} has been added to S3 Bucket {bucket}")
         else:
             # Add in-memory buffer TopoJSON file to bucket, file name is static
             fileName = "topoJSONPublicActivities.json"
@@ -108,6 +109,7 @@ def uploadToS3(file, actID=None):
     except Exception as e:
         application.logger.error(f"Upload to S3 bucket failed in the error: {e}")
         errorEmail.sendErrorEmail(script="UploadToS3Bucket", exceptiontype=e.__class__.__name__, body=e)
+
     # finally:
     #     # Close in-memory buffer file, removing it from memory
     #     file.close()

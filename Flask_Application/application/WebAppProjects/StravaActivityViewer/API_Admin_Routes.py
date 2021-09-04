@@ -5,6 +5,8 @@ import os
 from application import application
 import logging
 import secrets
+import time
+import traceback
 
 stravaActDashAPI_Admin_BP = Blueprint('stravaActDashAPI_Admin_BP', __name__,
                         template_folder='templates',
@@ -149,12 +151,36 @@ def genTopoJSON():
 def bulkprocess():
     """
     """
-    # Create topojson file
+    #
     application.logger.debug(f"Received request to bulk process!")
+    # Get form action parameter
     actionType = str(request.form['actionType'])
+    # Strava API request wait time if request limit is exceeded
+    waitTime = 960
     application.logger.debug(actionType)
+    if actionType == "streamdata-Acts":
+        application.logger.debug("Received Admin command to regenerate Strava stream data")
+        # Get Client details
+        client = OAuthStrava.getAuth()
+        # Get all activity IDs
+        actIDList = APIFunctionsStrava.getListIds(client, 10000)
+        # Loop over IDs
+        for i in actIDList:
+            for attempt in range(3):
+                # Try block to process and upload CSVs, Strava API will timeout after too many requests, wait 16 minutes
+                # for the 15 minute API lockout to end before trying again
+                try:
+                    APIFunctionsStrava.generateAndUploadCSVStream(client, i, activity=None)
+                except Exception as e:
+                    application.logger.debug(f"Failed on Strava Stream download for activity {i} and upload with the "
+                                             f"error: {e}")
+                    application.logger.debug((traceback.format_exc()))
+                    time.sleep(waitTime)
+                else:
+                    # CSV has been uploaded, break attempt look and move onto next activity ID
+                    break
 
-
+        return Response(status=200)
 # @stravaActDashAPI_BP.route("/admin/stravacreatesub", methods=['POST'])
 # @auth.login_required(role='admin')
 # def handle_Create_Strava_Sub():
