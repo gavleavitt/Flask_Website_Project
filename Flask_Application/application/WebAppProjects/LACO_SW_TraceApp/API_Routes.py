@@ -89,8 +89,8 @@ FROM
     # Lists to hold results
     pointfeatures = []
 
-    resultDict = {'startpoint':None, "Inlet": [], "Outlets": [],"Maintenance Holes": [],"Gravity Mains": [],
-                  "Laterals":[]}
+    resultDict = {'startpoint': None, "Inlets": [], "Outlets": [], "Maintenance Holes": [], "Gravity Mains": [],
+                  "Laterals": []}
 
     # Execute raw SQL query with parameters
     results = db.session.execute(sql, {"lat": lat, "lon": lon, "directionSQL":directionSQL})
@@ -125,7 +125,7 @@ FROM
 
         if i.factype == "Inlet":
             propDict['facsubtype'] = DomainLookUps.inletPlanLookUp(str(i.subtype))
-            resultDict['Inlet'].append(Feature(geometry=Point(geojsonGeom), properties=propDict))
+            resultDict['Inlets'].append(Feature(geometry=Point(geojsonGeom), properties=propDict))
         elif i.factype == "Outlets":
             propDict['material'] = DomainLookUps.gravityMainsMaterialLookup(str(i.material))
             resultDict['Outlets'].append(Feature(geometry=Point(geojsonGeom), properties=propDict))
@@ -157,8 +157,8 @@ FROM
     # pointsCollection = FeatureCollection(pointfeatures)
 
     # jsonify response to have 3 nested geojson results
-    response = jsonify({"startpoint": startpoint,
-        "Inlet": FeatureCollection(resultDict['Inlet']),
+    response = jsonify({"startpoint": FeatureCollection(resultDict['startpoint']),
+        "Inlets": FeatureCollection(resultDict['Inlets']),
         "Outlets":FeatureCollection(resultDict['Outlets']),
         "Maintenance Holes": FeatureCollection(resultDict["Maintenance Holes"]),
         "Gravity Mains": FeatureCollection(resultDict["Gravity Mains"]),

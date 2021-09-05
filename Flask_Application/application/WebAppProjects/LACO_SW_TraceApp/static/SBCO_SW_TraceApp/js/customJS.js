@@ -151,6 +151,7 @@ require(["esri/config", "esri/Map", "esri/layers/VectorTileLayer", "esri/views/M
               map.remove(resultslayer);
               view.graphics.remove(selectionLayer);
               view.graphics.remove(resultslayer);
+              view.popup.close();
               document.getElementById("NoSelAlert").removeAttribute('active');;
               document.getElementById("NoResultAlert").removeAttribute('active')
               userLat = null;
@@ -211,71 +212,91 @@ require(["esri/config", "esri/Map", "esri/layers/VectorTileLayer", "esri/views/M
 
               var layerObj = {}
 
-              if (data['Gravity Mains']['features'].length > 0){
-                const gmblob = new Blob([JSON.stringify(data['Gravity Mains'])], {type: "application/json"});
-                const gmurl  = URL.createObjectURL(gmblob);
-                const resultgm = new GeoJSONLayer({
-                  url:gmurl,
-                  title:"Gravity Mains",
-                  renderer:lineResultRenderer,
-                  popupTemplate: popupGM
-                });
-                layerObj['Gravity Mains'] = resultgm;
+              function addGeoJson(geojson, title, popupTemplate){
+                if (geojson['features'].length > 0){
+                  const blob = new Blob([JSON.stringify(geojson)], {type: "application/json"});
+                  const url  = URL.createObjectURL(blob);
+                  const result = new GeoJSONLayer({
+                    url:url,
+                    title:title,
+                    renderer:lineResultRenderer,
+                    popupTemplate: popupTemplate
+                  });
+                  layerObj[title] = result;
+                }
               }
-              const startptblob = new Blob([JSON.stringify(data['startpoint'])], {type: "application/json"});
-              const startpturl  = URL.createObjectURL(startptblob);
-              const resultstartpt = new GeoJSONLayer({
-                url:startpturl,
-                title:"Start Point",
-                renderer:pointResultRenderer
-              });
-
-              if (data['Inlet']['features'].length > 0){
-                const inletblob = new Blob([JSON.stringify(data['Inlet'])], {type: "application/json"});
-                const inleturl  = URL.createObjectURL(inletblob);
-                const resultinlet = new GeoJSONLayer({
-                  url:inleturl,
-                  title:"Inlets",
-                  renderer:pointResultRenderer,
-                  popupTemplate: popupInlets
-                });
-                layerObj['Inlet'] = resultinlet;
-              }
-
-              if (data['Outlets']['features'].length > 0){
-                const outletblob = new Blob([JSON.stringify(data['Outlets'])], {type: "application/json"});
-                const outleturl  = URL.createObjectURL(outletblob);
-                const resultoutlet = new GeoJSONLayer({
-                  url:outleturl,
-                  title: "Outlets",
-                  renderer:pointResultRenderer
-                });
-                layerObj['Outlets'] = resultoutlet;
-              }
-
-              if (data['Maintenance Holes']['features'].length > 0){
-                const mhblob = new Blob([JSON.stringify(data['Maintenance Holes'])], {type: "application/json"});
-                const mhurl  = URL.createObjectURL(mhblob);
-                const resultmh = new GeoJSONLayer({
-                  url:mhurl,
-                  title: "Maintenance Holes",
-                  renderer:pointResultRenderer,
-                  popupTemplate: popupMHs
-                });
-                layerObj['Maintenance Holes'] = resultmh;
-              }
-
-              if (data['Laterals']['features'].length > 0){
-                const latblob = new Blob([JSON.stringify(data['Laterals'])], {type: "application/json"});
-                const laturl  = URL.createObjectURL(latblob);
-                const resultlat = new GeoJSONLayer({
-                  url:laturl,
-                  title:"Laterals",
-                  renderer:lineResultRenderer,
-                  popupTemplate: popupLat
-                });
-                layerObj['Laterals'] = resultlat;
-              }
+              addGeoJson(data['Gravity Mains'], 'Gravity Mains', popupGM)
+              addGeoJson(data['Laterals'], 'Laterals', popupLat)
+              addGeoJson(data['Inlets'], 'Inlets', popupInlet)
+              addGeoJson(data['startpoint'], 'Start Point', null)
+              addGeoJson(data['Outlets'], 'Outlets', popupOutlet)
+              addGeoJson(data['Maintenance Holes'], 'Maintenance Holes', popupMH)
+              console.log(layerObj)
+              // if (data['Gravity Mains']['features'].length > 0){
+              //   const gmblob = new Blob([JSON.stringify(data['Gravity Mains'])], {type: "application/json"});
+              //   const gmurl  = URL.createObjectURL(gmblob);
+              //   const resultgm = new GeoJSONLayer({
+              //     url:gmurl,
+              //     title:"Gravity Mains",
+              //     renderer:lineResultRenderer,
+              //     popupTemplate: popupGM
+              //   });
+              //   layerObj['Gravity Mains'] = resultgm;
+              // }
+              // const startptblob = new Blob([JSON.stringify(data['startpoint'])], {type: "application/json"});
+              // const startpturl  = URL.createObjectURL(startptblob);
+              // const resultstartpt = new GeoJSONLayer({
+              //   url:startpturl,
+              //   title:"Start Point",
+              //   renderer:pointResultRenderer
+              // });
+              //
+              // if (data['Inlet']['features'].length > 0){
+              //   const inletblob = new Blob([JSON.stringify(data['Inlet'])], {type: "application/json"});
+              //   const inleturl  = URL.createObjectURL(inletblob);
+              //   const resultinlet = new GeoJSONLayer({
+              //     url:inleturl,
+              //     title:"Inlets",
+              //     renderer:pointResultRenderer,
+              //     popupTemplate: popupInlets
+              //   });
+              //   layerObj['Inlet'] = resultinlet;
+              // }
+              //
+              // if (data['Outlets']['features'].length > 0){
+              //   const outletblob = new Blob([JSON.stringify(data['Outlets'])], {type: "application/json"});
+              //   const outleturl  = URL.createObjectURL(outletblob);
+              //   const resultoutlet = new GeoJSONLayer({
+              //     url:outleturl,
+              //     title: "Outlets",
+              //     renderer:pointResultRenderer
+              //   });
+              //   layerObj['Outlets'] = resultoutlet;
+              // }
+              //
+              // if (data['Maintenance Holes']['features'].length > 0){
+              //   const mhblob = new Blob([JSON.stringify(data['Maintenance Holes'])], {type: "application/json"});
+              //   const mhurl  = URL.createObjectURL(mhblob);
+              //   const resultmh = new GeoJSONLayer({
+              //     url:mhurl,
+              //     title: "Maintenance Holes",
+              //     renderer:pointResultRenderer,
+              //     popupTemplate: popupMHs
+              //   });
+              //   layerObj['Maintenance Holes'] = resultmh;
+              // }
+              //
+              // if (data['Laterals']['features'].length > 0){
+              //   const latblob = new Blob([JSON.stringify(data['Laterals'])], {type: "application/json"});
+              //   const laturl  = URL.createObjectURL(latblob);
+              //   const resultlat = new GeoJSONLayer({
+              //     url:laturl,
+              //     title:"Laterals",
+              //     renderer:lineResultRenderer,
+              //     popupTemplate: popupLat
+              //   });
+              //   layerObj['Laterals'] = resultlat;
+              // }
               resultslayer = new GroupLayer({
                 id: "resultslayer",
                 title: "Trace Results",
@@ -292,12 +313,13 @@ require(["esri/config", "esri/Map", "esri/layers/VectorTileLayer", "esri/views/M
               // query features: https://developers.arcgis.com/javascript/latest/api-reference/esri-layers-GeoJSONLayer.html#queryFeatures
               // See https://developers.arcgis.com/javascript/latest/sample-code/featurelayer-query/
               //###### Inlet results ######
-              if (data['Inlet']['features'].length > 0){
+              if (data['Inlets']['features'].length > 0){
                 var inletResults = new Object();
                 inletQuery = new Query();
                 inletQuery.where = "factype = 'Inlet'";
                 inletQuery.outFields = [ "factype", "id", "facsubtype", "facid"];
-                layerObj['Inlet'].queryFeatures(inletQuery)
+                inletQuery.returnGeometry = true;
+                layerObj['Inlets'].queryFeatures(inletQuery)
                 .then(function(response){
                     // Get object of results
                     // Get record count
@@ -320,13 +342,13 @@ require(["esri/config", "esri/Map", "esri/layers/VectorTileLayer", "esri/views/M
                       item.setAttribute("description", description);
                       // Add event listenr to pick list item, opens popup for feature
                       item.addEventListener("click", function(){
-                        const target = event.target;
-                        const resultId = target.getAttribute("value");
+                        // const target = event.target;
+                        // const resultId = target.getAttribute("value");
                         view.popup.open({
                           features: [result],
                           location: result.geometry
                         });
-
+                        view.goTo(result.geometry)
                       });
                       // Append to existing results panel
                       document.getElementById("InletsWindow").appendChild(item);
@@ -337,7 +359,6 @@ require(["esri/config", "esri/Map", "esri/layers/VectorTileLayer", "esri/views/M
                 }
               // ###### Outlet Results ######
               if (data['Outlets']['features'].length > 0){
-                console.log("Outlet results!")
                 var outletResults = new Object();
                 outletQuery = new Query();
                 outletQuery.where = "factype = 'Outlets'";

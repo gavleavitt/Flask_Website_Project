@@ -1,10 +1,15 @@
 // pop-ups
-const popupInlets = {
+const popupInlet = {
   "title": "<b>Inlet: {facid}</b>",
   "content": "<b>Type:</b> {facsubtype}"
 }
 
-const popupMHs = {
+const popupOutlet = {
+  "title": "<b>Outlet: {facid}</b>",
+  "content": "<b>Type:</b> {facsubtype}"
+}
+
+const popupMH = {
   "title": "<b>Maintenance Hole: {facid}</b>",
   "content": "<b>Type:</b> {facsubtype}"
 }
