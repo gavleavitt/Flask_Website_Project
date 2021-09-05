@@ -5,7 +5,6 @@ var userlon = null;
 var geojsonData = null;
 var map = null;
 var view = null;
-var layerList = null;
 // var selectionLayer = null
 // var resultslayer = null
 require(["esri/config", "esri/Map", "esri/layers/VectorTileLayer", "esri/views/MapView", "esri/layers/TileLayer", "esri/Graphic", "esri/layers/GraphicsLayer", "esri/layers/WebTileLayer", "esri/layers/GeoJSONLayer", "esri/symbols/SimpleMarkerSymbol", "esri/renderers/UniqueValueRenderer", "esri/renderers/SimpleRenderer", "esri/widgets/LayerList", "esri/layers/GroupLayer", "esri/rest/support/Query"],
@@ -86,6 +85,8 @@ require(["esri/config", "esri/Map", "esri/layers/VectorTileLayer", "esri/views/M
         userLong = event.mapPoint.longitude;
         userLat = event.mapPoint.latitude;
         if (btnActive === "active"){
+          map.remove(selectionLayer);
+          view.graphics.remove(selectionLayer);
           console.log("Selection is active!");
           const selectionpoint = new Graphic({
             title:"Start Point",
@@ -124,36 +125,48 @@ require(["esri/config", "esri/Map", "esri/layers/VectorTileLayer", "esri/views/M
         // const removelayers = map.allLayers.find(function(layer) {
         //   return layer.title === "Selected Start Point";
         // });
-        const removelayers = map.allLayers.find(function(layer) {
-          map.remove(layer.title === "Selected Start Point");
-          map.remove(layer.title === "Trace Results");
-          // return [layer.title === "Selected Start Point",
-          //   layer.title === "Trace Results"]
-        });
-        map.removeMany(removelayers);
+        // const removelayers = map.allLayers.find(function(layer) {
+        //   map.remove(layer.title === "Selected Start Point");
+        //   map.remove(layer.title === "Trace Results");
+        //   // return [layer.title === "Selected Start Point",
+        //   //   layer.title === "Trace Results"]
+        // });
+        //  removeLayers = map.allLayers.find(function(layer){
+        //    return layer.title === "Selected Start Point";
+        //  })
+        // map.removeMany(removelayers);
+        // map.allLayers.find(function(layer){
+        //   console.log(layer)
+        // })
         userLat = null;
         userlon = null;
         btnActive = "active";
       });
-      document.getElementById("clearBtn").addEventListener("click", function(){
-        map.remove(selectionLayer);
-        map.remove(resultslayer);
-        view.graphics.remove(selectionLayer);
-        view.graphics.remove(resultslayer);
-        document.getElementById("NoSelAlert").removeAttribute('active');;
-        document.getElementById("NoResultAlert").removeAttribute('active')
-        userLat = null;
-        userlon = null;
-        btnActive = null;
-        // Hide results window
-        document.getElementById("results-grp").style.display = "none";
-        // Get list of results to remove, using their calcite attribute
-        removeList = document.querySelectorAll("calcite-pick-list-item");
-        for (let i = 0; i < removeList.length; i++) {
-          removeList[i].remove();
-        }
-      });
 
+
+
+      document.getElementById("clearBtn").addEventListener("click", function(){
+              console.log("Clearing results!")
+              map.remove(selectionLayer);
+              map.remove(resultslayer);
+              view.graphics.remove(selectionLayer);
+              view.graphics.remove(resultslayer);
+              document.getElementById("NoSelAlert").removeAttribute('active');;
+              document.getElementById("NoResultAlert").removeAttribute('active')
+              userLat = null;
+              userlon = null;
+              btnActive = null;
+              // inletResults, outletResults, mhResults, gmResults, latResults = null;
+              // Hide results window
+              document.getElementById("results-grp").style.display = "none";
+              // Get list of results to remove, using their calcite attribute
+              document.querySelectorAll("calcite-pick-list-item").forEach(e => e.remove());
+              // removeList = document.querySelectorAll("calcite-pick-list-item").forEach(e => e.remove());
+              // for (let i = 0; i < removeList.length; i++) {
+              //   removeList[i].remove();
+              // }}
+            }
+          )
 
       layerList = new LayerList({
         view
@@ -195,54 +208,148 @@ require(["esri/config", "esri/Map", "esri/layers/VectorTileLayer", "esri/views/M
               return r.json();
             })
             .then(function(data){
-              const lineblob = new Blob([JSON.stringify(data['lines'])], {type: "application/json"});
-              const lineurl  = URL.createObjectURL(lineblob);
-              const resultLines = new GeoJSONLayer({
-                url:lineurl,
-                title:"Underground Drainage Results",
-                renderer:lineResultRenderer
+
+              var layerObj = {}
+
+              if (data['Gravity Mains']['features'].length > 0){
+                const gmblob = new Blob([JSON.stringify(data['Gravity Mains'])], {type: "application/json"});
+                const gmurl  = URL.createObjectURL(gmblob);
+                const resultgm = new GeoJSONLayer({
+                  url:gmurl,
+                  title:"Gravity Mains",
+                  renderer:lineResultRenderer,
+                  popupTemplate: popupGM
+                });
+                layerObj['Gravity Mains'] = resultgm;
+              }
+              const startptblob = new Blob([JSON.stringify(data['startpoint'])], {type: "application/json"});
+              const startpturl  = URL.createObjectURL(startptblob);
+              const resultstartpt = new GeoJSONLayer({
+                url:startpturl,
+                title:"Start Point",
+                renderer:pointResultRenderer
               });
-              const pointblob = new Blob([JSON.stringify(data['points'])], {type: "application/json"});
-              const pointurl  = URL.createObjectURL(pointblob);
-              const resultpoints = new GeoJSONLayer({
-                url:pointurl,
-                title: "Structure Results",
-                renderer: pointResultRenderer
-              });
-              const startblob = new Blob([JSON.stringify(data['startpoint'])], {type: "application/json"});
-              const starturl  = URL.createObjectURL(startblob);
-              const startpoint = new GeoJSONLayer({
-                url:starturl,
-                title: "Trace Start Point",
-                renderer: startrenderer
-              });
+
+              if (data['Inlet']['features'].length > 0){
+                const inletblob = new Blob([JSON.stringify(data['Inlet'])], {type: "application/json"});
+                const inleturl  = URL.createObjectURL(inletblob);
+                const resultinlet = new GeoJSONLayer({
+                  url:inleturl,
+                  title:"Inlets",
+                  renderer:pointResultRenderer,
+                  popupTemplate: popupInlets
+                });
+                layerObj['Inlet'] = resultinlet;
+              }
+
+              if (data['Outlets']['features'].length > 0){
+                const outletblob = new Blob([JSON.stringify(data['Outlets'])], {type: "application/json"});
+                const outleturl  = URL.createObjectURL(outletblob);
+                const resultoutlet = new GeoJSONLayer({
+                  url:outleturl,
+                  title: "Outlets",
+                  renderer:pointResultRenderer
+                });
+                layerObj['Outlets'] = resultoutlet;
+              }
+
+              if (data['Maintenance Holes']['features'].length > 0){
+                const mhblob = new Blob([JSON.stringify(data['Maintenance Holes'])], {type: "application/json"});
+                const mhurl  = URL.createObjectURL(mhblob);
+                const resultmh = new GeoJSONLayer({
+                  url:mhurl,
+                  title: "Maintenance Holes",
+                  renderer:pointResultRenderer,
+                  popupTemplate: popupMHs
+                });
+                layerObj['Maintenance Holes'] = resultmh;
+              }
+
+              if (data['Laterals']['features'].length > 0){
+                const latblob = new Blob([JSON.stringify(data['Laterals'])], {type: "application/json"});
+                const laturl  = URL.createObjectURL(latblob);
+                const resultlat = new GeoJSONLayer({
+                  url:laturl,
+                  title:"Laterals",
+                  renderer:lineResultRenderer,
+                  popupTemplate: popupLat
+                });
+                layerObj['Laterals'] = resultlat;
+              }
               resultslayer = new GroupLayer({
                 id: "resultslayer",
                 title: "Trace Results",
-                layers: [resultLines, startpoint, resultpoints]
+                layers: Object.values(layerObj)
               });
               map.add(resultslayer);
-              resultLines.queryExtent().then((response) => {
+              layerObj['Gravity Mains'].queryExtent().then((response) => {
                 view.goTo(response.extent);
               });
               // Set Query text to inactive
               document.querySelector('#query-text').style.display = "none";
+
+
               // query features: https://developers.arcgis.com/javascript/latest/api-reference/esri-layers-GeoJSONLayer.html#queryFeatures
               // See https://developers.arcgis.com/javascript/latest/sample-code/featurelayer-query/
               //###### Inlet results ######
-              var inletResults = new Object();
-              inletQuery = new Query();
-              inletQuery.where = "factype = 'Inlet'";
-              inletQuery.outFields = [ "factype", "id", "facsubtype", "facid"];
-              resultpoints.queryFeatures(inletQuery)
-              .then(function(response){
+              if (data['Inlet']['features'].length > 0){
+                var inletResults = new Object();
+                inletQuery = new Query();
+                inletQuery.where = "factype = 'Inlet'";
+                inletQuery.outFields = [ "factype", "id", "facsubtype", "facid"];
+                layerObj['Inlet'].queryFeatures(inletQuery)
+                .then(function(response){
+                    // Get object of results
+                    // Get record count
+                    inletResults.count = Object.keys(response.features).length
+                    features = response.features;
+                    // Update accordian title to show Count
+                    document.getElementById("InletsWindow").setAttribute("heading", `Inlets (${inletResults.count})`)
+                    // Loop over each feature in result
+                    features.forEach((result, index)=>{
+                      attr = result.attributes;
+                      item = document.createElement("calcite-pick-list-item");
+                      item.setAttribute("label", attr.facid);
+                      item.setAttribute("value", index);
+                      // Add to service results
+                      // type = `Inlet Type: ${attr[facsubtype]}`;
+                      type = `Inlet Type: ${attr.facsubtype}`;
+                      // size =  `Inlet Size: ${attr[size]}`;
+                      // description = type + "\n" + size;
+                      description = type
+                      item.setAttribute("description", description);
+                      // Add event listenr to pick list item, opens popup for feature
+                      item.addEventListener("click", function(){
+                        const target = event.target;
+                        const resultId = target.getAttribute("value");
+                        view.popup.open({
+                          features: [result],
+                          location: result.geometry
+                        });
+
+                      });
+                      // Append to existing results panel
+                      document.getElementById("InletsWindow").appendChild(item);
+                    });
+                  });
+                } else {
+                  document.getElementById("InletsWindow").setAttribute("heading", "Inlets")
+                }
+              // ###### Outlet Results ######
+              if (data['Outlets']['features'].length > 0){
+                console.log("Outlet results!")
+                var outletResults = new Object();
+                outletQuery = new Query();
+                outletQuery.where = "factype = 'Outlets'";
+                outletQuery.outFields = [ "factype", "id", "size", "facid", "material"];
+                layerObj['Outlets'].queryFeatures(outletQuery)
+                .then(function(response){
                   // Get object of results
                   // Get record count
-                  inletResults.count = Object.keys(response.features).length
-                  console.log(inletResults.count)
+                  outletResults.count = Object.keys(response.features).length
                   features = response.features;
                   // Update accordian title to show Count
-                  document.getElementById("InletsWindow").setAttribute("heading", `Inlets (${inletResults.count})`)
+                  document.getElementById("OutletsWindow").setAttribute("heading", `Outlets (${outletResults.count})`)
                   // Loop over each feature in result
                   features.forEach((result, index)=>{
                     attr = result.attributes;
@@ -251,146 +358,128 @@ require(["esri/config", "esri/Map", "esri/layers/VectorTileLayer", "esri/views/M
                     item.setAttribute("value", index);
                     // Add to service results
                     // type = `Inlet Type: ${attr[facsubtype]}`;
-                    type = `Inlet Type: ${attr.facsubtype}`;
-                    // size =  `Inlet Size: ${attr[size]}`;
-                    // description = type + "\n" + size;
+                    type = `Outlet Type: ${attr.facsubtype}`;
+                    size =  `Size: ${attr.size}`;
+                    material = `Material: ${attr.material}`
+                    description = type + "\n" + size + "\n" + material;
+                    item.setAttribute("description", description);
+                    // Add event listenr to pick list item, opens popup for feature
+                    // item.addEventListener("click", traceResultClickHandler);
+                    // Append to existing results panel
+                    document.getElementById("OutletsWindow").appendChild(item);
+                  });
+                });
+              } else {
+                document.getElementById("OutletsWindow").setAttribute("heading", "Outlets")
+              }
+
+              if (data['Maintenance Holes']['features'].length > 0){
+                // ###### Maintenance Hole Results ######
+                var mhResults = new Object();
+                mhQuery = new Query();
+                mhQuery.where = "factype = 'Maintenance Holes'";
+                mhQuery.outFields = [ "factype", "id", "facid", "facsubtype"];
+                layerObj['Maintenance Holes'].queryFeatures(mhQuery)
+                .then(function(response){
+                  // Get object of results
+                  // Get record count
+                  mhResults.count = Object.keys(response.features).length
+                  features = response.features;
+                  // Update accordian title to show Count
+                  document.getElementById("MH-Window").setAttribute("heading", `Maintenance Holes (${mhResults.count})`)
+                  // Loop over each feature in result
+                  features.forEach((result, index)=>{
+                    attr = result.attributes;
+                    item = document.createElement("calcite-pick-list-item");
+                    item.setAttribute("label", attr.facid);
+                    item.setAttribute("value", index);
+                    // Add to service results
+                    // type = `Inlet Type: ${attr[facsubtype]}`;
+                    type = `Maintenance Hole Type: ${attr.facsubtype}`;
                     description = type
                     item.setAttribute("description", description);
                     // Add event listenr to pick list item, opens popup for feature
                     // item.addEventListener("click", traceResultClickHandler);
                     // Append to existing results panel
-                    document.getElementById("InletsWindow").appendChild(item);
+                    document.getElementById("MH-Window").appendChild(item);
                   });
                 });
+              } else {
+                document.getElementById("MH-Window").setAttribute("heading", "Maintenance Holes")
+              }
 
-              // ###### Outlet Results ######
-              var outletResults = new Object();
-              outletQuery = new Query();
-              outletQuery.where = "factype = 'Outlets'";
-              outletQuery.outFields = [ "factype", "id", "size", "facid", "material", "facsubtype"];
-              resultpoints.queryFeatures(outletQuery)
-              .then(function(response){
-                // Get object of results
-                // Get record count
-                outletResults.count = Object.keys(response.features).length
-                features = response.features;
-                // Update accordian title to show Count
-                document.getElementById("OutletsWindow").setAttribute("heading", `Outlets (${outletResults.count})`)
-                // Loop over each feature in result
-                features.forEach((result, index)=>{
-                  attr = result.attributes;
-                  item = document.createElement("calcite-pick-list-item");
-                  item.setAttribute("label", attr.facid);
-                  item.setAttribute("value", index);
-                  // Add to service results
-                  // type = `Inlet Type: ${attr[facsubtype]}`;
-                  type = `Outlet Type: ${attr.facsubtype}`;
-                  size =  `Size: ${attr.size}`;
-                  material = `Material ${attr.material}`
-                  description = type + "\n" + size + " " + material;
-                  item.setAttribute("description", description);
-                  // Add event listenr to pick list item, opens popup for feature
-                  // item.addEventListener("click", traceResultClickHandler);
-                  // Append to existing results panel
-                  document.getElementById("OutletsWindow").appendChild(item);
+              if (data['Gravity Mains']['features'].length > 0){
+                // ###### Gravity Mains Results ######
+                var gmResults = new Object();
+                gmQuery = new Query();
+                gmQuery.where = "factype = 'Gravity Mains'";
+                gmQuery.outFields = ["factype", "id", "facid", "size", "material"];
+                layerObj['Gravity Mains'].queryFeatures(gmQuery)
+                .then(function(response){
+                  // Get object of results
+                  // Get record count
+                  gmResults.count = Object.keys(response.features).length
+                  features = response.features;
+                  // Update accordian title to show Count
+                  document.getElementById("GM-Window").setAttribute("heading", `Gravity Mains (${gmResults.count})`)
+                  // Loop over each feature in result
+                  features.forEach((result, index)=>{
+                    attr = result.attributes;
+                    item = document.createElement("calcite-pick-list-item");
+                    item.setAttribute("label", attr.facid);
+                    item.setAttribute("value", index);
+                    // Add to service results
+                    // type = `Inlet Type: ${attr[facsubtype]}`;
+                    type = `Gravity Main Type: ${attr.facsubtype}`;
+                    size = `Size: ${attr.size}`
+                    description = type + "\n" + "\n" + size
+                    item.setAttribute("description", description);
+                    // Add event listenr to pick list item, opens popup for feature
+                    // item.addEventListener("click", traceResultClickHandler);
+                    // Append to existing results panel
+                    document.getElementById("GM-Window").appendChild(item);
+                  });
                 });
-              });
+              } else {
+                document.getElementById("GM-Window").setAttribute("heading", "Gravity Mains")
+              }
 
-              // ###### Maintenance Hole Results ######
-              var mhResults = new Object();
-              mhQuery = new Query();
-              mhQuery.where = "factype = 'Maintenance Holes'";
-              mhQuery.outFields = [ "factype", "id", "facid", "facsubtype"];
-              resultpoints.queryFeatures(mhQuery)
-              .then(function(response){
-                // Get object of results
-                // Get record count
-                mhResults.count = Object.keys(response.features).length
-                features = response.features;
-                // Update accordian title to show Count
-                document.getElementById("MH-Window").setAttribute("heading", `Maintenance Holes (${mhResults.count})`)
-                // Loop over each feature in result
-                features.forEach((result, index)=>{
-                  attr = result.attributes;
-                  item = document.createElement("calcite-pick-list-item");
-                  item.setAttribute("label", attr.facid);
-                  item.setAttribute("value", index);
-                  // Add to service results
-                  // type = `Inlet Type: ${attr[facsubtype]}`;
-                  type = `Maintenance Hole Type: ${attr.facsubtype}`;
-                  description = type
-                  item.setAttribute("description", description);
-                  // Add event listenr to pick list item, opens popup for feature
-                  // item.addEventListener("click", traceResultClickHandler);
-                  // Append to existing results panel
-                  document.getElementById("MH-Window").appendChild(item);
+              if (data['Laterals']['features'].length > 0){
+                // ###### Laterals Results ######
+                var latResults = new Object();
+                latQuery = new Query();
+                latQuery.where = "factype = 'Laterals'";
+                latQuery.outFields = [ "factype", "id", "facid", "size", "material"];
+                layerObj['Laterals'].queryFeatures(latQuery)
+                .then(function(response){
+                  // Get object of results
+                  // Get record count
+                  latResults.count = Object.keys(response.features).length
+                  features = response.features;
+                  // Update accordian title to show Count
+                  document.getElementById("Lat-Window").setAttribute("heading", `Laterals (${latResults.count})`)
+                  // Loop over each feature in result
+                  features.forEach((result, index)=>{
+                    attr = result.attributes;
+                    item = document.createElement("calcite-pick-list-item");
+                    item.setAttribute("label", attr.facid);
+                    item.setAttribute("value", index);
+                    // Add to service results
+                    // type = `Inlet Type: ${attr[facsubtype]}`;
+                    type = `Lateral Type: ${attr.facsubtype}`;
+                    size = `Size: ${attr.size}`
+                    // material = `Material: ${attr.material}`
+                    description = type + "\n" + size
+                    item.setAttribute("description", description);
+                    // Add event listenr to pick list item, opens popup for feature
+                    // item.addEventListener("click", traceResultClickHandler);
+                    // Append to existing results panel
+                    document.getElementById("Lat-Window").appendChild(item);
+                  });
                 });
-              });
-
-              // ###### Gravity Mains Results ######
-              var gmResults = new Object();
-              gmQuery = new Query();
-              gmQuery.where = "factype = 'Gravity Mains'";
-              gmQuery.outFields = ["factype", "id", "facid", "size", "material", "facsubtype"];
-              resultLines.queryFeatures(gmQuery)
-              .then(function(response){
-                // Get object of results
-                // Get record count
-                gmResults.count = Object.keys(response.features).length
-                features = response.features;
-                // Update accordian title to show Count
-                document.getElementById("GM-Window").setAttribute("heading", `Gravity Mains (${gmResults.count})`)
-                // Loop over each feature in result
-                features.forEach((result, index)=>{
-                  attr = result.attributes;
-                  item = document.createElement("calcite-pick-list-item");
-                  item.setAttribute("label", attr.facid);
-                  item.setAttribute("value", index);
-                  // Add to service results
-                  // type = `Inlet Type: ${attr[facsubtype]}`;
-                  type = `Gravity Main Type: ${attr.facsubtype}`;
-                  size = `Size: ${attr.size}`
-                  description = type + "\n" + size
-                  item.setAttribute("description", description);
-                  // Add event listenr to pick list item, opens popup for feature
-                  // item.addEventListener("click", traceResultClickHandler);
-                  // Append to existing results panel
-                  document.getElementById("GM-Window").appendChild(item);
-                });
-              });
-
-              // ###### Laterals Results ######
-              var latResults = new Object();
-              latQuery = new Query();
-              latQuery.where = "factype = 'Laterals'";
-              latQuery.outFields = [ "factype", "id", "facid", "size", "material", "facsubtype"];
-              resultLines.queryFeatures(latQuery)
-              .then(function(response){
-                // Get object of results
-                // Get record count
-                latResults.count = Object.keys(response.features).length
-                features = response.features;
-                // Update accordian title to show Count
-                document.getElementById("Lat-Window").setAttribute("heading", `Laterals (${latResults.count})`)
-                // Loop over each feature in result
-                features.forEach((result, index)=>{
-                  attr = result.attributes;
-                  item = document.createElement("calcite-pick-list-item");
-                  item.setAttribute("label", attr.facid);
-                  item.setAttribute("value", index);
-                  // Add to service results
-                  // type = `Inlet Type: ${attr[facsubtype]}`;
-                  type = `Lateral Type: ${attr.facsubtype}`;
-                  size = `Size: ${attr.size}`
-                  // material = `Material: ${attr.material}`
-                  description = type + "\n" + size
-                  item.setAttribute("description", description);
-                  // Add event listenr to pick list item, opens popup for feature
-                  // item.addEventListener("click", traceResultClickHandler);
-                  // Append to existing results panel
-                  document.getElementById("Lat-Window").appendChild(item);
-                });
-              });
+              } else {
+                document.getElementById("Lat-Window").setAttribute("heading", "Laterals")
+              }
               // Set result group to display
               document.getElementById("results-grp").style.display = "block";
                })

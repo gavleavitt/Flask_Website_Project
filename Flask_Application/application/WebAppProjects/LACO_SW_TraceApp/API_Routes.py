@@ -86,34 +86,35 @@ FROM
 	sp
     """)
 
-    # Lists to hold point and line results
+    # Lists to hold results
     pointfeatures = []
-    linefeatures =[]
+
+    resultDict = {'startpoint':None, "Inlet": [], "Outlets": [],"Maintenance Holes": [],"Gravity Mains": [],
+                  "Laterals":[]}
+
     # Execute raw SQL query with parameters
     results = db.session.execute(sql, {"lat": lat, "lon": lon, "directionSQL":directionSQL})
     startpoint = None
     id = 1
     for i in results:
+        # Load st_asgeojson query results as geojson data
+        geojsonGeom = geojson.loads(i.geojson)
         # Populate properties for each feature
         propDict = {}
         propDict['factype'] = i.factype
-        if i.factype == "Inlet":
-            propDict['facsubtype'] = DomainLookUps.inletPlanLookUp(str(i.subtype))
-        elif i.factype in ("Gravity Mains", "Laterals"):
-            propDict['facsubtype'] = DomainLookUps.gravityMainsMaterialLookup(str(i.subtype))
-        elif i.factype == "Maintenance Holes":
-            propDict['facsubtype'] = DomainLookUps.maintenanceHolePlanLookUp(str(i.subtype))
-        else:
-            propDict['facsubtype'] = i.subtype
         if i.size:
             propDict['size'] = i.size
         else:
             propDict['size'] = "Unknown"
         propDict['dwgno'] = i.dwgno
-        if i.material:
-            propDict['material'] = i.material
+        if i.dwgno:
+            propDict['dwgno'] = i.dwgno
         else:
-            propDict['material'] = "Unknown"
+            propDict['dwgno'] = "Unknown"
+        # if i.material:
+        #     propDict['material'] = i.material
+        # else:
+        #     propDict['material'] = "Unknown"
         propDict['id'] = id
         if not i.facid:
             propDict['facid'] = "Unknown"
@@ -121,21 +122,47 @@ FROM
             propDict['facid'] = i.facid
         propDict['cost'] = i.cost
         propDict['uuid'] = i.uuid
-        # Load st_asgeojson query results as geojson data
-        geojsonGeom = geojson.loads(i.geojson)
-        # Add to feature collection depending on factype, will return 3 geojson results
-        if i.factype == "startpoint":
+
+        if i.factype == "Inlet":
+            propDict['facsubtype'] = DomainLookUps.inletPlanLookUp(str(i.subtype))
+            resultDict['Inlet'].append(Feature(geometry=Point(geojsonGeom), properties=propDict))
+        elif i.factype == "Outlets":
+            propDict['material'] = DomainLookUps.gravityMainsMaterialLookup(str(i.material))
+            resultDict['Outlets'].append(Feature(geometry=Point(geojsonGeom), properties=propDict))
+        elif i.factype == "Maintenance Holes":
+            propDict['facsubtype'] = DomainLookUps.maintenanceHolePlanLookUp(str(i.subtype))
+            resultDict['Maintenance Holes'].append(Feature(geometry=Point(geojsonGeom), properties=propDict))
+        elif i.factype == "Gravity Mains":
+            propDict['material'] = DomainLookUps.gravityMainsMaterialLookup(str(i.material))
+            resultDict['Gravity Mains'].append(Feature(geometry=MultiLineString(geojsonGeom), properties=propDict))
+        elif i.factype == "Laterals":
+            propDict['material'] = DomainLookUps.gravityMainsMaterialLookup(str(i.material))
+            resultDict['Laterals'].append(Feature(geometry=MultiLineString(geojsonGeom), properties=propDict))
+        elif i.factype == "startpoint":
             startpoint = Feature(geometry=Point(geojsonGeom), properties=propDict)
-        elif i.geomtype == "POINT":
-            pointfeatures.append(Feature(geometry=Point(geojsonGeom), properties=propDict))
-        elif i.geomtype == "LINESTRING":
-            linefeatures.append(Feature(geometry=MultiLineString(geojsonGeom), properties=propDict))
+            resultDict['startpoint'] = startpoint
+        else:
+            propDict['facsubtype'] = i.subtype
+
+        # Add to feature collection depending on factype, will return 3 geojson results
+        # if i.factype == "startpoint":
+        #     startpoint = Feature(geometry=Point(geojsonGeom), properties=propDict)
+        # elif i.geomtype == "POINT":
+        #     pointfeatures.append(Feature(geometry=Point(geojsonGeom), properties=propDict))
+        # elif i.geomtype == "LINESTRING":
+        #     linefeatures.append(Feature(geometry=MultiLineString(geojsonGeom), properties=propDict))
         id += 1
     # Format json response, will have nested geojson data
-    lineCollection = FeatureCollection(linefeatures)
-    pointsCollection = FeatureCollection(pointfeatures)
+    # lineCollection = FeatureCollection(linefeatures)
+    # pointsCollection = FeatureCollection(pointfeatures)
+
     # jsonify response to have 3 nested geojson results
-    response = jsonify({"startpoint": startpoint, "lines": lineCollection, "points": pointsCollection})
+    response = jsonify({"startpoint": startpoint,
+        "Inlet": FeatureCollection(resultDict['Inlet']),
+        "Outlets":FeatureCollection(resultDict['Outlets']),
+        "Maintenance Holes": FeatureCollection(resultDict["Maintenance Holes"]),
+        "Gravity Mains": FeatureCollection(resultDict["Gravity Mains"]),
+        "Laterals": FeatureCollection(resultDict["Laterals"])})
     # Add header to allow CORS
     response.headers.add('Access-Control-Allow-Origin', '*')
     return response
