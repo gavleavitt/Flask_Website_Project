@@ -210,99 +210,50 @@ require(["esri/config", "esri/Map", "esri/layers/VectorTileLayer", "esri/views/M
             })
             .then(function(data){
 
+              // Object to hold ArcGIS JS API geojson formatted layers
               var layerObj = {}
+              // createCSV(data);
+              // headers = ["","","",""]
+              // exportCSVFile(headers,data,"csvFile")
+              createCSV(data)
 
               function addGeoJson(geojson, title, popupTemplate){
+                // Takes geojson result features returned from server and brings them in as object URLs since the GeoJSONLayer function expects a seperate URL
+                // for each layer, not one URL for all
+                // Check if the GeoJSON has results, if not skip it
                 if (geojson['features'].length > 0){
+                  // Make a blob object of geojson formatted data
                   const blob = new Blob([JSON.stringify(geojson)], {type: "application/json"});
+                  // Make a temporary URL that points to the client-side store previously created blob feature
                   const url  = URL.createObjectURL(blob);
+                  // Create a GeoJSON layer using provided popupTemplate and previously set renderer
                   const result = new GeoJSONLayer({
                     url:url,
                     title:title,
                     renderer:lineResultRenderer,
                     popupTemplate: popupTemplate
                   });
+                  // Add new geojson layer to layerObj
                   layerObj[title] = result;
                 }
               }
+              // Process geojson result layers provided by server
               addGeoJson(data['Gravity Mains'], 'Gravity Mains', popupGM)
               addGeoJson(data['Laterals'], 'Laterals', popupLat)
               addGeoJson(data['Inlets'], 'Inlets', popupInlet)
               addGeoJson(data['startpoint'], 'Start Point', null)
               addGeoJson(data['Outlets'], 'Outlets', popupOutlet)
               addGeoJson(data['Maintenance Holes'], 'Maintenance Holes', popupMH)
-              console.log(layerObj)
-              // if (data['Gravity Mains']['features'].length > 0){
-              //   const gmblob = new Blob([JSON.stringify(data['Gravity Mains'])], {type: "application/json"});
-              //   const gmurl  = URL.createObjectURL(gmblob);
-              //   const resultgm = new GeoJSONLayer({
-              //     url:gmurl,
-              //     title:"Gravity Mains",
-              //     renderer:lineResultRenderer,
-              //     popupTemplate: popupGM
-              //   });
-              //   layerObj['Gravity Mains'] = resultgm;
-              // }
-              // const startptblob = new Blob([JSON.stringify(data['startpoint'])], {type: "application/json"});
-              // const startpturl  = URL.createObjectURL(startptblob);
-              // const resultstartpt = new GeoJSONLayer({
-              //   url:startpturl,
-              //   title:"Start Point",
-              //   renderer:pointResultRenderer
-              // });
-              //
-              // if (data['Inlet']['features'].length > 0){
-              //   const inletblob = new Blob([JSON.stringify(data['Inlet'])], {type: "application/json"});
-              //   const inleturl  = URL.createObjectURL(inletblob);
-              //   const resultinlet = new GeoJSONLayer({
-              //     url:inleturl,
-              //     title:"Inlets",
-              //     renderer:pointResultRenderer,
-              //     popupTemplate: popupInlets
-              //   });
-              //   layerObj['Inlet'] = resultinlet;
-              // }
-              //
-              // if (data['Outlets']['features'].length > 0){
-              //   const outletblob = new Blob([JSON.stringify(data['Outlets'])], {type: "application/json"});
-              //   const outleturl  = URL.createObjectURL(outletblob);
-              //   const resultoutlet = new GeoJSONLayer({
-              //     url:outleturl,
-              //     title: "Outlets",
-              //     renderer:pointResultRenderer
-              //   });
-              //   layerObj['Outlets'] = resultoutlet;
-              // }
-              //
-              // if (data['Maintenance Holes']['features'].length > 0){
-              //   const mhblob = new Blob([JSON.stringify(data['Maintenance Holes'])], {type: "application/json"});
-              //   const mhurl  = URL.createObjectURL(mhblob);
-              //   const resultmh = new GeoJSONLayer({
-              //     url:mhurl,
-              //     title: "Maintenance Holes",
-              //     renderer:pointResultRenderer,
-              //     popupTemplate: popupMHs
-              //   });
-              //   layerObj['Maintenance Holes'] = resultmh;
-              // }
-              //
-              // if (data['Laterals']['features'].length > 0){
-              //   const latblob = new Blob([JSON.stringify(data['Laterals'])], {type: "application/json"});
-              //   const laturl  = URL.createObjectURL(latblob);
-              //   const resultlat = new GeoJSONLayer({
-              //     url:laturl,
-              //     title:"Laterals",
-              //     renderer:lineResultRenderer,
-              //     popupTemplate: popupLat
-              //   });
-              //   layerObj['Laterals'] = resultlat;
-              // }
+
+              // Add results as a group layer
               resultslayer = new GroupLayer({
                 id: "resultslayer",
                 title: "Trace Results",
                 layers: Object.values(layerObj)
               });
+              // Add group layer to map
               map.add(resultslayer);
+              // Zoom to extent of gravity mains result, can't zoom to extent of group layer
               layerObj['Gravity Mains'].queryExtent().then((response) => {
                 view.goTo(response.extent);
               });
@@ -310,197 +261,71 @@ require(["esri/config", "esri/Map", "esri/layers/VectorTileLayer", "esri/views/M
               document.querySelector('#query-text').style.display = "none";
 
 
-              // query features: https://developers.arcgis.com/javascript/latest/api-reference/esri-layers-GeoJSONLayer.html#queryFeatures
-              // See https://developers.arcgis.com/javascript/latest/sample-code/featurelayer-query/
-              //###### Inlet results ######
-              if (data['Inlets']['features'].length > 0){
-                var inletResults = new Object();
-                inletQuery = new Query();
-                inletQuery.where = "factype = 'Inlet'";
-                inletQuery.outFields = [ "factype", "id", "facsubtype", "facid"];
-                inletQuery.returnGeometry = true;
-                layerObj['Inlets'].queryFeatures(inletQuery)
-                .then(function(response){
-                    // Get object of results
-                    // Get record count
-                    inletResults.count = Object.keys(response.features).length
-                    features = response.features;
-                    // Update accordian title to show Count
-                    document.getElementById("InletsWindow").setAttribute("heading", `Inlets (${inletResults.count})`)
-                    // Loop over each feature in result
-                    features.forEach((result, index)=>{
-                      attr = result.attributes;
-                      item = document.createElement("calcite-pick-list-item");
-                      item.setAttribute("label", attr.facid);
-                      item.setAttribute("value", index);
-                      // Add to service results
-                      // type = `Inlet Type: ${attr[facsubtype]}`;
-                      type = `Inlet Type: ${attr.facsubtype}`;
-                      // size =  `Inlet Size: ${attr[size]}`;
-                      // description = type + "\n" + size;
-                      description = type
-                      item.setAttribute("description", description);
-                      // Add event listenr to pick list item, opens popup for feature
-                      item.addEventListener("click", function(){
-                        // const target = event.target;
-                        // const resultId = target.getAttribute("value");
-                        view.popup.open({
-                          features: [result],
-                          location: result.geometry
+              function buildResultsDisplay(geojsonlyr, calciteWindowID, titleText){
+                //  Get count of features in geojson layer
+                // if (datalyr['features'].length > 0){
+                console.log(titleText);
+                console.log(geojsonlyr)
+                if (geojsonlyr !== undefined){
+                  console.log("Populating data!");
+                  var results = new Object();
+                  query = new Query();
+                  query.where = `factype = '${titleText}'`;
+                  query.outFields = [ "factype", "id", "facsubtype", "facid"];
+                  query.returnGeometry = true;
+                  geojsonlyr.queryFeatures(query)
+                  .then(function(response){
+                      // Get object of results
+                      // Get record count
+                      results.count = Object.keys(response.features).length
+                      console.log(results.count)
+                      features = response.features;
+                      // Update accordian title to show Count
+                      document.getElementById(calciteWindowID).setAttribute("heading", `${titleText} (${results.count})`)
+                      // Loop over each feature in result
+                      features.forEach((result, index)=>{
+                        attr = result.attributes;
+                        item = document.createElement("calcite-pick-list-item");
+                        item.setAttribute("label", attr.facid);
+                        item.setAttribute("value", index);
+                        // Add to service results
+                        // type = `Inlet Type: ${attr[facsubtype]}`;
+                        type = `${titleText} Type: ${attr.facsubtype}`;
+                        if (["Inlets, Maintenance Holes"].includes(titleText)){
+                          console.log(titleText)
+                          description = type;
+                        } else {
+                          size =  `Size: ${attr.size}`;
+                          material = `Material: ${attr.material}`
+                          description = type + "\n" + size + "\n" + material;
+                        }
+                        item.setAttribute("description", description);
+                        item.addEventListener("click", function(){
+                          // const target = event.target;
+                          // const resultId = target.getAttribute("value");
+                          view.popup.open({
+                            features: [result],
+                            location: result.geometry
+                          });
+                          view.goTo(result.geometry)
                         });
-                        view.goTo(result.geometry)
+                        // Append to existing results panel
+                        console.log(calciteWindowID)
+                        document.getElementById(calciteWindowID).appendChild(item);
                       });
-                      // Append to existing results panel
-                      document.getElementById("InletsWindow").appendChild(item);
                     });
-                  });
-                } else {
-                  document.getElementById("InletsWindow").setAttribute("heading", "Inlets")
+                  } else {
+                    console.log("Setting empty results")
+                    document.getElementById(calciteWindowID).setAttribute("heading", titleText)
+                  }
                 }
-              // ###### Outlet Results ######
-              if (data['Outlets']['features'].length > 0){
-                var outletResults = new Object();
-                outletQuery = new Query();
-                outletQuery.where = "factype = 'Outlets'";
-                outletQuery.outFields = [ "factype", "id", "size", "facid", "material"];
-                layerObj['Outlets'].queryFeatures(outletQuery)
-                .then(function(response){
-                  // Get object of results
-                  // Get record count
-                  outletResults.count = Object.keys(response.features).length
-                  features = response.features;
-                  // Update accordian title to show Count
-                  document.getElementById("OutletsWindow").setAttribute("heading", `Outlets (${outletResults.count})`)
-                  // Loop over each feature in result
-                  features.forEach((result, index)=>{
-                    attr = result.attributes;
-                    item = document.createElement("calcite-pick-list-item");
-                    item.setAttribute("label", attr.facid);
-                    item.setAttribute("value", index);
-                    // Add to service results
-                    // type = `Inlet Type: ${attr[facsubtype]}`;
-                    type = `Outlet Type: ${attr.facsubtype}`;
-                    size =  `Size: ${attr.size}`;
-                    material = `Material: ${attr.material}`
-                    description = type + "\n" + size + "\n" + material;
-                    item.setAttribute("description", description);
-                    // Add event listenr to pick list item, opens popup for feature
-                    // item.addEventListener("click", traceResultClickHandler);
-                    // Append to existing results panel
-                    document.getElementById("OutletsWindow").appendChild(item);
-                  });
-                });
-              } else {
-                document.getElementById("OutletsWindow").setAttribute("heading", "Outlets")
-              }
 
-              if (data['Maintenance Holes']['features'].length > 0){
-                // ###### Maintenance Hole Results ######
-                var mhResults = new Object();
-                mhQuery = new Query();
-                mhQuery.where = "factype = 'Maintenance Holes'";
-                mhQuery.outFields = [ "factype", "id", "facid", "facsubtype"];
-                layerObj['Maintenance Holes'].queryFeatures(mhQuery)
-                .then(function(response){
-                  // Get object of results
-                  // Get record count
-                  mhResults.count = Object.keys(response.features).length
-                  features = response.features;
-                  // Update accordian title to show Count
-                  document.getElementById("MH-Window").setAttribute("heading", `Maintenance Holes (${mhResults.count})`)
-                  // Loop over each feature in result
-                  features.forEach((result, index)=>{
-                    attr = result.attributes;
-                    item = document.createElement("calcite-pick-list-item");
-                    item.setAttribute("label", attr.facid);
-                    item.setAttribute("value", index);
-                    // Add to service results
-                    // type = `Inlet Type: ${attr[facsubtype]}`;
-                    type = `Maintenance Hole Type: ${attr.facsubtype}`;
-                    description = type
-                    item.setAttribute("description", description);
-                    // Add event listenr to pick list item, opens popup for feature
-                    // item.addEventListener("click", traceResultClickHandler);
-                    // Append to existing results panel
-                    document.getElementById("MH-Window").appendChild(item);
-                  });
-                });
-              } else {
-                document.getElementById("MH-Window").setAttribute("heading", "Maintenance Holes")
-              }
 
-              if (data['Gravity Mains']['features'].length > 0){
-                // ###### Gravity Mains Results ######
-                var gmResults = new Object();
-                gmQuery = new Query();
-                gmQuery.where = "factype = 'Gravity Mains'";
-                gmQuery.outFields = ["factype", "id", "facid", "size", "material"];
-                layerObj['Gravity Mains'].queryFeatures(gmQuery)
-                .then(function(response){
-                  // Get object of results
-                  // Get record count
-                  gmResults.count = Object.keys(response.features).length
-                  features = response.features;
-                  // Update accordian title to show Count
-                  document.getElementById("GM-Window").setAttribute("heading", `Gravity Mains (${gmResults.count})`)
-                  // Loop over each feature in result
-                  features.forEach((result, index)=>{
-                    attr = result.attributes;
-                    item = document.createElement("calcite-pick-list-item");
-                    item.setAttribute("label", attr.facid);
-                    item.setAttribute("value", index);
-                    // Add to service results
-                    // type = `Inlet Type: ${attr[facsubtype]}`;
-                    type = `Gravity Main Type: ${attr.facsubtype}`;
-                    size = `Size: ${attr.size}`
-                    description = type + "\n" + "\n" + size
-                    item.setAttribute("description", description);
-                    // Add event listenr to pick list item, opens popup for feature
-                    // item.addEventListener("click", traceResultClickHandler);
-                    // Append to existing results panel
-                    document.getElementById("GM-Window").appendChild(item);
-                  });
-                });
-              } else {
-                document.getElementById("GM-Window").setAttribute("heading", "Gravity Mains")
-              }
-
-              if (data['Laterals']['features'].length > 0){
-                // ###### Laterals Results ######
-                var latResults = new Object();
-                latQuery = new Query();
-                latQuery.where = "factype = 'Laterals'";
-                latQuery.outFields = [ "factype", "id", "facid", "size", "material"];
-                layerObj['Laterals'].queryFeatures(latQuery)
-                .then(function(response){
-                  // Get object of results
-                  // Get record count
-                  latResults.count = Object.keys(response.features).length
-                  features = response.features;
-                  // Update accordian title to show Count
-                  document.getElementById("Lat-Window").setAttribute("heading", `Laterals (${latResults.count})`)
-                  // Loop over each feature in result
-                  features.forEach((result, index)=>{
-                    attr = result.attributes;
-                    item = document.createElement("calcite-pick-list-item");
-                    item.setAttribute("label", attr.facid);
-                    item.setAttribute("value", index);
-                    // Add to service results
-                    // type = `Inlet Type: ${attr[facsubtype]}`;
-                    type = `Lateral Type: ${attr.facsubtype}`;
-                    size = `Size: ${attr.size}`
-                    // material = `Material: ${attr.material}`
-                    description = type + "\n" + size
-                    item.setAttribute("description", description);
-                    // Add event listenr to pick list item, opens popup for feature
-                    // item.addEventListener("click", traceResultClickHandler);
-                    // Append to existing results panel
-                    document.getElementById("Lat-Window").appendChild(item);
-                  });
-                });
-              } else {
-                document.getElementById("Lat-Window").setAttribute("heading", "Laterals")
-              }
+              buildResultsDisplay(layerObj['Gravity Mains'], 'GM-Window', 'Gravity Mains')
+              buildResultsDisplay(layerObj['Laterals'], 'Lat-Window', 'Laterals')
+              buildResultsDisplay(layerObj['Inlets'], 'InletsWindow', 'Inlets')
+              buildResultsDisplay(layerObj['Outlets'], 'OutletsWindow', 'Outlets')
+              buildResultsDisplay(layerObj['Maintenance Holes'], 'MH-Window', 'Maintenance Holes')
               // Set result group to display
               document.getElementById("results-grp").style.display = "block";
                })
@@ -513,25 +338,4 @@ require(["esri/config", "esri/Map", "esri/layers/VectorTileLayer", "esri/views/M
             });
       });
   });
-
-  // load geojson data as a layer
-  // see https://gis.stackexchange.com/questions/373811/create-geojson-layer-based-on-remote-server-request-arcgis-js-api
-  // inletQuery.outFields = [ "factype", "id", "POPULATION", "(POPULATION / AREA) as 'POP_DENSITY'" ];
-  // inletQuery.outFields = [ "factype", "id", "subfactype", "size", "dwgno", "material", "facid"];
-  // Click listener for when user clicks on a result list entry,
-  // zooms to feature and opens popup
-  // function traceResultClickHandler(event) {
-  //   const target = event.target;
-  //   const resultId = target.getAttribute("value");
-  //
-  //   // get the graphic corresponding to the clicked item
-  //   const result =
-  //     resultId && graphics && graphics[parseInt(resultId, 10)];
-  //   if (result) {
-  //     view.popup.open({
-  //       features: [result],
-  //       location: result.geometry
-  //     });
-  //     // Zoom to feature
-  //   }
-  // };
+;

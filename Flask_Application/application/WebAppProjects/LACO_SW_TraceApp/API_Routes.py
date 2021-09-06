@@ -122,8 +122,9 @@ FROM
             propDict['facid'] = i.facid
         propDict['cost'] = i.cost
         propDict['uuid'] = i.uuid
-
-        if i.factype == "Inlet":
+        propDict['facsubtype'] = "Unknown"
+        propDict['material'] = "Unknown"
+        if i.factype == "Inlets":
             propDict['facsubtype'] = DomainLookUps.inletPlanLookUp(str(i.subtype))
             resultDict['Inlets'].append(Feature(geometry=Point(geojsonGeom), properties=propDict))
         elif i.factype == "Outlets":
