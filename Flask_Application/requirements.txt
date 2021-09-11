@@ -22,7 +22,6 @@ Flask==1.1.2
 Flask-Assets==2.0
 Flask-BasicAuth==0.2.0
 Flask-HTTPAuth==4.0.0
-Flask-Login==0.5.0
 Flask-Migrate==2.5.3
 Flask-SQLAlchemy==2.4.3
 Flask-WTF==0.14.3
@@ -41,11 +40,11 @@ install==1.3.3
 itsdangerous==1.1.0
 Jinja2==2.11.3
 jmespath==0.10.0
-jsonschema==3.2.0
 kombu==5.0.2
 Mako==1.1.2
 MarkupSafe==1.1.1
-numpy
+multidict==4.7.6
+numpy==1.18.5
 oauth2client==4.1.3
 oauthlib==3.1.0
 overpass==0.7
@@ -54,13 +53,12 @@ pdfplumber==0.5.23
 Pillow==8.2.0
 prompt-toolkit==3.0.10
 protobuf==3.13.0
-psycopg2-binary
+psycopg2-binary==2.8.5
 pyasn1==0.4.8
 pyasn1-modules==0.2.8
-pycryptodome
+pycryptodome==3.9.8
 PyDrive==1.3.1
 pyproj==3.0.0.post1
-pyrsistent==0.17.3
 python-dateutil==2.8.1
 python-dotenv==0.14.0
 python-editor==1.0.4
@@ -70,12 +68,10 @@ requests==2.24.0
 requests-oauthlib==1.3.0
 rsa==4.6
 s3transfer==0.3.3
-pip inst==1.7.1
-simplejson==3.17.2
+Shapely==1.7.1
 six==1.15.0
 sortedcontainers==2.2.2
 SQLAlchemy==1.3.19
-sqlathanor==0.7.0
 stravalib==0.10.2
 topojson==1.0rc11
 typing-extensions==3.7.4.3
@@ -83,7 +79,6 @@ tzlocal==2.1
 units==0.7
 uritemplate==3.0.1
 urllib3==1.25.10
-validator-collection==1.5.0
 vine==5.0.0
 virtualenv==20.0.25
 Wand==0.6.3
@@ -92,4 +87,5 @@ webassets==2.0
 Werkzeug==1.0.1
 wincertstore==0.2
 WTForms==2.3.3
+yarl==1.6.0
 zipp==3.1.0
