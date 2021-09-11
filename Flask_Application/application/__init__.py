@@ -50,6 +50,9 @@ if application.config['ENV'] == "development":
     localurl = "leavitttesting.com:5000"
     application.logger.debug(f"Setting up local development server name: {localurl}")
     app.config['SERVER_NAME'] = localurl
+    # Setup SQLAlchemy engine sessionmaker factory for localhost
+    # engineLocal = create_engine(os.environ.get("DBCON_LOCAL"))
+    # SessionLocal = sessionmaker(bind=engineLocal)
 else:
     # Live deployment
     # see https://stackoverflow.com/a/60549321
@@ -75,9 +78,7 @@ db = SQLAlchemy(app, model_class = FlaskBaseModel)
 # db.init_app(app)
 db = initialize_flask_sqlathanor(db)
 
-# Setup SQLAlchemy engine sessionmaker factory for localhost
-engineLocal = create_engine(os.environ.get("DBCON_LOCAL"))
-SessionLocal = sessionmaker(bind=engineLocal)
+
 
 # Attach logging handler to application
 application.logger.addHandler(handler)
