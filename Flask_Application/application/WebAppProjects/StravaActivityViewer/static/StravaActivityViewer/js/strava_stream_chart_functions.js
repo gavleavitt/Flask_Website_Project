@@ -280,15 +280,15 @@ function populateAncillaryData(index){
   var ancilObj = csvDatObject[index];
   // Return formatted text for tooltip depending on which stream dataset is active
   if (active == "elevation-stream-btn"){
-    return checkAncillaryData("distance", ancilObj["distance"]) + "Elevation(Feet):" + ancilObj["altitude"] + "\n" + "Speed(mph):" + ancilObj["velocity_smooth"] + "\n" + "Grade(%):" + ancilObj["grade_smooth"] + "\n" + checkAncillaryData("cadence", ancilObj["cadence"]) + checkAncillaryData("heartrate",ancilObj["heartrate"])
+    return checkAncillaryData("distance", ancilObj["distance"]) + "Speed(mph):" + (ancilObj["velocity_smooth"]*2.23694).toFixed(1) + "\n" + "Grade(%):" + ancilObj["grade_smooth"] + "\n" + checkAncillaryData("cadence", ancilObj["cadence"]) + checkAncillaryData("heartrate",ancilObj["heartrate"])
   } else if (active == "speed-stream-btn"){
-    return checkAncillaryData("distance", ancilObj["distance"]) + "Elevation(Feet):" + ancilObj["altitude"] + "\n" + "Grade(%):" + ancilObj["grade_smooth"] + "\n" + checkAncillaryData("cadence", ancilObj["cadence"]) + checkAncillaryData("heartrate",ancilObj["heartrate"])
+    return checkAncillaryData("distance", ancilObj["distance"]) + "Elevation(Feet):" + (ancilObj["altitude"]*3.28).toFixed(0) + "\n" + "Grade(%):" + ancilObj["grade_smooth"] + "\n" + checkAncillaryData("cadence", ancilObj["cadence"]) + checkAncillaryData("heartrate",ancilObj["heartrate"])
   } else if (active == "grade-stream-btn"){
-    return checkAncillaryData("distance", ancilObj["distance"]) + "Elevation(Feet):" + ancilObj["altitude"] + "\n" +  "Speed(mph):" + ancilObj["velocity_smooth"] + "\n" + checkAncillaryData("cadence", ancilObj["cadence"]) + checkAncillaryData("heartrate",ancilObj["heartrate"])
+    return checkAncillaryData("distance", ancilObj["distance"]) + "Elevation(Feet):" + (ancilObj["altitude"]*3.28).toFixed(0) + "\n" +  "Speed(mph):" + (ancilObj["velocity_smooth"]*2.23694).toFixed(1) + "\n" + checkAncillaryData("cadence", ancilObj["cadence"]) + checkAncillaryData("heartrate",ancilObj["heartrate"])
   } else if (active == "cadence-stream-btn"){
-    return checkAncillaryData("distance", ancilObj["distance"]) + "Elevation(Feet):" + ancilObj["altitude"] + "\n" +  "Speed(mph):" + ancilObj["velocity_smooth"] + "\n" + "Grade(%):" + ancilObj["grade_smooth"] + "\n" + checkAncillaryData("heartrate",ancilObj["heartrate"])
+    return checkAncillaryData("distance", ancilObj["distance"]) + "Elevation(Feet):" + (ancilObj["altitude"]*3.28).toFixed(0) + "\n" +  "Speed(mph):" + (ancilObj["velocity_smooth"]*2.23694).toFixed(1) + "\n" + "Grade(%):" + ancilObj["grade_smooth"] + "\n" + checkAncillaryData("heartrate",ancilObj["heartrate"])
   } else if (active == "heartrate-stream-btn"){
-    return checkAncillaryData("distance", ancilObj["distance"]) + "Elevation(Feet):" + ancilObj["altitude"] + "\n" + "Speed(mph):" + ancilObj["velocity_smooth"] + "\n" + "Grade(%):" + ancilObj["grade_smooth"]  + "\n" + checkAncillaryData("cadence", ancilObj["cadence"])
+    return checkAncillaryData("distance", ancilObj["distance"])* + "Elevation(Feet):" + (ancilObj["altitude"]*3.28).toFixed(0) + "\n" + "Speed(mph):" + (ancilObj["velocity_smooth"]*2.23694).toFixed(1) + "\n" + "Grade(%):" + ancilObj["grade_smooth"]  + "\n" + checkAncillaryData("cadence", ancilObj["cadence"])
   } else if (active == "temperature-stream-btn"){
     // Do nothing for now
   }
@@ -303,7 +303,7 @@ function checkAncillaryData(datType, sensorData){
     } else if (datType == "heartrate"){
       return "Heart Rate(bpm):" + sensorData
     } else if (datType == "distance"){
-        return "Distance(Miles):" + (sensorData*0.000189394).toFixed(1) + "\n"
+        return "Distance(Miles):" + (sensorData*0.000621371).toFixed(2) + "\n"
     }
   } else {
     return ""

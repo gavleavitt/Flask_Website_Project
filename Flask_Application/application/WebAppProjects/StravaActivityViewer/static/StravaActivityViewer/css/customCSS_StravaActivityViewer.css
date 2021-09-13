@@ -57,10 +57,11 @@ html{
 }
 
 .material-icons{
-  font-size: 25px;
+  font-size: 20px;
   color: #555;
-  border-right: 1px solid #aaa;
-  border-bottom: 1px solid #aaa;
+  /* border-right: 1px solid #aaa;
+  border-bottom: 1px solid #aaa; */
+  border: none;
 }
 /* #strava-display-container {
   grid-row: 2/4;
@@ -608,14 +609,17 @@ html{
   position: absolute;
   top: 0;
   left: 0;
-
+  display:none;
 }
 
 .toggle-btn{
   border: none;
   text-decoration: none;
   background-color:var(--titlebackground);
+  width:22px;
+  height:20px;
 }
+
 
 .stream-chart-btns{
   padding-bottom:10px;
@@ -684,7 +688,7 @@ This targets only fine pointers (mouse) for hover behavior, this prevents the ho
     z-index: 2;
     background-color: #e6e6e6;
     padding: 0px !important;
-    height: 26px;
+    /* height: 26px; */
   }
   .map-panel{
     /* grid-column: 1/8; */
@@ -729,8 +733,21 @@ This targets only fine pointers (mouse) for hover behavior, this prevents the ho
   }
 }
 @media screen and (max-width: 700px) {
+  #chart-Btns{
+    padding-top: 20px;
+  }
+  .chartToggle{
+    padding-left: 3px;
+    padding-right: 3px;
+    padding-top: 3px;
+    padding-bottom: 3px;
+    font-size: 10px;
+  }
   .leaflet-control-attribution .leaflet-control{
     font-size: 6px !important;
+  }
+  .toggle-cont{
+    display:block;
   }
 
   .titletext{
