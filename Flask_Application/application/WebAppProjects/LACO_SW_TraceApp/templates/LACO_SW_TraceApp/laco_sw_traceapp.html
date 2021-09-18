@@ -11,7 +11,7 @@
     <script src="https://js.arcgis.com/4.20/"></script>
 
     <!-- Custom local javascript -->
-    <!-- <script src="{{ url_for('lacoSWTraceapp_API_BP.static', filename='SBCO_SW_TraceApp/js/createCSV.js') }}"></script> -->
+    <script src="{{ url_for('lacoSWTraceapp_API_BP.static', filename='SBCO_SW_TraceApp/js/createCSV.js') }}"></script>
     <script src="{{ url_for('lacoSWTraceapp_API_BP.static', filename='SBCO_SW_TraceApp/js/pop-ups.js') }}"></script>
     <script src="{{ url_for('lacoSWTraceapp_API_BP.static', filename='SBCO_SW_TraceApp/js/renderers.js') }}"></script>
     <script src="{{ url_for('lacoSWTraceapp_API_BP.static', filename='SBCO_SW_TraceApp/js/customJS.js') }}"></script>
@@ -44,17 +44,19 @@
             <calcite-radio-button checked value="downstream">Downstream</calcite-radio-button>
             <calcite-radio-button value="upstream">Upstream</calcite-radio-button>
         </calcite-radio-button-group>
-        <div class="button-grp">
-          <calcite-button id="selBtn" button-alignment="center" round width="half" scale="s" icon-start="object-detection" color="blue" class="tool-btn">Select Location</calcite-button>
-          <calcite-button id="submitBtn" button-alignment="center" round width="half" scale="s" icon-start="submit" color="red" class="tool-btn">Run</calcite-button>
-          <calcite-button id="clearBtn" button-alignment="center" round width="half" scale="s" icon-start="reset" color="neutral" class="tool-btn">Clear</calcite-button>
-        </div>
+          <div class="button-grp">
+            <calcite-button id="selBtn" button-alignment="center" round width="half" scale="s" icon-start="object-detection" color="blue" class="tool-btn">Select Location</calcite-button>
+            <calcite-button id="submitBtn" button-alignment="center" round width="half" scale="s" icon-start="submit" color="red" class="tool-btn">Run</calcite-button>
+            <calcite-button id="clearBtn" button-alignment="center" round width="half" scale="s" icon-start="reset" color="neutral" class="tool-btn">Clear</calcite-button>
+          </div>
         <div id="query-text">
           <b>Sending request to server</b>
         </div>
         <!-- <calcite-flow id="results-grp"> -->
         <calcite-panel id="results-grp">
+          <calcite-fab id="DownloadCSV" color="blue" icon="download-to" label="download" scale="l" text-enabled text="Download Result CSV"></calcite-fab>
           <calcite-panel id="results" heading="Results">
+            <!-- <calcite-icon scale="m" slot="fab" text-enabled text="Download Result CSV" icon="download-to"></calcite-icon> -->
               <calcite-block id="OutletsWindow" heading="Outlets" collapsible>
                 <calcite-icon scale="s" slot="icon" icon="circle-f"></calcite-icon>
                   <!-- <calcite-notice active>

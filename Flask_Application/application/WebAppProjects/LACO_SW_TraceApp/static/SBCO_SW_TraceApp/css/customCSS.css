@@ -12,6 +12,12 @@ body,
   width: 100%;
 }
 
+#DownloadCSV{
+  justify-content: center;
+  background-color: #FFFFFF;
+  padding: 5px;
+}
+
 #InletsWindow{
   overflow: auto;
 }
@@ -21,7 +27,7 @@ body,
 }
 
 #TraceToolTitle .header{
-  font-size: 30px; 
+  font-size: 30px;
 }
 
 #MH-Window calcite-icon{

@@ -5,6 +5,7 @@ var userlon = null;
 var geojsonData = null;
 var map = null;
 var view = null;
+// var layerObj = null;
 // var selectionLayer = null
 // var resultslayer = null
 require(["esri/config", "esri/Map", "esri/layers/VectorTileLayer", "esri/views/MapView", "esri/layers/TileLayer", "esri/Graphic", "esri/layers/GraphicsLayer", "esri/layers/WebTileLayer", "esri/layers/GeoJSONLayer", "esri/symbols/SimpleMarkerSymbol", "esri/renderers/UniqueValueRenderer", "esri/renderers/SimpleRenderer", "esri/widgets/LayerList", "esri/layers/GroupLayer", "esri/rest/support/Query"],
@@ -75,11 +76,11 @@ require(["esri/config", "esri/Map", "esri/layers/VectorTileLayer", "esri/views/M
       view.ui.add("traceDiv", "top-left");
 
       view.on("click", (event) => {
-        console.log("click event: ", event);
-        console.log("x:", event.mapPoint.longitude.toFixed(5));
-        console.log("y:", event.mapPoint.latitude.toFixed(5));
-        console.log("x:", event.mapPoint.x.toFixed(2));
-        console.log("y:", event.mapPoint.y.toFixed(2));
+        // console.log("click event: ", event);
+        // console.log("x:", event.mapPoint.longitude.toFixed(5));
+        // console.log("y:", event.mapPoint.latitude.toFixed(5));
+        // console.log("x:", event.mapPoint.x.toFixed(2));
+        // console.log("y:", event.mapPoint.y.toFixed(2));
         document.getElementById("NoSelAlert").removeAttribute('active');
         // Set global variables of user's selection:
         userLong = event.mapPoint.longitude;
@@ -116,28 +117,6 @@ require(["esri/config", "esri/Map", "esri/layers/VectorTileLayer", "esri/views/M
       });
       document.getElementById("selBtn").addEventListener("click", function(){
         console.log("selection active!");
-        // Clear out existing graphic layers
-        // if (typeof selectionLayer != "undefined"){
-        //   selectionLayer.removeAll();
-        // };
-        // map.removeLayer(map.getLayer("selectionLayer"));
-        // map.removeLayer(map.getLayer("resultslayer"));
-        // const removelayers = map.allLayers.find(function(layer) {
-        //   return layer.title === "Selected Start Point";
-        // });
-        // const removelayers = map.allLayers.find(function(layer) {
-        //   map.remove(layer.title === "Selected Start Point");
-        //   map.remove(layer.title === "Trace Results");
-        //   // return [layer.title === "Selected Start Point",
-        //   //   layer.title === "Trace Results"]
-        // });
-        //  removeLayers = map.allLayers.find(function(layer){
-        //    return layer.title === "Selected Start Point";
-        //  })
-        // map.removeMany(removelayers);
-        // map.allLayers.find(function(layer){
-        //   console.log(layer)
-        // })
         userLat = null;
         userlon = null;
         btnActive = "active";
@@ -202,6 +181,7 @@ require(["esri/config", "esri/Map", "esri/layers/VectorTileLayer", "esri/views/M
             // console.log(url);
             // Set Query text to active
             document.querySelector('#query-text').style.display = "block";
+            // Issue Async request
             fetch(url, {method: "GET",
               mode: 'cors'})
             .then(r => {
@@ -211,12 +191,7 @@ require(["esri/config", "esri/Map", "esri/layers/VectorTileLayer", "esri/views/M
             .then(function(data){
 
               // Object to hold ArcGIS JS API geojson formatted layers
-              var layerObj = {}
-              // createCSV(data);
-              // headers = ["","","",""]
-              // exportCSVFile(headers,data,"csvFile")
-              createCSV(data)
-
+              layerObj = {}
               function addGeoJson(geojson, title, popupTemplate){
                 // Takes geojson result features returned from server and brings them in as object URLs since the GeoJSONLayer function expects a seperate URL
                 // for each layer, not one URL for all
@@ -259,7 +234,9 @@ require(["esri/config", "esri/Map", "esri/layers/VectorTileLayer", "esri/views/M
               });
               // Set Query text to inactive
               document.querySelector('#query-text').style.display = "none";
-
+              document.getElementById("DownloadCSV").addEventListener("click", function(){
+                createCSV(data)
+              });
 
               function buildResultsDisplay(geojsonlyr, calciteWindowID, titleText){
                 //  Get count of features in geojson layer

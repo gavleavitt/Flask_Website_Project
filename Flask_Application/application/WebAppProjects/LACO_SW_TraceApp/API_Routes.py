@@ -91,89 +91,89 @@ FROM
 
     # Lists to hold results
     results = db.session.execute(sql, {"lat": lat, "lon": lon, "directionSQL": directionSQL})
-    if returnType == "geojson":
-        resultDict = {'startpoint': None, "Inlets": [], "Outlets": [], "Maintenance Holes": [], "Gravity Mains": [],
-                      "Laterals": []}
-        # Execute raw SQL query with parameters
+    # if returnType == "geojson":
+    resultDict = {'startpoint': None, "Inlets": [], "Outlets": [], "Maintenance Holes": [], "Gravity Mains": [],
+                  "Laterals": []}
+    # Execute raw SQL query with parameters
 
-        startpoint = None
-        id = 1
-        for i in results:
-            # Load st_asgeojson query results as geojson data
-            geojsonGeom = geojson.loads(i.geojson)
-            # Populate properties for each feature
-            propDict = {}
-            propDict['factype'] = i.factype
-            if i.size:
-                propDict['size'] = i.size
-            else:
-                propDict['size'] = "Unknown"
+    startpoint = None
+    id = 1
+    for i in results:
+        # Load st_asgeojson query results as geojson data
+        geojsonGeom = geojson.loads(i.geojson)
+        # Populate properties for each feature
+        propDict = {}
+        propDict['factype'] = i.factype
+        if i.size:
+            propDict['size'] = i.size
+        else:
+            propDict['size'] = "Unknown"
+        propDict['dwgno'] = i.dwgno
+        if i.dwgno:
             propDict['dwgno'] = i.dwgno
-            if i.dwgno:
-                propDict['dwgno'] = i.dwgno
-            else:
-                propDict['dwgno'] = "Unknown"
-            # if i.material:
-            #     propDict['material'] = i.material
-            # else:
-            #     propDict['material'] = "Unknown"
-            propDict['id'] = id
-            if not i.facid:
-                propDict['facid'] = "Unknown"
-            else:
-                propDict['facid'] = i.facid
-            propDict['cost'] = i.cost
-            propDict['uuid'] = i.uuid
-            propDict['facsubtype'] = "Unknown"
-            propDict['material'] = "Unknown"
-            if i.factype == "Inlets":
-                propDict['facsubtype'] = DomainLookUps.inletPlanLookUp(str(i.subtype))
-                resultDict['Inlets'].append(Feature(geometry=Point(geojsonGeom), properties=propDict))
-            elif i.factype == "Outlets":
-                propDict['material'] = DomainLookUps.gravityMainsMaterialLookup(str(i.material))
-                resultDict['Outlets'].append(Feature(geometry=Point(geojsonGeom), properties=propDict))
-            elif i.factype == "Maintenance Holes":
-                propDict['facsubtype'] = DomainLookUps.maintenanceHolePlanLookUp(str(i.subtype))
-                resultDict['Maintenance Holes'].append(Feature(geometry=Point(geojsonGeom), properties=propDict))
-            elif i.factype == "Gravity Mains":
-                propDict['material'] = DomainLookUps.gravityMainsMaterialLookup(str(i.material))
-                resultDict['Gravity Mains'].append(Feature(geometry=MultiLineString(geojsonGeom), properties=propDict))
-            elif i.factype == "Laterals":
-                propDict['material'] = DomainLookUps.gravityMainsMaterialLookup(str(i.material))
-                resultDict['Laterals'].append(Feature(geometry=MultiLineString(geojsonGeom), properties=propDict))
-            elif i.factype == "startpoint":
-                startpoint = Feature(geometry=Point(geojsonGeom), properties=propDict)
-                resultDict['startpoint'] = startpoint
-            else:
-                propDict['facsubtype'] = i.subtype
-            id += 1
-        # jsonify response
+        else:
+            propDict['dwgno'] = "Unknown"
+        # if i.material:
+        #     propDict['material'] = i.material
+        # else:
+        #     propDict['material'] = "Unknown"
+        propDict['id'] = id
+        if not i.facid:
+            propDict['facid'] = "Unknown"
+        else:
+            propDict['facid'] = i.facid
+        propDict['linearpipefeetfromstart'] = i.cost
+        propDict['uuid'] = i.uuid
+        propDict['facsubtype'] = "Unknown"
+        propDict['material'] = "Unknown"
+        if i.factype == "Inlets":
+            propDict['facsubtype'] = DomainLookUps.inletPlanLookUp(str(i.subtype))
+            resultDict['Inlets'].append(Feature(geometry=Point(geojsonGeom), properties=propDict))
+        elif i.factype == "Outlets":
+            propDict['material'] = DomainLookUps.gravityMainsMaterialLookup(str(i.material))
+            resultDict['Outlets'].append(Feature(geometry=Point(geojsonGeom), properties=propDict))
+        elif i.factype == "Maintenance Holes":
+            propDict['facsubtype'] = DomainLookUps.maintenanceHolePlanLookUp(str(i.subtype))
+            resultDict['Maintenance Holes'].append(Feature(geometry=Point(geojsonGeom), properties=propDict))
+        elif i.factype == "Gravity Mains":
+            propDict['material'] = DomainLookUps.gravityMainsMaterialLookup(str(i.material))
+            resultDict['Gravity Mains'].append(Feature(geometry=MultiLineString(geojsonGeom), properties=propDict))
+        elif i.factype == "Laterals":
+            propDict['material'] = DomainLookUps.gravityMainsMaterialLookup(str(i.material))
+            resultDict['Laterals'].append(Feature(geometry=MultiLineString(geojsonGeom), properties=propDict))
+        elif i.factype == "startpoint":
+            startpoint = Feature(geometry=Point(geojsonGeom), properties=propDict)
+            resultDict['startpoint'] = startpoint
+        else:
+            propDict['facsubtype'] = i.subtype
+        id += 1
+    # jsonify response
 
-        response = jsonify({"startpoint": FeatureCollection(resultDict['startpoint']),
-            "Inlets": FeatureCollection(resultDict['Inlets']),
-            "Outlets":FeatureCollection(resultDict['Outlets']),
-            "Maintenance Holes": FeatureCollection(resultDict["Maintenance Holes"]),
-            "Gravity Mains": FeatureCollection(resultDict["Gravity Mains"]),
-            "Laterals": FeatureCollection(resultDict["Laterals"])})
-    else:
-        # write csv to memory as string
-        csvObject = io.StringIO
-        # Make csv writer
-        csvWriter = csv.writer(csvObject)
-        # write header row
-        headerList = ["factype", "facsubtype", "facid", "material", "size", "dwgno", "uuid", "cost"]
-        csvWriter.writerow(headerList)
-        # write query results to csv
-        for i in results:
-            csvWriter.writerow([i.factype, i.facsubtype, i.facid,i.material, i.size, i.dwgno, i.uuid, i.cost])
-        # See: https://stackoverflow.com/a/26998089
-
-
-        #
-        # cw.writerows(csvList)
-        response = make_response(csvObject.getvalue())
-        response.headers["Content-Disposition"] = "attachment; filename=export.csv"
-        response.headers["Content-type"] = "text/csv"
+    response = jsonify({"startpoint": FeatureCollection(resultDict['startpoint']),
+        "Inlets": FeatureCollection(resultDict["Inlets"]),
+        "Outlets":FeatureCollection(resultDict["Outlets"]),
+        "Maintenance Holes": FeatureCollection(resultDict["Maintenance Holes"]),
+        "Gravity Mains": FeatureCollection(resultDict["Gravity Mains"]),
+        "Laterals": FeatureCollection(resultDict["Laterals"])})
+    # else:
+    #     # write csv to memory as string
+    #     csvObject = io.StringIO
+    #     # Make csv writer
+    #     csvWriter = csv.writer(csvObject)
+    #     # write header row
+    #     headerList = ["factype", "facsubtype", "facid", "material", "size", "dwgno", "uuid", "cost"]
+    #     csvWriter.writerow(headerList)
+    #     # write query results to csv
+    #     for i in results:
+    #         csvWriter.writerow([i.factype, i.facsubtype, i.facid,i.material, i.size, i.dwgno, i.uuid, i.cost])
+    #     # See: https://stackoverflow.com/a/26998089
+    #
+    #
+    #     #
+    #     # cw.writerows(csvList)
+    #     response = make_response(csvObject.getvalue())
+    #     response.headers["Content-Disposition"] = "attachment; filename=export.csv"
+    #     response.headers["Content-type"] = "text/csv"
     # Add header to allow CORS
     response.headers.add('Access-Control-Allow-Origin', '*')
     return response
