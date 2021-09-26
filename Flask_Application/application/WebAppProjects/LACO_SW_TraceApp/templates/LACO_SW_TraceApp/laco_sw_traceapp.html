@@ -6,6 +6,17 @@
     <title>LA County Stormwater System Trace Application</title>
     <!-- json2csv -->
     <!-- <script src="https://cdn.jsdelivr.net/npm/json2csv"></script> -->
+
+
+    <!-- TileQuery local Dist -->
+    <script src="{{ url_for('lacoSWTraceapp_API_BP.static', filename='SBCO_SW_TraceApp/js/dist/tilequery.js') }}"></script>
+
+    <!-- jszip lcoal dist -->
+    <script src="{{ url_for('lacoSWTraceapp_API_BP.static', filename='SBCO_SW_TraceApp/js/dist/jszip.min.js') }}"></script>
+
+    <!-- Filesaver local dist -->
+    <script src="{{ url_for('lacoSWTraceapp_API_BP.static', filename='SBCO_SW_TraceApp/js/dist/FileSaver.min.js') }}"></script>
+
     <!-- ArcGIS JS API  -->
     <link rel="stylesheet" href="https://js.arcgis.com/4.20/esri/themes/light/main.css">
     <script src="https://js.arcgis.com/4.20/"></script>
@@ -15,15 +26,23 @@
     <script src="{{ url_for('lacoSWTraceapp_API_BP.static', filename='SBCO_SW_TraceApp/js/pop-ups.js') }}"></script>
     <script src="{{ url_for('lacoSWTraceapp_API_BP.static', filename='SBCO_SW_TraceApp/js/renderers.js') }}"></script>
     <script src="{{ url_for('lacoSWTraceapp_API_BP.static', filename='SBCO_SW_TraceApp/js/customJS.js') }}"></script>
+    <script src="{{ url_for('lacoSWTraceapp_API_BP.static', filename='SBCO_SW_TraceApp/js/vtl_popup.js') }}"></script>
+    <script src="{{ url_for('lacoSWTraceapp_API_BP.static', filename='SBCO_SW_TraceApp/js/createZIP.js') }}"></script>
     <!-- Custom local CSS -->
     <link rel="stylesheet" href="{{ url_for('lacoSWTraceapp_API_BP.static', filename='SBCO_SW_TraceApp/css/customCSS.css') }}">
 
     <!-- Calcite -->
+
+    <script type="module" src="https://js.arcgis.com/calcite-components/1.0.0-beta.63/calcite.esm.js"></script>
+    <script nomodule="" src="https://js.arcgis.com/calcite-components/1.0.0-beta.63/calcite.js"></script>
+
+    <link rel="stylesheet" type="text/css" href="https://js.arcgis.com/calcite-components/1.0.0-beta.63/calcite.css" />
+
     <!-- <script type="module" src="https://js.arcgis.com/calcite-components/1.0.0-beta.52/calcite.esm.js"></script> -->
-    <script nomodule="" src="https://js.arcgis.com/calcite-components/1.0.0-beta.52/calcite.js"></script>
-    <script type="module" src=https://js.arcgis.com/calcite-components/1.0.0-beta.61/calcite.esm.js></script>
+    <!-- <script nomodule="" src="https://js.arcgis.com/calcite-components/1.0.0-beta.52/calcite.js"></script> -->
+    <!-- <script type="module" src=https://js.arcgis.com/calcite-components/1.0.0-beta.61/calcite.esm.js></script> -->
     <!-- <link rel="stylesheet" type="text/css" href="https://js.arcgis.com/calcite-components/1.0.0-beta.52/calcite.css" /> -->
-    <link rel="stylesheet" type="text/css" href=https://js.arcgis.com/calcite-components/1.0.0-beta.61/calcite.css />
+    <!-- <link rel="stylesheet" type="text/css" href=https://js.arcgis.com/calcite-components/1.0.0-beta.61/calcite.css /> -->
 
   </head>
   <body>
@@ -50,11 +69,15 @@
             <calcite-button id="clearBtn" button-alignment="center" round width="half" scale="s" icon-start="reset" color="neutral" class="tool-btn">Clear</calcite-button>
           </div>
         <div id="query-text">
-          <b>Sending request to server</b>
+          <calcite-loader id="toolloader" active text="Processing Request"></calcite-loader>
+          <!-- <b>Sending request to server</b> -->
         </div>
         <!-- <calcite-flow id="results-grp"> -->
         <calcite-panel id="results-grp">
-          <calcite-fab id="DownloadCSV" color="blue" icon="download-to" label="download" scale="l" text-enabled text="Download Result CSV"></calcite-fab>
+          <div>
+            <calcite-fab id="DownloadCSV" class="Download" color="blue" icon="download-to" label="download" scale="l" text-enabled text="Download Result CSV"></calcite-fab>
+            <calcite-fab id="DownloadGeoJSON" class="Download" color="blue" icon="download-to" label="download" scale="l" text-enabled text="Download Result GeoJSON (Zipped)"></calcite-fab>
+          </div>
           <calcite-panel id="results" heading="Results">
             <!-- <calcite-icon scale="m" slot="fab" text-enabled text="Download Result CSV" icon="download-to"></calcite-icon> -->
               <calcite-block id="OutletsWindow" heading="Outlets" collapsible>

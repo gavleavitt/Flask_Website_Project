@@ -2,58 +2,113 @@
 var btnActive = null;
 var userLat = null;
 var userlon = null;
-var geojsonData = null;
+var serverResponse = null;
 var map = null;
 var view = null;
+var gravMainsTileURL = "https://vectortileservices3.arcgis.com/NfAw5Z474Q8vyMGv/arcgis/rest/services/gravity_mains_vector_tile_layer/VectorTileServer/tile/{z}/{y}/{x}.pbf"
 // var layerObj = null;
 // var selectionLayer = null
 // var resultslayer = null
-require(["esri/config", "esri/Map", "esri/layers/VectorTileLayer", "esri/views/MapView", "esri/layers/TileLayer", "esri/Graphic", "esri/layers/GraphicsLayer", "esri/layers/WebTileLayer", "esri/layers/GeoJSONLayer", "esri/symbols/SimpleMarkerSymbol", "esri/renderers/UniqueValueRenderer", "esri/renderers/SimpleRenderer", "esri/widgets/LayerList", "esri/layers/GroupLayer", "esri/rest/support/Query"],
-  function (esriConfig, Map, VectorTileLayer, MapView, TileLayer, Graphic, GraphicsLayer, WebTileLayer, GeoJSONLayer, SimpleMarkerSymbol, UniqueValueRenderer, SimpleRenderer, LayerList, GroupLayer, Query) {
+require(["esri/config", "esri/Map", "esri/layers/VectorTileLayer", "esri/views/MapView", "esri/layers/TileLayer", "esri/Graphic", "esri/layers/GraphicsLayer", "esri/layers/WebTileLayer", "esri/layers/GeoJSONLayer", "esri/symbols/SimpleMarkerSymbol", "esri/renderers/UniqueValueRenderer", "esri/renderers/SimpleRenderer", "esri/widgets/LayerList", "esri/layers/GroupLayer", "esri/rest/support/Query", "esri/widgets/Search", "esri/layers/FeatureLayer", "esri/widgets/Bookmarks", "esri/widgets/Expand","esri/layers/TileLayer"],
+  function (esriConfig, Map, VectorTileLayer, MapView, TileLayer, Graphic, GraphicsLayer, WebTileLayer, GeoJSONLayer, SimpleMarkerSymbol, UniqueValueRenderer, SimpleRenderer, LayerList, GroupLayer, Query, Search, FeatureLayer, Bookmarks, Expand, TileLayer) {
       esriConfig.apiKey = "AAPK5f601af9967543d6bc498db5a6b0f84bpHLpA-1hb11KUYm2IfzgmzBATsNlgD24Rjueqj2sKqaVsz3d6vU-6-l1yb-0YTi3";
-      console.log("Loading vector tiles!");
+      // console.log("Loading vector tiles!");
 
       var selectionLayer = new GraphicsLayer();
       var resultslayer = new GroupLayer();
 
       const gravitymainstiles = new VectorTileLayer({
+        // title: "Gravity Mains",
+        title:"Gravity Mains",
+        // Hide from layer list
+        listMode: "hide",
+        // url: "https://vectortileservices3.arcgis.com/NfAw5Z474Q8vyMGv/arcgis/rest/services/Gravity_Mains_VTL/VectorTileServer",
+        url: "https://vectortileservices3.arcgis.com/NfAw5Z474Q8vyMGv/arcgis/rest/services/Gravity_Mains_VTL/VectorTileServer/resources/styles/root.json",
+        minscale: 2311162.217155,
+        maxscale: 15000
+      });
+
+      // const gravitymainstiles = new TileLayer({
+      //   // title: "Gravity Mains",
+      //   title:"Gravity Mains",
+      //   // Hide from layer list
+      //   listMode: "hide",
+      //   url: "https://vectortileservices3.arcgis.com/NfAw5Z474Q8vyMGv/arcgis/rest/services/Gravity_Mains_VTL/VectorTileServer",
+      //   minscale: 2311162.217155,
+      //   maxscale: 15000
+      // });
+
+      const gravitymainsFeatures = new FeatureLayer({
         title: "Gravity Mains",
-        url: "https://vectortileservices3.arcgis.com/NfAw5Z474Q8vyMGv/arcgis/rest/services/LACO_GravityMains_VTL/VectorTileServer"
+        url: "https://services3.arcgis.com/NfAw5Z474Q8vyMGv/ArcGIS/rest/services/Gravity_Mains_2ft_Simplify_/FeatureServer/0",
+        minScale: 25000
       });
 
-      const lateraltiles = new VectorTileLayer({
+      const lateralFeatures = new FeatureLayer({
         title: "Laterals",
-        url: "https://vectortileservices3.arcgis.com/NfAw5Z474Q8vyMGv/arcgis/rest/services/Laterals/VectorTileServer"
+        url: "https://services3.arcgis.com/NfAw5Z474Q8vyMGv/arcgis/rest/services/Laterals_2ft_Simplify/FeatureServer/0",
+        minScale: 25000
       });
 
-      const inlettiles = new VectorTileLayer({
-          title: "Inlets",
-          url: "https://vectortileservices3.arcgis.com/NfAw5Z474Q8vyMGv/arcgis/rest/services/Inlets/VectorTileServer",
-          minScale: 15000
-         });
 
-      const mhtiles = new VectorTileLayer({
-           title: "Maintenance Holes",
-           url: "https://vectortileservices3.arcgis.com/NfAw5Z474Q8vyMGv/arcgis/rest/services/MaintenanceH_oles/VectorTileServer",
-           minScale: 15000
-          });
+      // const lateraltiles = new VectorTileLayer({
+      //   title: "Laterals",
+      //   url: "https://vectortileservices3.arcgis.com/NfAw5Z474Q8vyMGv/arcgis/rest/services/Laterals/VectorTileServer"
+      // });
 
-      const ottiles = new VectorTileLayer({
-            title: "Outlets",
-            url: "https://vectortileservices3.arcgis.com/NfAw5Z474Q8vyMGv/arcgis/rest/services/Outlets/VectorTileServer",
-            minScale: 15000
-           });
 
+      const inletFeatures = new FeatureLayer({
+        title: "Inlets",
+        url: "https://services3.arcgis.com/NfAw5Z474Q8vyMGv/arcgis/rest/services/inlets_wgs84/FeatureServer/0",
+        minScale: 15000
+      });
+      // const inlettiles = new VectorTileLayer({
+      //     title: "Inlets",
+      //     url: "https://vectortileservices3.arcgis.com/NfAw5Z474Q8vyMGv/arcgis/rest/services/Inlets/VectorTileServer",
+      //     minScale: 15000
+      //    });
+
+      // const mhtiles = new VectorTileLayer({
+      //      title: "Maintenance Holes",
+      //      url: "https://vectortileservices3.arcgis.com/NfAw5Z474Q8vyMGv/arcgis/rest/services/MaintenanceH_oles/VectorTileServer",
+      //      minScale: 15000
+      //     });
+
+      const mhFeatures = new FeatureLayer({
+        title: "Maintenance Holes",
+        url: "https://services3.arcgis.com/NfAw5Z474Q8vyMGv/arcgis/rest/services/inlets_wgs84/FeatureServer/0",
+        minScale: 15000
+      });
+
+      // const ottiles = new VectorTileLayer({
+      //   title: "Outlets",
+      //   url: "https://vectortileservices3.arcgis.com/NfAw5Z474Q8vyMGv/arcgis/rest/services/Outlets/VectorTileServer",
+      //   minScale: 15000
+      //  });
+
+       const olFeatures = new FeatureLayer({
+        title: "Outlets",
+         url: "https://services3.arcgis.com/NfAw5Z474Q8vyMGv/arcgis/rest/services/maintenanceholes_84/FeatureServer/0",
+         minScale: 15000
+       });
+
+
+      // const networklayer = new GroupLayer({
+      //     id: "networklayer",
+      //     title: "Storm Network",
+      //     layers: [gravitymainstiles, lateraltiles, inlettiles, mhtiles, ottiles]
+      //   });
 
       const networklayer = new GroupLayer({
           id: "networklayer",
           title: "Storm Network",
-          layers: [gravitymainstiles, lateraltiles, inlettiles, mhtiles, ottiles]
+          layers: [gravitymainsFeatures, lateralFeatures, inletFeatures, mhFeatures, olFeatures]
         });
+
 
       const map = new Map({
         basemap: "arcgis-topographic", // Basemap layer service
-        layers: [networklayer] // vector tile layer
+        layers: [networklayer,gravitymainstiles] // vector tile layer
       });
       const view = new MapView({
         map: map,
@@ -61,6 +116,26 @@ require(["esri/config", "esri/Map", "esri/layers/VectorTileLayer", "esri/views/M
         zoom: 13, // Zoom level
         container: "viewDiv", // Div element
       });
+      const searchWidget = new Search({
+        view: view
+      });
+      view.ui.add(searchWidget, {
+        position: "top-left",
+        index: 2
+      });
+
+      const bookmarks = new Bookmarks({
+        view: view,
+        // allows bookmarks to be added, edited, or deleted
+        editingEnabled: true
+      });
+
+      const bkExpand = new Expand({
+         view: view,
+         content: bookmarks,
+         expanded: false
+       });
+       view.ui.add(bkExpand, "top-right", 0);
 
       const selectionMarkerSymbol = {
          type: "simple-marker",
@@ -75,12 +150,19 @@ require(["esri/config", "esri/Map", "esri/layers/VectorTileLayer", "esri/views/M
 
       view.ui.add("traceDiv", "top-left");
 
+      layerList = new LayerList({
+        view
+      });
+
+      view.ui.add(layerList, "top-right");
+
       view.on("click", (event) => {
         // console.log("click event: ", event);
         // console.log("x:", event.mapPoint.longitude.toFixed(5));
         // console.log("y:", event.mapPoint.latitude.toFixed(5));
         // console.log("x:", event.mapPoint.x.toFixed(2));
         // console.log("y:", event.mapPoint.y.toFixed(2));
+        esriTilequery([event.mapPoint.longitude, event.mapPoint.latitude], gravMainsTileURL)
         document.getElementById("NoSelAlert").removeAttribute('active');
         // Set global variables of user's selection:
         userLong = event.mapPoint.longitude;
@@ -121,9 +203,6 @@ require(["esri/config", "esri/Map", "esri/layers/VectorTileLayer", "esri/views/M
         userlon = null;
         btnActive = "active";
       });
-
-
-
       document.getElementById("clearBtn").addEventListener("click", function(){
               console.log("Clearing results!")
               map.remove(selectionLayer);
@@ -147,12 +226,6 @@ require(["esri/config", "esri/Map", "esri/layers/VectorTileLayer", "esri/views/M
               // }}
             }
           )
-
-      layerList = new LayerList({
-        view
-      });
-
-      view.ui.add(layerList, "top-right");
 
       document.getElementById("submitBtn").addEventListener("click", function(){
             // Clear out existing graphic layers
@@ -189,14 +262,15 @@ require(["esri/config", "esri/Map", "esri/layers/VectorTileLayer", "esri/views/M
               return r.json();
             })
             .then(function(data){
-
+              serverResponse = data
               // Object to hold ArcGIS JS API geojson formatted layers
               layerObj = {}
               function addGeoJson(geojson, title, popupTemplate){
                 // Takes geojson result features returned from server and brings them in as object URLs since the GeoJSONLayer function expects a seperate URL
                 // for each layer, not one URL for all
                 // Check if the GeoJSON has results, if not skip it
-                if (geojson['features'].length > 0){
+                // if ((geojson['features'].length > 0) || (title == "Start Point")) {
+                if (geojson['features'].length > 0) {
                   // Make a blob object of geojson formatted data
                   const blob = new Blob([JSON.stringify(geojson)], {type: "application/json"});
                   // Make a temporary URL that points to the client-side store previously created blob feature
@@ -205,13 +279,14 @@ require(["esri/config", "esri/Map", "esri/layers/VectorTileLayer", "esri/views/M
                   const result = new GeoJSONLayer({
                     url:url,
                     title:title,
-                    renderer:lineResultRenderer,
+                    renderer:resultsrenderer,
                     popupTemplate: popupTemplate
                   });
                   // Add new geojson layer to layerObj
                   layerObj[title] = result;
                 }
               }
+
               // Process geojson result layers provided by server
               addGeoJson(data['Gravity Mains'], 'Gravity Mains', popupGM)
               addGeoJson(data['Laterals'], 'Laterals', popupLat)
@@ -236,6 +311,9 @@ require(["esri/config", "esri/Map", "esri/layers/VectorTileLayer", "esri/views/M
               document.querySelector('#query-text').style.display = "none";
               document.getElementById("DownloadCSV").addEventListener("click", function(){
                 createCSV(data)
+              });
+              document.getElementById("DownloadGeoJSON").addEventListener("click", function(){
+                createGeoJSONZIP(data)
               });
 
               function buildResultsDisplay(geojsonlyr, calciteWindowID, titleText){
@@ -314,5 +392,6 @@ require(["esri/config", "esri/Map", "esri/layers/VectorTileLayer", "esri/views/M
               document.getElementById("NoResultAlert").setAttribute('active','')
             });
       });
+      // document.getElementById("toolloader").removeAttribute('active');
   });
 ;

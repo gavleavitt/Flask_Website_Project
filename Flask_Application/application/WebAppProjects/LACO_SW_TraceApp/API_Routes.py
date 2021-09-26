@@ -92,11 +92,11 @@ FROM
     # Lists to hold results
     results = db.session.execute(sql, {"lat": lat, "lon": lon, "directionSQL": directionSQL})
     # if returnType == "geojson":
-    resultDict = {'startpoint': None, "Inlets": [], "Outlets": [], "Maintenance Holes": [], "Gravity Mains": [],
+    resultDict = {'startpoint': [], "Inlets": [], "Outlets": [], "Maintenance Holes": [], "Gravity Mains": [],
                   "Laterals": []}
     # Execute raw SQL query with parameters
 
-    startpoint = None
+    # startpoint = None
     id = 1
     for i in results:
         # Load st_asgeojson query results as geojson data
@@ -142,8 +142,9 @@ FROM
             propDict['material'] = DomainLookUps.gravityMainsMaterialLookup(str(i.material))
             resultDict['Laterals'].append(Feature(geometry=MultiLineString(geojsonGeom), properties=propDict))
         elif i.factype == "startpoint":
-            startpoint = Feature(geometry=Point(geojsonGeom), properties=propDict)
-            resultDict['startpoint'] = startpoint
+            # startpoint = Feature(geometry=Point(geojsonGeom), properties=propDict)
+            # resultDict['startpoint'].append(startpoint)
+            resultDict['startpoint'].append(Feature(geometry=Point(geojsonGeom), properties=propDict))
         else:
             propDict['facsubtype'] = i.subtype
         id += 1
