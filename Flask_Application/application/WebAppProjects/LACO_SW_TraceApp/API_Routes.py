@@ -14,17 +14,83 @@ lacoSWTraceapp_API_BP = Blueprint('lacoSWTraceapp_API_BP', __name__,
 def handletracerequest():
     # Get coordinates
     # Get lat, y
+    # arguments = request.args.to_dict(flat=False)
     lat = float(request.args.get("latitude"))
     # Get lon, x
     lon = float(request.args.get("longitude"))
-    returnType = request.args.get("returnType")
+    # Check if block points have been provided
     # Coordinates to use in SQL query, must be in x, y / lon, lat
     coord = (lon, lat)
-    application.logger.debug(f"Lat,lon: {coord}")
-    application.logger.debug(f"ST_Point({coord})")
-    upstreamSQL = 'SELECT id, source, target, -1 as cost, reverse_cost FROM storm_network'
-    downstreamSQL = 'SELECT id, source, target, cost, -1 as reverse_cost FROM storm_network'
-
+    # application.logger.debug(f"Lat,lon: {coord}")
+    # application.logger.debug(f"ST_Point({coord})")
+    if request.args.getlist("blocklnglats"):
+        #  Get request as a list
+        reqBlockList = request.args.getlist("blocklnglats")
+        blockCords = []
+        # Parse request to a list
+        for i in reqBlockList:
+            # Convert request coordinates to floats as nested lists, convert to floats to help avoid injection
+            blockCords.append([float(i.split(",")[0]), float(i.split(",")[1])])
+        # application.logger.debug(blockCords)
+        # Issue postgis request to get edge IDs to give -1 cost, flagging them as impassable
+        # See https://gis.stackexchange.com/questions/193023/pgrouting-how-to-temporarily-increase-some-edges-cost-without-affecting-concur
+        # Format into SQL statement with a temp table
+        # Create SQL expression to find nearest edges, build out expression in raw text
+        nearestEdgeSQL = """
+        CREATE TEMP TABLE pts(geom geometry);
+        INSERT INTO pts VALUES
+        """
+        # Used to track if the block coordinate is the last in the list
+        blockCount = len(blockCords) - 1
+        for c, i in enumerate(blockCords):
+            nearestEdgeSQL += f"\n(St_transform(ST_SetSRID(ST_Point({i[0]}, {i[1]}), 4326),2229))"
+            if c < blockCount:
+                # Add each block coordinate to SQL text as a VALUE
+                nearestEdgeSQL += ","
+            else:
+                # Last line of temp table input
+                nearestEdgeSQL += ";"
+        nearestEdgeSQL += """
+SELECT 
+	network.id AS edgeid,
+	ST_Distance(pts.geom, network.geom) AS dist
+from 
+	pts 
+CROSS JOIN LATERAL (
+	SELECT 
+		storm_network.id,
+		storm_network.geom
+	FROM 
+		storm_network 
+	ORDER BY 
+		storm_network.geom <-> pts.geom 
+	LIMIT 1
+) AS network
+        """
+        # application.logger.debug(nearestEdgeSQL)
+        # execute query to get nearest edge id for each input
+        edgeresults = db.session.execute(nearestEdgeSQL)
+        #  Get results of query
+        edgeIDs = "("
+        for i in edgeresults:
+            edgeIDs += f"{i.edgeid},"
+        # Remove trailing comma
+        edgeIDs = edgeIDs[:-1]
+        edgeIDs += ")"
+            # edgeIDs.append(i.edgeid)
+        # application.logger.debug(edgeIDs)
+        # Set both flow direction options, correct one will be used in request
+        upstreamSQL = f'SELECT id, source, target, -1 as cost,' \
+                      f'CASE WHEN id IN {edgeIDs} THEN -1 ELSE reverse_cost END as reverse_cost ' \
+                      f'FROM storm_network'
+        downstreamSQL = f'SELECT id, source, target, ' \
+                        f'CASE WHEN id IN {edgeIDs} THEN -1 ELSE cost END as cost,' \
+                        f'-1 as reverse_cost FROM storm_network'
+    else:
+        # Set both flow direction options, correct one will be used in request
+        upstreamSQL = 'SELECT id, source, target, -1 as cost, reverse_cost FROM storm_network'
+        downstreamSQL = 'SELECT id, source, target, cost, -1 as reverse_cost FROM storm_network'
+    # Set direction SQL based on request parameters
     if str(request.args.get("direction")) == "upstream":
         directionSQL = upstreamSQL
     elif str(request.args.get("direction")) == "downstream":
@@ -32,6 +98,7 @@ def handletracerequest():
     else:
         return Response(status=400)
     # Raw sql statement, used since PG_Routing doesnt have SQLAlchemy ORM support
+    # application.logger.debug(directionSQL)
     sql = ("""
 SELECT 
 	node.id as id, node.the_geom as geom, GeometryType(node.the_geom) as geomtype
@@ -39,7 +106,7 @@ INTO TEMP TABLE sp
 FROM
 	storm_network_vertices_pgr as node
 WHERE
-	st_intersects(ST_Snap(ST_Transform(ST_SetSRID(ST_Point(:lon, :lat), 4326),2229),node.the_geom, 100), node.the_geom)
+	st_intersects(ST_Snap(ST_Transform(ST_SetSRID(ST_Point(:lon, :lat), 4326),2229),node.the_geom, 500), node.the_geom)
 ORDER BY 
 	node.the_geom <-> ST_Transform(ST_SetSRID(ST_Point(:lon, :lat), 4326),2229)
 LIMIT 1;
@@ -88,7 +155,7 @@ SELECT
 FROM
 	sp
     """)
-
+    # application.logger.debug(sql)
     # Lists to hold results
     results = db.session.execute(sql, {"lat": lat, "lon": lon, "directionSQL": directionSQL})
     # if returnType == "geojson":

@@ -1,10 +1,12 @@
 /*jshint esversion: 6 */
-var btnActive = null;
+var btnActive = "inactive";
 var userLat = null;
 var userlon = null;
 var serverResponse = null;
 var map = null;
 var view = null;
+var blockBtn = "inactive"
+var blockList = []
 var gravMainsTileURL = "https://vectortileservices3.arcgis.com/NfAw5Z474Q8vyMGv/arcgis/rest/services/gravity_mains_vector_tile_layer/VectorTileServer/tile/{z}/{y}/{x}.pbf"
 // var layerObj = null;
 // var selectionLayer = null
@@ -76,7 +78,7 @@ require(["esri/config", "esri/Map", "esri/layers/VectorTileLayer", "esri/views/M
 
       const mhFeatures = new FeatureLayer({
         title: "Maintenance Holes",
-        url: "https://services3.arcgis.com/NfAw5Z474Q8vyMGv/arcgis/rest/services/inlets_wgs84/FeatureServer/0",
+        url: "https://services3.arcgis.com/NfAw5Z474Q8vyMGv/arcgis/rest/services/maintenanceholes_84/FeatureServer/0",
         minScale: 15000
       });
 
@@ -88,7 +90,7 @@ require(["esri/config", "esri/Map", "esri/layers/VectorTileLayer", "esri/views/M
 
        const olFeatures = new FeatureLayer({
         title: "Outlets",
-         url: "https://services3.arcgis.com/NfAw5Z474Q8vyMGv/arcgis/rest/services/maintenanceholes_84/FeatureServer/0",
+         url: "https://services3.arcgis.com/NfAw5Z474Q8vyMGv/arcgis/rest/services/outlets_WGS84/FeatureServer/0",
          minScale: 15000
        });
 
@@ -102,7 +104,7 @@ require(["esri/config", "esri/Map", "esri/layers/VectorTileLayer", "esri/views/M
       const networklayer = new GroupLayer({
           id: "networklayer",
           title: "Storm Network",
-          layers: [gravitymainsFeatures, lateralFeatures, inletFeatures, mhFeatures, olFeatures]
+          layers: [lateralFeatures, gravitymainsFeatures, inletFeatures, mhFeatures, olFeatures]
         });
 
 
@@ -120,7 +122,7 @@ require(["esri/config", "esri/Map", "esri/layers/VectorTileLayer", "esri/views/M
         view: view
       });
       view.ui.add(searchWidget, {
-        position: "top-left",
+        position: "top-right",
         index: 2
       });
 
@@ -137,17 +139,6 @@ require(["esri/config", "esri/Map", "esri/layers/VectorTileLayer", "esri/views/M
        });
        view.ui.add(bkExpand, "top-right", 0);
 
-      const selectionMarkerSymbol = {
-         type: "simple-marker",
-         style: "x",
-         color: "blue",
-         size:"20px",
-         outline: {
-             color: "blue", // White
-             width: "10px"
-         }
-      };
-
       view.ui.add("traceDiv", "top-left");
 
       layerList = new LayerList({
@@ -160,14 +151,17 @@ require(["esri/config", "esri/Map", "esri/layers/VectorTileLayer", "esri/views/M
         // console.log("click event: ", event);
         // console.log("x:", event.mapPoint.longitude.toFixed(5));
         // console.log("y:", event.mapPoint.latitude.toFixed(5));
-        // console.log("x:", event.mapPoint.x.toFixed(2));
-        // console.log("y:", event.mapPoint.y.toFixed(2));
-        esriTilequery([event.mapPoint.longitude, event.mapPoint.latitude], gravMainsTileURL)
+        console.log("x:", event.mapPoint.x.toFixed(2));
+        console.log("y:", event.mapPoint.y.toFixed(2));
+        // esriTilequery([event.mapPoint.longitude, event.mapPoint.latitude], gravMainsTileURL)
         document.getElementById("NoSelAlert").removeAttribute('active');
-        // Set global variables of user's selection:
-        userLong = event.mapPoint.longitude;
-        userLat = event.mapPoint.latitude;
+        console.log(blockBtn);
+        // Check if selection button is active
         if (btnActive === "active"){
+          view.popup.autoOpenEnabled = false;
+          // Set global variables of user's selection:
+          userLong = event.mapPoint.longitude;
+          userLat = event.mapPoint.latitude;
           map.remove(selectionLayer);
           view.graphics.remove(selectionLayer);
           console.log("Selection is active!");
@@ -189,32 +183,82 @@ require(["esri/config", "esri/Map", "esri/layers/VectorTileLayer", "esri/views/M
           map.add(selectionLayer);
           btnActive = null;
         }
-          document.addEventListener("pointermove", function(){
-            if (btnActive === "active"){
-              document.body.style.cursor = "crosshair";
-            } else {
-                document.body.style.cursor = "default";
-              }
+        // Active block button logic
+        if (blockBtn==="active"){
+          view.popup.autoOpenEnabled = false;
+          // Add block lnglat array
+          // blockList.push({"lng":event.mapPoint.longitude,"lat":event.mapPoint.latitude})
+          blockList.push([event.mapPoint.longitude,event.mapPoint.latitude])
+          console.log("Block selection active!")
+
+          // Get list of IDs of all layers in the map
+          activeLayerIDs = []
+          map.layers.forEach((item, i) => {
+              activeLayerIDs.push(item.id)
+            }
+          );
+
+          // Create a graphic point
+          const blockPoint = new Graphic({
+            title:"Block Points",
+            geometry: {
+               type: "point",
+               longitude: event.mapPoint.longitude,
+               latitude: event.mapPoint.latitude
+             },
+             symbol: blockingMarkerSymbol
           });
+          // If blocking layer doesn't exist in the map, create it
+          if (!activeLayerIDs.includes("blockingLayer")){
+            blockingLayer = new GraphicsLayer({
+              id: "blockingLayer",
+              title: "Selected Block Points"
+            });
+            // Add layer to map
+            map.add(blockingLayer);
+          }
+          // Add new block point to blocking layer
+          blockingLayer.graphics.add(blockPoint);
+        }
+        // Re-enable popups, if disabled for button usage
+        view.popup.autoOpenEnabled = true;
+      });
+      document.addEventListener("pointermove", function(){
+        if ((btnActive === "active") ||(blockBtn === "active")){
+          console.log("crosshair cursor active!")
+          document.body.style.cursor = "crosshair";
+        } else {
+            document.body.style.cursor = "default";
+          }
       });
       document.getElementById("selBtn").addEventListener("click", function(){
         console.log("selection active!");
         userLat = null;
         userlon = null;
         btnActive = "active";
+        blockBtn = "inactive";
+      });
+      document.getElementById("block-Btn").addEventListener("click", function(){
+        console.log("Block selection active!");
+        blockBtn = "active";
+        btnActive = "inactive";
       });
       document.getElementById("clearBtn").addEventListener("click", function(){
               console.log("Clearing results!")
               map.remove(selectionLayer);
               map.remove(resultslayer);
+              map.remove(blockingLayer);
               view.graphics.remove(selectionLayer);
               view.graphics.remove(resultslayer);
+              view.graphics.remove(blockingLayer);
               view.popup.close();
               document.getElementById("NoSelAlert").removeAttribute('active');;
               document.getElementById("NoResultAlert").removeAttribute('active')
               userLat = null;
               userlon = null;
-              btnActive = null;
+              btnActive = "inactive";
+              blockBtn = "inactive";
+              blockList = [];
               // inletResults, outletResults, mhResults, gmResults, latResults = null;
               // Hide results window
               document.getElementById("results-grp").style.display = "none";
@@ -228,8 +272,10 @@ require(["esri/config", "esri/Map", "esri/layers/VectorTileLayer", "esri/views/M
           )
 
       document.getElementById("submitBtn").addEventListener("click", function(){
+            btnActive = "inactive";
+            blockBtn = "inactive";
             // Clear out existing graphic layers
-            map.remove(selectionLayer);
+            // map.remove(selectionLayer);
             map.remove(resultslayer);
             // Check if a point has been clicked, if not return message
             if (userLat === null){
@@ -249,8 +295,19 @@ require(["esri/config", "esri/Map", "esri/layers/VectorTileLayer", "esri/views/M
             // console.log(traceDirection)
             var url = new URL('http://api.leavitttesting.com:5000/api/v1/trace/lacostormwater');
             // var url = new URL('/api/v1/trace/lacostormwater')
+            console.log(blockList)
+            // GET query parameters
             var params = {"latitude":userLat, "longitude":userLong, "direction":traceDirection};
-            url.search = new URLSearchParams(params).toString();
+            searchQuery = new URLSearchParams(params)
+            // if blocklist exists, add each to query parameters
+            if (blockList.length > 0){
+              blockList.forEach((item, i) => {
+                // Add to GET query parameters, key value is repeated for each item
+                searchQuery.append('blocklnglats',item)
+              });
+            }
+            // url.search = new URLSearchParams(params).toString();
+            url.search = searchQuery.toString();
             // console.log(url);
             // Set Query text to active
             document.querySelector('#query-text').style.display = "block";
@@ -384,6 +441,7 @@ require(["esri/config", "esri/Map", "esri/layers/VectorTileLayer", "esri/views/M
               // Set result group to display
               document.getElementById("results-grp").style.display = "block";
                })
+
             .catch(error =>{
               console.log(error)
               console.log("Server request error!")

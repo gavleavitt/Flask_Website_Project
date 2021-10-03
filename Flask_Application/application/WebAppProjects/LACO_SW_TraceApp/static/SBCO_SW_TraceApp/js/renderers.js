@@ -1,3 +1,26 @@
+const selectionMarkerSymbol = {
+   type: "simple-marker",
+   style: "x",
+   color: "blue",
+   size:"20px",
+   outline: {
+       color: "blue", // White
+       width: "10px"
+   }
+};
+
+const blockingMarkerSymbol = {
+   type: "simple-marker",
+   style: "triangle",
+   color: "orange",
+   size:"24px",
+   outline: {
+       color: "red", // White
+       width: "1px"
+   }
+};
+
+
 const pointResultRenderer = {
   type: "unique-value",
   legendOptions: {
@@ -10,7 +33,7 @@ const pointResultRenderer = {
     label: "Inlet",
     symbol: {
       type: "simple-marker",  // autocasts as new SimpleMarkerSymbol()
-      size: 8,
+      size: 6,
       style: "square",
       // color: "#0007cf"
       color: [0, 7, 209, 0.60]

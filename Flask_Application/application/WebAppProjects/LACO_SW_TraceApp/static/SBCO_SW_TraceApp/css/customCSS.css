@@ -47,7 +47,7 @@ body,
 }
 
 .button-grp{
-  display: flex;
+  /* display: flex; */
   /* flex-flow: row wrap; */
   justify-content: center;
 }
@@ -56,6 +56,16 @@ body,
 }
 .tool-btn{
   padding:5px;
+  height:50px;
+}
+.btn-subgrp{
+  display:flex;
+}
+#block-Btn{
+  --calcite-ui-brand: #e07f00;
+  --calcite-ui-foreground-1: #e07f00;
+  --calcite-ui-brand-hover: #ac6304;
+  --calcite-ui-brand-press: #ac6304;
 }
 .line-break {
   width: 100%;

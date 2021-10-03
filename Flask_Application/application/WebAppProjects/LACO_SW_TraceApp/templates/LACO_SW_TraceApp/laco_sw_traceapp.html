@@ -64,9 +64,14 @@
             <calcite-radio-button value="upstream">Upstream</calcite-radio-button>
         </calcite-radio-button-group>
           <div class="button-grp">
-            <calcite-button id="selBtn" button-alignment="center" round width="half" scale="s" icon-start="object-detection" color="blue" class="tool-btn">Select Location</calcite-button>
-            <calcite-button id="submitBtn" button-alignment="center" round width="half" scale="s" icon-start="submit" color="red" class="tool-btn">Run</calcite-button>
-            <calcite-button id="clearBtn" button-alignment="center" round width="half" scale="s" icon-start="reset" color="neutral" class="tool-btn">Clear</calcite-button>
+            <div class="btn-subgrp">
+              <calcite-button id="selBtn" button-alignment="center" round width="half" scale="s" icon-start="object-detection" color="blue" class="tool-btn">Select Start Location</calcite-button>
+              <calcite-button id="block-Btn" button-alignment="center" round width="half" scale="s" icon-start="x-circle" color="blue" class="tool-btn">Set Flow Block Locations</calcite-button>
+            </div>
+            <div class="btn-subgrp">
+              <calcite-button id="submitBtn" button-alignment="center" round width="half" scale="s" icon-start="submit" color="red" class="tool-btn">Run</calcite-button>
+              <calcite-button id="clearBtn" button-alignment="center" round width="half" scale="s" icon-start="reset" color="neutral" class="tool-btn">Clear</calcite-button>
+            </div>
           </div>
         <div id="query-text">
           <calcite-loader id="toolloader" active text="Processing Request"></calcite-loader>
@@ -75,8 +80,8 @@
         <!-- <calcite-flow id="results-grp"> -->
         <calcite-panel id="results-grp">
           <div>
-            <calcite-fab id="DownloadCSV" class="Download" color="blue" icon="download-to" label="download" scale="l" text-enabled text="Download Result CSV"></calcite-fab>
-            <calcite-fab id="DownloadGeoJSON" class="Download" color="blue" icon="download-to" label="download" scale="l" text-enabled text="Download Result GeoJSON (Zipped)"></calcite-fab>
+            <calcite-fab id="DownloadCSV" class="Download" color="blue" icon="download-to" label="download" scale="l" text-enabled text="Download CSV"></calcite-fab>
+            <calcite-fab id="DownloadGeoJSON" class="Download" color="blue" icon="download-to" label="download" scale="l" text-enabled text="Download GeoJSON (.zip)"></calcite-fab>
           </div>
           <calcite-panel id="results" heading="Results">
             <!-- <calcite-icon scale="m" slot="fab" text-enabled text="Download Result CSV" icon="download-to"></calcite-icon> -->
