@@ -8,27 +8,29 @@ var view = null;
 var blockBtn = "inactive"
 var blockList = []
 var gravMainsTileURL = "https://vectortileservices3.arcgis.com/NfAw5Z474Q8vyMGv/arcgis/rest/services/gravity_mains_vector_tile_layer/VectorTileServer/tile/{z}/{y}/{x}.pbf"
+var activeLayerIDs = []
 // var layerObj = null;
 // var selectionLayer = null
 // var resultslayer = null
-require(["esri/config", "esri/Map", "esri/layers/VectorTileLayer", "esri/views/MapView", "esri/layers/TileLayer", "esri/Graphic", "esri/layers/GraphicsLayer", "esri/layers/WebTileLayer", "esri/layers/GeoJSONLayer", "esri/symbols/SimpleMarkerSymbol", "esri/renderers/UniqueValueRenderer", "esri/renderers/SimpleRenderer", "esri/widgets/LayerList", "esri/layers/GroupLayer", "esri/rest/support/Query", "esri/widgets/Search", "esri/layers/FeatureLayer", "esri/widgets/Bookmarks", "esri/widgets/Expand","esri/layers/TileLayer"],
-  function (esriConfig, Map, VectorTileLayer, MapView, TileLayer, Graphic, GraphicsLayer, WebTileLayer, GeoJSONLayer, SimpleMarkerSymbol, UniqueValueRenderer, SimpleRenderer, LayerList, GroupLayer, Query, Search, FeatureLayer, Bookmarks, Expand, TileLayer) {
-      esriConfig.apiKey = "AAPK5f601af9967543d6bc498db5a6b0f84bpHLpA-1hb11KUYm2IfzgmzBATsNlgD24Rjueqj2sKqaVsz3d6vU-6-l1yb-0YTi3";
+require(["esri/config", "esri/Map", "esri/layers/VectorTileLayer", "esri/views/MapView", "esri/layers/TileLayer", "esri/Graphic", "esri/layers/GraphicsLayer", "esri/layers/WebTileLayer", "esri/layers/GeoJSONLayer", "esri/symbols/SimpleMarkerSymbol", "esri/renderers/UniqueValueRenderer", "esri/renderers/SimpleRenderer", "esri/widgets/LayerList", "esri/layers/GroupLayer", "esri/rest/support/Query", "esri/widgets/Search", "esri/layers/FeatureLayer", "esri/widgets/Bookmarks", "esri/widgets/Expand","esri/layers/TileLayer", "esri/symbols/CIMSymbol", "esri/layers/support/LabelClass", "esri/layers/MapImageLayer", "esri/Basemap", "esri/rest/support/Query"],
+  function (esriConfig, Map, VectorTileLayer, MapView, TileLayer, Graphic, GraphicsLayer, WebTileLayer, GeoJSONLayer, SimpleMarkerSymbol, UniqueValueRenderer, SimpleRenderer, LayerList, GroupLayer, Query, Search, FeatureLayer, Bookmarks, Expand, TileLayer, CIMSymbol, LabelClass, MapImageLayer, Basemap, Query) {
+      // esriConfig.apiKey = "AAPK5f601af9967543d6bc498db5a6b0f84bpHLpA-1hb11KUYm2IfzgmzBATsNlgD24Rjueqj2sKqaVsz3d6vU-6-l1yb-0YTi3";
+      esriConfig.apiKey = "AAPKbf2fbfc0f4f5469d8520ecee766989aaFU4P9UKZIP2TvrGoyjZRYQleJ6QWxf-ZOQgBBaGjor0zJkHYCEH701bI8oJYzxB4";
       // console.log("Loading vector tiles!");
 
       var selectionLayer = new GraphicsLayer();
       var resultslayer = new GroupLayer();
 
-      const gravitymainstiles = new VectorTileLayer({
-        // title: "Gravity Mains",
-        title:"Gravity Mains",
-        // Hide from layer list
-        listMode: "hide",
-        // url: "https://vectortileservices3.arcgis.com/NfAw5Z474Q8vyMGv/arcgis/rest/services/Gravity_Mains_VTL/VectorTileServer",
-        url: "https://vectortileservices3.arcgis.com/NfAw5Z474Q8vyMGv/arcgis/rest/services/Gravity_Mains_VTL/VectorTileServer/resources/styles/root.json",
-        minscale: 2311162.217155,
-        maxscale: 15000
-      });
+      // const gravitymainstiles = new VectorTileLayer({
+      //   // title: "Gravity Mains",
+      //   title:"Gravity Mains",
+      //   // Hide from layer list
+      //   listMode: "hide",
+      //   // url: "https://vectortileservices3.arcgis.com/NfAw5Z474Q8vyMGv/arcgis/rest/services/Gravity_Mains_VTL/VectorTileServer",
+      //   url: "https://vectortileservices3.arcgis.com/NfAw5Z474Q8vyMGv/arcgis/rest/services/Gravity_Mains_VTL/VectorTileServer/resources/styles/root.json",
+      //   minscale: 2311162.217155,
+      //   maxscale: 15000
+      // });
 
       // const gravitymainstiles = new TileLayer({
       //   // title: "Gravity Mains",
@@ -94,12 +96,74 @@ require(["esri/config", "esri/Map", "esri/layers/VectorTileLayer", "esri/views/M
          minScale: 15000
        });
 
+       // const laCoParcels = new FeatureLayer({
+       // Use image layer instead, data are requested from server as a raster file instead of vector data
+       const laCoParcels = new MapImageLayer({
+         title: "LA County Parcels",
+         // url: "https://public.gis.lacounty.gov/public/rest/services/LACounty_Cache/LACounty_Parcel/MapServer/0",
+         url: "https://public.gis.lacounty.gov/public/rest/services/LACounty_Cache/LACounty_Parcel/MapServer",
+         minscale: 15000,
+         visible: false
+         // sublayers: [{
+         //   id: 0,
+         //   labelsVisible: true,
+         //   labelingInfo: parcelLabeling
+         // }]
+       })
 
-      // const networklayer = new GroupLayer({
-      //     id: "networklayer",
-      //     title: "Storm Network",
-      //     layers: [gravitymainstiles, lateraltiles, inlettiles, mhtiles, ottiles]
-      //   });
+       const laCoParcelsFilter = new FeatureLayer({
+         title: "Possible Source Parcels",
+         url: "https://public.gis.lacounty.gov/public/rest/services/LACounty_Cache/LACounty_Parcel/MapServer/0",
+         renderer: parcelFilterBorder,
+         labelingInfo: parcelFilterLabel,
+         popupTemplate: popupfilteredparcels
+       })
+
+       const laCoCities = new MapImageLayer({
+       // const laCoCities = new FeatureLayer({
+         title: "LA County Cities",
+         // url: "https://public.gis.lacounty.gov/public/rest/services/LACounty_Dynamic/Political_Boundaries/MapServer/19",
+         url: "https://public.gis.lacounty.gov/public/rest/services/LACounty_Dynamic/Political_Boundaries/MapServer/",
+         // url: "https://dpw.gis.lacounty.gov/dpw/rest/services/PW_Open_Data/MapServer",
+         sublayers: [{
+           id: 19,
+           renderer: cityBorder,
+           // labelsVisible: true,
+           // labelingInfo: cityLabel,
+         }]
+         // labelingInfo: cityLabel,
+         // renderer: cityBorder
+       })
+
+       const laCoBoundary = new MapImageLayer({
+       // const laCoBoundary = new FeatureLayer({
+         title: "LA County Boundary",
+         url: "https://dpw.gis.lacounty.gov/dpw/rest/services/PW_Open_Data/MapServer",
+         // url: "https://dpw.gis.lacounty.gov/dpw/rest/services/PW_Open_Data/MapServer/13",
+         // renderer: countyCIM
+         // renderer: countyBorder
+         sublayers: [{
+           id: 13,
+           renderer: countyBorder
+         }]
+       })
+
+       const riversChannels = new MapImageLayer({
+       // const riversChannels = new FeatureLayer({
+         title: "Major Rivers and Channels",
+         // url: "https://dpw.gis.lacounty.gov/dpw/rest/services/dynamicLayers/MapServer/1",
+         url: "https://dpw.gis.lacounty.gov/dpw/rest/services/dynamicLayers/MapServer",
+         visible: false,
+         sublayers: [{
+           id: 1,
+         }]
+       })
+
+       const watersheds = new FeatureLayer({
+         title: "Watersheds",
+         url: "https://dpw.gis.lacounty.gov/dpw/rest/services/dynamicLayers/MapServer/0",
+         visible: false
+       })
 
       const networklayer = new GroupLayer({
           id: "networklayer",
@@ -107,10 +171,34 @@ require(["esri/config", "esri/Map", "esri/layers/VectorTileLayer", "esri/views/M
           layers: [lateralFeatures, gravitymainsFeatures, inletFeatures, mhFeatures, olFeatures]
         });
 
+        const ancilData = new GroupLayer({
+          id: "AncilGroup",
+          title: "Ancillary Data",
+          layers: [laCoCities, laCoBoundary, riversChannels, watersheds, laCoParcels],
+          visible: true
+        })
 
+
+      // Add customized esri topo basemap as a vector tile layer using its AGOL ID
+      const customVTL = new VectorTileLayer({
+        portalItem: {
+          id: "3fa74fed129c4276ac3bf41eefdad6ac"
+        }
+      });
+
+      // create basemap object from vector tile layer
+      const custombasemap = new Basemap({
+        baseLayers: [
+          customVTL
+        ]
+      });
+
+      // Init map with the custom vector basemap
       const map = new Map({
-        basemap: "arcgis-topographic", // Basemap layer service
-        layers: [networklayer,gravitymainstiles] // vector tile layer
+        // basemap: "arcgis-topographic", // Basemap layer service
+        // Custom edited basemap
+        basemap: custombasemap,
+        layers: [networklayer, ancilData] // vector tile layer
       });
       const view = new MapView({
         map: map,
@@ -125,6 +213,9 @@ require(["esri/config", "esri/Map", "esri/layers/VectorTileLayer", "esri/views/M
         position: "top-right",
         index: 2
       });
+
+      // Add window for viewing current zoom scale
+      view.ui.add(vScale, 'bottom-right')
 
       const bookmarks = new Bookmarks({
         view: view,
@@ -147,12 +238,16 @@ require(["esri/config", "esri/Map", "esri/layers/VectorTileLayer", "esri/views/M
 
       view.ui.add(layerList, "top-right");
 
+
+      // Watch scale/zoom changes, update current scale display
+      view.watch('scale', function(evt){
+        document.getElementById('vScale').innerHTML = '1:' + evt.toFixed(2);
+      });
+
       view.on("click", (event) => {
         // console.log("click event: ", event);
-        // console.log("x:", event.mapPoint.longitude.toFixed(5));
-        // console.log("y:", event.mapPoint.latitude.toFixed(5));
-        console.log("x:", event.mapPoint.x.toFixed(2));
-        console.log("y:", event.mapPoint.y.toFixed(2));
+        console.log("x(lon):", event.mapPoint.x.toFixed(2));
+        console.log("y(lat):", event.mapPoint.y.toFixed(2));
         // esriTilequery([event.mapPoint.longitude, event.mapPoint.latitude], gravMainsTileURL)
         document.getElementById("NoSelAlert").removeAttribute('active');
         console.log(blockBtn);
@@ -226,9 +321,14 @@ require(["esri/config", "esri/Map", "esri/layers/VectorTileLayer", "esri/views/M
       document.addEventListener("pointermove", function(){
         if ((btnActive === "active") ||(blockBtn === "active")){
           console.log("crosshair cursor active!")
+          // Set crosshair cursor
           document.body.style.cursor = "crosshair";
+          // Disable popups
+          view.popup.autoOpenEnabled = false;
         } else {
             document.body.style.cursor = "default";
+            view.popup.autoOpenEnabled = true;
+            // Enable popups
           }
       });
       document.getElementById("selBtn").addEventListener("click", function(){
@@ -247,10 +347,13 @@ require(["esri/config", "esri/Map", "esri/layers/VectorTileLayer", "esri/views/M
               console.log("Clearing results!")
               map.remove(selectionLayer);
               map.remove(resultslayer);
-              map.remove(blockingLayer);
               view.graphics.remove(selectionLayer);
               view.graphics.remove(resultslayer);
-              view.graphics.remove(blockingLayer);
+              // Check if blocking layer exists, if so remove it from map and graphics
+              if (activeLayerIDs.includes("blockingLayer")){
+                map.remove(blockingLayer);
+                view.graphics.remove(blockingLayer);
+              }
               view.popup.close();
               document.getElementById("NoSelAlert").removeAttribute('active');;
               document.getElementById("NoResultAlert").removeAttribute('active')
@@ -298,6 +401,11 @@ require(["esri/config", "esri/Map", "esri/layers/VectorTileLayer", "esri/views/M
             console.log(blockList)
             // GET query parameters
             var params = {"latitude":userLat, "longitude":userLong, "direction":traceDirection};
+            if (document.getElementById("parcel-btn").hasAttribute("checked")){
+              params["parcels"] = "true"
+            } else {
+              params["parcels"] = "false"
+            };
             searchQuery = new URLSearchParams(params)
             // if blocklist exists, add each to query parameters
             if (blockList.length > 0){
@@ -351,6 +459,33 @@ require(["esri/config", "esri/Map", "esri/layers/VectorTileLayer", "esri/views/M
               addGeoJson(data['startpoint'], 'Start Point', null)
               addGeoJson(data['Outlets'], 'Outlets', popupOutlet)
               addGeoJson(data['Maintenance Holes'], 'Maintenance Holes', popupMH)
+
+              // Process parcel OID results
+              if ("parcels" in data){
+                // Convert results to SQL statement
+                sql = "OBJECTID IN ("
+                data['parcels'].forEach((item, i) => {
+                  sql += `${item},`
+                });
+                // Remove last comma and add right ) to complete statement
+                sql = sql.substring(0,sql.length-1)
+                sql += ")"
+                // let parcelQuery = laCoParcelsFilter.createQuery();
+                // parcelQuery.where = sql
+                // parcelQuery.outFields = ["APN"]
+                // parcelQuery.returnGeometry = true;
+                // laCoParcelsFilter.queryFeatures(parcelQuery)
+                // .then(function(response){
+                //   console.log(response)
+                // });
+                // Filter results parcel layer
+                laCoParcelsFilter.definitionExpression = sql
+                layerObj['Filtered Parcels'] = laCoParcelsFilter;
+                // Add filtered parcel layer to map
+              }
+              if ("subwatersheds" in data){
+                addGeoJson(data['subwatersheds'], "Subwatersheds", null)
+              }
 
               // Add results as a group layer
               resultslayer = new GroupLayer({
@@ -449,6 +584,18 @@ require(["esri/config", "esri/Map", "esri/layers/VectorTileLayer", "esri/views/M
               document.querySelector('#query-text').style.display = "none";
               document.getElementById("NoResultAlert").setAttribute('active','')
             });
+      });
+      document.getElementById("upstream-btn").addEventListener("click", function(){
+        // Trigger if upstream button is pressed, allow user to select parcel return
+        console.log("Upstream clicked!")
+        document.getElementById("parcel-label").style.display = "block";
+      });
+
+      document.getElementById("downstream-btn").addEventListener("click", function(){
+        // Trigger if downstream button is pressed, hide parcel option and set it to inative
+        console.log("Downstream clicked!")
+        document.getElementById("parcel-label").style.display = "none";
+        document.getElementById("parcel-btn").removeAttribute("checked");
       });
       // document.getElementById("toolloader").removeAttribute('active');
   });

@@ -25,6 +25,7 @@
     <script src="{{ url_for('lacoSWTraceapp_API_BP.static', filename='SBCO_SW_TraceApp/js/createCSV.js') }}"></script>
     <script src="{{ url_for('lacoSWTraceapp_API_BP.static', filename='SBCO_SW_TraceApp/js/pop-ups.js') }}"></script>
     <script src="{{ url_for('lacoSWTraceapp_API_BP.static', filename='SBCO_SW_TraceApp/js/renderers.js') }}"></script>
+    <script src="{{ url_for('lacoSWTraceapp_API_BP.static', filename='SBCO_SW_TraceApp/js/labeling.js') }}"></script>
     <script src="{{ url_for('lacoSWTraceapp_API_BP.static', filename='SBCO_SW_TraceApp/js/customJS.js') }}"></script>
     <script src="{{ url_for('lacoSWTraceapp_API_BP.static', filename='SBCO_SW_TraceApp/js/vtl_popup.js') }}"></script>
     <script src="{{ url_for('lacoSWTraceapp_API_BP.static', filename='SBCO_SW_TraceApp/js/createZIP.js') }}"></script>
@@ -60,9 +61,12 @@
     <div id="traceDiv">
       <calcite-block id="TraceToolTitle" collapsible heading="Trace Tool" open summary="Select Trace Direction">
         <calcite-radio-button-group id="directionGrp" layout="vertical" name="TraceType" >
-            <calcite-radio-button checked value="downstream">Downstream</calcite-radio-button>
-            <calcite-radio-button value="upstream">Upstream</calcite-radio-button>
+            <calcite-radio-button id="downstream-btn" checked value="downstream">Downstream</calcite-radio-button>
+            <calcite-radio-button id="upstream-btn" value="upstream">Upstream</calcite-radio-button>
         </calcite-radio-button-group>
+        <calcite-label id="parcel-label" alignment="start">Query Parcels
+          <calcite-checkbox id="parcel-btn"></calcite-checkbox>
+        </calcite-label>
           <div class="button-grp">
             <div class="btn-subgrp">
               <calcite-button id="selBtn" button-alignment="center" round width="half" scale="s" icon-start="object-detection" color="blue" class="tool-btn">Select Start Location</calcite-button>
@@ -138,5 +142,6 @@
         </div> -->
       </calcite-block>
     </div>
+     <div id="vScale" class="esri-widget">
   </body>
 </html>

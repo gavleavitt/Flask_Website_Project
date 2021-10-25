@@ -1,3 +1,4 @@
+
 const selectionMarkerSymbol = {
    type: "simple-marker",
    style: "x",
@@ -20,6 +21,94 @@ const blockingMarkerSymbol = {
    }
 };
 
+let countyBorder = {
+  type: "simple",  // autocasts as new SimpleRenderer()
+  symbol: {
+    type: "simple-fill",  // autocasts as new SimpleMarkerSymbol()
+    color: [0, 0, 0, 0],
+    // size: 6,
+    // color: "black",
+    outline: {  // autocasts as new SimpleLineSymbol()
+      width: 3,
+      style: "dash",
+      color: "green"
+    }
+  }
+};
+
+let cityBorder = {
+  type: "simple",  // autocasts as new SimpleRenderer()
+  symbol: {
+    type: "simple-fill",  // autocasts as new SimpleMarkerSymbol()
+    color: [0, 0, 0, 0],
+    // size: 6,
+    // color: "black",
+    outline: {  // autocasts as new SimpleLineSymbol()
+      width: 2,
+      style: "dash",
+      color: "orange"
+    }
+  }
+};
+
+let parcelFilterBorder = {
+  type: "simple",  // autocasts as new SimpleRenderer()
+  symbol: {
+    type: "simple-fill",  // autocasts as new SimpleMarkerSymbol()
+    color: [0, 0, 0, 0],
+    // size: 6,
+    // color: "black",
+    outline: {  // autocasts as new SimpleLineSymbol()
+      width: 2,
+      // style: "dash",
+      color: "#51ff00"
+    }
+  }
+};
+
+
+// countyCIM = {
+//   data:{
+//     "type": "CIMPolygonSymbol",
+//     "symbolLayers": [
+//       {
+//         "type": "CIMSolidStroke",
+//         "effects": [
+//           {
+//             "type": "CIMGeometricEffectDashes",
+//             "dashTemplate": [
+//               20,
+//               10,
+//               20,
+//               10
+//             ],
+//             "lineDashEnding": "HalfPattern",
+//             "controlPointEnding": "NoConstraint"
+//           },
+//           {
+//             "type": "CIMGeometricEffectOffset",
+//             "method": "Bevelled",
+//             "offset": 0,
+//             "option": "Fast"
+//           }
+//         ],
+//         "enable": true,
+//         "colorLocked": true,
+//         "capStyle": "Round",
+//         "joinStyle": "Round",
+//         "lineStyle3D": "Strip",
+//         "miterLimit": 10,
+//         "width": 8,
+//         "color": [
+//           0,
+//           0,
+//           0,
+//           255
+//         ]
+//       }
+//     ]
+//   }
+// };
 
 const pointResultRenderer = {
   type: "unique-value",
@@ -214,7 +303,24 @@ const resultsrenderer = {
         color: "black"
       }
     }
-  }, {
+  },
+  {
+   value: "subwatersheds",
+   label: "Subwatersheds",
+   symbol: {
+     type: "simple",  // autocasts as new SimpleRenderer()
+     type: "simple-fill",  // autocasts as new SimpleMarkerSymbol()
+     color: [0, 0, 0, 0],
+     // size: 6,
+     // color: "black",
+     outline: {  // autocasts as new SimpleLineSymbol()
+       width: 3,
+       style: "solid",
+       color: "blue"
+     }
+   }
+ },
+  {
     value: "startpoint",
     label: "Start Point",
     symbol: {

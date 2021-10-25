@@ -46,6 +46,11 @@ body,
   color: #02c718;
 }
 
+
+#vScale {
+  padding: 10px;
+}
+
 .button-grp{
   /* display: flex; */
   /* flex-flow: row wrap; */
@@ -54,6 +59,14 @@ body,
 .flex-line2{
   width: 100%
 }
+#parcel-label{
+  display: none;
+  margin-top: 15px;
+}
+/* #parcel-btn > div{
+  display: flex;
+  margin-left: 15px;
+} */
 .tool-btn{
   padding:5px;
   height:50px;

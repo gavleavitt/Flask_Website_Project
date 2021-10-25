@@ -23,3 +23,8 @@ const popupLat = {
   "title": "<b>Lateral: {facid}</b>",
   "content": "<b>Material:</b> {Material}<br><b>Size:</b> {size}\""
 }
+
+const popupfilteredparcels = {
+  "title": "<b>APN: {APN}</b>",
+  "content": "<b>Situs Address: {SitusFullAddress}<br>Land Use code: {UseCode}<br<Use type: {UseType}<br>Use Description: {UseDescription}</b>"
+}
