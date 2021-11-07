@@ -3,6 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no" />
+    {% include 'projectimports.html' %}
     <title>LA County Stormwater System Trace Application</title>
     <!-- json2csv -->
     <!-- <script src="https://cdn.jsdelivr.net/npm/json2csv"></script> -->
@@ -32,6 +33,11 @@
     <!-- Custom local CSS -->
     <link rel="stylesheet" href="{{ url_for('lacoSWTraceapp_API_BP.static', filename='SBCO_SW_TraceApp/css/customCSS.css') }}">
 
+    <!-- Application Title bar CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/AppTitleBar.css') }}">
+    <!-- Modal JS -->
+    <script src="{{ url_for('static', filename='js/modal.js') }}"></script>
+
     <!-- Calcite -->
 
     <script type="module" src="https://js.arcgis.com/calcite-components/1.0.0-beta.63/calcite.esm.js"></script>
@@ -47,101 +53,142 @@
 
   </head>
   <body>
-    <div>
-      <calcite-alert id="NoSelAlert" icon="information">
-        <div slot="title">Error - No Map Selection</div>
-        <div slot="message">Please select a map location before running the Trace Tool!</div>
-      </calcite-alert>
-      <calcite-alert id="NoResultAlert" color="red" icon="exclamation-mark-triangle">
-          <div slot="title">Error - No Data</div>
-          <div slot="message">No data was returned from the server, verify that the start location is near a point asset. If the error persists then the server may be unresponsive.</div>
-      </calcite-alert>
-    </div>
-    <div id="viewDiv"></div>
-    <div id="traceDiv">
-      <calcite-block id="TraceToolTitle" collapsible heading="Trace Tool" open summary="Select Trace Direction">
-        <calcite-radio-button-group id="directionGrp" layout="vertical" name="TraceType" >
-            <calcite-radio-button id="downstream-btn" checked value="downstream">Downstream</calcite-radio-button>
-            <calcite-radio-button id="upstream-btn" value="upstream">Upstream</calcite-radio-button>
-        </calcite-radio-button-group>
-        <calcite-label id="parcel-label" alignment="start">Query Parcels
-          <calcite-checkbox id="parcel-btn"></calcite-checkbox>
-        </calcite-label>
-          <div class="button-grp">
-            <div class="btn-subgrp">
-              <calcite-button id="selBtn" button-alignment="center" round width="half" scale="s" icon-start="object-detection" color="blue" class="tool-btn">Select Start Location</calcite-button>
-              <calcite-button id="block-Btn" button-alignment="center" round width="half" scale="s" icon-start="x-circle" color="blue" class="tool-btn">Set Flow Block Locations</calcite-button>
+    <div class="container">
+      <div>
+        <calcite-alert id="NoSelAlert" icon="information">
+          <div slot="title">Error - No Map Selection</div>
+          <div slot="message">Please select a map location before running the Trace Tool!</div>
+        </calcite-alert>
+        <calcite-alert id="NoResultAlert" color="red" icon="exclamation-mark-triangle">
+            <div slot="title">Error - No Data</div>
+            <div slot="message">No data was returned from the server, verify that the start location is near a point asset. If the error persists then the server may be unresponsive.</div>
+        </calcite-alert>
+      </div>
+      <div class="item titlediv">
+  			<div id ="Title" class="titletext"><a href="/"><img id="icon" src="/static/images/favicon-32x32.png"></a>LA County Stormwater Trace App
+  			</div>
+  			<!-- See this for basic popup box: https://html-online.com/articles/simple-popup-box/ -->
+  			<!-- https://www.w3schools.com/howto/howto_css_modals.asp -->
+  			<div class="popupbuttontext">
+  				<div class="map-home"><a class="home-link" href="/">Home</a></div>
+  				<button class="headerbtn" id="btn">Map Details</button>
+  			</div>
+  		</div>
+      <div id="viewDiv"></div>
+      <div id="traceDiv">
+        <calcite-block id="TraceToolTitle" collapsible heading="Trace Tool" open summary="Select Trace Direction">
+          <calcite-radio-button-group id="directionGrp" layout="vertical" name="TraceType" >
+              <calcite-radio-button id="downstream-btn" checked value="downstream">Downstream</calcite-radio-button>
+              <calcite-radio-button id="upstream-btn" value="upstream">Upstream</calcite-radio-button>
+          </calcite-radio-button-group>
+          <calcite-label id="parcel-label" alignment="start">Filter Parcels
+            <calcite-checkbox id="parcel-btn"></calcite-checkbox>
+          </calcite-label>
+            <div class="button-grp">
+              <div class="btn-subgrp">
+                <calcite-button id="selBtn" button-alignment="center" round width="half" scale="s" icon-start="object-detection" color="blue" class="tool-btn">Select Start Location</calcite-button>
+                <calcite-button id="block-Btn" button-alignment="center" round width="half" scale="s" icon-start="x-circle" color="blue" class="tool-btn">Set Flow Block Locations</calcite-button>
+              </div>
+              <div class="btn-subgrp">
+                <calcite-button id="submitBtn" button-alignment="center" round width="half" scale="s" icon-start="submit" color="red" class="tool-btn">Run</calcite-button>
+                <calcite-button id="clearBtn" button-alignment="center" round width="half" scale="s" icon-start="reset" color="neutral" class="tool-btn">Clear</calcite-button>
+              </div>
             </div>
-            <div class="btn-subgrp">
-              <calcite-button id="submitBtn" button-alignment="center" round width="half" scale="s" icon-start="submit" color="red" class="tool-btn">Run</calcite-button>
-              <calcite-button id="clearBtn" button-alignment="center" round width="half" scale="s" icon-start="reset" color="neutral" class="tool-btn">Clear</calcite-button>
+          <div id="query-text">
+            <calcite-loader id="toolloader" active text="Processing Request"></calcite-loader>
+            <!-- <b>Sending request to server</b> -->
+          </div>
+          <!-- <calcite-flow id="results-grp"> -->
+          <calcite-panel id="results-grp">
+            <div>
+              <calcite-fab id="DownloadCSV" class="Download" color="blue" icon="download-to" label="download" scale="l" text-enabled text="Download CSV"></calcite-fab>
+              <calcite-fab id="DownloadGeoJSON" class="Download" color="blue" icon="download-to" label="download" scale="l" text-enabled text="Download GeoJSON (.zip)"></calcite-fab>
             </div>
-          </div>
-        <div id="query-text">
-          <calcite-loader id="toolloader" active text="Processing Request"></calcite-loader>
-          <!-- <b>Sending request to server</b> -->
-        </div>
-        <!-- <calcite-flow id="results-grp"> -->
-        <calcite-panel id="results-grp">
-          <div>
-            <calcite-fab id="DownloadCSV" class="Download" color="blue" icon="download-to" label="download" scale="l" text-enabled text="Download CSV"></calcite-fab>
-            <calcite-fab id="DownloadGeoJSON" class="Download" color="blue" icon="download-to" label="download" scale="l" text-enabled text="Download GeoJSON (.zip)"></calcite-fab>
-          </div>
-          <calcite-panel id="results" heading="Results">
-            <!-- <calcite-icon scale="m" slot="fab" text-enabled text="Download Result CSV" icon="download-to"></calcite-icon> -->
-              <calcite-block id="OutletsWindow" heading="Outlets" collapsible>
-                <calcite-icon scale="s" slot="icon" icon="circle-f"></calcite-icon>
-                  <!-- <calcite-notice active>
-                      <div slot="message"></div>
-                  </calcite-notice> -->
-              </calcite-block>
-              <calcite-block id="InletsWindow" heading="Inlets" collapsible>
-                 <calcite-icon scale="s" slot="icon" icon="square-area"></calcite-icon>
-                  <!-- <calcite-notice active>
-                      <div slot="message"></div>
-                  </calcite-notice> -->
-              </calcite-block>
-              <calcite-block id="MH-Window" heading="Maintenance Holes" collapsible>
-                <calcite-icon scale="s" slot="icon" icon="circle-area"></calcite-icon>
-                  <!-- <calcite-notice active>
-                      <div slot="message"></div>
-                  </calcite-notice> -->
-              </calcite-block>
-              <calcite-block  id="GM-Window" heading="Gravity Mains" collapsible>
-                <calcite-icon scale="s" slot="icon" icon="line-solid"></calcite-icon>
-                  <!-- <calcite-notice active>
-                  </calcite-notice> -->
-              </calcite-block>
-              <calcite-block id="Lat-Window" heading="Laterals" collapsible>
-                <calcite-icon scale="s" slot="icon" icon="line-solid"></calcite-icon>
-                  <!-- <calcite-notice active>
-                  </calcite-notice> -->
-              </calcite-block>
+            <calcite-panel id="results" heading="Results">
+              <!-- <calcite-icon scale="m" slot="fab" text-enabled text="Download Result CSV" icon="download-to"></calcite-icon> -->
+                <calcite-block id="OutletsWindow" heading="Outlets" collapsible>
+                  <calcite-icon scale="s" slot="icon" icon="circle-f"></calcite-icon>
+                    <!-- <calcite-notice active>
+                        <div slot="message"></div>
+                    </calcite-notice> -->
+                </calcite-block>
+                <calcite-block id="InletsWindow" heading="Inlets" collapsible>
+                   <calcite-icon scale="s" slot="icon" icon="square-area"></calcite-icon>
+                    <!-- <calcite-notice active>
+                        <div slot="message"></div>
+                    </calcite-notice> -->
+                </calcite-block>
+                <calcite-block id="MH-Window" heading="Maintenance Holes" collapsible>
+                  <calcite-icon scale="s" slot="icon" icon="circle-area"></calcite-icon>
+                    <!-- <calcite-notice active>
+                        <div slot="message"></div>
+                    </calcite-notice> -->
+                </calcite-block>
+                <calcite-block  id="GM-Window" heading="Gravity Mains" collapsible>
+                  <calcite-icon scale="s" slot="icon" icon="line-solid"></calcite-icon>
+                    <!-- <calcite-notice active>
+                    </calcite-notice> -->
+                </calcite-block>
+                <calcite-block id="Lat-Window" heading="Laterals" collapsible>
+                  <calcite-icon scale="s" slot="icon" icon="line-solid"></calcite-icon>
+                    <!-- <calcite-notice active>
+                    </calcite-notice> -->
+                </calcite-block>
+            </calcite-panel>
           </calcite-panel>
-        </calcite-panel>
-        <!-- </calcite-flow> -->
 
-
-        <!-- <div id="accordion-grp">
-          <calcite-accordion>
-            <calcite-accordion-item icon="plane" item-title="Outlets-accord" item-subtitle="">
-              Feature Count
-            </calcite-accordion-item>
-            <calcite-accordion-item id="InletsWindow" icon="square-area" item-title="Inlets" item-subtitle="">
-            </calcite-accordion-item>
-            <calcite-accordion-item icon="car" item-title="Maintenance Holes" item-subtitle="">
-              Feature Count
-            </calcite-accordion-item>
-            <calcite-accordion-item icon="plane" item-title="Gravity Mains" item-subtitle="">
-              Feature Count
-            </calcite-accordion-item>
-            <calcite-accordion-item icon="plane" item-title="Laterals" item-subtitle="">
-              Feature Count
-            </calcite-accordion-item>
-          </calcite-accordion>
-        </div> -->
-      </calcite-block>
-    </div>
-     <div id="vScale" class="esri-widget">
+        </calcite-block>
+      </div>
+       <div id="vScale" class="esri-widget"></div>
+       <!-- Modal -->
+       <div id="myModal" class="modal">
+         <div class="modal-content-container">
+           <!-- <div class="close">&times;</div> -->
+           <div class="close">&times;</div>
+           <div class="modal-text">
+             <p style="margin-top:0px;"><b>Map Details</b>
+             <p>
+               This mapping application allows a user to interactively trace and indentify storm water features by water flow direction along the storm drain systems within Los Angeles County.
+              </p>
+            </p>
+             <p><b>Usage Directions</b>
+             <p>
+               Tracing can be conducted upstream, against the flow direction, or downstream, with the flow direction. Begin by zooming and panning to the area of interest, then click the "Select Start Location" button and use the cursor
+               to select a point feature asset (maintenance hole, inlet or outlet) or pipe intersection point to set the trace point of origin. Selecting a location midway along a pipe may not provide desired results and
+               only one start location can be provided at a time. Note that the point must be placed within 500 feet of the desired start location, the analysis
+               will automatically snap the point to the nearest storm system point asset within the tolerance. Next select Downstream or Upstream, if upstream is selected, parcels can be visually
+               filtered as well. Note that this adds to the processing time.
+             <p>
+               Flow along lines can also be selectively blocked, excluding them from the analysis, by using the "Set Flow Block Locations" button then clicking on the desired pipe(s). Multiple flow block locations
+               can be selected.
+             </p>
+             <p>
+               Next select "Run" to start the analysis, depending on the selected location and options this may take up to a minute. Afterwards the display will update to show the results on the map
+               and within the results window. From here the results can be explored and/or exported as a CSV table or a .zip containing the GeoJSON files.
+             </p>
+             <p>
+               The selection and/or results can be cleared at any time by selecting the "Clear" button.
+             </p>
+             <p><b>Disclaimer</b>
+             <br>
+             This is an unofficial personal project, I have no affiliation with any Los Angeles County public agencies, and I receive no compensation for this application. All provided data and results should be used for <b>reference</b> or demonstration purposes only.
+             The data used in this analysis tool are <b>modified</b> from the source with data being split, merged, and added as needed, to meet the project's requirements and not necessarily reflective of the original source data.
+             The source data was acquired from the <a href=https://pw.lacounty.gov/fcd/StormDrain/index.cfm>LA County Department of Public Works Storm Drain portal website</a> and are also available
+             from the County's ESRI <a href=https://dpw.gis.lacounty.gov/dpw/rest/services/sds_mobile/MapServer>MapServer</a>. I hold no responsibility for the accuracy of these data or any decisions made based on information provided here.
+             </p>
+             <p><b>Contact Me</b>
+             <br>
+             If you have any questions, feature suggestions, comments, or notice any errors/bugs feel free to email me at <span id="emailaddr"></span>
+             </p>
+             <p>
+               <!-- TODO: Update to project page when ready-->
+               You can see my other projects under my <a href=/#goto-proj>projects</a> section and you can see a description on how I made this map <a href={{ url_for('projectPages_BP.stravaserversideprocessing')}}>here</a>.
+             </p>
+             <p>You can visit the GitHub repo for the overall website project <a href=https://github.com/gavleavitt/Flask_Website_Project target="_blank">here</a> and the repo for the website/Esri JS API application <a href=https://github.com/gavleavitt/Flask_Website_Project/tree/master/Flask_Application/application/WebAppProjects/LACO_SW_TraceApp target="_blank">here</a>.
+             </p>
+           </div>
+        </div>
+      </div>
+     </div>
   </body>
 </html>

@@ -26,5 +26,5 @@ const popupLat = {
 
 const popupfilteredparcels = {
   "title": "<b>APN: {APN}</b>",
-  "content": "<b>Situs Address: {SitusFullAddress}<br>Land Use code: {UseCode}<br<Use type: {UseType}<br>Use Description: {UseDescription}</b>"
+  "content": "<b>Situs Address: {SitusFullAddress}<br>Land Use code: {UseCode}<b><br>Use type: {UseType}<br>Use Description: {UseDescription}</b>"
 }

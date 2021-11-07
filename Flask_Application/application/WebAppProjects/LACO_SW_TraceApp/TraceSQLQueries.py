@@ -34,17 +34,19 @@ WHERE
         # resDict[i.id]['geom'] = geojson.loads(i.geom)
         # resDict[i.id]['watershed'] = i.watershed
         propDict = {"factype":"subwatersheds"}
+        # application.logger.debug(i.id)
         resList.append(Feature(geometry=Polygon(geojson.loads(i.geom)), properties=propDict))
     return resList
 
 def getUnionedSubWaterSheds(lnglatList):
     latlngStr = ""
     length = len(lnglatList)
-    # watershedLayer = "la_co_subwatersheds"
     watershedLayer = "subwatershedstrace"
+    # Loop over list of inlet lon/lats building out a list of postgis points transformed into 2229
     for c, i in enumerate(lnglatList):
         newPT = f"ST_Transform(ST_SetSRID(ST_Point({i[0]}, {i[1]}), 4326), 2229)"
         latlngStr += newPT
+        # If there is not another record add a comma
         if (c + 1) != length:
             latlngStr += ","
     sql =f"""
@@ -57,15 +59,21 @@ FROM
 WHERE 
     ST_Intersects(sw.geom, pts.geom) 
     """
-    resDict = {}
+    # resDict = {}
+    res = []
     # Query DB
     results = db.session.execute(sql)
-    for c, i in enumerate(results):
-        # Load postgres subwatershed geom query result into geojson format
-        resDict[c] = {}
-        resDict[c]['geom'] = geojson.loads(i.geom)
-        # resDict[i.id]['watershed'] = i.watershed
-    return resDict
+    application.logger.debug(f"Unioned suberwatersheds length is: {results.rowcount}")
+    for i in results:
+        res.append(geojson.loads(i.geom))
+    return res
+    # for c, i in enumerate(results):
+    #     # Load postgres subwatershed geom query result into geojson format
+    #     resDict[c] = {}
+    #     resDict[c]['geom'] = geojson.loads(i.geom)
+    #     # resDict[i.id]['watershed'] = i.watershed
+    #     # application.logger.debug(i.geom)
+    # return resDict
 
 def TraceNetwork(lon, lat, directionSQL):
     # Raw sql statement, used since PG_Routing doesnt have SQLAlchemy ORM support
@@ -87,7 +95,7 @@ def TraceNetwork(lon, lat, directionSQL):
             sp.id, 999999, true) AS nodes;
 
     SELECT
-    	mh.uuid, st_asgeojson(st_transform(mh.geom, 4326)) as geojson, mh.factype as factype,  tr.cost as cost, "DWGNO" as dwgno, NULL as size, "JHSRC" as facid, CAST("MATERIAL" as text) as material, CAST("STND_PLAN" as text) as subtype, GeometryType(mh.geom) as geomtype
+    	mh.uuid, st_asgeojson(st_transform(mh.geom, 4326)) as geojson, mh.factype as factype,  tr.cost as cost, dwgno, NULL as size, jhsrc as facid, CAST(material as text) as material, CAST(stnd_plan as text) as subtype, GeometryType(mh.geom) as geomtype
     FROM 
     	maintenanceholes mh, traceresults as tr
     WHERE
@@ -110,12 +118,12 @@ def TraceNetwork(lon, lat, directionSQL):
     SELECT
     	gm.uuid, st_asgeojson(st_transform(gm.geom, 4326)) as geojson, gm.factype as factype,  tr.cost as cost, NULL as dwgno, CAST(diameter_h as text) as size, eqnum as facid,CAST(material as text) as material, CAST(subtype as text) as subtype, GeometryType(gm.geom) as geomtype
     FROM 
-    	gravitymainssplit gm, traceresults as tr
+    	gravitymains gm, traceresults as tr
     WHERE
     	(gm.edge_fk = tr.edge)
     UNION
     SELECT
-    	l.uuid, st_asgeojson(st_transform(l.geom, 4326)) as geojson, l.factype as factype,  tr.cost as cost, "DWGNO" as dwgno, CAST("DIAMETER_H" as text) as size, "JHSRC" as facid, CAST("MATERIAL" as text) as material, CAST("SUBTYPE" as text) as subtype, GeometryType(l.geom) as geomtype  
+    	l.uuid, st_asgeojson(st_transform(l.geom, 4326)) as geojson, l.factype as factype,  tr.cost as cost, dwgno, CAST(diameter_height as text) as size, jhsrc as facid, CAST(material as text) as material, CAST(subtype as text) as subtype, GeometryType(l.geom) as geomtype  
     FROM 
     	laterals l, traceresults as tr
     WHERE
@@ -161,7 +169,7 @@ def TraceNetwork(lon, lat, directionSQL):
         else:
             propDict['facid'] = i.facid
         propDict['linearpipefeetfromstart'] = i.cost
-        # propDict['uuid'] = i.uuid
+        propDict['uuid'] = i.uuid
         propDict['facsubtype'] = "Unknown"
         propDict['material'] = "Unknown"
         if i.factype == "Inlets":

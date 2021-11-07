@@ -57,27 +57,28 @@ def handletracerequest():
 
     # Check if return parcel OIDs was selected
     if request.args.get('parcels') == "true":
-        # TODO: Query subwatersheds which intersect the inlets
+        parcelsURL = "https://public.gis.lacounty.gov/public/rest/services/LACounty_Cache/LACounty_Parcel/MapServer/0"
+        # buildings = "https://arcgis.gis.lacounty.gov/arcgis/rest/services/DRP/SMMNA_Resources_AGOL_Version/MapServer/177"
+        # serviceRestURL = "https://arcgis.gis.lacounty.gov/arcgis/rest/services/DRP/SMMNA_Resources_AGOL_Version/MapServer/177"
         lnglats = []
         # Create a list of point lnglat coordinates from the inlet results
         for k in responseDict["Inlets"]['features']:
             lng = k['geometry']['coordinates'][0]
             lat = k['geometry']['coordinates'][1]
             lnglats.append([lng, lat])
-        # Get subwatersheds as geojson, will return as response
-        subWaterSheds = TraceSQLQueries.getSubWaterSheds(lnglats)
-        # Get unioned/dissolved subwatershed boundary
-        unionGeom = TraceSQLQueries.getUnionedSubWaterSheds(lnglats)
-        parcelsURL = "https://public.gis.lacounty.gov/public/rest/services/LACounty_Cache/LACounty_Parcel/MapServer/0"
-        # buildings = "https://arcgis.gis.lacounty.gov/arcgis/rest/services/DRP/SMMNA_Resources_AGOL_Version/MapServer/177"
-        # serviceRestURL = "https://arcgis.gis.lacounty.gov/arcgis/rest/services/DRP/SMMNA_Resources_AGOL_Version/MapServer/177"
-        req = QueryEsriRest.featureServReq(parcelsURL, unionGeom, ['APN', 'SitusFullAddress', 'UseType', 'UseDescription'],
-                                           "esriGeometryPolygon", "esriSpatialRelIntersects")
-        # reqGeom = req.queryFeaturesGeoJSON()
-        reqOIDs= req.queryFeaturesOIDs()
-        # TODO: Consider querying landuse or zoning information for each building, add to building details
-        responseDict["parcels"] = reqOIDs
-        responseDict["subwatersheds"] = FeatureCollection(subWaterSheds)
+        # Check if any lnglats were returned, if not skip getting subwatersheds
+        if len(lnglats) > 0:
+            # Get subwatersheds as geojson
+            subWaterSheds = TraceSQLQueries.getSubWaterSheds(lnglats)
+            # Get unioned/dissolved subwatershed boundary
+            # unionGeom = TraceSQLQueries.getUnionedSubWaterSheds(lnglats)
+            req = QueryEsriRest.featureServReq(parcelsURL, subWaterSheds, ['APN', 'SitusFullAddress', 'UseType', 'UseDescription'],
+                                               "esriGeometryPolygon", "esriSpatialRelIntersects")
+            # reqGeom = req.queryFeaturesGeoJSON()
+            reqOIDs= req.queryFeaturesOIDs()
+            # TODO: Consider querying landuse or zoning information for each building, add to building details
+            responseDict["parcels"] = reqOIDs
+            responseDict["subwatersheds"] = FeatureCollection(subWaterSheds)
     # Jsonify response
     response = jsonify(responseDict)
     # Add header to allow CORS

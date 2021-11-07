@@ -1,4 +1,5 @@
 function createGeoJSONZIP() {
+  console.log("creating ZIP!")
   // Create JSZip ojbect to hold results
   var zip = new JSZip()
   // Get list of geojson object keys
@@ -13,10 +14,13 @@ function createGeoJSONZIP() {
       zip.file(fileName,JSON.stringify(serverResponse[item]))
     }
   });
-  // Generate zip file
-  zip.generateAsync({type:"blob"})
-  .then(function (blob) {
-      // use filesaver.js to set the zip file name and initiate download
-      saveAs(blob, "TraceResults.zip");
-  });
+  // Check if zip has any files in it, slip if not
+  if (Object.keys(zip.files).length > 0){
+    // Generate zip file
+    zip.generateAsync({type:"blob"})
+    .then(function (blob) {
+        // use filesaver.js to set the zip file name and initiate download
+        saveAs(blob, "TraceResults.zip");
+    });
+  }
 }
