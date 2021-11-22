@@ -3,6 +3,9 @@
   --calcite-panel-max-width: 300px;
   --titlebackground: #dbdbdb;
 }
+calcite-pick-list-item{
+  white-space: pre-line;
+}
 
 * {
   box-sizing: border-box;

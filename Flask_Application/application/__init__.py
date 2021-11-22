@@ -64,19 +64,21 @@ handler.setFormatter(formatter)
 engine = create_engine(os.environ.get("DBCON"))
 Session = sessionmaker(bind=engine)
 
+lacotraceEng = create_engine(os.environ.get("DBCON_LACOTRACE"))
+LacotraceSes = sessionmaker(bind=lacotraceEng)
 
 
 # Disabling modification tracking
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-# Setup SQLAthanor
-db = SQLAlchemy(app, model_class = FlaskBaseModel)
 # Init flask sqlalchemy database with flask
+db = SQLAlchemy(app, model_class = FlaskBaseModel)
 # db.init_app(app)
+# Setup SQLAthanor
 db = initialize_flask_sqlathanor(db)
 
 # Setup SQLAlchemy engine sessionmaker factory for localhost
-engineLocal = create_engine(os.environ.get("DBCON_LOCAL"))
-SessionLocal = sessionmaker(bind=engineLocal)
+# engineLocal = create_engine(os.environ.get("DBCON_LOCAL"))
+# SessionLocal = sessionmaker(bind=engineLocal)
 
 # Attach logging handler to application
 application.logger.addHandler(handler)

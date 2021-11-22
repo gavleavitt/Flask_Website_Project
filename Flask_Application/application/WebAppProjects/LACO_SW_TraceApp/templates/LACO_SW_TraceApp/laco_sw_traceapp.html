@@ -104,6 +104,8 @@
               <calcite-fab id="DownloadCSV" class="Download" color="blue" icon="download-to" label="download" scale="l" text-enabled text="Download CSV"></calcite-fab>
               <calcite-fab id="DownloadGeoJSON" class="Download" color="blue" icon="download-to" label="download" scale="l" text-enabled text="Download GeoJSON (.zip)"></calcite-fab>
             </div>
+            <!-- <div id="linearft">
+            </div> -->
             <calcite-panel id="results" heading="Results">
               <!-- <calcite-icon scale="m" slot="fab" text-enabled text="Download Result CSV" icon="download-to"></calcite-icon> -->
                 <calcite-block id="OutletsWindow" heading="Outlets" collapsible>
@@ -172,7 +174,7 @@
              <p><b>Disclaimer</b>
              <br>
              This is an unofficial personal project, I have no affiliation with any Los Angeles County public agencies, and I receive no compensation for this application. All provided data and results should be used for <b>reference</b> or demonstration purposes only.
-             The data used in this analysis tool are <b>modified</b> from the source with data being split, merged, and added as needed, to meet the project's requirements and not necessarily reflective of the original source data.
+             The data used in this analysis tool are <b>modified</b> from the source with data being split, merged, and added as needed, to meet the project's requirements and are not necessarily reflective of the original source data.
              The source data was acquired from the <a href=https://pw.lacounty.gov/fcd/StormDrain/index.cfm>LA County Department of Public Works Storm Drain portal website</a> and are also available
              from the County's ESRI <a href=https://dpw.gis.lacounty.gov/dpw/rest/services/sds_mobile/MapServer>MapServer</a>. I hold no responsibility for the accuracy of these data or any decisions made based on information provided here.
              </p>
@@ -181,7 +183,6 @@
              If you have any questions, feature suggestions, comments, or notice any errors/bugs feel free to email me at <span id="emailaddr"></span>
              </p>
              <p>
-               <!-- TODO: Update to project page when ready-->
                You can see my other projects under my <a href=/#goto-proj>projects</a> section and you can see a description on how I made this map <a href={{ url_for('projectPages_BP.stravaserversideprocessing')}}>here</a>.
              </p>
              <p>You can visit the GitHub repo for the overall website project <a href=https://github.com/gavleavitt/Flask_Website_Project target="_blank">here</a> and the repo for the website/Esri JS API application <a href=https://github.com/gavleavitt/Flask_Website_Project/tree/master/Flask_Application/application/WebAppProjects/LACO_SW_TraceApp target="_blank">here</a>.
@@ -190,5 +191,9 @@
         </div>
       </div>
      </div>
+     <script>
+     var email = "gav" + "lea" + "web" + "@g" + "mail" + ".com";
+     document.getElementById("emailaddr").innerHTML = "<a href='mailto:" + email + "'>" + email + "</a>"
+     </script>
   </body>
 </html>

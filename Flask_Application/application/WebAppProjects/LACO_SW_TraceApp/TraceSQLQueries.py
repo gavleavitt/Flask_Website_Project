@@ -3,6 +3,8 @@ from application import db
 import geojson
 from geojson import Feature, Point, Polygon, FeatureCollection, MultiLineString
 from application.WebAppProjects.LACO_SW_TraceApp import DomainLookUps
+from application import LacotraceSes
+from sqlalchemy import text
 
 def getSubWaterSheds(lnglatList):
     latlngStr = ""
@@ -27,7 +29,9 @@ WHERE
     # resultDict['Outlets'].append(Feature(geometry=Point(geojsonGeom), properties=propDict))
     resList = []
     # Query DB
-    results = db.session.execute(sql)
+    # results = db.session.execute(sql)
+    with LacotraceSes() as session:
+        results  = session.execute(sql)
     for i in results:
         # Load postgres subwatershed geom query result into geojson format
         # resDict[i.id] = {}
@@ -62,7 +66,10 @@ WHERE
     # resDict = {}
     res = []
     # Query DB
-    results = db.session.execute(sql)
+    # results = db.session.execute(sql)
+    with LacotraceSes() as session:
+        results  = session.execute(sql)
+    # results = lacotraceSes.execute(sql)
     application.logger.debug(f"Unioned suberwatersheds length is: {results.rowcount}")
     for i in results:
         res.append(geojson.loads(i.geom))
@@ -136,7 +143,10 @@ def TraceNetwork(lon, lat, directionSQL):
         """)
     # application.logger.debug(sql)
     # Lists to hold results
-    results = db.session.execute(sql, {"lat": lat, "lon": lon, "directionSQL": directionSQL})
+    # results = db.session.execute(sql, {"lat": lat, "lon": lon, "directionSQL": directionSQL})
+    # results = lacotraceSes.execute(sql, {"lat": lat, "lon": lon, "directionSQL": directionSQL})
+    with LacotraceSes() as session:
+        results = session.execute(sql, {"lat": lat, "lon": lon, "directionSQL": directionSQL})
     # if returnType == "geojson":
     resultDict = {'startpoint': [], "Inlets": [], "Outlets": [], "Maintenance Holes": [], "Gravity Mains": [],
                   "Laterals": []}
@@ -238,7 +248,10 @@ def queryNearestEdges(blockList):
      """
     # application.logger.debug(nearestEdgeSQL)
     # execute query to get nearest edge id for each input
-    edgeresults = db.session.execute(nearestEdgeSQL)
+    # edgeresults = db.session.execute(nearestEdgeSQL)
+    with LacotraceSes() as session:
+        edgeresults  = session.execute(nearestEdgeSQL)
+    # edgeresults = lacotraceSes.execute(nearestEdgeSQL)
     #  Get results of query and build SQL expression of edgeIDs, (#,#,etc)
     edgeIDs = "("
     for i in edgeresults:

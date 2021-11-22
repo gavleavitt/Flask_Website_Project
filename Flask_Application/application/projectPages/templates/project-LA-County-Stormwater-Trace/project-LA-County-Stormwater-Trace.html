@@ -19,7 +19,24 @@
 				Summary
 			</h2>
 			<p>
-				Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Erat nam at lectus urna duis convallis convallis tellus id. Ultrices mi tempus imperdiet nulla malesuada pellentesque elit eget. Suspendisse sed nisi lacus sed viverra tellus. Fermentum et sollicitudin ac orci phasellus egestas tellus rutrum tellus. Fermentum posuere urna nec tincidunt praesent semper feugiat. Pretium aenean pharetra magna ac placerat.
+				This application was developed as an unofficial personal project and allows a user to trace storm water flow within LA County and cities storm drain networks. Flow can be traced upstream or downstream,
+				and when tracing upstream custom generated subwatershed basins can be used to identify parcels which may be contributing water or pollutants to the storm drain system. Flow can be blocked in the trace process
+				to exclude certain network nodes from the analysis. These results, excluding parcels and subwatersheds, can be exported as a CSV or as geojson files.
+			</p>
+			<p>
+				This application uses the ArcGIS API for Javascript for client-side mapping and results handling and uses the Esri Caclite Design System for UI elements. Server-side processing occurs on a Python Flask server
+				which executes SQL commands to a Postgres/PostGIS database.
+			</p>
+			<p>
+				LA County's storm drain data were downloaded from <a href="https://pw.lacounty.gov/fcd/StormDrain/index.cfm">here</a>and edited by splitting such that polyline feature's start and end points did not intersect midline, all line end points must either end at a point feature or the start of another line feature.
+				While the source data has outlets for the system, many gravity mains were shown as ending without outlets, in these cases pseudo outlets were derived. Source data were also snapped such that nearby, ~5ft of each other,
+				features were correctly coincident. Finally, all line feature geometries and IDs were combined into a single network table that was noded using pgrRouting's <a href="https://docs.pgrouting.org/3.1/en/pgr_createTopology.html">pgr_createTopology</a>.
+			</p>
+			<p>
+				The network is traced by the Flask server which uses the user's input to write dynamic SQL queries. The primary query for tracing uses the <a href="https://docs.pgrouting.org/3.1/en/pgr_drivingDistance.html">pgr_drivingDistance algorithm</a> to find all edges and nodes in the provided trace direction.
+				The results, which are given for the noded table and node vertices datasets, are then used to select and union the assiocated results from the primary storm drain datasets, which store all the attribute information. These results are returned to Flask in GeojSON format where they are further formatted and
+				returned to the requesting client. If the filter parcels option was selected, then all subwatersheds which intersect the inlets are selected then the subwatershed geometries are used to query LA County's parcel MapServer REST API to get the OIDs of all intersecting parcels.
+				These OIDs are attached to the Flask server response to be processed on the client-side. 
 			</p>
 			<h3>
 				Project Workflow

@@ -10,6 +10,7 @@ var blockBtn = "inactive"
 var blockList = []
 var gravMainsTileURL = "https://vectortileservices3.arcgis.com/NfAw5Z474Q8vyMGv/arcgis/rest/services/gravity_mains_vector_tile_layer/VectorTileServer/tile/{z}/{y}/{x}.pbf"
 
+
 // var activeLayerIDs = []
 // var layerObj = null;
 // var selectionLayer = null
@@ -27,55 +28,9 @@ function calculateExtents(extents){
   console.log(extents)
 };
 
-// var extents = []
-// Object.keys(obj).forEach((key) => {
-//   console.log(obj[key])
-//   console.log(obj[key].fullExtent)
-//   obj[key].fullExtent.then((extent) =>{
-//     console.log(extent)
-//   })
-//   console.log(obj[key].fullExtent.clone())
-//   extents.push(obj[key].fullExtent.clone())
-//
-// })
-// // clone the first extent
-// newExtent = extents[0].clone();
-// // Extent the cloned extent to include all others
-// exents.forEach((item)=>{
-//   newExtent.union(item)
-// });
-// Object.values(obj).forEach((item, i) => {
-//   item.queryExtent().then((response) => {
-//         extents[i] = response.extent;
-//       });
-// });
-// Object.values(obj).forEach((item, i) => {
-//   item.queryExtent().then((response) => {
-//         extents[i] = response.extent;
-//       }).then((extent)=>{
-//         if (i == 0){
-//           newExtent = Object.values(extents)[0].clone();
-//         } else {
-//           newExtent.union(extents[i])
-//         }
-//       }
-// });
-// // console.log(extents);
-// console.log(extents[0]);
-// console.log(Object.keys(extents));
-// console.log(Object.values(extents));
-//
-// // clone the first extent
-// newExtent = Object.values(extents)[0].clone();
-// // Extent the cloned extent to include all others
-// Object.values(extents).forEach((item)=>{
-//   newExtent.union(item)
-// });
-// console.log(extents)
-// console.log(newExtent)
-// return newExtent
-require(["esri/config", "esri/Map", "esri/layers/VectorTileLayer", "esri/views/MapView", "esri/layers/TileLayer", "esri/Graphic", "esri/layers/GraphicsLayer", "esri/layers/WebTileLayer", "esri/layers/GeoJSONLayer", "esri/symbols/SimpleMarkerSymbol", "esri/renderers/UniqueValueRenderer", "esri/renderers/SimpleRenderer", "esri/widgets/LayerList", "esri/layers/GroupLayer", "esri/rest/support/Query", "esri/widgets/Search", "esri/layers/FeatureLayer", "esri/widgets/Bookmarks", "esri/widgets/Expand","esri/layers/TileLayer", "esri/symbols/CIMSymbol", "esri/layers/support/LabelClass", "esri/layers/MapImageLayer", "esri/Basemap", "esri/rest/support/Query", "esri/geometry/Extent"],
-  function (esriConfig, Map, VectorTileLayer, MapView, TileLayer, Graphic, GraphicsLayer, WebTileLayer, GeoJSONLayer, SimpleMarkerSymbol, UniqueValueRenderer, SimpleRenderer, LayerList, GroupLayer, Query, Search, FeatureLayer, Bookmarks, Expand, TileLayer, CIMSymbol, LabelClass, MapImageLayer, Basemap, Query, Extent) {
+
+require(["esri/config", "esri/Map", "esri/layers/VectorTileLayer", "esri/views/MapView", "esri/layers/TileLayer", "esri/Graphic", "esri/layers/GraphicsLayer", "esri/layers/WebTileLayer", "esri/layers/GeoJSONLayer", "esri/symbols/SimpleMarkerSymbol", "esri/renderers/UniqueValueRenderer", "esri/renderers/SimpleRenderer", "esri/widgets/LayerList", "esri/layers/GroupLayer", "esri/rest/support/Query", "esri/widgets/Search", "esri/layers/FeatureLayer", "esri/widgets/Bookmarks", "esri/widgets/Expand","esri/layers/TileLayer", "esri/symbols/CIMSymbol", "esri/layers/support/LabelClass", "esri/layers/MapImageLayer", "esri/Basemap", "esri/rest/support/Query", "esri/geometry/Extent", "esri/geometry/Point"],
+  function (esriConfig, Map, VectorTileLayer, MapView, TileLayer, Graphic, GraphicsLayer, WebTileLayer, GeoJSONLayer, SimpleMarkerSymbol, UniqueValueRenderer, SimpleRenderer, LayerList, GroupLayer, Query, Search, FeatureLayer, Bookmarks, Expand, TileLayer, CIMSymbol, LabelClass, MapImageLayer, Basemap, Query, Extent, Point) {
       function getActiveLayerIDs(){
         // Get list of IDs of all layers in the map
         activeLayerIDs = []
@@ -87,21 +42,27 @@ require(["esri/config", "esri/Map", "esri/layers/VectorTileLayer", "esri/views/M
       };
 
       function buildResultsDisplay(geojsonlyr, calciteWindowID, titleText){
-        // Check if geojson layer already exits
+        // Check if geojson layer exits, skip if not
         if (geojsonlyr !== undefined){
-          // console.log("Populating data!");
+          // empty object to hold results
           var results = new Object();
+          // New blank query to be populated with settings
           query = new Query();
+          // Set where clause
           query.where = `factype = '${titleText}'`;
-          query.outFields = [ "factype", "id", "facsubtype", "facid"];
+          // Set output fields
+          // query.outFields = [ "factype", "id", "facsubtype", "facid", "linearpipefeetfromstart", "uuid"];
+          query.outFields = ["*"]
+          // Return feature geometry
           query.returnGeometry = true;
+          // Query features within geojson layer, async
           geojsonlyr.queryFeatures(query)
           .then(function(response){
               // Get object of results
               // Get record count
               results.count = Object.keys(response.features).length
-              console.log(results.count)
               features = response.features;
+              results.f
               // Update accordian title to show Count
               document.getElementById(calciteWindowID).setAttribute("heading", `${titleText} (${results.count})`);
               // Remove disabled status
@@ -110,36 +71,93 @@ require(["esri/config", "esri/Map", "esri/layers/VectorTileLayer", "esri/views/M
               document.getElementById("DownloadGeoJSON").removeAttribute("disabled");
               // Loop over each feature in result
               features.forEach((result, index)=>{
+                // Pull out attributes
                 attr = result.attributes;
+                // Create a calcite pick list item to hold record result
                 item = document.createElement("calcite-pick-list-item");
+                // Set label (title) to facid
                 item.setAttribute("label", attr.facid);
+                // Set value key to index value
                 item.setAttribute("value", index);
                 // Add to service results
                 // type = `Inlet Type: ${attr[facsubtype]}`;
-                type = `${titleText} Type: ${attr.facsubtype}`;
-                if (["Inlets, Maintenance Holes"].includes(titleText)){
-                  console.log(titleText)
-                  description = type;
+                // Set asset type text
+                // type = `Type: ${attr.facsubtype}`;
+                // bulild out description text based on asset type
+                if (["Inlets", "Maintenance Holes"].includes(attr.factype)){
+                  description = `Type: ${attr.facsubtype}`;
                 } else {
                   size =  `Size: ${attr.size}`;
                   material = `Material: ${attr.material}`
-                  description = type + "\n" + size + "\n" + material;
+                  description = size + "\n" + material;
                 }
+                // Set feet from start text
+                description = description + "\n" + `Pipe Feet from Start: ${(parseFloat(attr.linearpipefeetfromstart)).toFixed(1)}`
+                var newNode = document.createElement('div');
+                // Add description text to calcite item
                 item.setAttribute("description", description);
+                // Set the feature's uuid as an attribute to be called later
+                item.setAttribute("uuid", attr.uuid);
+                // Add event listener to calcite item to open and zoom to popup
                 item.addEventListener("click", function(){
-                  // const target = event.target;
-                  // const resultId = target.getAttribute("value");
-                  view.popup.open({
-                    features: [result],
-                    location: result.geometry
+                  // Get the clicked feature's uuid
+                  uuid = this.getAttribute("uuid")
+                  // networklayer.layers.items.forEach(i=>console.log(i.title))
+                  // Iterate over each layer in the network group and query its features to find the matching UUID
+                  // flatten layers in network layer, pulls out nested layers
+                  let flatNetwork = map.layers.flatten(function(item){
+                    return item.layers || item.sublayers;
                   });
-                  view.goTo(result.geometry)
+                  console.log(flatNetwork)
+                  flatNetwork.forEach((e,i)=> {
+                  // networklayer.layers.items.forEach((e,i)=> {
+                    // console.log(e);
+                    // Create an empty query
+                    if (e.declaredClass == "esri.layers.FeatureLayer"){
+                      let query = e.createQuery();
+                      // Set where parameter, query matching uuid
+                      query.where = `uuid = '${uuid}'`;
+                      // query.returnGeometry = true;
+                      // query.returnQueryGeometry = true;
+                      // Execute query, async, and process results
+                      e.queryFeatures(query)
+                        .then((res)=>{
+                          // Check if result has any features
+                          if (res.features.length >0){
+                            feat = res.features[0]
+                            // check if result is a point or polyline feature, if polyline calculate its midpoint and replace result geometry with the point
+                            if (res.geometryType == "polyline"){
+                              // console.log("polyline!")
+                              // var midIndex = Math.round(feat.geometry.paths[0].length / 2);
+                              // var midPoint = new Point({
+                              //  x:feat.geometry.paths[0][midIndex][0],
+                              //  y:feat.geometry.paths[0][midIndex][1],
+                              //  spatialReference:res.spatialReference
+                              // });
+                              feat.geometry = feat.geometry.extent.center
+                              // var midPoint = parseInt(feat.geometry.paths[0].length / 2);
+                              // console.log(midPoint)
+                              // feat.geometry.x = feat.geometry.paths[0][midPoint][0];
+                              // feat.geometry.y = feat.geometry.paths[0][midPoint][1];
+                              // geom = feat.geometry
+                            }
+                            view.popup.open({
+                              // fetchFeatures: true, // <- fetch the selected features (if any)
+                              location:feat.geometry,
+                              features: [feat],
+                            });
+                            view.goTo(feat.geometry)
+                          }
+                        });
+                    }
+
+                  })
                 });
-                // Append to existing results panel
-                // console.log(calciteWindowID)
+                // Append new calcite item to existing results panel
                 document.getElementById(calciteWindowID).appendChild(item);
               });
             });
+            //
           } else {
             // Result is not populated, set empty results and disable calcite ollapsible
             // console.log("Setting empty results")
@@ -158,16 +176,16 @@ require(["esri/config", "esri/Map", "esri/layers/VectorTileLayer", "esri/views/M
       // Create group layer to hold trace results
       var resultslayer = new GroupLayer();
 
-      // const gravitymainstiles = new VectorTileLayer({
-      //   // title: "Gravity Mains",
-      //   title:"Gravity Mains",
-      //   // Hide from layer list
-      //   listMode: "hide",
-      //   // url: "https://vectortileservices3.arcgis.com/NfAw5Z474Q8vyMGv/arcgis/rest/services/Gravity_Mains_VTL/VectorTileServer",
-      //   url: "https://vectortileservices3.arcgis.com/NfAw5Z474Q8vyMGv/arcgis/rest/services/Gravity_Mains_VTL/VectorTileServer/resources/styles/root.json",
-      //   minscale: 2311162.217155,
-      //   maxscale: 15000
-      // });
+      const gravityMainsVTL = new VectorTileLayer({
+        // title: "Gravity Mains",
+        title:"Gravity Mains",
+        // Hide from layer list
+        listMode: "hide",
+        // url: "https://vectortileservices3.arcgis.com/NfAw5Z474Q8vyMGv/arcgis/rest/services/Gravity_Mains_VTL/VectorTileServer",
+        url:  "https://vectortileservices3.arcgis.com/NfAw5Z474Q8vyMGv/arcgis/rest/services/GravityMains_VTL/VectorTileServer",
+        minscale: 2311162.217155,
+        maxscale: 15000
+      });
 
       // const gravitymainstiles = new TileLayer({
       //   // title: "Gravity Mains",
@@ -192,30 +210,33 @@ require(["esri/config", "esri/Map", "esri/layers/VectorTileLayer", "esri/views/M
       // Set featurelayers (consider imagelayers instead) to display the storm drain network
       const gravitymainsFeatures = new FeatureLayer({
         title: "Gravity Mains",
-        url: "https://services3.arcgis.com/NfAw5Z474Q8vyMGv/ArcGIS/rest/services/Gravity_Mains_2ft_Simplify_/FeatureServer/0",
-        minScale: 25000
+        url: "https://services3.arcgis.com/NfAw5Z474Q8vyMGv/arcgis/rest/services/GravityMains_Simplify_2ft/FeatureServer/0",
+        listMode: "hide",
+        minScale: 25000,
+        popupTemplate: popupGM
       });
 
       const lateralFeatures = new FeatureLayer({
         title: "Laterals",
-        url: "https://services3.arcgis.com/NfAw5Z474Q8vyMGv/arcgis/rest/services/Laterals_2ft_Simplify/FeatureServer/0",
+        url: "https://services3.arcgis.com/NfAw5Z474Q8vyMGv/arcgis/rest/services/Laterals/FeatureServer/0",
         minScale: 25000
       });
 
       const inletFeatures = new FeatureLayer({
         title: "Inlets",
-        url: "https://services3.arcgis.com/NfAw5Z474Q8vyMGv/arcgis/rest/services/inlets_wgs84/FeatureServer/0",
+        // url: "https://services3.arcgis.com/NfAw5Z474Q8vyMGv/arcgis/rest/services/inlets_wgs84/FeatureServer/0",
+        url: "https://services3.arcgis.com/NfAw5Z474Q8vyMGv/arcgis/rest/services/Inlets_SHP/FeatureServer/0",
         minScale: 15000
       });
       const mhFeatures = new FeatureLayer({
         title: "Maintenance Holes",
-        url: "https://services3.arcgis.com/NfAw5Z474Q8vyMGv/arcgis/rest/services/maintenanceholes_84/FeatureServer/0",
+        url: "https://services3.arcgis.com/NfAw5Z474Q8vyMGv/arcgis/rest/services/maintenanceholes/FeatureServer/0",
         minScale: 15000
       });
 
        const olFeatures = new FeatureLayer({
         title: "Outlets",
-         url: "https://services3.arcgis.com/NfAw5Z474Q8vyMGv/arcgis/rest/services/outlets_WGS84/FeatureServer/0",
+         url: "https://services3.arcgis.com/NfAw5Z474Q8vyMGv/arcgis/rest/services/outlets/FeatureServer/0",
          minScale: 15000
        });
 
@@ -295,12 +316,20 @@ require(["esri/config", "esri/Map", "esri/layers/VectorTileLayer", "esri/views/M
          popupTemplate: popupfilteredparcels
        })
 
+       gravityMainsGrouped = new GroupLayer({
+         id: "gmgroup",
+         title: "Gravity Mains",
+         layers: [gravitymainsFeatures, gravityMainsVTL],
+         visibilityMode: "inherited"
+       })
        // Add group layer for the network reference data
       const networklayer = new GroupLayer({
           id: "networklayer",
           title: "Storm Network",
-          layers: [lateralFeatures, gravitymainsFeatures, inletFeatures, mhFeatures, olFeatures]
+          layers: [lateralFeatures, gravityMainsGrouped, inletFeatures, mhFeatures, olFeatures]
+          // layers: [lateralFeatures, gravitymainsFeatures, inletFeatures, mhFeatures, olFeatures]
         });
+
         // Add group data for the ancillary data
         const ancilData = new GroupLayer({
           id: "AncilGroup",
@@ -334,13 +363,18 @@ require(["esri/config", "esri/Map", "esri/layers/VectorTileLayer", "esri/views/M
       // Create mapview using the map
       const view = new MapView({
         map: map,
-        center: [-118.167416, 33.784257], // Longitude, latitude
-        zoom: 13, // Zoom level
+        center: [-118.167416, 34.00], // Longitude, latitude
+        zoom: 8, // Zoom level
         container: "viewDiv", // Div element
       });
 
+      // Use default popup templates, as set in the featurelayer on AGOL
+      view.popup.defaultPopupTemplateEnabled = true;
       // Add window for viewing current zoom scale
       view.ui.add(vScale, 'bottom-right')
+
+      // Move zoom to buttom left
+      view.ui.move("zoom", "bottom-right");
 
       // Create bookmarks widget
       const bookmarks = new Bookmarks({
@@ -586,7 +620,8 @@ require(["esri/config", "esri/Map", "esri/layers/VectorTileLayer", "esri/views/M
                     url:url,
                     title:title,
                     renderer:resultsrenderer,
-                    popupTemplate: popupTemplate
+                    popupTemplate: null
+                    // popupTemplate: popupTemplate
                   });
                   // Add new geojson layer to result layerObj
                   layerObj[title] = result;
@@ -684,6 +719,8 @@ require(["esri/config", "esri/Map", "esri/layers/VectorTileLayer", "esri/views/M
             document.getElementById("DownloadGeoJSON").addEventListener("click", function(){
               createGeoJSONZIP(data)
             });
+
+            // Set total linear pipe feet, broken up by mains and laterals
 
             // Build out Calcite block results window
             buildResultsDisplay(layerObj['Gravity Mains'], 'GM-Window', 'Gravity Mains')
