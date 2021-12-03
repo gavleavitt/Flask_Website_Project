@@ -8,11 +8,14 @@ from application.WebAppProjects.LACO_SW_TraceApp import TraceSQLQueries
 import io
 import csv
 
+# lacoSWTraceapp_API_BP = Blueprint('lacoSWTraceapp_API_BP', __name__,
+#                         template_folder='templates',
+#                         static_folder='static', subdomain="api")
 lacoSWTraceapp_API_BP = Blueprint('lacoSWTraceapp_API_BP', __name__,
                         template_folder='templates',
                         static_folder='static')
-
-@lacoSWTraceapp_API_BP.route("/lacostormwater", methods=['GET', 'POST'], subdomain='api')
+# @lacoSWTraceapp_API_BP.route("/lacostormwater", methods=['GET', 'POST'])
+@lacoSWTraceapp_API_BP.route("/lacostormwater", methods=['GET', 'POST'])
 def handletracerequest():
     # Get coordinates
     # Get lat, y

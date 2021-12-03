@@ -129,17 +129,19 @@
 .close {
   /* grid-row: 1/1; */
   color: #aaaaaa;
-  font-size: 32px;
+  font-size: 32px !important;
   font-weight: bold;
   margin-top: -10px;
   /* text-align: right; */
   /* position: sticky; */
   /* position: -webkit-sticky; */
   position: fixed;
-  right: 11%;
-  transform: translateX(40%);
+  right: 12%;
+  transform: translateX(-12%);
   /* background-color: var(--titlebackground); */
   /* opacity: 95%; */
+  /* position: relative;
+  right: -95%; */
 }
 
 .modal-text{

@@ -8,6 +8,12 @@
     <!-- json2csv -->
     <!-- <script src="https://cdn.jsdelivr.net/npm/json2csv"></script> -->
 
+    <!-- Set Global variable for trace API URL -->
+    <script type='text/javascript' >
+      var traceurl = new URL("{{ apiURL }}")
+      console.log(JSON.stringify(traceurl))
+      console.log(traceurl)
+    </script>
 
     <!-- TileQuery local Dist -->
     <script src="{{ url_for('lacoSWTraceapp_API_BP.static', filename='SBCO_SW_TraceApp/js/dist/tilequery.js') }}"></script>
@@ -87,7 +93,7 @@
             <div class="button-grp">
               <div class="btn-subgrp">
                 <calcite-button id="selBtn" button-alignment="center" round width="half" scale="s" icon-start="object-detection" color="blue" class="tool-btn">Select Start Location</calcite-button>
-                <calcite-button id="block-Btn" button-alignment="center" round width="half" scale="s" icon-start="x-circle" color="blue" class="tool-btn">Set Flow Block Locations</calcite-button>
+                <calcite-button id="block-Btn" button-alignment="center" round width="half" scale="s" icon-start="x-circle" color="blue" class="tool-btn">Set Block Locations</calcite-button>
               </div>
               <div class="btn-subgrp">
                 <calcite-button id="submitBtn" button-alignment="center" round width="half" scale="s" icon-start="submit" color="red" class="tool-btn">Run</calcite-button>

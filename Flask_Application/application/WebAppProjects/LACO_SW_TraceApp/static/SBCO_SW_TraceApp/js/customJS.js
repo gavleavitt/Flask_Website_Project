@@ -29,8 +29,8 @@ function calculateExtents(extents){
 };
 
 
-require(["esri/config", "esri/Map", "esri/layers/VectorTileLayer", "esri/views/MapView", "esri/layers/TileLayer", "esri/Graphic", "esri/layers/GraphicsLayer", "esri/layers/WebTileLayer", "esri/layers/GeoJSONLayer", "esri/symbols/SimpleMarkerSymbol", "esri/renderers/UniqueValueRenderer", "esri/renderers/SimpleRenderer", "esri/widgets/LayerList", "esri/layers/GroupLayer", "esri/rest/support/Query", "esri/widgets/Search", "esri/layers/FeatureLayer", "esri/widgets/Bookmarks", "esri/widgets/Expand","esri/layers/TileLayer", "esri/symbols/CIMSymbol", "esri/layers/support/LabelClass", "esri/layers/MapImageLayer", "esri/Basemap", "esri/rest/support/Query", "esri/geometry/Extent", "esri/geometry/Point"],
-  function (esriConfig, Map, VectorTileLayer, MapView, TileLayer, Graphic, GraphicsLayer, WebTileLayer, GeoJSONLayer, SimpleMarkerSymbol, UniqueValueRenderer, SimpleRenderer, LayerList, GroupLayer, Query, Search, FeatureLayer, Bookmarks, Expand, TileLayer, CIMSymbol, LabelClass, MapImageLayer, Basemap, Query, Extent, Point) {
+require(["esri/config", "esri/Map", "esri/layers/VectorTileLayer", "esri/views/MapView", "esri/layers/TileLayer", "esri/Graphic", "esri/layers/GraphicsLayer", "esri/layers/WebTileLayer", "esri/layers/GeoJSONLayer", "esri/symbols/SimpleMarkerSymbol", "esri/renderers/UniqueValueRenderer", "esri/renderers/SimpleRenderer", "esri/widgets/LayerList", "esri/layers/GroupLayer", "esri/rest/support/Query", "esri/widgets/Search", "esri/layers/FeatureLayer", "esri/widgets/Bookmarks", "esri/widgets/Expand","esri/layers/TileLayer", "esri/symbols/CIMSymbol", "esri/layers/support/LabelClass", "esri/layers/MapImageLayer", "esri/Basemap", "esri/rest/support/Query", "esri/geometry/Extent", "esri/geometry/Point", "esri/widgets/Locate"],
+  function (esriConfig, Map, VectorTileLayer, MapView, TileLayer, Graphic, GraphicsLayer, WebTileLayer, GeoJSONLayer, SimpleMarkerSymbol, UniqueValueRenderer, SimpleRenderer, LayerList, GroupLayer, Query, Search, FeatureLayer, Bookmarks, Expand, TileLayer, CIMSymbol, LabelClass, MapImageLayer, Basemap, Query, Extent, Point, Locate) {
       function getActiveLayerIDs(){
         // Get list of IDs of all layers in the map
         activeLayerIDs = []
@@ -183,8 +183,9 @@ require(["esri/config", "esri/Map", "esri/layers/VectorTileLayer", "esri/views/M
         listMode: "hide",
         // url: "https://vectortileservices3.arcgis.com/NfAw5Z474Q8vyMGv/arcgis/rest/services/Gravity_Mains_VTL/VectorTileServer",
         url:  "https://vectortileservices3.arcgis.com/NfAw5Z474Q8vyMGv/arcgis/rest/services/GravityMains_VTL/VectorTileServer",
-        minscale: 2311162.217155,
-        maxscale: 15000
+        minScale: 2311162.217155,
+        // maxScale: 25000,
+        maxScale: 15000
       });
 
       // const gravitymainstiles = new TileLayer({
@@ -212,26 +213,31 @@ require(["esri/config", "esri/Map", "esri/layers/VectorTileLayer", "esri/views/M
         title: "Gravity Mains",
         url: "https://services3.arcgis.com/NfAw5Z474Q8vyMGv/arcgis/rest/services/GravityMains_Simplify_2ft/FeatureServer/0",
         listMode: "hide",
-        minScale: 25000,
-        popupTemplate: popupGM
+        // minScale: 25000,
+        minScale: 15000,
+        popupTemplate: popupGM,
+        renderer: gravityMainsCIM
       });
 
       const lateralFeatures = new FeatureLayer({
         title: "Laterals",
         url: "https://services3.arcgis.com/NfAw5Z474Q8vyMGv/arcgis/rest/services/Laterals/FeatureServer/0",
-        minScale: 25000
+        minScale: 25000,
+        popupTemplate: popupLat
       });
 
       const inletFeatures = new FeatureLayer({
         title: "Inlets",
         // url: "https://services3.arcgis.com/NfAw5Z474Q8vyMGv/arcgis/rest/services/inlets_wgs84/FeatureServer/0",
         url: "https://services3.arcgis.com/NfAw5Z474Q8vyMGv/arcgis/rest/services/Inlets_SHP/FeatureServer/0",
-        minScale: 15000
+        minScale: 15000,
+        popupTemplate: popupIN
       });
       const mhFeatures = new FeatureLayer({
         title: "Maintenance Holes",
         url: "https://services3.arcgis.com/NfAw5Z474Q8vyMGv/arcgis/rest/services/maintenanceholes/FeatureServer/0",
-        minScale: 15000
+        minScale: 15000,
+        popupTemplate: popupMH
       });
 
        const olFeatures = new FeatureLayer({
@@ -249,14 +255,19 @@ require(["esri/config", "esri/Map", "esri/layers/VectorTileLayer", "esri/views/M
          url: "https://public.gis.lacounty.gov/public/rest/services/LACounty_Cache/LACounty_Parcel/MapServer",
          minscale: 15000,
          // Not visible by default
-         visible: false
+         visible: false,
+         listMode: "hide",
          // sublayers: [{
          //   id: 0,
          //   labelsVisible: true,
          //   labelingInfo: parcelLabeling
          // }]
        })
-
+       const laCoParcelsSearch = new FeatureLayer({
+        title: "LA County Parcels",
+        url: "https://public.gis.lacounty.gov/public/rest/services/LACounty_Cache/LACounty_Parcel/MapServer/0",
+        listMode: "hide",
+       })
 
        const laCoCities = new MapImageLayer({
        // const laCoCities = new FeatureLayer({
@@ -319,7 +330,15 @@ require(["esri/config", "esri/Map", "esri/layers/VectorTileLayer", "esri/views/M
        gravityMainsGrouped = new GroupLayer({
          id: "gmgroup",
          title: "Gravity Mains",
-         layers: [gravitymainsFeatures, gravityMainsVTL],
+         layers: [gravitymainsFeatures,gravityMainsVTL],
+         visibilityMode: "inherited"
+       })
+
+       parcelsGrouped = new GroupLayer({
+         id:"parcelgroup",
+         title: "LACO Parcels",
+         visible: false,
+         layers: [laCoParcels, laCoParcelsSearch],
          visibilityMode: "inherited"
        })
        // Add group layer for the network reference data
@@ -334,7 +353,7 @@ require(["esri/config", "esri/Map", "esri/layers/VectorTileLayer", "esri/views/M
         const ancilData = new GroupLayer({
           id: "AncilGroup",
           title: "Ancillary Data",
-          layers: [laCoCities, laCoBoundary, riversChannels, watersheds, laCoParcels],
+          layers: [laCoCities, laCoBoundary, riversChannels, watersheds, parcelsGrouped],
           visible: true
         })
 
@@ -371,10 +390,16 @@ require(["esri/config", "esri/Map", "esri/layers/VectorTileLayer", "esri/views/M
       // Use default popup templates, as set in the featurelayer on AGOL
       view.popup.defaultPopupTemplateEnabled = true;
       // Add window for viewing current zoom scale
-      view.ui.add(vScale, 'bottom-right')
-
       // Move zoom to buttom left
-      view.ui.move("zoom", "bottom-right");
+      // view.ui.move("zoom", "bottom-right");
+      view.ui.move("zoom", "manual");
+      view.ui.add(vScale, {
+        index: 0,
+        // position: 'bottom-right'
+        position: 'manual'
+      });
+
+
 
       // Create bookmarks widget
       const bookmarks = new Bookmarks({
@@ -393,8 +418,39 @@ require(["esri/config", "esri/Map", "esri/layers/VectorTileLayer", "esri/views/M
        view.ui.add(bkExpand, "top-right", 0);
 
        // Create search widget using the map view as the source
+       // see https://developers.arcgis.com/javascript/latest/sample-code/widgets-search-multiplesource/
        const searchWidget = new Search({
-         view: view
+         view: view,
+         autoSelect: true,
+         sources: [
+           {
+             layer:inletFeatures,
+             searchFields: ["eqnum","uuid", "dwgno"],
+             name: "Inlets"
+           },
+           {
+             layer:mhFeatures,
+             searchFields: ["eqnum","uuid","dwgno","jhsrc", "name"],
+             name: "Maintenance Holes"
+           }, {
+             layer:gravitymainsFeatures,
+             searchFields: ["eqnum","uuid","dwgno","jhsrc", "name", "pmnum"],
+             name: "Gravity Mains"
+           }, {
+             layer:lateralFeatures,
+             searchFields: ["eqnum","uuid","dwgno","jhsrc", "name"],
+             name: "Laterals"
+           }, {
+             layer:olFeatures,
+             searchFields: ["eqnum","uuid","dwgno", "name", "outfall_id"],
+             name: "Laterals"
+           },
+           {
+             layer:laCoParcelsSearch,
+             searchFields: ["AIN","APN"],
+             name: "Parcels"
+           }
+         ]
        });
        // Add search widget to ui
        view.ui.add(searchWidget, {
@@ -410,6 +466,18 @@ require(["esri/config", "esri/Map", "esri/layers/VectorTileLayer", "esri/views/M
 
       view.ui.add(layerList, "top-right", 3);
 
+      let locateWidget = new Locate({
+        view: view,   // Attaches the Locate button to the view
+        graphic: new Graphic({
+          symbol: { type: "simple-marker" }  // overwrites the default symbol used for the
+          // graphic placed at the location of the user when found
+        })
+      });
+
+      view.ui.add(locateWidget, {
+        position: "manual",
+        index: 0
+      });
 
       // Watch scale/zoom changes, update current scale display
       view.watch('scale', function(evt){
@@ -571,7 +639,8 @@ require(["esri/config", "esri/Map", "esri/layers/VectorTileLayer", "esri/views/M
             radioGrp = document.querySelector('#directionGrp');
             traceDirection = radioGrp.querySelectorAll(":checked")[0].defaultValue;
             // Set server request URL
-            var url = new URL('http://api.leavitttesting.com:5000/api/v1/trace/lacostormwater');
+            // var url = new URL('http://leavittmapping.com/api/v1/trace/lacostormwater');
+            // var url = new URL('http://api.leavitttesting133.com:5000/api/v1/trace/lacostormwater');
             // Set query parameters
             var params = {"latitude":userLat, "longitude":userLong, "direction":traceDirection};
             // Check if parcel filter opton has been selected, set param
@@ -589,12 +658,16 @@ require(["esri/config", "esri/Map", "esri/layers/VectorTileLayer", "esri/views/M
                 searchQuery.append('blocklnglats',item)
               });
             }
+            console.log(traceurl)
+            console.log(JSON.stringify(traceurl))
             // Add GET parameters to GET request string
-            url.search = searchQuery.toString();
+            traceurl.search = searchQuery.toString();
+            console.log(traceurl)
+            console.log(JSON.stringify(traceurl))
             // Set Query active text to active
             document.querySelector('#query-text').style.display = "block";
             // Issue Async request
-            fetch(url, {method: "GET",
+            fetch(traceurl, {method: "GET",
               mode: 'cors'})
             .then(r => {
               // Returns data as json, I think this has to be done in a .then statement
@@ -629,12 +702,12 @@ require(["esri/config", "esri/Map", "esri/layers/VectorTileLayer", "esri/views/M
               }
 
               // Process geojson result layers provided by server
-              addGeoJson(data['Gravity Mains'], 'Gravity Mains', popupGM)
-              addGeoJson(data['Laterals'], 'Laterals', popupLat)
-              addGeoJson(data['Inlets'], 'Inlets', popupInlet)
+              addGeoJson(data['Gravity Mains'], 'Gravity Mains', null)
+              addGeoJson(data['Laterals'], 'Laterals', null)
+              addGeoJson(data['Inlets'], 'Inlets', null)
               addGeoJson(data['startpoint'], 'Start Point', null)
-              addGeoJson(data['Outlets'], 'Outlets', popupOutlet)
-              addGeoJson(data['Maintenance Holes'], 'Maintenance Holes', popupMH)
+              addGeoJson(data['Outlets'], 'Outlets', null)
+              addGeoJson(data['Maintenance Holes'], 'Maintenance Holes',null)
 
               // Process parcel OID results, if provided in request
               if ("parcels" in data){

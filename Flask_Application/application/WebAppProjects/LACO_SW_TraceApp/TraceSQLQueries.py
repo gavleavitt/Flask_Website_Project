@@ -31,7 +31,7 @@ WHERE
     # Query DB
     # results = db.session.execute(sql)
     with LacotraceSes() as session:
-        results  = session.execute(sql)
+        results = session.execute(sql)
     for i in results:
         # Load postgres subwatershed geom query result into geojson format
         # resDict[i.id] = {}
@@ -68,7 +68,7 @@ WHERE
     # Query DB
     # results = db.session.execute(sql)
     with LacotraceSes() as session:
-        results  = session.execute(sql)
+        results = session.execute(sql)
     # results = lacotraceSes.execute(sql)
     application.logger.debug(f"Unioned suberwatersheds length is: {results.rowcount}")
     for i in results:

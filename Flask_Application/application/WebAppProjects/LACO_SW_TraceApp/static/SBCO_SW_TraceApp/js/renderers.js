@@ -46,7 +46,7 @@ let cityBorder = {
     outline: {  // autocasts as new SimpleLineSymbol()
       width: 2,
       style: "dash",
-      color: "orange"
+      color: [148, 9, 150]
     }
   }
 };
@@ -64,6 +64,263 @@ let parcelFilterBorder = {
       color: "#51ff00"
     }
   }
+};
+
+const gravityMainsCIM = {
+          type: "unique-value", // autocasts as UniqueValueRenderer
+          field: "material",
+          defaultSymbol: {
+            type: "cim", // autocasts as CIMSymbol
+            data: {
+              type: "CIMSymbolReference",
+              symbol: {
+                type: "CIMLineSymbol",
+                symbolLayers: [{
+                    // black 1px line symbol
+                    type: "CIMSolidStroke",
+                    enable: true,
+                    width: 2,
+                    color: [
+                      175,
+                      175,
+                      175,
+                      255
+                    ]
+                  },
+                  {
+                    // arrow symbol
+                    type: "CIMVectorMarker",
+                    enable: true,
+                    size: 10,
+                    markerPlacement: {
+                      // see https://github.com/Esri/cim-spec/blob/master/docs/v2/CIMSymbols.md#enumeration-placementendings
+                      // see https://github.com/Esri/cim-spec/blob/master/docs/v2/CIMSymbols.md#cimmarkerplacementatratiopositions
+                      type: "CIMMarkerPlacementAtRatioPositions",
+                      beginPosition: 1,
+                      endPosition: 1,
+                      positionArray: [0.5],
+                      angleToLine: true, // symbol will maintain its angle to the line when map is rotated
+                      // type: "CIMMarkerPlacementAlongLineSameSize", // places same size markers along the line
+                      // endings: "WithMarkers",
+                      // placementTemplate: [60], // determines space between each arrow
+                      // angleToLine: true // symbol will maintain its angle to the line when map is rotated
+                    },
+                    frame: {
+                      xmin: -5,
+                      ymin: -5,
+                      xmax: 5,
+                      ymax: 5
+                    },
+                    markerGraphics: [{
+                      type: "CIMMarkerGraphic",
+                      geometry: {
+                        rings: [
+                          [
+                            [
+                              8,
+                              5.47
+                            ],
+                            [
+                              8,
+                            -  5.6
+                            ],
+                            [
+                              -1.96,
+                              0.03
+                            ],
+                            [
+                              8,
+                              5.47
+                            ]
+                          ]
+                        ]
+                      },
+                      symbol: {
+                        // black fill for the arrow symbol
+                        type: "CIMPolygonSymbol",
+                        symbolLayers: [{
+                          type: "CIMSolidFill",
+                          enable: true,
+                          color: [
+                            0,
+                            0,
+                            0,
+                            255
+                          ]
+                        }]
+                      }
+                    }]
+                  }
+                ]
+              }
+            }
+          },
+          // defaultSymbol: {
+          //   type: "simple-line" // default SimpleLineSymbol
+          // },
+          uniqueValueInfos: [{
+            value: "1", // when one-way='yes', create CIMSymbol line with arrows
+            symbol: {
+              type: "cim", // autocasts as CIMSymbol
+              data: {
+                type: "CIMSymbolReference",
+                symbol: {
+                  type: "CIMLineSymbol",
+                  symbolLayers: [{
+                      // black 1px line symbol
+                      type: "CIMSolidStroke",
+                      enable: true,
+                      width: 2,
+                      color: [
+                        237,
+                        81,
+                        81,
+                        255
+                      ]
+                    },
+                    {
+                      // arrow symbol
+                      type: "CIMVectorMarker",
+                      enable: true,
+                      size: 10,
+                      markerPlacement: {
+                        type: "CIMMarkerPlacementAtRatioPositions",
+                        // rotation: 180,
+                        positionArray: [-0.5],
+                        angleToLine: true // symbol will maintain its angle to the line when map is rotated
+                      },
+                      frame: {
+                        xmin: -5,
+                        ymin: -5,
+                        xmax: 5,
+                        ymax: 5
+                      },
+                      markerGraphics: [{
+                        type: "CIMMarkerGraphic",
+                        geometry: {
+                          rings: [
+                            [
+                              [
+                                8,
+                                5.47
+                              ],
+                              [
+                                8,
+                              -  5.6
+                              ],
+                              [
+                                -1.96,
+                                0.03
+                              ],
+                              [
+                                8,
+                                5.47
+                              ]
+                            ]
+                          ]
+                        },
+                        symbol: {
+                          // black fill for the arrow symbol
+                          type: "CIMPolygonSymbol",
+                          symbolLayers: [{
+                            type: "CIMSolidFill",
+                            enable: true,
+                            color: [
+                              0,
+                              0,
+                              0,
+                              255
+                            ]
+                          }]
+                        }
+                      }]
+                    }
+                  ]
+                }
+              }
+            }
+          }, {
+            value: "3",
+            symbol: {
+              type: "cim", // autocasts as CIMSymbol
+              data: {
+                type: "CIMSymbolReference",
+                symbol: {
+                  type: "CIMLineSymbol",
+                  symbolLayers: [{
+                      // black 1px line symbol
+                      type: "CIMSolidStroke",
+                      enable: true,
+                      width: 2,
+                      color: [
+                        255,
+                        170,
+                        0,
+                        255
+                      ]
+                    },
+                    {
+                      // arrow symbol
+                      type: "CIMVectorMarker",
+                      enable: true,
+                      size: 10,
+                      markerPlacement: {
+                        type: "CIMMarkerPlacementAtRatioPositions",
+                        positionArray: [0.5],
+                        angleToLine: true // symbol will maintain its angle to the line when map is rotated
+                      },
+                      frame: {
+                        xmin: -5,
+                        ymin: -5,
+                        xmax: 5,
+                        ymax: 5
+                      },
+                      markerGraphics: [{
+                        type: "CIMMarkerGraphic",
+                        geometry: {
+                          rings: [
+                            [
+                              [
+                                8,
+                                5.47
+                              ],
+                              [
+                                8,
+                              -  5.6
+                              ],
+                              [
+                                -1.96,
+                                0.03
+                              ],
+                              [
+                                8,
+                                5.47
+                              ]
+                            ]
+                          ]
+                        },
+                        symbol: {
+                          // black fill for the arrow symbol
+                          type: "CIMPolygonSymbol",
+                          symbolLayers: [{
+                            type: "CIMSolidFill",
+                            enable: true,
+                            color: [
+                              0,
+                              0,
+                              0,
+                              255
+                            ]
+                          }]
+                        }
+                      }]
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
 };
 
 
