@@ -9,8 +9,7 @@ var view = null;
 var blockBtn = "inactive"
 var blockList = []
 var gravMainsTileURL = "https://vectortileservices3.arcgis.com/NfAw5Z474Q8vyMGv/arcgis/rest/services/gravity_mains_vector_tile_layer/VectorTileServer/tile/{z}/{y}/{x}.pbf"
-
-
+const USERBOOKMARK_KEY = "arcgis-local-bookmarks";
 // var activeLayerIDs = []
 // var layerObj = null;
 // var selectionLayer = null
@@ -27,10 +26,31 @@ function getExtents(obj){
 function calculateExtents(extents){
   console.log(extents)
 };
+function addToLocalBKStorage(bks){
+  const rawBookmarks = bks.bookmarks.map(({ active, extent, name, thumbnail }) => ({ active, extent, name, thumbnail }));
+  const localData = localStorage.setItem(USERBOOKMARK_KEY, JSON.stringify(rawBookmarks));
+}
+// function addToLocalBKStorage(bks, presetuids){
+//   // TODO: remove default bookmarks from bks variable before mapping
+//   // bks.bookmarks.forEach((e, i) => {
+//   // Remove preset bookmarks from bks.bookmarks object
+//   // console.log(bks)
+//   // removeList = []
+//   // bks.bookmarks.items.forEach((e,i)=> {
+//   //   if (presetuids.includes(e.uid)) {
+//   //     removeList.push(i)
+//   //   }
+//   // })
+//      bks.boomarks.items.splice(presetuids.length)
+//   // const rawBookmarks = bks.bookmarks.map(({ active, extent, name, thumbnail }) => ({ active, extent, name, thumbnail }));
+//   const rawBookmarks = userBKs.bookmarks.map(({ active, extent, name, thumbnail }) => ({ active, extent, name, thumbnail }));
+//   console.log(userBKs)
+//   // const localData = localStorage.setItem(BOOKMARK_KEY, JSON.stringify(rawBookmarks));
+//   // console.log(JSON.stringify(rawBookmarks))
+// }
 
-
-require(["esri/config", "esri/Map", "esri/layers/VectorTileLayer", "esri/views/MapView", "esri/layers/TileLayer", "esri/Graphic", "esri/layers/GraphicsLayer", "esri/layers/WebTileLayer", "esri/layers/GeoJSONLayer", "esri/symbols/SimpleMarkerSymbol", "esri/renderers/UniqueValueRenderer", "esri/renderers/SimpleRenderer", "esri/widgets/LayerList", "esri/layers/GroupLayer", "esri/rest/support/Query", "esri/widgets/Search", "esri/layers/FeatureLayer", "esri/widgets/Bookmarks", "esri/widgets/Expand","esri/layers/TileLayer", "esri/symbols/CIMSymbol", "esri/layers/support/LabelClass", "esri/layers/MapImageLayer", "esri/Basemap", "esri/rest/support/Query", "esri/geometry/Extent", "esri/geometry/Point", "esri/widgets/Locate"],
-  function (esriConfig, Map, VectorTileLayer, MapView, TileLayer, Graphic, GraphicsLayer, WebTileLayer, GeoJSONLayer, SimpleMarkerSymbol, UniqueValueRenderer, SimpleRenderer, LayerList, GroupLayer, Query, Search, FeatureLayer, Bookmarks, Expand, TileLayer, CIMSymbol, LabelClass, MapImageLayer, Basemap, Query, Extent, Point, Locate) {
+require(["esri/config", "esri/Map", "esri/layers/VectorTileLayer", "esri/views/MapView", "esri/layers/TileLayer", "esri/Graphic", "esri/layers/GraphicsLayer", "esri/layers/WebTileLayer", "esri/layers/GeoJSONLayer", "esri/symbols/SimpleMarkerSymbol", "esri/renderers/UniqueValueRenderer", "esri/renderers/SimpleRenderer", "esri/widgets/LayerList", "esri/layers/GroupLayer", "esri/rest/support/Query", "esri/widgets/Search", "esri/layers/FeatureLayer", "esri/widgets/Bookmarks", "esri/widgets/Expand","esri/layers/TileLayer", "esri/symbols/CIMSymbol", "esri/layers/support/LabelClass", "esri/layers/MapImageLayer", "esri/Basemap", "esri/rest/support/Query", "esri/geometry/Extent", "esri/geometry/Point", "esri/widgets/Locate","esri/portal/Portal","esri/identity/OAuthInfo","esri/identity/IdentityManager","esri/portal/PortalQueryParams", "esri/layers/Layer", "esri/widgets/Print"],
+  function (esriConfig, Map, VectorTileLayer, MapView, TileLayer, Graphic, GraphicsLayer, WebTileLayer, GeoJSONLayer, SimpleMarkerSymbol, UniqueValueRenderer, SimpleRenderer, LayerList, GroupLayer, Query, Search, FeatureLayer, Bookmarks, Expand, TileLayer, CIMSymbol, LabelClass, MapImageLayer, Basemap, Query, Extent, Point, Locate, Portal, OAuthInfo, esriId, PortalQueryParams, Layer, Print) {
       function getActiveLayerIDs(){
         // Get list of IDs of all layers in the map
         activeLayerIDs = []
@@ -127,19 +147,7 @@ require(["esri/config", "esri/Map", "esri/layers/VectorTileLayer", "esri/views/M
                             feat = res.features[0]
                             // check if result is a point or polyline feature, if polyline calculate its midpoint and replace result geometry with the point
                             if (res.geometryType == "polyline"){
-                              // console.log("polyline!")
-                              // var midIndex = Math.round(feat.geometry.paths[0].length / 2);
-                              // var midPoint = new Point({
-                              //  x:feat.geometry.paths[0][midIndex][0],
-                              //  y:feat.geometry.paths[0][midIndex][1],
-                              //  spatialReference:res.spatialReference
-                              // });
                               feat.geometry = feat.geometry.extent.center
-                              // var midPoint = parseInt(feat.geometry.paths[0].length / 2);
-                              // console.log(midPoint)
-                              // feat.geometry.x = feat.geometry.paths[0][midPoint][0];
-                              // feat.geometry.y = feat.geometry.paths[0][midPoint][1];
-                              // geom = feat.geometry
                             }
                             view.popup.open({
                               // fetchFeatures: true, // <- fetch the selected features (if any)
@@ -187,27 +195,6 @@ require(["esri/config", "esri/Map", "esri/layers/VectorTileLayer", "esri/views/M
         // maxScale: 25000,
         maxScale: 15000
       });
-
-      // const gravitymainstiles = new TileLayer({
-      //   // title: "Gravity Mains",
-      //   title:"Gravity Mains",
-      //   // Hide from layer list
-      //   listMode: "hide",
-      //   url: "https://vectortileservices3.arcgis.com/NfAw5Z474Q8vyMGv/arcgis/rest/services/Gravity_Mains_VTL/VectorTileServer",
-      //   minscale: 2311162.217155,
-      //   maxscale: 15000
-      // });
-
-
-      // Map server layer for displaying data when zoomed out
-      // const gravitymainsFeaturesWideZoom = new MapImageLayer({
-      //   title: "Gravity Mains Reference",
-      //   url: "https://dpw.gis.lacounty.gov/dpw/rest/services/sds_mobile/MapServer",
-      //   maxScale: 25000,
-      //   sublayers: [{
-      //     id: 22
-      //   }]
-      // });
       // Set featurelayers (consider imagelayers instead) to display the storm drain network
       const gravitymainsFeatures = new FeatureLayer({
         title: "Gravity Mains",
@@ -216,9 +203,9 @@ require(["esri/config", "esri/Map", "esri/layers/VectorTileLayer", "esri/views/M
         // minScale: 25000,
         minScale: 15000,
         popupTemplate: popupGM,
-        renderer: gravityMainsCIM
+        renderer: gravityMainsCIM,
+        // labelingInfo: [gravityMainsLabels]
       });
-
       const lateralFeatures = new FeatureLayer({
         title: "Laterals",
         url: "https://services3.arcgis.com/NfAw5Z474Q8vyMGv/arcgis/rest/services/Laterals/FeatureServer/0",
@@ -398,24 +385,89 @@ require(["esri/config", "esri/Map", "esri/layers/VectorTileLayer", "esri/views/M
         // position: 'bottom-right'
         position: 'manual'
       });
-
-
-
+      let existingData = [];
+      // Get existing user bookmarks
+      const userBookmarks = localStorage.getItem(USERBOOKMARK_KEY);
+      // console.log(existingBookmarks)
+      if (userBookmarks) {
+        parsedBookmarks = JSON.parse(userBookmarks);
+        // existingData.push(...presetBks)
+        // Combine user bookmarks with preset bookmarks
+        // combinedBookmarks = parsedBookmarks.concat(presetBks);
+        presetLength = presetBks.length
+      } else {
+        parsedBookmarks = presetBks
+      }
       // Create bookmarks widget
       const bookmarks = new Bookmarks({
         view: view,
         // allows bookmarks to be added, edited, or deleted
-        editingEnabled: true
+        editingEnabled: true,
+        bookmarks: parsedBookmarks
       });
+      // Get array of uids associated with the preset BKs
+      // presetList = bookmarks.bookmarks.items.slice(0,presetLength)
+      // presetuids = []
+      // presetList.forEach((e)=>{
+      //   presetuids.push(e.uid);
+      // })
 
       // Create an expand widget containing the bookmarks widget
       const bkExpand = new Expand({
          view: view,
          content: bookmarks,
-         expanded: false
+         expanded: false,
+         container: document.createElement("bkExpand"),
        });
        // Add expand widget to UI
-       view.ui.add(bkExpand, "top-right", 0);
+      view.ui.add(bkExpand, "top-right", 0);
+      console.log(bookmarks.bookmarks);
+      console.log(bookmarks)
+
+      // See: https://codepen.io/kellyhutchins/pen/ExjPGQe
+      // https://odoe.net/blog/custom-bookmarks-in-your-arcgis-js-api-apps
+      // https://odoe.net/blog/custom-bookmarks-in-your-arcgis-js-api-apps
+      view.when(function () {
+        bookmarks.bookmarks.on("change", function (evt) {
+          evt.added.forEach(function (e) {
+            addToLocalBKStorage(bookmarks)
+          });
+          evt.removed.forEach(function (e) {
+            addToLocalBKStorage(bookmarks)
+          });
+          evt.moved.forEach(function (e) {
+            addToLocalBKStorage(bookmarks)
+          })
+        });
+    })
+    //   view.when(function () {
+    //     bookmarks.bookmarks.on("before-remove", function (evt) {
+    //       if (presetuids.includes(evt.item.uid)){
+    //         evt.preventDefault();
+    //       }
+    //       })
+    //     bookmarks.bookmarks.on("before-add", function (evt) {
+    //       if (presetuids.includes(evt.item.uid)){
+    //         evt.preventDefault();
+    //       }
+    //     })
+    //     bookmarks.bookmarks.on("before-change", function (evt) {
+    //       if (presetuids.includes(evt.item.uid)){
+    //         evt.preventDefault();
+    //       }
+    //     })
+    //     bookmarks.bookmarks.on("change", function (evt) {
+    //       evt.added.forEach(function (e) {
+    //         addToLocalBKStorage(bookmarks, presetuids)
+    //       });
+    //       evt.removed.forEach(function (e) {
+    //         addToLocalBKStorage(bookmarks, presetuids)
+    //       });
+    //       evt.moved.forEach(function (e) {
+    //         addToLocalBKStorage(bookmarks, presetuids)
+    //       })
+    //     });
+    // });
 
        // Create search widget using the map view as the source
        // see https://developers.arcgis.com/javascript/latest/sample-code/widgets-search-multiplesource/
@@ -468,16 +520,33 @@ require(["esri/config", "esri/Map", "esri/layers/VectorTileLayer", "esri/views/M
 
       let locateWidget = new Locate({
         view: view,   // Attaches the Locate button to the view
+        container: document.createElement("locateWidget"),
         graphic: new Graphic({
           symbol: { type: "simple-marker" }  // overwrites the default symbol used for the
           // graphic placed at the location of the user when found
         })
       });
 
+      // Add locate widget
       view.ui.add(locateWidget, {
         position: "manual",
         index: 0
       });
+      // Add print widget
+      const print = new Print({
+        view: view,
+        printServiceUrl:
+           "https://utility.arcgisonline.com/arcgis/rest/services/Utilities/PrintingTools/GPServer/Export%20Web%20Map%20Task"
+      });
+      const printExpand = new Expand({
+         view: view,
+         content: print,
+         expanded: false,
+         container: document.createElement("printExpand"),
+         mode:"auto"
+       });
+       // Add expand widget to UI
+      view.ui.add(printExpand);
 
       // Watch scale/zoom changes, update current scale display
       view.watch('scale', function(evt){
@@ -555,10 +624,11 @@ require(["esri/config", "esri/Map", "esri/layers/VectorTileLayer", "esri/views/M
         // Re-enable popups, if disabled for button usage
         view.popup.autoOpenEnabled = true;
       });
+
       // Add event listener for cursor movement, change cursor if selection is active
       document.addEventListener("pointermove", function(){
         if ((btnActive === "active") ||(blockBtn === "active")){
-          console.log("crosshair cursor active!")
+          // console.log("crosshair cursor active!")
           // Set crosshair cursor
           document.body.style.cursor = "crosshair";
           // Disable popups
@@ -571,7 +641,7 @@ require(["esri/config", "esri/Map", "esri/layers/VectorTileLayer", "esri/views/M
       });
       // Add listener to selection button
       document.getElementById("selBtn").addEventListener("click", function(){
-        console.log("selection active!");
+        // console.log("selection active!");
         userLat = null;
         userlon = null;
         btnActive = "active";
@@ -590,7 +660,7 @@ require(["esri/config", "esri/Map", "esri/layers/VectorTileLayer", "esri/views/M
       });
       // Create clear button funtionality
       document.getElementById("clearBtn").addEventListener("click", function(){
-              console.log("Clearing results!")
+              // console.log("Clearing results!")
               // Remove results and selection layers from the map and view
               map.remove(selectionLayer);
               map.remove(resultslayer);
@@ -598,7 +668,7 @@ require(["esri/config", "esri/Map", "esri/layers/VectorTileLayer", "esri/views/M
               view.graphics.remove(resultslayer);
               // Check if blocking layer exists, if so remove it from map and graphics
               if (getActiveLayerIDs().includes("blockingLayer")){
-                console.log("Map has blocking points!")
+                // console.log("Map has blocking points!")
                 map.remove(blockingLayer);
                 view.graphics.remove(blockingLayer);
               }
@@ -670,11 +740,13 @@ require(["esri/config", "esri/Map", "esri/layers/VectorTileLayer", "esri/views/M
             fetch(traceurl, {method: "GET",
               mode: 'cors'})
             .then(r => {
+              console.log("waiting on fetch")
               // Returns data as json, I think this has to be done in a .then statement
               return r.json();
             })
             // Pass result json data into a generic function
             .then(function(data){
+              console.log("handling fetch{}")
               // Change variable name
               serverResponse = data
               // Object to hold ArcGIS JS API geojson formatted layers, reset on every server request

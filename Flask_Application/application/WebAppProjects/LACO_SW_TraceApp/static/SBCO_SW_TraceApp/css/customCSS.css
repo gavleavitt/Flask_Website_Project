@@ -7,6 +7,8 @@ calcite-pick-list-item{
   white-space: pre-line;
 }
 
+
+
 * {
   box-sizing: border-box;
 }
@@ -22,6 +24,10 @@ body{
   width: 100%;
   height: 100%;
   flex-direction: column;
+}
+
+.container-prot{
+  display: none;
 }
 
 body{
@@ -54,7 +60,7 @@ body{
 }
 
 #InletsWindow calcite-icon{
-  color: #1400ff;
+  color: #0097ef;
 }
 
 #TraceToolTitle .header{
@@ -66,11 +72,15 @@ body{
 }
 
 #GM-Window calcite-icon{
-  color: #ed5151;
+  /* color: #ed5151; */
+  color: #e5b900;
 }
 
 #Lat-Window calcite-icon{
   color: #02c718;
+}
+#OutletsWindow calcite-icon{
+  color: #FF0000;
 }
 
 #vScale {
@@ -122,19 +132,35 @@ body{
 calcite-block{
   margin-bottom: 0px;
 }
-
-.esri-component.esri-locate.esri-widget--button.esri-widget{
+locateWidget {
   position: absolute;
   right: 50px;
   top: 15px;
 }
+/* .esri-component.esri-locate.esri-widget--button.esri-widget{
+  position: absolute;
+  right: 50px;
+  top: 15px;
+} */
 
+/* .esri-component.esri-expand.esri-widget.esri-expand--auto{
+  right: 85px;
+  top: 15px;
+} */
+printExpand {
+  position: absolute;
+  right: 85px;
+  top: 15px;
+}
 .esri-component.esri-zoom.esri-widget{
   position: absolute;
   bottom: 65px;
   right: 10px;
 }
 
+printExpand .esri-view-width-greater-than-xsmall.esri-expand--auto.esri-expand__content{
+  position: sticky;
+}
 
 @media screen and (max-width: 700px) {
   html *{
@@ -143,13 +169,42 @@ calcite-block{
     --calcite-font-size--1: 10px !important;
     --calcite-font-size-0: 10px !important;
   }
-  .esri-component.esri-locate.esri-widget--button.esri-widget{
+
+  /* .esri-component.esri-locate.esri-widget--button.esri-widget{
     position: absolute;
-    right: 156px;
+    right: 149px;
     top: 3px;
+  } */
+  bkexpand {
+    position: absolute;
+    top: 0px;
+    right: 184px;
   }
+  printExpand .esri-view-width-xsmall.esri-expand--auto.esri-expand__container--expanded{
+    position: sticky;
+  }
+  printExpand {
+    position: absolute;
+    right:4px;
+    bottom:4px;
+    top: unset;
+  }
+  locateWidget {
+    position: absolute;
+    top: 3px;
+    right: 150px;
+  }
+
   .tool-btn{
     padding: 2px;
+  }
+  calcite-radio-button {
+    font-size: 12px !important;
+    height:30px;
+  }
+  sc-calcite-label-h sc-calcite-label-s{
+    font-size: 12px !important;
+    height:30px;
   }
   #viewDiv{
     margin: 2px;
@@ -181,7 +236,7 @@ calcite-block{
   .item.titlediv{
     display: none;
   }
-  .esri-attribution__sources, .esri-attribution, #vScale, .esri-zoom, .esri-component.esri-expand.esri-widget.esri-expand--auto{
+  .esri-attribution__sources, .esri-attribution, #vScale, .esri-zoom{
     display: none;
   }
   #TraceToolTitle .article .content{

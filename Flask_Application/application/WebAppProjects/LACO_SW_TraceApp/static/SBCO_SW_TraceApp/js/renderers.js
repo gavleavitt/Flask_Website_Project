@@ -79,7 +79,7 @@ const gravityMainsCIM = {
                     // black 1px line symbol
                     type: "CIMSolidStroke",
                     enable: true,
-                    width: 2,
+                    width: 3,
                     color: [
                       175,
                       175,
@@ -91,7 +91,7 @@ const gravityMainsCIM = {
                     // arrow symbol
                     type: "CIMVectorMarker",
                     enable: true,
-                    size: 10,
+                    size: 14,
                     markerPlacement: {
                       // see https://github.com/Esri/cim-spec/blob/master/docs/v2/CIMSymbols.md#enumeration-placementendings
                       // see https://github.com/Esri/cim-spec/blob/master/docs/v2/CIMSymbols.md#cimmarkerplacementatratiopositions
@@ -170,7 +170,7 @@ const gravityMainsCIM = {
                       // black 1px line symbol
                       type: "CIMSolidStroke",
                       enable: true,
-                      width: 2,
+                      width: 3,
                       color: [
                         237,
                         81,
@@ -182,7 +182,7 @@ const gravityMainsCIM = {
                       // arrow symbol
                       type: "CIMVectorMarker",
                       enable: true,
-                      size: 10,
+                      size: 14,
                       markerPlacement: {
                         type: "CIMMarkerPlacementAtRatioPositions",
                         // rotation: 180,
@@ -251,7 +251,7 @@ const gravityMainsCIM = {
                       // black 1px line symbol
                       type: "CIMSolidStroke",
                       enable: true,
-                      width: 2,
+                      width: 3,
                       color: [
                         255,
                         170,
@@ -263,7 +263,7 @@ const gravityMainsCIM = {
                       // arrow symbol
                       type: "CIMVectorMarker",
                       enable: true,
-                      size: 10,
+                      size: 14,
                       markerPlacement: {
                         type: "CIMMarkerPlacementAtRatioPositions",
                         positionArray: [0.5],
@@ -412,8 +412,9 @@ const pointResultRenderer = {
     label: "Outlet",
     symbol: {
       type: "simple-marker",  // autocasts as new SimpleMarkerSymbol()
-      size: 14,
+      size: 16,
       color: "red",
+      style: "diamond",
       outline: {  // autocasts as new SimpleLineSymbol()
         width: 4,
         color: "black"
@@ -446,7 +447,7 @@ const lineResultRenderer = {
       type: "simple-line",
       join: "miter",
       // color: "209, 6, 20",
-      color: [209, 6, 20, 0.75],
+      color: [229, 185, 0, 0.75],
       width: "12px",
       style: "solid"
     }
@@ -553,8 +554,9 @@ const resultsrenderer = {
     label: "Outlets",
     symbol: {
       type: "simple-marker",  // autocasts as new SimpleMarkerSymbol()
-      size: 14,
+      size: 16,
       color: "red",
+      style: "diamond",
       outline: {  // autocasts as new SimpleLineSymbol()
         width: 4,
         color: "black"
