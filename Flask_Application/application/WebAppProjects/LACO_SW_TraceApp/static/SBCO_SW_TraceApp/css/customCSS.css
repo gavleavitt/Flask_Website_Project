@@ -3,21 +3,34 @@
   --calcite-panel-max-width: 300px;
   --titlebackground: #dbdbdb;
 }
+html,
+body {
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  background-color:var(--titlebackground);
+}
 calcite-pick-list-item{
   white-space: pre-line;
 }
-
 
 
 * {
   box-sizing: border-box;
 }
 
-body{
+/* body{
   height: 100vh;
   width: 100vw;
   margin: 0;
   padding: 0;
+  background-color:var(--titlebackground);
+} */
+#closeTab{
+  position: absolute;
+  left:8px;
+  bottom: 214px;
 }
 .container{
   display: flex;
@@ -30,12 +43,19 @@ body{
   display: none;
 }
 
-body{
-  background-color:var(--titlebackground);
+.esri-feature-table{
+  height:250px;
 }
 
+#tableContainer{
+  display: none;
+  /* flex: 1; */
+  width: 100%;
+}
 #viewDiv{
+  flex: 1;
   height: 100%;
+  /* width: 100%; */
   padding: 0;
   border-width: 2px;
   border-style: solid;
@@ -152,15 +172,35 @@ printExpand {
   right: 85px;
   top: 15px;
 }
+
+tableexpand{
+  position: absolute;
+  right: 120px;
+  top: 15px;
+}
+
 .esri-component.esri-zoom.esri-widget{
   position: absolute;
   bottom: 65px;
   right: 10px;
 }
 
-printExpand .esri-view-width-greater-than-xsmall.esri-expand--auto.esri-expand__content{
-  position: sticky;
+printExpand .esri-expand__content.esri-expand__content--expanded{
+  position: sticky !important;
 }
+
+printExpand .esri-view-width-greater-than-xsmall.esri-expand--auto .esri-expand__content{
+  position: sticky !important;
+}
+
+[data-tab-id="layoutTab"]{
+  display: none;
+}
+
+
+/* printExpand .esri-expand__content.esri-expand__content--expanded{
+  position: sticky;
+} */
 
 @media screen and (max-width: 700px) {
   html *{

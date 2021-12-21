@@ -16,7 +16,7 @@
     </script>
 
     <!-- TileQuery local Dist -->
-    <script src="{{ url_for('lacoSWTraceapp_API_BP.static', filename='SBCO_SW_TraceApp/js/dist/tilequery.js') }}"></script>
+    <!-- <script src="{{ url_for('lacoSWTraceapp_API_BP.static', filename='SBCO_SW_TraceApp/js/dist/tilequery.js') }}"></script> -->
 
     <!-- jszip lcoal dist -->
     <script src="{{ url_for('lacoSWTraceapp_API_BP.static', filename='SBCO_SW_TraceApp/js/dist/jszip.min.js') }}"></script>
@@ -62,7 +62,7 @@
 
   </head>
   <body>
-    <div class="container">
+    <div id="appContainer" class="container">
       <div>
         <calcite-alert id="NoSelAlert" icon="information">
           <div slot="title">Error - No Map Selection</div>
@@ -116,6 +116,8 @@
             <!-- <div id="linearft">
             </div> -->
             <calcite-panel id="results" heading="Results">
+                <div id="resultsText">
+                </div>
               <!-- <calcite-icon scale="m" slot="fab" text-enabled text="Download Result CSV" icon="download-to"></calcite-icon> -->
                 <calcite-block id="OutletsWindow" heading="Outlets" collapsible>
                   <calcite-icon scale="s" slot="icon" icon="diamond"></calcite-icon>
@@ -198,6 +200,12 @@
              </p>
            </div>
         </div>
+      </div>
+      <div id="tableContainer">
+        <button id="closeTab">
+          <calcite-icon icon="x"></calcite-icon>
+        </button>
+        <div id="tableDiv"></div>
       </div>
      </div>
      <script>

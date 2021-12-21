@@ -48,13 +48,15 @@ const gravityMainsLabels = {
     color: "black",
     haloColor: "white",
     haloSize: "1px",
-    yoffset: 30,
+    yoffset: "30px",
+    xoffset: "30px",
     font: {  // autocast as new Font()
       // family: "Playfair Display",
       size: 12,
       weight: "bold"
     }
   },
+  labelPlacement: "above-center",
   // labelPlacement: "center-along",
   labelExpressionInfo: {
     expression: "Ceil($feature.diameter_h,0) + '\" ' + Decode($feature.material, 1,'Reinforced Concrete Pipe (RCP)', 2,'Plastic Pipe', 3,'Reinforced Concrete Box (RCB)', 4,'Corrugated Metal Pipe (CMP)', 5,'Reinforced Concrete Arch (RCA)', 6,'Cast/Ductile Iron Pipe (CIP)', 7,'Improved Channel', 8,'Corrugated Steel Pipe (CSP)', 9,'Concrete Pipe', 10,'Acrylonitrile-Butadiene-Styrene (ABS)', 11,'Polyvinyl Chloride (PVC)', 12,'Steel Pipe', 13,'Vitrified Clay Pipe (VCP)', 14,'Unreinforced Concrete Pipe', 15,'Asbestos Cement Pipe', 16,'Polyethylene Liner', 17,'Techite', 18,'Dirt Channel', 19,'Dirt Swale', 20,'Brick', 21,'Cured-In-Place Pipe Liner (CIPP)', 22,'High Density Polyethylene Pipe (HDPE)', 98,'?', 99,'Other', 0,'Not Coded', -9,'Error?', 23,'Reinforced Cement Concrete(RCC)', 24,'TRUSS PIPE','Other')"

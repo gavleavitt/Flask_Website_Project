@@ -8,10 +8,11 @@ var map = null;
 var view = null;
 var blockBtn = "inactive"
 var blockList = []
+var layerListCalls = []
 var gravMainsTileURL = "https://vectortileservices3.arcgis.com/NfAw5Z474Q8vyMGv/arcgis/rest/services/gravity_mains_vector_tile_layer/VectorTileServer/tile/{z}/{y}/{x}.pbf"
 const USERBOOKMARK_KEY = "arcgis-local-bookmarks";
 // var activeLayerIDs = []
-// var layerObj = null;
+var layerObj = null;
 // var selectionLayer = null
 // var resultslayer = null
 function getExtents(obj){
@@ -49,8 +50,59 @@ function addToLocalBKStorage(bks){
 //   // console.log(JSON.stringify(rawBookmarks))
 // }
 
-require(["esri/config", "esri/Map", "esri/layers/VectorTileLayer", "esri/views/MapView", "esri/layers/TileLayer", "esri/Graphic", "esri/layers/GraphicsLayer", "esri/layers/WebTileLayer", "esri/layers/GeoJSONLayer", "esri/symbols/SimpleMarkerSymbol", "esri/renderers/UniqueValueRenderer", "esri/renderers/SimpleRenderer", "esri/widgets/LayerList", "esri/layers/GroupLayer", "esri/rest/support/Query", "esri/widgets/Search", "esri/layers/FeatureLayer", "esri/widgets/Bookmarks", "esri/widgets/Expand","esri/layers/TileLayer", "esri/symbols/CIMSymbol", "esri/layers/support/LabelClass", "esri/layers/MapImageLayer", "esri/Basemap", "esri/rest/support/Query", "esri/geometry/Extent", "esri/geometry/Point", "esri/widgets/Locate","esri/portal/Portal","esri/identity/OAuthInfo","esri/identity/IdentityManager","esri/portal/PortalQueryParams", "esri/layers/Layer", "esri/widgets/Print"],
-  function (esriConfig, Map, VectorTileLayer, MapView, TileLayer, Graphic, GraphicsLayer, WebTileLayer, GeoJSONLayer, SimpleMarkerSymbol, UniqueValueRenderer, SimpleRenderer, LayerList, GroupLayer, Query, Search, FeatureLayer, Bookmarks, Expand, TileLayer, CIMSymbol, LabelClass, MapImageLayer, Basemap, Query, Extent, Point, Locate, Portal, OAuthInfo, esriId, PortalQueryParams, Layer, Print) {
+require(["esri/config", "esri/Map", "esri/layers/VectorTileLayer", "esri/views/MapView", "esri/layers/TileLayer", "esri/Graphic", "esri/layers/GraphicsLayer", "esri/layers/WebTileLayer", "esri/layers/GeoJSONLayer", "esri/symbols/SimpleMarkerSymbol", "esri/renderers/UniqueValueRenderer", "esri/renderers/SimpleRenderer", "esri/widgets/LayerList", "esri/layers/GroupLayer", "esri/rest/support/Query", "esri/widgets/Search", "esri/layers/FeatureLayer", "esri/widgets/Bookmarks", "esri/widgets/Expand","esri/layers/TileLayer", "esri/symbols/CIMSymbol", "esri/layers/support/LabelClass", "esri/layers/MapImageLayer", "esri/Basemap", "esri/rest/support/Query", "esri/geometry/Extent", "esri/geometry/Point", "esri/widgets/Locate","esri/portal/Portal","esri/identity/OAuthInfo","esri/identity/IdentityManager","esri/portal/PortalQueryParams", "esri/layers/Layer", "esri/widgets/Print", "esri/widgets/FeatureTable","esri/widgets/TableList", "esri/widgets/FeatureTable/Grid/support/ButtonMenu"],
+  function (esriConfig, Map, VectorTileLayer, MapView, TileLayer, Graphic, GraphicsLayer, WebTileLayer, GeoJSONLayer, SimpleMarkerSymbol, UniqueValueRenderer, SimpleRenderer, LayerList, GroupLayer, Query, Search, FeatureLayer, Bookmarks, Expand, TileLayer, CIMSymbol, LabelClass, MapImageLayer, Basemap, Query, Extent, Point, Locate, Portal, OAuthInfo, esriId, PortalQueryParams, Layer, Print, FeatureTable, TableList, ButtonMenu) {
+
+      // https://developers.arcgis.com/javascript/latest/sample-code/widgets-layerlist-actions/
+      function defineActions(event) {
+        // For some reason this gets called multiple times and each call only shows the top level layer item
+        // Only use the first call, else skip
+        if (layerListCalls.indexOf(event.item.title) > -1) {
+             return false;
+        } else {
+          // Event call hasnt been handled yet, add to list and process
+             layerListCalls.push(event.item.title);
+        }
+        if (event.item.title == "Trace Results"){
+          event.item.open = true
+          event.item.children.forEach((item, i) => {
+            item.open = true
+            // console.log(item.title)
+            layerListCalls.push(item.title)
+            item.actionsSections = [
+                [
+                  {
+                    // This allows the user to turn the table on
+                    title: "Show table",
+                    className: "esri-icon-table",
+                    id: `${item.title}`,
+                    // type: "toggle"
+                    type: "button"
+                  }
+                ]
+              ];
+          });
+        }
+      }
+
+      // function addTables(obj, layerList, groupLayer){
+      //   console.log(groupLayer)
+      //   Object.keys(obj).forEach((e)=>{
+      //     // Check if table is in table list and is defined
+      //     if (e !== undefined && layerList.includes(e)){
+      //       // Create feature table object
+      //       const featureTable = new FeatureTable({
+      //         view: view, // The view property must be set for the select/highlight to work
+      //         layer: obj[e],
+      //         title: e,
+      //         // container: "tableDiv"
+      //       });
+      //       // Query layer list entry that matches the feature layer
+      //       // document.querySelectorAll
+      //     }
+      //   });
+      // };
+
       function getActiveLayerIDs(){
         // Get list of IDs of all layers in the map
         activeLayerIDs = []
@@ -89,6 +141,7 @@ require(["esri/config", "esri/Map", "esri/layers/VectorTileLayer", "esri/views/M
               document.getElementById(calciteWindowID).removeAttribute("disabled");
               document.getElementById("DownloadCSV").removeAttribute("disabled");
               document.getElementById("DownloadGeoJSON").removeAttribute("disabled");
+              totalLen = 0
               // Loop over each feature in result
               features.forEach((result, index)=>{
                 // Pull out attributes
@@ -109,10 +162,10 @@ require(["esri/config", "esri/Map", "esri/layers/VectorTileLayer", "esri/views/M
                 } else {
                   size =  `Size: ${attr.size}`;
                   material = `Material: ${attr.material}`
-                  description = size + "\n" + material;
+                  pipeLen = (parseFloat(attr.linearpipefeetfromstart)).toFixed(1)
+                  totalLen += pipeLen
+                  description = size + "\n" + material  + "\n" + `Pipe Length (ft): ${pipeLen}`;
                 }
-                // Set feet from start text
-                description = description + "\n" + `Pipe Feet from Start: ${(parseFloat(attr.linearpipefeetfromstart)).toFixed(1)}`
                 var newNode = document.createElement('div');
                 // Add description text to calcite item
                 item.setAttribute("description", description);
@@ -164,6 +217,7 @@ require(["esri/config", "esri/Map", "esri/layers/VectorTileLayer", "esri/views/M
                 // Append new calcite item to existing results panel
                 document.getElementById(calciteWindowID).appendChild(item);
               });
+              // TODO: Update results display with total length, depending on if lateral or main
             });
             //
           } else {
@@ -265,6 +319,7 @@ require(["esri/config", "esri/Map", "esri/layers/VectorTileLayer", "esri/views/M
          sublayers: [{
            id: 19,
            renderer: cityBorder,
+           title: "LA County Cities"
            // labelsVisible: true,
            // labelingInfo: cityLabel,
          }]
@@ -279,7 +334,8 @@ require(["esri/config", "esri/Map", "esri/layers/VectorTileLayer", "esri/views/M
          // url: "https://dpw.gis.lacounty.gov/dpw/rest/services/PW_Open_Data/MapServer/13",
          sublayers: [{
            id: 13,
-           renderer: countyBorder
+           renderer: countyBorder,
+           title: "LA County Boundary"
          }]
        })
 
@@ -301,6 +357,7 @@ require(["esri/config", "esri/Map", "esri/layers/VectorTileLayer", "esri/views/M
          visible: false,
          sublayers: [{
            id: 0,
+           title: "Watersheds"
          }]
        })
 
@@ -346,24 +403,27 @@ require(["esri/config", "esri/Map", "esri/layers/VectorTileLayer", "esri/views/M
 
 
       // Add customized esri topo basemap as a vector tile layer using its AGOL ID
-      const customVTL = new VectorTileLayer({
-        portalItem: {
-          id: "3fa74fed129c4276ac3bf41eefdad6ac"
-        }
-      });
-
-      // create basemap object from vector tile layer
-      const custombasemap = new Basemap({
-        baseLayers: [
-          customVTL
-        ]
-      });
+      // Doesnt appear to render properly in print tool, removed for now
+      // const customVTL = new VectorTileLayer({
+      //   portalItem: {
+      //     id: "3fa74fed129c4276ac3bf41eefdad6ac",
+      //     title: "Basemap"
+      //   }
+      // });
+      //
+      // // create basemap object from vector tile layer
+      // const custombasemap = new Basemap({
+      //   baseLayers: [
+      //     customVTL,
+      //   ],
+      //   title: "Basemap"
+      // });
 
       // Init map with the custom vector basemap
       const map = new Map({
-        // basemap: "arcgis-topographic", // Basemap layer service
+        basemap: "arcgis-topographic", // Basemap layer service
         // Custom edited basemap
-        basemap: custombasemap,
+        // basemap: custombasemap,
         layers: [networklayer, ancilData] // vector tile layer
       });
       // Create mapview using the map
@@ -513,8 +573,43 @@ require(["esri/config", "esri/Map", "esri/layers/VectorTileLayer", "esri/views/M
       view.ui.add("traceDiv", "top-left");
 
       layerList = new LayerList({
-        view
+        view: view,
+        listItemCreatedFunction: defineActions
       });
+      layerList.on("trigger-action", (event) => {
+        // Clear out any existing tables
+        document.getElementById("tableDiv").innerHTML = ""
+        try {
+          const featureTable = new FeatureTable({
+            view: view, // The view property must be set for the select/highlight to work
+            layer: layerObj[event.action.id],
+            title: event.action.id,
+            container: "tableDiv",
+            id: "table"
+          });
+        }
+        catch(e){
+          console.log("Table error")
+        }
+        // Display table container
+        document.getElementById("tableContainer").style.display = "flex"
+        // Add event listener to close table container
+        document.getElementById("closeTab").addEventListener("click", function(){
+          document.getElementById("tableContainer").style.display = "none"
+        })
+        // see: https://developers.arcgis.com/javascript/latest/sample-code/sandbox/?sample=widgets-featuretable-popup-interaction
+        // add pop interactions to feature table
+        // if (event.action.value == true){
+        //
+        //
+        //   // Turn off any other tables
+        // } else {
+        //   console.log("turn table off")
+        //   document.getElementById("tableContainer").style.display = "none"
+        //   // document.getElementById("tableDiv").innerHTML = ""
+        // }
+        // Create table using event id
+      })
 
       view.ui.add(layerList, "top-right", 3);
 
@@ -535,6 +630,10 @@ require(["esri/config", "esri/Map", "esri/layers/VectorTileLayer", "esri/views/M
       // Add print widget
       const print = new Print({
         view: view,
+        templateOptions: {
+          legendEnbaled: false,
+          attributionEnabled: false
+        },
         printServiceUrl:
            "https://utility.arcgisonline.com/arcgis/rest/services/Utilities/PrintingTools/GPServer/Export%20Web%20Map%20Task"
       });
@@ -547,6 +646,32 @@ require(["esri/config", "esri/Map", "esri/layers/VectorTileLayer", "esri/views/M
        });
        // Add expand widget to UI
       view.ui.add(printExpand);
+
+
+      // const tabList = new Expand({
+      //    view: view,
+      //    content: "",
+      //    expanded: false,
+      //    container: document.createElement("tabList"),
+      //    mode:"auto"
+      //  });
+
+
+      // const attrTab new FeatureTable({
+      //   view: view, // The view property must be set for the select/highlight to work
+      //   layer: featureLayer,
+      //   container: "tableDiv"
+      // })
+      // // Attribuet Table expand
+      // const attrTabExpand = new Expand({
+      //    view: view,
+      //    content: attrTab,
+      //    expanded: false,
+      //    container: document.createElement("attrTabExpand"),
+      //    mode:"auto"
+      //  });
+      //  view.ui.add(attrTabExpand);
+
 
       // Watch scale/zoom changes, update current scale display
       view.watch('scale', function(evt){
@@ -666,6 +791,9 @@ require(["esri/config", "esri/Map", "esri/layers/VectorTileLayer", "esri/views/M
               map.remove(resultslayer);
               view.graphics.remove(selectionLayer);
               view.graphics.remove(resultslayer);
+              // Clear out feature tables
+              document.getElementById("tableDiv").innerHTML = ""
+              document.getElementById("tableContainer").style.display = "none"
               // Check if blocking layer exists, if so remove it from map and graphics
               if (getActiveLayerIDs().includes("blockingLayer")){
                 // console.log("Map has blocking points!")
@@ -695,6 +823,8 @@ require(["esri/config", "esri/Map", "esri/layers/VectorTileLayer", "esri/views/M
             // Close out any alerts
             document.getElementById("NoSelAlert").removeAttribute('active');
             document.getElementById("NoResultAlert").removeAttribute('active');
+            // clear out any layerlist call information
+            layerListCalls = []
             btnActive = "inactive";
             blockBtn = "inactive";
             // Clear out existing graphic layers
@@ -765,7 +895,8 @@ require(["esri/config", "esri/Map", "esri/layers/VectorTileLayer", "esri/views/M
                     url:url,
                     title:title,
                     renderer:resultsrenderer,
-                    popupTemplate: null
+                    popupTemplate: null,
+                    id: `${title}-resultslayer`
                     // popupTemplate: popupTemplate
                   });
                   // Add new geojson layer to result layerObj
@@ -780,7 +911,6 @@ require(["esri/config", "esri/Map", "esri/layers/VectorTileLayer", "esri/views/M
               addGeoJson(data['startpoint'], 'Start Point', null)
               addGeoJson(data['Outlets'], 'Outlets', null)
               addGeoJson(data['Maintenance Holes'], 'Maintenance Holes',null)
-
               // Process parcel OID results, if provided in request
               if ("parcels" in data){
                 // Convert results into string SQL statement
@@ -819,11 +949,11 @@ require(["esri/config", "esri/Map", "esri/layers/VectorTileLayer", "esri/views/M
               });
               // Add group layer to map
               map.add(resultslayer);
-              resultslayer
-              .when(()=>{
-                console.log(resultslayer)
-              }
-            )
+            //   resultslayer
+            //   .when(()=>{
+            //     console.log(resultslayer)
+            //   }
+            // )
             // Array to hold promises
             var extents = []
             // Iterate over each geojson feature layer
@@ -851,6 +981,23 @@ require(["esri/config", "esri/Map", "esri/layers/VectorTileLayer", "esri/views/M
               // Set the view to the new extent
               view.goTo(totalExtent)
             });
+            // addTables(layerObj, ["Gravity Mains","Outlets","Inlets","Maintenance Holes"], resultslayer)
+            // const tableList = new TableList({
+            //     map: map, // get access to the map which has the collection of tables
+            //     selectionEnabled: true,
+            //     listItemCreatedFunction: createActions // call createActions function to set ActionToggle and ActionButton
+            //   });
+            // console.log(tableList);
+            // const tableExpand = new Expand({
+            //     view: view,
+            //     content: tableList,
+            //     container: document.createElement("tableExpand"),
+            //     expandIconClass: "esri-icon-table",
+            //     // group: "top-right"
+            //   });
+            //   view.ui.add(tableExpand, "manual")
+
+
             // Set Query text to inactive
             document.querySelector('#query-text').style.display = "none";
             // Replace base html item with itself, this will remove any existing event listeners from previous runs
