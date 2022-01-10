@@ -3,7 +3,7 @@ import logging, os, csv
 from io import StringIO
 from application import application, errorEmail
 from application.WebAppProjects.StravaActivityViewer import DBQueriesStrava, StravaAWSS3, OAuthStrava
-
+import time
 def singleActivityProcessing(client, actID):
     """
     Processes a single Strava Activity by placing the full activity in the database, making a simplified and masked public
@@ -16,6 +16,9 @@ def singleActivityProcessing(client, actID):
     """
 
     try:
+        # Wait 45 minutes before processing update, this allows time for user to update any ride details before they
+        #  are processed, in particular changing details uploaded from Wahoo
+        time.sleep(2700)
         application.logger.debug("Getting full activity details")
         # Get all activity details for newly created activity, including stream data
         activity = getFullDetails(client, actID)

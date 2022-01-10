@@ -9,25 +9,30 @@ var view = null;
 var blockBtn = "inactive"
 var blockList = []
 var layerListCalls = []
+let highlightSelect;
+var activeMapHighLightLayer = []
+var featureTable = null
+var highlight = null
 var gravMainsTileURL = "https://vectortileservices3.arcgis.com/NfAw5Z474Q8vyMGv/arcgis/rest/services/gravity_mains_vector_tile_layer/VectorTileServer/tile/{z}/{y}/{x}.pbf"
 const USERBOOKMARK_KEY = "arcgis-local-bookmarks";
+var tabSel = []
+var hitOptions = {};
+// var viewHighlightTableHandler = null;
 // var activeLayerIDs = []
 var layerObj = null;
 // var selectionLayer = null
 // var resultslayer = null
-function getExtents(obj){
-  extents = []
-  Object.values(obj).forEach((item) => {
-    item.queryExtent().then((response) => {
-      extents.push(response.extent)
-    });
-  });
-  return extents
-};
-function calculateExtents(extents){
-  console.log(extents)
-};
+// function getExtents(obj){
+//   extents = []
+//   Object.values(obj).forEach((item) => {
+//     item.queryExtent().then((response) => {
+//       extents.push(response.extent)
+//     });
+//   });
+//   return extents
+// };
 function addToLocalBKStorage(bks){
+  // Adds bookmarks to local storage, bookmarks are mapped then stored as a raw json string
   const rawBookmarks = bks.bookmarks.map(({ active, extent, name, thumbnail }) => ({ active, extent, name, thumbnail }));
   const localData = localStorage.setItem(USERBOOKMARK_KEY, JSON.stringify(rawBookmarks));
 }
@@ -50,9 +55,101 @@ function addToLocalBKStorage(bks){
 //   // console.log(JSON.stringify(rawBookmarks))
 // }
 
-require(["esri/config", "esri/Map", "esri/layers/VectorTileLayer", "esri/views/MapView", "esri/layers/TileLayer", "esri/Graphic", "esri/layers/GraphicsLayer", "esri/layers/WebTileLayer", "esri/layers/GeoJSONLayer", "esri/symbols/SimpleMarkerSymbol", "esri/renderers/UniqueValueRenderer", "esri/renderers/SimpleRenderer", "esri/widgets/LayerList", "esri/layers/GroupLayer", "esri/rest/support/Query", "esri/widgets/Search", "esri/layers/FeatureLayer", "esri/widgets/Bookmarks", "esri/widgets/Expand","esri/layers/TileLayer", "esri/symbols/CIMSymbol", "esri/layers/support/LabelClass", "esri/layers/MapImageLayer", "esri/Basemap", "esri/rest/support/Query", "esri/geometry/Extent", "esri/geometry/Point", "esri/widgets/Locate","esri/portal/Portal","esri/identity/OAuthInfo","esri/identity/IdentityManager","esri/portal/PortalQueryParams", "esri/layers/Layer", "esri/widgets/Print", "esri/widgets/FeatureTable","esri/widgets/TableList", "esri/widgets/FeatureTable/Grid/support/ButtonMenu"],
-  function (esriConfig, Map, VectorTileLayer, MapView, TileLayer, Graphic, GraphicsLayer, WebTileLayer, GeoJSONLayer, SimpleMarkerSymbol, UniqueValueRenderer, SimpleRenderer, LayerList, GroupLayer, Query, Search, FeatureLayer, Bookmarks, Expand, TileLayer, CIMSymbol, LabelClass, MapImageLayer, Basemap, Query, Extent, Point, Locate, Portal, OAuthInfo, esriId, PortalQueryParams, Layer, Print, FeatureTable, TableList, ButtonMenu) {
+require(["esri/config", "esri/Map", "esri/layers/VectorTileLayer", "esri/views/MapView", "esri/layers/TileLayer", "esri/Graphic", "esri/layers/GraphicsLayer", "esri/layers/WebTileLayer", "esri/layers/GeoJSONLayer", "esri/symbols/SimpleMarkerSymbol", "esri/renderers/UniqueValueRenderer", "esri/renderers/SimpleRenderer", "esri/widgets/LayerList", "esri/layers/GroupLayer", "esri/rest/support/Query", "esri/widgets/Search", "esri/layers/FeatureLayer", "esri/widgets/Bookmarks", "esri/widgets/Expand","esri/layers/TileLayer", "esri/symbols/CIMSymbol", "esri/layers/support/LabelClass", "esri/layers/MapImageLayer", "esri/Basemap", "esri/rest/support/Query", "esri/geometry/Extent", "esri/geometry/Point", "esri/widgets/Locate","esri/portal/Portal","esri/identity/OAuthInfo","esri/identity/IdentityManager","esri/portal/PortalQueryParams", "esri/layers/Layer", "esri/widgets/Print", "esri/widgets/FeatureTable","esri/widgets/TableList", "esri/widgets/FeatureTable/Grid/support/ButtonMenu", "esri/geometry/geometryEngine"],
+  function (esriConfig, Map, VectorTileLayer, MapView, TileLayer, Graphic, GraphicsLayer, WebTileLayer, GeoJSONLayer, SimpleMarkerSymbol, UniqueValueRenderer, SimpleRenderer, LayerList, GroupLayer, Query, Search, FeatureLayer, Bookmarks, Expand, TileLayer, CIMSymbol, LabelClass, MapImageLayer, Basemap, Query, Extent, Point, Locate, Portal, OAuthInfo, esriId, PortalQueryParams, Layer, Print, FeatureTable, TableList, ButtonMenu, geometryEngine){
+      function clearAllHighlighted(){
+        // Remove any existing highlights
+        if (highlightSelect) {
+          highlightSelect.remove();
+        }
+      };
+      // https://community.esri.com/t5/arcgis-api-for-silverlight-questions/how-to-find-the-midpoint-of-a-polyline/m-p/208428#M5198
+      function midPointPolyline(line) {
+        // Gets the middle point of a polyline
+        // Taken from forum: https://community.esri.com/t5/aec-architecture-engineering-and-construction/how-to-get-the-mid-point-of-the-polyline-in-arcgis/td-p/13711
+        // see alterative here: https://community.esri.com/t5/arcgis-api-for-javascript-questions/point-along-a-line/td-p/479200
+        var path = line.paths[0];
+        // var seglen = geometryEngine.geodesicLength(line, "feet");
+        var seglen = geometryEngine.geodesicLength(line,);
+        var midLen = seglen / 2;
+        var currentDistance = 0;
+        var beforeIndex = 0;
+        var startPoint = line.getPoint(0, 0);
+        console.log(startPoint)
+        for (i = 1; i < path.length - 1; i++) {
+          var nextPoint = line.getPoint(0, i);
+          console.log(nextPoint)
+          // var d = geometryEngine.distance(startPoint, nextPoint, "feet");
+          var d = geometryEngine.distance(startPoint, nextPoint);
+          if (currentDistance + d < midLen) {
+            currentDistance += d;
+            startPoint = nextPoint;
+          } else {
+            beforeIndex = (i === 1) ? 0 : i;
+          break;
+          }
+        }
+        startPoint = line.getPoint(0, beforeIndex);
+        var endPoint = line.getPoint(0, beforeIndex + 1);
+        var x = (startPoint.x + endPoint.x) / 2;
+        var y = (startPoint.y + endPoint.y) / 2;
+        var midpt = new Point(x, y, line.spatialReference);
+        return midpt;
+      };
+      function tableZoom(selection){
+        console.log(selection)
+        // Zooms to features on the map which are selected in the feature table
+        // Get parent layer of selected record
+        if (selection.feature){
+          layer = selection.feature.sourceLayer
+          // Create query to select feature from source layer based on OID
+          const queryRecs = new Query({
+            objectIds: [selection.objectId],
+            returnGeometry: true,
+            outFields: ["*"]
+          });
+          // Query layer with async promise
+          layer.queryFeatures(queryRecs).then((result) => {
+            // Handle points and polyline differently, for polyline need to get middle point
+            // Pull out x,y from the result point geometries and use them input, using the Point object as input causes popups to open at incorrect locations
+            if (layer.geometryType == "point"){
+              zoomGeom = [result.features[0].geometry.x,result.features[0].geometry.y]
+            } else {
+              midPt = midPointPolyline(result.features[0].geometry)
+              zoomGeom = [midPt.x, midPt.y]
+            }
+            // View to result
+            view.goTo({
+              center: zoomGeom,
+              speedFactor: 0.5,
+              zoom: 18
+            })
+            // Open popup at result with result features
+            view.popup.open({
+              location: zoomGeom,
+              features: [result.features[0]]
+            });
+          });
+        }
+      };
+      function highlightFeat(selection){
+        // Highlight associated map feature from feature table selection
+        // based on: https://developers.arcgis.com/javascript/latest/sample-code/sandbox/?sample=highlight-point-features
+        if (selection.feature){
+          layer = selection.feature.layer
+          // Get the layer view of the layer, highlights happen on the layer view, not the layer itself
+          view.whenLayerView(layer).then(function(layerView){
+            // Remove any existing highlight on layer, only want a single highlight at a time
+            clearAllHighlighted();
+            // Highlight map layer using the feature table selection OID
+            console.log("highlighting map layer!")
+            highlightSelect = layerView.highlight(
+              selection.feature.attributes["OBJECTID"]
+            )
+          });
+        }
 
+      };
       // https://developers.arcgis.com/javascript/latest/sample-code/widgets-layerlist-actions/
       function defineActions(event) {
         // For some reason this gets called multiple times and each call only shows the top level layer item
@@ -83,25 +180,7 @@ require(["esri/config", "esri/Map", "esri/layers/VectorTileLayer", "esri/views/M
               ];
           });
         }
-      }
-
-      // function addTables(obj, layerList, groupLayer){
-      //   console.log(groupLayer)
-      //   Object.keys(obj).forEach((e)=>{
-      //     // Check if table is in table list and is defined
-      //     if (e !== undefined && layerList.includes(e)){
-      //       // Create feature table object
-      //       const featureTable = new FeatureTable({
-      //         view: view, // The view property must be set for the select/highlight to work
-      //         layer: obj[e],
-      //         title: e,
-      //         // container: "tableDiv"
-      //       });
-      //       // Query layer list entry that matches the feature layer
-      //       // document.querySelectorAll
-      //     }
-      //   });
-      // };
+      };
 
       function getActiveLayerIDs(){
         // Get list of IDs of all layers in the map
@@ -160,9 +239,9 @@ require(["esri/config", "esri/Map", "esri/layers/VectorTileLayer", "esri/views/M
                 if (["Inlets", "Maintenance Holes"].includes(attr.factype)){
                   description = `Type: ${attr.facsubtype}`;
                 } else {
-                  size =  `Size: ${attr.size}`;
+                  size =  `Size: ${attr.size_in}`;
                   material = `Material: ${attr.material}`
-                  pipeLen = (parseFloat(attr.linearpipefeetfromstart)).toFixed(1)
+                  pipeLen = (parseFloat(attr.pipelength_ft)).toFixed(1)
                   totalLen += pipeLen
                   description = size + "\n" + material  + "\n" + `Pipe Length (ft): ${pipeLen}`;
                 }
@@ -228,7 +307,38 @@ require(["esri/config", "esri/Map", "esri/layers/VectorTileLayer", "esri/views/M
             document.getElementById("DownloadCSV").setAttribute("disabled", "");
             document.getElementById("DownloadGeoJSON").setAttribute("disabled", "");
           }
-        }
+        };
+
+      function handleHitTest(){
+        // Handle hittest all hittest logic, including view click
+        view.on("click", (event)  => {
+          // Clear all existing highlights on map
+          clearAllHighlighted(event);
+          // Perform hittest only on the active feature table's parent layer
+          view.hitTest(event, hitOptions).then((response) => {
+            // Check if results were returned on desired layer and if feature table exists
+            // Check if the active feature table's parent layer was clicked
+            // if (response.results.length > 0 && typeof featTab !== 'undefined') {
+            if (response.results.length > 0 && featureTable !== null) {
+              // Get graphic from hitTest
+              const graphic = response.results[0].graphic;
+              // Highlight/select record(s) in feature table using the response's graphic
+              featureTable.selectRows(graphic);
+              // Get OID from response
+              oid = response.results[0].graphic.attributes.OBJECTID
+              // Shift OID value for scrolling table, otherwise the desired record is not in view
+              if (oid >= 3 ){
+                oid -= 3
+              }
+              // Scroll table to modified OID/index value
+              featureTable.scrollToIndex(oid)
+            } else if (featureTable !== null){
+              // Feature table exists but nothing was selected, clear any selection on feature table
+              featureTable.clearSelection();
+              }
+          });
+        })
+      };
 
       // esriConfig.apiKey = "AAPK5f601af9967543d6bc498db5a6b0f84bpHLpA-1hb11KUYm2IfzgmzBATsNlgD24Rjueqj2sKqaVsz3d6vU-6-l1yb-0YTi3";
       esriConfig.apiKey = "AAPKbf2fbfc0f4f5469d8520ecee766989aaFU4P9UKZIP2TvrGoyjZRYQleJ6QWxf-ZOQgBBaGjor0zJkHYCEH701bI8oJYzxB4";
@@ -434,8 +544,17 @@ require(["esri/config", "esri/Map", "esri/layers/VectorTileLayer", "esri/views/M
         container: "viewDiv", // Div element
       });
 
+      // const featureTable = new FeatureTable({
+      //   view: view, // The view property must be set for the select/highlight to work
+      //   // layer: layerObj[event.action.id],
+      //   // title: event.action.id,
+      //   container: "tableDiv",
+      //   id: "table"
+      // });
+
       // Use default popup templates, as set in the featurelayer on AGOL
       view.popup.defaultPopupTemplateEnabled = true;
+
       // Add window for viewing current zoom scale
       // Move zoom to buttom left
       // view.ui.move("zoom", "bottom-right");
@@ -478,11 +597,12 @@ require(["esri/config", "esri/Map", "esri/layers/VectorTileLayer", "esri/views/M
          content: bookmarks,
          expanded: false,
          container: document.createElement("bkExpand"),
+         mode: "auto",
+         autoCollapse: true
        });
        // Add expand widget to UI
-      view.ui.add(bkExpand, "top-right", 0);
-      console.log(bookmarks.bookmarks);
-      console.log(bookmarks)
+      view.ui.add(bkExpand, "manual");
+      // view.ui.add(bkExpand, "bottom-left");
 
       // See: https://codepen.io/kellyhutchins/pen/ExjPGQe
       // https://odoe.net/blog/custom-bookmarks-in-your-arcgis-js-api-apps
@@ -500,6 +620,7 @@ require(["esri/config", "esri/Map", "esri/layers/VectorTileLayer", "esri/views/M
           })
         });
     })
+      handleHitTest()
     //   view.when(function () {
     //     bookmarks.bookmarks.on("before-remove", function (evt) {
     //       if (presetuids.includes(evt.item.uid)){
@@ -528,105 +649,154 @@ require(["esri/config", "esri/Map", "esri/layers/VectorTileLayer", "esri/views/M
     //       })
     //     });
     // });
+    let locateWidget = new Locate({
+      view: view,   // Attaches the Locate button to the view
+      container: document.createElement("locateWidget"),
+      graphic: new Graphic({
+        symbol: { type: "simple-marker" }  // overwrites the default symbol used for the
+        // graphic placed at the location of the user when found
+      })
+    });
 
-       // Create search widget using the map view as the source
-       // see https://developers.arcgis.com/javascript/latest/sample-code/widgets-search-multiplesource/
-       const searchWidget = new Search({
-         view: view,
-         autoSelect: true,
-         sources: [
-           {
-             layer:inletFeatures,
-             searchFields: ["eqnum","uuid", "dwgno"],
-             name: "Inlets"
-           },
-           {
-             layer:mhFeatures,
-             searchFields: ["eqnum","uuid","dwgno","jhsrc", "name"],
-             name: "Maintenance Holes"
-           }, {
-             layer:gravitymainsFeatures,
-             searchFields: ["eqnum","uuid","dwgno","jhsrc", "name", "pmnum"],
-             name: "Gravity Mains"
-           }, {
-             layer:lateralFeatures,
-             searchFields: ["eqnum","uuid","dwgno","jhsrc", "name"],
-             name: "Laterals"
-           }, {
-             layer:olFeatures,
-             searchFields: ["eqnum","uuid","dwgno", "name", "outfall_id"],
-             name: "Laterals"
-           },
-           {
-             layer:laCoParcelsSearch,
-             searchFields: ["AIN","APN"],
-             name: "Parcels"
-           }
-         ]
-       });
-       // Add search widget to ui
-       view.ui.add(searchWidget, {
-         position: "top-right",
-         index: 2
-       });
+    // Add locate widget
+    view.ui.add(locateWidget, {
+      position: "manual",
+      // index: 0
+    });
 
-      view.ui.add("traceDiv", "top-left");
+     // Create search widget using the map view as the source
+     // see https://developers.arcgis.com/javascript/latest/sample-code/widgets-search-multiplesource/
+     const searchWidget = new Search({
+       view: view,
+       autoSelect: true,
+       sources: [
+         {
+           layer:inletFeatures,
+           searchFields: ["eqnum","uuid", "dwgno"],
+           name: "Inlets"
+         },
+         {
+           layer:mhFeatures,
+           searchFields: ["eqnum","uuid","dwgno","jhsrc", "name"],
+           name: "Maintenance Holes"
+         }, {
+           layer:gravitymainsFeatures,
+           searchFields: ["eqnum","uuid","dwgno","jhsrc", "name", "pmnum"],
+           name: "Gravity Mains"
+         }, {
+           layer:lateralFeatures,
+           searchFields: ["eqnum","uuid","dwgno","jhsrc", "name"],
+           name: "Laterals"
+         }, {
+           layer:olFeatures,
+           searchFields: ["eqnum","uuid","dwgno", "name", "outfall_id"],
+           name: "Laterals"
+         },
+         {
+           layer:laCoParcelsSearch,
+           searchFields: ["AIN","APN"],
+           name: "Parcels"
+         }
+       ]
+     });
+     // Add search widget to ui
+     view.ui.add(searchWidget, {
+       position: "top-right",
+       index: 0
+     });
 
-      layerList = new LayerList({
-        view: view,
-        listItemCreatedFunction: defineActions
-      });
-      layerList.on("trigger-action", (event) => {
-        // Clear out any existing tables
-        document.getElementById("tableDiv").innerHTML = ""
-        try {
-          const featureTable = new FeatureTable({
+    view.ui.add("traceDiv", "top-left");
+
+    layerList = new LayerList({
+      view: view,
+      listItemCreatedFunction: defineActions
+    });
+    // Handle creation/updating of feature tables after the table action is triggered
+    layerList.on("trigger-action", (event) => {
+        // Clear out any existing tables by removing all inner html
+        // document.getElementById("tableDiv").innerHTML = ""
+        // try {
+        //   featureTable.destroy();
+        // }
+        // catch(e){}
+        // Consider: Create a blank feature table on page load, update propeties and show/hide as needed
+        // if(typeof featureTable == 'undefined'){
+        // if(typeof featureTable == 'object'){
+        if(featureTable == null){
+          console.log("Creating new feature table")
+          // const featureTable = new FeatureTable({
+          featureTable = new FeatureTable({
             view: view, // The view property must be set for the select/highlight to work
             layer: layerObj[event.action.id],
             title: event.action.id,
             container: "tableDiv",
-            id: "table"
+            // id: "table"
           });
+          // Fire event on every selection change, event contains OID of record which changed
+          // Keep only a single selection, if more than 1 one deselect all and reselect selection
+          featureTable.on("selection-change", (event) => {
+            // Local scoped selection, only holding 1 item at a time
+            console.log("Selection change on feature table!")
+            sel = []
+            console.log(event);
+            // Check if a new record was added to selection
+            if (event.added.length > 0){
+              console.log("Added to feature table selection")
+              // Loop over selection, should only be 1 item for each event
+              event.added.forEach((item, i) => {
+                // Add item to global and local selection variables
+                // Global variable keeps track of multiple selections
+                tabSel.push(item);
+                sel.push(item);
+              });
+              if (tabSel.length > 1){
+                // clear any existing selection, prevents multi-selecting
+                featureTable.clearSelection();
+                // Deselect the prior record
+                // featureTable.deselectRows(tabSel.slice(0,-1));
+                // Reset global selection variable
+                tabSel = []
+              }
+              // Reselect user's selection
+              featureTable.selectRows(sel[0].objectId);
+              // Set active highlight layer on map
+              // if (activeMapHighLightLayer){
+              //   activeMapHighLightLayer = sel[0].feature.sourceLayer
+              // }
+              // Highlight selection
+              highlightFeat(sel[0]);
+              // Zoom to selection
+              tableZoom(sel[0]);
+
+              // https://developers.arcgis.com/javascript/latest/sample-code/highlight-features-by-geometry/
+              // Updated: https://developers.arcgis.com/javascript/latest/sample-code/highlight-features-by-geometry/
+              // https://developers.arcgis.com/javascript/latest/sample-code/highlight-scenelayer/
+              // https://developers.arcgis.com/javascript/latest/api-reference/esri-views-layers-GeoJSONLayerView.html
+            }
+          });
+        } else {
+          featureTable.layer = layerObj[event.action.id]
+          featureTable.title = event.action.id
         }
-        catch(e){
-          console.log("Table error")
-        }
+        // Reset any existing global hitOptions
+        hitOptions = {};
+        // set layer to include in hittest, same layer that was used for FeatureTable
+        // see: https://developers.arcgis.com/javascript/latest/sample-code/view-hittest/
+        hitOptions.include = layerObj[event.action.id]
+
+        // featureTable.clearSelection()
         // Display table container
         document.getElementById("tableContainer").style.display = "flex"
         // Add event listener to close table container
         document.getElementById("closeTab").addEventListener("click", function(){
-          document.getElementById("tableContainer").style.display = "none"
+          // Clear selected/highlighted features
+          // featureTable.clearSelection();
+        document.getElementById("tableContainer").style.display = "none"
         })
-        // see: https://developers.arcgis.com/javascript/latest/sample-code/sandbox/?sample=widgets-featuretable-popup-interaction
-        // add pop interactions to feature table
-        // if (event.action.value == true){
-        //
-        //
-        //   // Turn off any other tables
-        // } else {
-        //   console.log("turn table off")
-        //   document.getElementById("tableContainer").style.display = "none"
-        //   // document.getElementById("tableDiv").innerHTML = ""
-        // }
-        // Create table using event id
       })
 
       view.ui.add(layerList, "top-right", 3);
 
-      let locateWidget = new Locate({
-        view: view,   // Attaches the Locate button to the view
-        container: document.createElement("locateWidget"),
-        graphic: new Graphic({
-          symbol: { type: "simple-marker" }  // overwrites the default symbol used for the
-          // graphic placed at the location of the user when found
-        })
-      });
-
-      // Add locate widget
-      view.ui.add(locateWidget, {
-        position: "manual",
-        index: 0
-      });
       // Add print widget
       const print = new Print({
         view: view,
@@ -642,10 +812,11 @@ require(["esri/config", "esri/Map", "esri/layers/VectorTileLayer", "esri/views/M
          content: print,
          expanded: false,
          container: document.createElement("printExpand"),
-         mode:"auto"
+         mode: "floating"
+         // mode:"auto"
        });
        // Add expand widget to UI
-      view.ui.add(printExpand);
+      view.ui.add(printExpand, "manual");
 
 
       // const tabList = new Expand({

@@ -1,4 +1,5 @@
 // Set modal function to load when page loads
+// document.onload = function(){
 window.onload = function(){
   // Modal from https://www.w3schools.com/howto/tryit.asp?filename=tryhow_css_modal
   // Get the modal

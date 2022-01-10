@@ -161,9 +161,9 @@ def TraceNetwork(lon, lat, directionSQL):
         propDict = {}
         propDict['factype'] = i.factype
         if i.size:
-            propDict['size'] = i.size
+            propDict['size_in'] = i.size
         else:
-            propDict['size'] = "Unknown"
+            propDict['size_in'] = "Unknown"
         propDict['dwgno'] = i.dwgno
         if i.dwgno:
             propDict['dwgno'] = i.dwgno
@@ -178,7 +178,7 @@ def TraceNetwork(lon, lat, directionSQL):
             propDict['facid'] = "Unknown"
         else:
             propDict['facid'] = i.facid
-        propDict['linearpipefeetfromstart'] = i.cost
+        propDict['pipelength_ft'] = i.cost
         propDict['uuid'] = i.uuid
         propDict['facsubtype'] = "Unknown"
         propDict['material'] = "Unknown"

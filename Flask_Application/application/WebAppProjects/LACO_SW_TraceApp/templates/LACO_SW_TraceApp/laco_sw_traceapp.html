@@ -15,6 +15,9 @@
       console.log(traceurl)
     </script>
 
+    <!-- Modal JS -->
+    <!-- <script src="{{ url_for('static', filename='js/modal.js') }}"></script> -->
+
     <!-- TileQuery local Dist -->
     <!-- <script src="{{ url_for('lacoSWTraceapp_API_BP.static', filename='SBCO_SW_TraceApp/js/dist/tilequery.js') }}"></script> -->
 
@@ -44,7 +47,7 @@
     <!-- Application Title bar CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/AppTitleBar.css') }}">
     <!-- Modal JS -->
-    <script src="{{ url_for('static', filename='js/modal.js') }}"></script>
+    <!-- <script src="{{ url_for('static', filename='js/modal.js') }}"></script> -->
 
     <!-- Calcite -->
     <script type="module" src="https://js.arcgis.com/calcite-components/1.0.0-beta.69/calcite.esm.js"></script>
@@ -208,6 +211,7 @@
         <div id="tableDiv"></div>
       </div>
      </div>
+     <script src="{{ url_for('static', filename='js/modalFastLoad.js') }}"></script>
      <script>
      var email = "gav" + "lea" + "web" + "@g" + "mail" + ".com";
      document.getElementById("emailaddr").innerHTML = "<a href='mailto:" + email + "'>" + email + "</a>"

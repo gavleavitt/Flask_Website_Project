@@ -152,11 +152,7 @@ calcite-pick-list-item{
 calcite-block{
   margin-bottom: 0px;
 }
-locateWidget {
-  position: absolute;
-  right: 50px;
-  top: 15px;
-}
+
 /* .esri-component.esri-locate.esri-widget--button.esri-widget{
   position: absolute;
   right: 50px;
@@ -167,18 +163,29 @@ locateWidget {
   right: 85px;
   top: 15px;
 } */
+locateWidget {
+  position: absolute;
+  right: 296px;
+  top: 14px;
+}
 printExpand {
   position: absolute;
-  right: 85px;
-  top: 15px;
+  right: 332px;
+  top: 14px;
 }
-
+bkexpand {
+  position: absolute;
+  right: 260px;
+  top: 14px;
+}
 tableexpand{
   position: absolute;
   right: 120px;
   top: 15px;
 }
-
+.esri-expand__content.esri-expand__content--expanded{
+  width:250px;
+}
 .esri-component.esri-zoom.esri-widget{
   position: absolute;
   bottom: 65px;
@@ -197,11 +204,17 @@ printExpand .esri-view-width-greater-than-xsmall.esri-expand--auto .esri-expand_
   display: none;
 }
 
-
+.esri-print.esri-widget.esri-widget--panel{
+  margin-top: 4px;
+}
 /* printExpand .esri-expand__content.esri-expand__content--expanded{
   position: sticky;
 } */
 
+
+.esri-expand--floating.esri-expand__content{
+  position: static !important;
+}
 @media screen and (max-width: 700px) {
   html *{
     font-size: 10px !important;
@@ -209,7 +222,15 @@ printExpand .esri-view-width-greater-than-xsmall.esri-expand--auto .esri-expand_
     --calcite-font-size--1: 10px !important;
     --calcite-font-size-0: 10px !important;
   }
-
+  .esri-layer-list__list{
+    margin: 8px;
+  }
+  .esri-expand__container {
+    position: relative !important;
+}
+header{
+  z-index: 1 !important;
+}
   /* .esri-component.esri-locate.esri-widget--button.esri-widget{
     position: absolute;
     right: 149px;
@@ -217,8 +238,15 @@ printExpand .esri-view-width-greater-than-xsmall.esri-expand--auto .esri-expand_
   } */
   bkexpand {
     position: absolute;
-    top: 0px;
-    right: 184px;
+    right:4px;
+    bottom:38px;
+    top:unset
+  }
+  .esri-component.esri-layer-list.esri-widget.esri-widget--panel{
+    padding: 2px;
+  }
+  .esri-layer-list__list.esri-layer-list__list--root.esri-layer-list__list--independent{
+    margin: 2px;
   }
   printExpand .esri-view-width-xsmall.esri-expand--auto.esri-expand__container--expanded{
     position: sticky;
@@ -265,7 +293,8 @@ printExpand .esri-view-width-greater-than-xsmall.esri-expand--auto .esri-expand_
     top: -20px !important;
   }
   .esri-component.esri-layer-list.esri-widget.esri-widget--panel{
-    width: auto !important;
+    /* width: auto !important; */
+    width: 190px;
   }
   .esri-component.esri-search.esri-widget{
     width: 145px;
