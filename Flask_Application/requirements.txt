@@ -50,7 +50,7 @@ oauthlib==3.1.0
 overpass==0.7
 pdfminer.six==20200517
 pdfplumber==0.5.23
-Pillow==8.2.0
+Pillow==9.0.0
 prompt-toolkit==3.0.10
 protobuf==3.13.0
 psycopg2-binary==2.8.5
