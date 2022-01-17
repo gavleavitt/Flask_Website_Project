@@ -1,5 +1,5 @@
 :root {
-  --calcite-panel-max-height: 400px;
+  --calcite-panel-max-height: 415px;
   --calcite-panel-max-width: 300px;
   --titlebackground: #dbdbdb;
 }
@@ -16,6 +16,9 @@ calcite-pick-list-item{
 }
 
 
+.titlediv{
+  margin:3px;
+}
 * {
   box-sizing: border-box;
 }
@@ -29,8 +32,8 @@ calcite-pick-list-item{
 } */
 #closeTab{
   position: absolute;
-  left:8px;
-  bottom: 214px;
+  left: 10px;
+  bottom: 218px;
 }
 .container{
   display: flex;
@@ -46,11 +49,15 @@ calcite-pick-list-item{
 .esri-feature-table{
   height:250px;
 }
-
 #tableContainer{
   display: none;
   /* flex: 1; */
-  width: 100%;
+  padding: 0;
+  border-width: 2px;
+  border-style: solid;
+  border-color: black;
+  border-radius: 5px;
+  margin: 3px;
 }
 #viewDiv{
   flex: 1;
@@ -61,8 +68,8 @@ calcite-pick-list-item{
   border-style: solid;
   border-color: black;
   border-radius: 5px;
-  margin: 6px;
-  margin-top: 3px;
+  margin: 3px;
+  /* margin-top: 3px; */
 }
 
 .loader__text{
@@ -183,6 +190,12 @@ tableexpand{
   right: 120px;
   top: 15px;
 }
+
+bmGallery{
+  position: absolute;
+  right: 370px;
+  top: 14px;
+}
 .esri-expand__content.esri-expand__content--expanded{
   width:250px;
 }
@@ -242,6 +255,12 @@ header{
     bottom:38px;
     top:unset
   }
+  bmGallery{
+    position: absolute;
+    right: 5px;
+    top: unset;
+    bottom: 72px;
+  }
   .esri-component.esri-layer-list.esri-widget.esri-widget--panel{
     padding: 2px;
   }
@@ -278,7 +297,7 @@ header{
     margin: 2px;
   }
   #traceDiv{
-    width:210px !important;
+    width:182px !important;
   }
   .button-grp{
     margin-right: -6px;
@@ -294,7 +313,7 @@ header{
   }
   .esri-component.esri-layer-list.esri-widget.esri-widget--panel{
     /* width: auto !important; */
-    width: 190px;
+    width: 180px;
   }
   .esri-component.esri-search.esri-widget{
     width: 145px;

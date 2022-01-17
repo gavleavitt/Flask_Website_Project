@@ -140,21 +140,21 @@ sched = BackgroundScheduler(daemon=True, timezone=utc)
 # Set logging for APS scheduler
 logging.getLogger('apscheduler').setLevel(logging.DEBUG)
 # Setup scheduled tasks
+if application.config['ENV'] == "production":
+    try:
+        # Trigger every day at 9:30 am
+        # sched.add_job(parsePDF.pdfjob, trigger='cron', hour='9', minute='30')
+        # sched.add_job(parsePDF.pdfjob, trigger='cron', hour='15', minute='37')
+        # Add PDF parsing job to trigger daily at 4:30 pm UTC, 9:30 PST
+        sched.add_job(functionsWaterQual.pdfjob, trigger='cron', hour='16', minute='30')
+        # Trigger every minute
+        # sched.add_job(parsePDF.pdfjob, 'cron', minute='*')
+        # Start scheduled jobs
+        sched.start()
+        application.logger.debug("Scheduled task created")
+    except Exception as e:
+        application.logger.error("Failed to create parse pdfjob")
+        application.logger.error(e)
 
-try:
-    # Trigger every day at 9:30 am
-    # sched.add_job(parsePDF.pdfjob, trigger='cron', hour='9', minute='30')
-    # sched.add_job(parsePDF.pdfjob, trigger='cron', hour='15', minute='37')
-    # Add PDF parsing job to trigger daily at 4:30 pm UTC, 9:30 PST
-    sched.add_job(functionsWaterQual.pdfjob, trigger='cron', hour='16', minute='30')
-    # Trigger every minute
-    # sched.add_job(parsePDF.pdfjob, 'cron', minute='*')
-    # Start scheduled jobs
-    sched.start()
-    application.logger.debug("Scheduled task created")
-except Exception as e:
-    application.logger.error("Failed to create parse pdfjob")
-    application.logger.error(e)
-
-# Shutdown cron thread if the web process is stopped
-atexit.register(lambda: sched.shutdown(wait=False))
+    # Shutdown cron thread if the web process is stopped
+    atexit.register(lambda: sched.shutdown(wait=False))

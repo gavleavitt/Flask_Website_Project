@@ -31,7 +31,8 @@
     <link rel="stylesheet" href="https://js.arcgis.com/4.21/esri/themes/light/main.css">
     <script src="https://js.arcgis.com/4.21/"></script>
 
-
+    <!-- Application Title bar CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/AppTitleBar.css') }}">
     <!-- Custom local javascript -->
     <script src="{{ url_for('lacoSWTraceapp_API_BP.static', filename='SBCO_SW_TraceApp/js/createCSV.js') }}"></script>
     <script src="{{ url_for('lacoSWTraceapp_API_BP.static', filename='SBCO_SW_TraceApp/js/pop-ups.js') }}"></script>
@@ -44,8 +45,7 @@
     <!-- Custom local CSS -->
     <link rel="stylesheet" href="{{ url_for('lacoSWTraceapp_API_BP.static', filename='SBCO_SW_TraceApp/css/customCSS.css') }}">
 
-    <!-- Application Title bar CSS -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/AppTitleBar.css') }}">
+
     <!-- Modal JS -->
     <!-- <script src="{{ url_for('static', filename='js/modal.js') }}"></script> -->
 
@@ -122,30 +122,30 @@
                 <div id="resultsText">
                 </div>
               <!-- <calcite-icon scale="m" slot="fab" text-enabled text="Download Result CSV" icon="download-to"></calcite-icon> -->
-                <calcite-block id="OutletsWindow" heading="Outlets" collapsible>
+                <calcite-block id="OutletsWindow" heading="Outlets">
                   <calcite-icon scale="s" slot="icon" icon="diamond"></calcite-icon>
                     <!-- <calcite-notice active>
                         <div slot="message"></div>
                     </calcite-notice> -->
                 </calcite-block>
-                <calcite-block id="InletsWindow" heading="Inlets" collapsible>
+                <calcite-block id="InletsWindow" heading="Inlets">
                    <calcite-icon scale="s" slot="icon" icon="square-area"></calcite-icon>
                     <!-- <calcite-notice active>
                         <div slot="message"></div>
                     </calcite-notice> -->
                 </calcite-block>
-                <calcite-block id="MH-Window" heading="Maintenance Holes" collapsible>
+                <calcite-block id="MH-Window" heading="Maintenance Holes">
                   <calcite-icon scale="s" slot="icon" icon="circle-area"></calcite-icon>
                     <!-- <calcite-notice active>
                         <div slot="message"></div>
                     </calcite-notice> -->
                 </calcite-block>
-                <calcite-block  id="GM-Window" heading="Gravity Mains" collapsible>
+                <calcite-block  id="GM-Window" heading="Gravity Mains">
                   <calcite-icon scale="s" slot="icon" icon="line-solid"></calcite-icon>
                     <!-- <calcite-notice active>
                     </calcite-notice> -->
                 </calcite-block>
-                <calcite-block id="Lat-Window" heading="Laterals" collapsible>
+                <calcite-block id="Lat-Window" heading="Laterals">
                   <calcite-icon scale="s" slot="icon" icon="line-solid"></calcite-icon>
                     <!-- <calcite-notice active>
                     </calcite-notice> -->

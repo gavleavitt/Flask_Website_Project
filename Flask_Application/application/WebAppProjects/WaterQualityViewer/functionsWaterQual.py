@@ -357,7 +357,7 @@ def genReSampleDict(tab, pdfDate):
         elif tab[row][0] in nullBeaches and tab[row][1] is not None:
             # print("This re-sample PDF is also filling in missing data")
             # Add beach name to the combined beaches list
-            application.logger.debug(f"Adding the following beach to the combined beaches list {tab[row][0]}")
+            # application.logger.debug(f"Adding the following beach to the combined beaches list {tab[row][0]}")
             # print(f"Records to be appended are {tab[row]}")
             combinedBeaches.append(tab[row][0])
             # Add table row to the new records list

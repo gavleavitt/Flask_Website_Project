@@ -1,23 +1,57 @@
 // // pop-ups
-// const popupInlet = {
-//   "title": "<b>Inlet: {facid}</b>",
-//   "content": "<b>Type:</b> {facsubtype}"
-// }
-//
-// const popupOutlet = {
-//   "title": "<b>Outlet: {facid}</b>",
-//   "content": "<b>Type:</b> {facsubtype}"
-// }
-//
-// const popupMH = {
-//   "title": "<b>Maintenance Hole: {facid}</b>",
-//   "content": "<b>Type:</b> {facsubtype}"
-// }
+function populatepopupResults(title){
+  const popupResults = {
+    title: `<b>Trace Result - ${title}: {facid}</b>`,
+    content: [
+      {
+        type: "fields",
+        fieldInfos: [
+          {
+            fieldName: "facid",
+            label: "Facility ID"
+          },
+          {
+            fieldName: "dwgno",
+            label: "DWG Number"
+          },
+          {
+            fieldName: "uuid",
+            label: "UUID"
+          }
+        ]
+      }
+    ]
+  }
+  if (title.includes("Laterals") || title.includes("Gravity Mains")){
+    insert = [
+        {
+          fieldName: "size_in",
+          label: "Pipe Diameter (in)"
+        },
+        {
+          fieldName: "material",
+          label: "Material"
+        },{
+        fieldName: "pipelength_ft",
+        label: "Pipe Length (ft)",
+        format: {
+          digitSeparator: true,
+          places: 1
+        }
+      }
+    ]
+  } else {
+      insert = [
+        {
+          fieldName: "facsubtype",
+          label: "Facility Type"
+        }
+      ]
+  }
+  popupResults.content[0].fieldInfos.splice(1, 0, ...insert)
+  return popupResults
+}
 
-// const popupGM = {
-//   "title": "<b>Gravity Main: {facid}</b>",
-//   "content": "<b>Material:</b> {material}<br><b>Size:</b> {size}\""
-// }
 
 const popupGM = {
   "title": "<b>Gravity Main: {name}</b>",
@@ -29,16 +63,14 @@ const popupGM = {
                     "label": "FID",
                     "isEditable": false,
                     "tooltip": "",
-                    "visible": false,
-                    "stringFieldOption": "textbox"
+                    "visible": false
                 },
                 {
                     "fieldName": "name",
                     "label": "name",
                     "isEditable": true,
                     "tooltip": "",
-                    "visible": true,
-                    "stringFieldOption": "textbox"
+                    "visible": true
                 },
                 {
                     "fieldName": "expression/expr0",
@@ -62,7 +94,6 @@ const popupGM = {
                     "isEditable": true,
                     "tooltip": "",
                     "visible": false,
-                    "stringFieldOption": "textbox",
                     "format": {
                         "places": 2,
                         "digitSeparator": true
@@ -73,8 +104,7 @@ const popupGM = {
                     "label": "plan_no",
                     "isEditable": true,
                     "tooltip": "",
-                    "visible": false,
-                    "stringFieldOption": "textbox"
+                    "visible": false
                 },
                 {
                     "fieldName": "owner",
@@ -82,7 +112,6 @@ const popupGM = {
                     "isEditable": true,
                     "tooltip": "",
                     "visible": false,
-                    "stringFieldOption": "textbox",
                     "format": {
                         "places": 0,
                         "digitSeparator": true
@@ -94,7 +123,6 @@ const popupGM = {
                     "isEditable": true,
                     "tooltip": "",
                     "visible": false,
-                    "stringFieldOption": "textbox",
                     "format": {
                         "places": 0,
                         "digitSeparator": true
@@ -106,7 +134,6 @@ const popupGM = {
                     "isEditable": true,
                     "tooltip": "",
                     "visible": false,
-                    "stringFieldOption": "textbox",
                     "format": {
                         "places": 0,
                         "digitSeparator": true
@@ -118,7 +145,6 @@ const popupGM = {
                     "isEditable": true,
                     "tooltip": "",
                     "visible": false,
-                    "stringFieldOption": "textbox",
                     "format": {
                         "places": 2,
                         "digitSeparator": true
@@ -130,7 +156,6 @@ const popupGM = {
                     "isEditable": true,
                     "tooltip": "",
                     "visible": false,
-                    "stringFieldOption": "textbox",
                     "format": {
                         "places": 0,
                         "digitSeparator": true
@@ -142,7 +167,6 @@ const popupGM = {
                     "isEditable": true,
                     "tooltip": "",
                     "visible": false,
-                    "stringFieldOption": "textbox",
                     "format": {
                         "places": 0,
                         "digitSeparator": false
@@ -154,7 +178,6 @@ const popupGM = {
                     "isEditable": true,
                     "tooltip": "",
                     "visible": false,
-                    "stringFieldOption": "textbox",
                     "format": {
                         "places": 0,
                         "digitSeparator": true
@@ -165,8 +188,7 @@ const popupGM = {
                     "label": "maintained",
                     "isEditable": true,
                     "tooltip": "",
-                    "visible": false,
-                    "stringFieldOption": "textbox"
+                    "visible": false
                 },
                 {
                     "fieldName": "diameter_h",
@@ -174,7 +196,6 @@ const popupGM = {
                     "isEditable": true,
                     "tooltip": "",
                     "visible": false,
-                    "stringFieldOption": "textbox",
                     "format": {
                         "places": 2,
                         "digitSeparator": true
@@ -185,16 +206,14 @@ const popupGM = {
                     "label": "jhsrc",
                     "isEditable": true,
                     "tooltip": "",
-                    "visible": true,
-                    "stringFieldOption": "textbox"
+                    "visible": true
                 },
                 {
                     "fieldName": "dwgno",
                     "label": "dwgno",
                     "isEditable": true,
                     "tooltip": "",
-                    "visible": true,
-                    "stringFieldOption": "textbox"
+                    "visible": true
                 },
                 {
                     "fieldName": "sheet_no",
@@ -202,7 +221,6 @@ const popupGM = {
                     "isEditable": true,
                     "tooltip": "",
                     "visible": true,
-                    "stringFieldOption": "textbox",
                     "format": {
                         "places": 0,
                         "digitSeparator": false
@@ -213,24 +231,21 @@ const popupGM = {
                     "label": "eqnum",
                     "isEditable": true,
                     "tooltip": "",
-                    "visible": true,
-                    "stringFieldOption": "textbox"
+                    "visible": true
                 },
                 {
                     "fieldName": "pmnum",
                     "label": "pmnum",
                     "isEditable": true,
                     "tooltip": "",
-                    "visible": true,
-                    "stringFieldOption": "textbox"
+                    "visible": true
                 },
                 {
                     "fieldName": "remarks",
                     "label": "remarks",
                     "isEditable": true,
                     "tooltip": "",
-                    "visible": false,
-                    "stringFieldOption": "textbox"
+                    "visible": false
                 },
                 {
                     "fieldName": "width",
@@ -238,7 +253,6 @@ const popupGM = {
                     "isEditable": true,
                     "tooltip": "",
                     "visible": false,
-                    "stringFieldOption": "textbox",
                     "format": {
                         "places": 0,
                         "digitSeparator": true
@@ -249,32 +263,28 @@ const popupGM = {
                     "label": "permit_no",
                     "isEditable": true,
                     "tooltip": "",
-                    "visible": false,
-                    "stringFieldOption": "textbox"
+                    "visible": false
                 },
                 {
                     "fieldName": "alias",
                     "label": "alias",
                     "isEditable": true,
                     "tooltip": "",
-                    "visible": false,
-                    "stringFieldOption": "textbox"
+                    "visible": false
                 },
                 {
                     "fieldName": "barcode",
                     "label": "barcode",
                     "isEditable": true,
                     "tooltip": "",
-                    "visible": false,
-                    "stringFieldOption": "textbox"
+                    "visible": false
                 },
                 {
                     "fieldName": "uuid",
                     "label": "uuid",
                     "isEditable": true,
                     "tooltip": "",
-                    "visible": true,
-                    "stringFieldOption": "textbox"
+                    "visible": true
                 },
                 {
                     "fieldName": "edge_fk",
@@ -282,7 +292,6 @@ const popupGM = {
                     "isEditable": true,
                     "tooltip": "",
                     "visible": false,
-                    "stringFieldOption": "textbox",
                     "format": {
                         "places": 2,
                         "digitSeparator": true
@@ -293,16 +302,14 @@ const popupGM = {
                     "label": "factype",
                     "isEditable": true,
                     "tooltip": "",
-                    "visible": false,
-                    "stringFieldOption": "textbox"
+                    "visible": false
                 },
                 {
                     "fieldName": "facid",
                     "label": "facid",
                     "isEditable": true,
                     "tooltip": "",
-                    "visible": false,
-                    "stringFieldOption": "textbox"
+                    "visible": false
                 },
                 {
                     "fieldName": "Shape__Length",
@@ -310,7 +317,6 @@ const popupGM = {
                     "isEditable": false,
                     "tooltip": "",
                     "visible": false,
-                    "stringFieldOption": "textbox",
                     "format": {
                         "places": 2,
                         "digitSeparator": true
@@ -320,22 +326,19 @@ const popupGM = {
                     "fieldName": "link",
                     "label": "link",
                     "isEditable": true,
-                    "visible": false,
-                    "stringFieldOption": "textbox"
+                    "visible": false
                 },
                 {
                     "fieldName": "abandoned",
                     "label": "abandoned",
                     "isEditable": true,
-                    "visible": false,
-                    "stringFieldOption": "textbox"
+                    "visible": false
                 },
                 {
                     "fieldName": "us_water",
                     "label": "us_water",
                     "isEditable": true,
-                    "visible": false,
-                    "stringFieldOption": "textbox"
+                    "visible": false
                 }
             ]
   }],

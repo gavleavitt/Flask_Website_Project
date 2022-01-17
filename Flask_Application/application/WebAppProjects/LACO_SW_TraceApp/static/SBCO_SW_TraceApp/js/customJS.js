@@ -17,6 +17,9 @@ var gravMainsTileURL = "https://vectortileservices3.arcgis.com/NfAw5Z474Q8vyMGv/
 const USERBOOKMARK_KEY = "arcgis-local-bookmarks";
 var tabSel = []
 var hitOptions = {};
+var layerListAction = null;
+var featTabHandler = null;
+var tabStatus = null;
 // var viewHighlightTableHandler = null;
 // var activeLayerIDs = []
 var layerObj = null;
@@ -55,8 +58,61 @@ function addToLocalBKStorage(bks){
 //   // console.log(JSON.stringify(rawBookmarks))
 // }
 
-require(["esri/config", "esri/Map", "esri/layers/VectorTileLayer", "esri/views/MapView", "esri/layers/TileLayer", "esri/Graphic", "esri/layers/GraphicsLayer", "esri/layers/WebTileLayer", "esri/layers/GeoJSONLayer", "esri/symbols/SimpleMarkerSymbol", "esri/renderers/UniqueValueRenderer", "esri/renderers/SimpleRenderer", "esri/widgets/LayerList", "esri/layers/GroupLayer", "esri/rest/support/Query", "esri/widgets/Search", "esri/layers/FeatureLayer", "esri/widgets/Bookmarks", "esri/widgets/Expand","esri/layers/TileLayer", "esri/symbols/CIMSymbol", "esri/layers/support/LabelClass", "esri/layers/MapImageLayer", "esri/Basemap", "esri/rest/support/Query", "esri/geometry/Extent", "esri/geometry/Point", "esri/widgets/Locate","esri/portal/Portal","esri/identity/OAuthInfo","esri/identity/IdentityManager","esri/portal/PortalQueryParams", "esri/layers/Layer", "esri/widgets/Print", "esri/widgets/FeatureTable","esri/widgets/TableList", "esri/widgets/FeatureTable/Grid/support/ButtonMenu", "esri/geometry/geometryEngine"],
-  function (esriConfig, Map, VectorTileLayer, MapView, TileLayer, Graphic, GraphicsLayer, WebTileLayer, GeoJSONLayer, SimpleMarkerSymbol, UniqueValueRenderer, SimpleRenderer, LayerList, GroupLayer, Query, Search, FeatureLayer, Bookmarks, Expand, TileLayer, CIMSymbol, LabelClass, MapImageLayer, Basemap, Query, Extent, Point, Locate, Portal, OAuthInfo, esriId, PortalQueryParams, Layer, Print, FeatureTable, TableList, ButtonMenu, geometryEngine){
+require(["esri/config", "esri/Map", "esri/layers/VectorTileLayer", "esri/views/MapView", "esri/layers/TileLayer", "esri/Graphic", "esri/layers/GraphicsLayer", "esri/layers/WebTileLayer", "esri/layers/GeoJSONLayer", "esri/symbols/SimpleMarkerSymbol", "esri/renderers/UniqueValueRenderer", "esri/renderers/SimpleRenderer", "esri/widgets/LayerList", "esri/layers/GroupLayer", "esri/rest/support/Query", "esri/widgets/Search", "esri/layers/FeatureLayer", "esri/widgets/Bookmarks", "esri/widgets/Expand","esri/layers/TileLayer", "esri/symbols/CIMSymbol", "esri/layers/support/LabelClass", "esri/layers/MapImageLayer", "esri/Basemap", "esri/rest/support/Query", "esri/geometry/Extent", "esri/geometry/Point", "esri/widgets/Locate","esri/portal/Portal","esri/identity/OAuthInfo","esri/identity/IdentityManager","esri/portal/PortalQueryParams", "esri/layers/Layer", "esri/widgets/Print", "esri/widgets/FeatureTable","esri/widgets/TableList", "esri/widgets/FeatureTable/Grid/support/ButtonMenu", "esri/geometry/geometryEngine", "esri/widgets/BasemapGallery", "esri/widgets/BasemapGallery/support/PortalBasemapsSource"],
+  function (esriConfig, Map, VectorTileLayer, MapView, TileLayer, Graphic, GraphicsLayer, WebTileLayer, GeoJSONLayer, SimpleMarkerSymbol, UniqueValueRenderer, SimpleRenderer, LayerList, GroupLayer, Query, Search, FeatureLayer, Bookmarks, Expand, TileLayer, CIMSymbol, LabelClass, MapImageLayer, Basemap, Query, Extent, Point, Locate, Portal, OAuthInfo, esriId, PortalQueryParams, Layer, Print, FeatureTable, TableList, ButtonMenu, geometryEngine, BasemapGallery, PortalSource){
+      // function spliceBookmarks(basemapGallery){
+      //   keep = ["Topographic","Imagery","arcgis-streets", "OpenStreetMap"]
+      //   newItems = []
+      //   items = basemapGallery.source.basemaps.items
+      //   Promise.all(items).then((values) => {
+      //     console.log(values)
+      //     values.forEach((item, i) => {
+      //       console.log(item.title)
+      //       if (keep.includes(item.title)){
+      //         console.log(`Pushing title ${item.title}`)
+      //         newItems.push(item)
+      //       }
+      //     });
+      //   });
+      //
+      //   // Set new basemap items
+      //   basemapGallery.source.basemaps.items = ["Topographic","Imagery","arcgis-streets", "OpenStreetMap"]
+      // }
+
+      function configFeatTabFields(title){
+        fieldConfigs = [
+          {
+            name: "OBJECTID",
+            label: "OBJECTID",
+            visible: false
+          },{
+            name: "facid",
+            label: "Facility ID"
+          },{
+            name: "dwgno",
+            label: "DWG Number"
+          }
+        ]
+        if(["Gravity Mains", "Laterals"].includes(title)){
+          insert = [{
+            name: "size_in",
+            label: "Pipe Diameter (in)"
+          },{
+             name: "material",
+             label: "Material"
+           },{
+            name: "pipelength_ft",
+            label: "Pipe Length (ft)"
+          }]
+        } else {
+          insert = [{
+            name: "facsubtype",
+            label: "Facility Type"
+          }]
+        }
+        fieldConfigs.splice(2, 0, ...insert)
+        return fieldConfigs
+      }
       function clearAllHighlighted(){
         // Remove any existing highlights
         if (highlightSelect) {
@@ -98,9 +154,10 @@ require(["esri/config", "esri/Map", "esri/layers/VectorTileLayer", "esri/views/M
       };
       function tableZoom(selection){
         console.log(selection)
+        console.log("Table zoom trigged!")
         // Zooms to features on the map which are selected in the feature table
         // Get parent layer of selected record
-        if (selection.feature){
+        if (selection.feature && tabStatus=="Open"){
           layer = selection.feature.sourceLayer
           // Create query to select feature from source layer based on OID
           const queryRecs = new Query({
@@ -135,7 +192,7 @@ require(["esri/config", "esri/Map", "esri/layers/VectorTileLayer", "esri/views/M
       function highlightFeat(selection){
         // Highlight associated map feature from feature table selection
         // based on: https://developers.arcgis.com/javascript/latest/sample-code/sandbox/?sample=highlight-point-features
-        if (selection.feature){
+        if (selection.feature && tabStatus=="Open"){
           layer = selection.feature.layer
           // Get the layer view of the layer, highlights happen on the layer view, not the layer itself
           view.whenLayerView(layer).then(function(layerView){
@@ -205,7 +262,7 @@ require(["esri/config", "esri/Map", "esri/layers/VectorTileLayer", "esri/views/M
           // query.outFields = [ "factype", "id", "facsubtype", "facid", "linearpipefeetfromstart", "uuid"];
           query.outFields = ["*"]
           // Return feature geometry
-          query.returnGeometry = true;
+          // query.returnGeometry = true;
           // Query features within geojson layer, async
           geojsonlyr.queryFeatures(query)
           .then(function(response){
@@ -221,81 +278,93 @@ require(["esri/config", "esri/Map", "esri/layers/VectorTileLayer", "esri/views/M
               document.getElementById("DownloadCSV").removeAttribute("disabled");
               document.getElementById("DownloadGeoJSON").removeAttribute("disabled");
               totalLen = 0
-              // Loop over each feature in result
-              features.forEach((result, index)=>{
-                // Pull out attributes
-                attr = result.attributes;
-                // Create a calcite pick list item to hold record result
-                item = document.createElement("calcite-pick-list-item");
-                // Set label (title) to facid
-                item.setAttribute("label", attr.facid);
-                // Set value key to index value
-                item.setAttribute("value", index);
-                // Add to service results
-                // type = `Inlet Type: ${attr[facsubtype]}`;
-                // Set asset type text
-                // type = `Type: ${attr.facsubtype}`;
-                // bulild out description text based on asset type
-                if (["Inlets", "Maintenance Holes"].includes(attr.factype)){
-                  description = `Type: ${attr.facsubtype}`;
-                } else {
-                  size =  `Size: ${attr.size_in}`;
-                  material = `Material: ${attr.material}`
-                  pipeLen = (parseFloat(attr.pipelength_ft)).toFixed(1)
+              // Get total pipe lengths
+              if (["Gravity Mains", "Laterals"].includes(geojsonlyr.title)){
+                features.forEach((result, index)=>{
+                  attr = result.attributes
+                  pipeLen = (parseFloat(attr.pipelength_ft))
                   totalLen += pipeLen
-                  description = size + "\n" + material  + "\n" + `Pipe Length (ft): ${pipeLen}`;
-                }
-                var newNode = document.createElement('div');
-                // Add description text to calcite item
-                item.setAttribute("description", description);
-                // Set the feature's uuid as an attribute to be called later
-                item.setAttribute("uuid", attr.uuid);
-                // Add event listener to calcite item to open and zoom to popup
-                item.addEventListener("click", function(){
-                  // Get the clicked feature's uuid
-                  uuid = this.getAttribute("uuid")
-                  // networklayer.layers.items.forEach(i=>console.log(i.title))
-                  // Iterate over each layer in the network group and query its features to find the matching UUID
-                  // flatten layers in network layer, pulls out nested layers
-                  let flatNetwork = map.layers.flatten(function(item){
-                    return item.layers || item.sublayers;
-                  });
-                  console.log(flatNetwork)
-                  flatNetwork.forEach((e,i)=> {
-                  // networklayer.layers.items.forEach((e,i)=> {
-                    // console.log(e);
-                    // Create an empty query
-                    if (e.declaredClass == "esri.layers.FeatureLayer"){
-                      let query = e.createQuery();
-                      // Set where parameter, query matching uuid
-                      query.where = `uuid = '${uuid}'`;
-                      // query.returnGeometry = true;
-                      // query.returnQueryGeometry = true;
-                      // Execute query, async, and process results
-                      e.queryFeatures(query)
-                        .then((res)=>{
-                          // Check if result has any features
-                          if (res.features.length >0){
-                            feat = res.features[0]
-                            // check if result is a point or polyline feature, if polyline calculate its midpoint and replace result geometry with the point
-                            if (res.geometryType == "polyline"){
-                              feat.geometry = feat.geometry.extent.center
-                            }
-                            view.popup.open({
-                              // fetchFeatures: true, // <- fetch the selected features (if any)
-                              location:feat.geometry,
-                              features: [feat],
-                            });
-                            view.goTo(feat.geometry)
-                          }
-                        });
-                    }
+                })
+                document.getElementById(calciteWindowID).setAttribute("summary", `Total Pipe length (ft):  ${totalLen.toFixed(1)}`);
+              }
 
-                  })
-                });
-                // Append new calcite item to existing results panel
-                document.getElementById(calciteWindowID).appendChild(item);
-              });
+              // Loop over each feature in result
+              // Calcite window for each result, removed for now since it processes very slowly, resulting in errors if clicked before finished
+              // features.forEach((result, index)=>{
+              //   // Pull out attributes
+              //   attr = result.attributes;
+              //   // Create a calcite pick list item to hold record result
+              //   item = document.createElement("calcite-pick-list-item");
+              //   // Set label (title) to facid
+              //   item.setAttribute("label", attr.facid);
+              //   // Set value key to index value
+              //   item.setAttribute("value", index);
+              //   // Add to service results
+              //   // type = `Inlet Type: ${attr[facsubtype]}`;
+              //   // Set asset type text
+              //   // type = `Type: ${attr.facsubtype}`;
+              //   // bulild out description text based on asset type
+              //   if (["Inlets", "Maintenance Holes"].includes(attr.factype)){
+              //     description = `Type: ${attr.facsubtype}`;
+              //   } else {
+              //     size =  `Size: ${attr.size_in}`;
+              //     material = `Material: ${attr.material}`
+              //     pipeLen = (parseFloat(attr.pipelength_ft)).toFixed(1)
+              //     totalLen += pipeLen
+              //     description = size + "\n" + material  + "\n" + `Pipe Length (ft): ${pipeLen}`;
+              //   }
+              //
+              //   var newNode = document.createElement('div');
+              //   // Add description text to calcite item
+              //   item.setAttribute("description", description);
+              //   // Set the feature's uuid as an attribute to be called later
+              //   item.setAttribute("uuid", attr.uuid);
+              //   // Add event listener to calcite item to open and zoom to popup
+              //   item.addEventListener("click", function(){
+              //     // Get the clicked feature's uuid
+              //     uuid = this.getAttribute("uuid")
+              //     // networklayer.layers.items.forEach(i=>console.log(i.title))
+              //     // Iterate over each layer in the network group and query its features to find the matching UUID
+              //     // flatten layers in network layer, pulls out nested layers
+              //     let flatNetwork = map.layers.flatten(function(item){
+              //       return item.layers || item.sublayers;
+              //     });
+              //     console.log(flatNetwork)
+              //     flatNetwork.forEach((e,i)=> {
+              //     // networklayer.layers.items.forEach((e,i)=> {
+              //       // console.log(e);
+              //       // Create an empty query
+              //       if (e.declaredClass == "esri.layers.FeatureLayer"){
+              //         let query = e.createQuery();
+              //         // Set where parameter, query matching uuid
+              //         query.where = `uuid = '${uuid}'`;
+              //         // query.returnGeometry = true;
+              //         // query.returnQueryGeometry = true;
+              //         // Execute query, async, and process results
+              //         e.queryFeatures(query)
+              //           .then((res)=>{
+              //             // Check if result has any features
+              //             if (res.features.length >0){
+              //               feat = res.features[0]
+              //               // check if result is a point or polyline feature, if polyline calculate its midpoint and replace result geometry with the point
+              //               if (res.geometryType == "polyline"){
+              //                 feat.geometry = feat.geometry.extent.center
+              //               }
+              //               view.popup.open({
+              //                 // fetchFeatures: true, // <- fetch the selected features (if any)
+              //                 location:feat.geometry,
+              //                 features: [feat],
+              //               });
+              //               view.goTo(feat.geometry)
+              //             }
+              //           });
+              //       }
+              //
+              //     })
+              //   });
+              //   // Append new calcite item to existing results panel
+              //   document.getElementById(calciteWindowID).appendChild(item);
+              // });
               // TODO: Update results display with total length, depending on if lateral or main
             });
             //
@@ -319,7 +388,7 @@ require(["esri/config", "esri/Map", "esri/layers/VectorTileLayer", "esri/views/M
             // Check if results were returned on desired layer and if feature table exists
             // Check if the active feature table's parent layer was clicked
             // if (response.results.length > 0 && typeof featTab !== 'undefined') {
-            if (response.results.length > 0 && featureTable !== null) {
+            if (response.results.length > 0 && featureTable !== null && tabStatus=="Open") {
               // Get graphic from hitTest
               const graphic = response.results[0].graphic;
               // Highlight/select record(s) in feature table using the response's graphic
@@ -600,10 +669,42 @@ require(["esri/config", "esri/Map", "esri/layers/VectorTileLayer", "esri/views/M
          mode: "auto",
          autoCollapse: true
        });
+
        // Add expand widget to UI
       view.ui.add(bkExpand, "manual");
       // view.ui.add(bkExpand, "bottom-left");
 
+      // Taken from: https://community.esri.com/t5/arcgis-api-for-javascript-questions/basemapgallery-how-to-limit-list/m-p/401929/highlight/true#M36994
+      // Filters displayed basemaps in gallery based on allowed list
+      // const allowedBasemapTitles = ["Imagery", "Imagery with Labels"];
+      // const allowedBasemapTitles = ["arcgis-topographic","arcgis-imagery", "arcgis-imagery-labels","arcgis-streets","osm-standard","arcgis-light-gray"];
+      // const allowedBasemapTitles = ["topo-vector","Imagery", "streets-vector", "osm"];
+      // const source = new PortalSource({
+      //   // filtering portal basemaps
+      //   filterFunction: (basemap) => allowedBasemapTitles.indexOf(basemap.portalItem.title) > -1
+      // });
+      // const basemapGallery = new BasemapGallery({ view, source });
+      const basemapGallery = new BasemapGallery({view})
+      // basemapGallery.when(function(){
+      //   items = basemapGallery.source.basemaps.items
+      //   console.log(items)
+      //   basemapGallery.source.basemaps.items = [items[0]]
+      //   // basemapGallery.source.basemaps.items = ["Topographic","Imagery","arcgis-streets", "OpenStreetMap"]
+      // })
+      const bmgExpand = new Expand({
+        view: view,
+        content: basemapGallery,
+        expanded: false,
+        container: document.createElement("bmGallery"),
+        mode: "auto",
+        autoCollapse: true
+      })
+      // Add widget to the top right corner of the view
+      view.ui.add(bmgExpand, {
+        position: "manual"
+      });
+      console.log(basemapGallery)
+      console.log(basemapGallery.source.basemaps.items)
       // See: https://codepen.io/kellyhutchins/pen/ExjPGQe
       // https://odoe.net/blog/custom-bookmarks-in-your-arcgis-js-api-apps
       // https://odoe.net/blog/custom-bookmarks-in-your-arcgis-js-api-apps
@@ -709,32 +810,29 @@ require(["esri/config", "esri/Map", "esri/layers/VectorTileLayer", "esri/views/M
 
     layerList = new LayerList({
       view: view,
-      listItemCreatedFunction: defineActions
+      listItemCreatedFunction: defineActions,
+      container: document.createElement("layerListDiv")
     });
     // Handle creation/updating of feature tables after the table action is triggered
     layerList.on("trigger-action", (event) => {
-        // Clear out any existing tables by removing all inner html
-        // document.getElementById("tableDiv").innerHTML = ""
-        // try {
-        //   featureTable.destroy();
-        // }
-        // catch(e){}
-        // Consider: Create a blank feature table on page load, update propeties and show/hide as needed
-        // if(typeof featureTable == 'undefined'){
-        // if(typeof featureTable == 'object'){
+        tabStatus = "Open"
         if(featureTable == null){
           console.log("Creating new feature table")
           // const featureTable = new FeatureTable({
+          console.log(layerObj[event.action.id].title);
+          console.log(layerObj[event.action.id])
           featureTable = new FeatureTable({
             view: view, // The view property must be set for the select/highlight to work
             layer: layerObj[event.action.id],
             title: event.action.id,
             container: "tableDiv",
+            fieldConfigs: configFeatTabFields(layerObj[event.action.id].title)
             // id: "table"
           });
+          // tabStatus = "Open"
           // Fire event on every selection change, event contains OID of record which changed
           // Keep only a single selection, if more than 1 one deselect all and reselect selection
-          featureTable.on("selection-change", (event) => {
+          featTabHandler = featureTable.on("selection-change", (event) => {
             // Local scoped selection, only holding 1 item at a time
             console.log("Selection change on feature table!")
             sel = []
@@ -775,8 +873,12 @@ require(["esri/config", "esri/Map", "esri/layers/VectorTileLayer", "esri/views/M
             }
           });
         } else {
+          console.log("Updating existing table!")
           featureTable.layer = layerObj[event.action.id]
           featureTable.title = event.action.id
+          console.log(layerObj[event.action.id].title)
+          console.log(layerObj[event.action.id])
+          // featureTable.fieldConfigs = configFeatTabFields(layerObj[event.action.id].title)
         }
         // Reset any existing global hitOptions
         hitOptions = {};
@@ -791,7 +893,12 @@ require(["esri/config", "esri/Map", "esri/layers/VectorTileLayer", "esri/views/M
         document.getElementById("closeTab").addEventListener("click", function(){
           // Clear selected/highlighted features
           // featureTable.clearSelection();
-        document.getElementById("tableContainer").style.display = "none"
+          document.getElementById("tableContainer").style.display = "none"
+          hitOptions = {}
+          tabStatus = null;
+          // TEST: remove handler, can it be recreated?
+          // featTabHandler.remove();
+          // featTabHandler = null;
         })
       })
 
@@ -963,7 +1070,7 @@ require(["esri/config", "esri/Map", "esri/layers/VectorTileLayer", "esri/views/M
               view.graphics.remove(selectionLayer);
               view.graphics.remove(resultslayer);
               // Clear out feature tables
-              document.getElementById("tableDiv").innerHTML = ""
+              // document.getElementById("tableDiv").innerHTML = ""
               document.getElementById("tableContainer").style.display = "none"
               // Check if blocking layer exists, if so remove it from map and graphics
               if (getActiveLayerIDs().includes("blockingLayer")){
@@ -1064,10 +1171,12 @@ require(["esri/config", "esri/Map", "esri/layers/VectorTileLayer", "esri/views/M
                   // Create a GeoJSON layer using provided popupTemplate and previously set renderer template
                   const result = new GeoJSONLayer({
                     url:url,
-                    title:title,
+                    // title:`Trace Result - ${title}: {facid}`,
+                    title:`${title}`,
                     renderer:resultsrenderer,
-                    popupTemplate: null,
-                    id: `${title}-resultslayer`
+                    popupTemplate: populatepopupResults(title),
+                    // id: `${title}-resultslayer`
+                    id: `${title}`
                     // popupTemplate: popupTemplate
                   });
                   // Add new geojson layer to result layerObj

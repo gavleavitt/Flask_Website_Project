@@ -102,14 +102,14 @@ def TraceNetwork(lon, lat, directionSQL):
             sp.id, 999999, true) AS nodes;
 
     SELECT
-    	mh.uuid, st_asgeojson(st_transform(mh.geom, 4326)) as geojson, mh.factype as factype,  tr.cost as cost, dwgno, NULL as size, jhsrc as facid, CAST(material as text) as material, CAST(stnd_plan as text) as subtype, GeometryType(mh.geom) as geomtype
+    	mh.uuid, st_asgeojson(st_transform(mh.geom, 4326)) as geojson, mh.factype as factype,  tr.cost as cost, dwgno, NULL as size, facid as facid, CAST(material as text) as material, CAST(stnd_plan as text) as subtype, GeometryType(mh.geom) as geomtype
     FROM 
     	maintenanceholes mh, traceresults as tr
     WHERE
     	(mh.node_fk = tr.node)
     UNION
     select 
-    	i.uuid, st_asgeojson(st_transform(i.geom, 4326)) as geojson, i.factype as factype, tr.cost as cost, dwgno, NULL as size, eqnum as facid, NULL as material, CAST(stnd_plan as text) as subtype, GeometryType(i.geom) as geomtype
+    	i.uuid, st_asgeojson(st_transform(i.geom, 4326)) as geojson, i.factype as factype, tr.cost as cost, dwgno, NULL as size, facid as facid, NULL as material, CAST(stnd_plan as text) as subtype, GeometryType(i.geom) as geomtype
     FROM 
     	inlets i, traceresults as tr
     WHERE
@@ -123,14 +123,14 @@ def TraceNetwork(lon, lat, directionSQL):
     	(ol.node_fk = tr.node)
     UNION
     SELECT
-    	gm.uuid, st_asgeojson(st_transform(gm.geom, 4326)) as geojson, gm.factype as factype,  tr.cost as cost, NULL as dwgno, CAST(diameter_h as text) as size, eqnum as facid,CAST(material as text) as material, CAST(subtype as text) as subtype, GeometryType(gm.geom) as geomtype
+    	gm.uuid, st_asgeojson(st_transform(gm.geom, 4326)) as geojson, gm.factype as factype,  tr.cost as cost, NULL as dwgno, CAST(diameter_h as text) as size, facid as facid,CAST(material as text) as material, CAST(subtype as text) as subtype, GeometryType(gm.geom) as geomtype
     FROM 
     	gravitymains gm, traceresults as tr
     WHERE
     	(gm.edge_fk = tr.edge)
     UNION
     SELECT
-    	l.uuid, st_asgeojson(st_transform(l.geom, 4326)) as geojson, l.factype as factype,  tr.cost as cost, dwgno, CAST(diameter_height as text) as size, jhsrc as facid, CAST(material as text) as material, CAST(subtype as text) as subtype, GeometryType(l.geom) as geomtype  
+    	l.uuid, st_asgeojson(st_transform(l.geom, 4326)) as geojson, l.factype as factype,  tr.cost as cost, dwgno, CAST(diameter_height as text) as size, facid as facid, CAST(material as text) as material, CAST(subtype as text) as subtype, GeometryType(l.geom) as geomtype  
     FROM 
     	laterals l, traceresults as tr
     WHERE
