@@ -1,15 +1,85 @@
 :root {
-  --calcite-panel-max-height: 400px;
-  --calcite-panel-max-width: 300px
+  --calcite-panel-max-height: 415px;
+  --calcite-panel-max-width: 300px;
+  --titlebackground: #dbdbdb;
 }
-
 html,
-body,
-#viewDiv {
-  padding: 0;
-  margin: 0;
+body {
   height: 100%;
   width: 100%;
+  margin: 0;
+  padding: 0;
+  background-color:var(--titlebackground);
+}
+calcite-pick-list-item{
+  white-space: pre-line;
+}
+
+
+.titlediv{
+  margin:3px;
+}
+* {
+  box-sizing: border-box;
+}
+
+/* body{
+  height: 100vh;
+  width: 100vw;
+  margin: 0;
+  padding: 0;
+  background-color:var(--titlebackground);
+} */
+#closeTab{
+  position: absolute;
+  left: 10px;
+  bottom: 218px;
+}
+.container{
+  display: flex;
+  width: 100%;
+  height: 100%;
+  flex-direction: column;
+}
+
+.container-prot{
+  display: none;
+}
+
+.esri-feature-table{
+  height:250px;
+}
+#tableContainer{
+  display: none;
+  /* flex: 1; */
+  padding: 0;
+  border-width: 2px;
+  border-style: solid;
+  border-color: black;
+  border-radius: 5px;
+  margin: 3px;
+}
+#viewDiv{
+  flex: 1;
+  height: 100%;
+  /* width: 100%; */
+  padding: 0;
+  border-width: 2px;
+  border-style: solid;
+  border-color: black;
+  border-radius: 5px;
+  margin: 3px;
+  /* margin-top: 3px; */
+}
+
+.loader__text{
+  font-weight: bold;
+}
+
+.Download{
+  justify-content: center;
+  background-color: #FFFFFF;
+  padding: 5px;
 }
 
 #InletsWindow{
@@ -17,11 +87,11 @@ body,
 }
 
 #InletsWindow calcite-icon{
-  color: #1400ff;
+  color: #0097ef;
 }
 
 #TraceToolTitle .header{
-  font-size: 30px; 
+  font-size: 30px;
 }
 
 #MH-Window calcite-icon{
@@ -29,23 +99,52 @@ body,
 }
 
 #GM-Window calcite-icon{
-  color: #ed5151;
+  /* color: #ed5151; */
+  color: #e5b900;
 }
 
 #Lat-Window calcite-icon{
   color: #02c718;
 }
+#OutletsWindow calcite-icon{
+  color: #FF0000;
+}
+
+#vScale {
+  padding: 10px;
+  position: absolute;
+  bottom: 20px;
+  right: 10px;
+}
 
 .button-grp{
-  display: flex;
+  /* display: flex; */
   /* flex-flow: row wrap; */
   justify-content: center;
 }
 .flex-line2{
   width: 100%
 }
+#parcel-label{
+  display: none;
+  margin-top: 15px;
+}
+/* #parcel-btn > div{
+  display: flex;
+  margin-left: 15px;
+} */
 .tool-btn{
   padding:5px;
+  height:50px;
+}
+.btn-subgrp{
+  display:flex;
+}
+#block-Btn{
+  --calcite-ui-brand: #e07f00;
+  --calcite-ui-foreground-1: #e07f00;
+  --calcite-ui-brand-hover: #ac6304;
+  --calcite-ui-brand-press: #ac6304;
 }
 .line-break {
   width: 100%;
@@ -59,4 +158,180 @@ body,
 
 calcite-block{
   margin-bottom: 0px;
+}
+
+/* .esri-component.esri-locate.esri-widget--button.esri-widget{
+  position: absolute;
+  right: 50px;
+  top: 15px;
+} */
+
+/* .esri-component.esri-expand.esri-widget.esri-expand--auto{
+  right: 85px;
+  top: 15px;
+} */
+locateWidget {
+  position: absolute;
+  right: 296px;
+  top: 14px;
+}
+printExpand {
+  position: absolute;
+  right: 332px;
+  top: 14px;
+}
+bkexpand {
+  position: absolute;
+  right: 260px;
+  top: 14px;
+}
+tableexpand{
+  position: absolute;
+  right: 120px;
+  top: 15px;
+}
+
+bmGallery{
+  position: absolute;
+  right: 370px;
+  top: 14px;
+}
+.esri-expand__content.esri-expand__content--expanded{
+  width:250px;
+}
+.esri-component.esri-zoom.esri-widget{
+  position: absolute;
+  bottom: 65px;
+  right: 10px;
+}
+
+printExpand .esri-expand__content.esri-expand__content--expanded{
+  position: sticky !important;
+}
+
+printExpand .esri-view-width-greater-than-xsmall.esri-expand--auto .esri-expand__content{
+  position: sticky !important;
+}
+
+[data-tab-id="layoutTab"]{
+  display: none;
+}
+
+.esri-print.esri-widget.esri-widget--panel{
+  margin-top: 4px;
+}
+/* printExpand .esri-expand__content.esri-expand__content--expanded{
+  position: sticky;
+} */
+
+
+.esri-expand--floating.esri-expand__content{
+  position: static !important;
+}
+@media screen and (max-width: 700px) {
+  html *{
+    font-size: 10px !important;
+    --calcite-font-size--2: 10px !important;
+    --calcite-font-size--1: 10px !important;
+    --calcite-font-size-0: 10px !important;
+  }
+  .esri-layer-list__list{
+    margin: 8px;
+  }
+  .esri-expand__container {
+    position: relative !important;
+}
+header{
+  z-index: 1 !important;
+}
+  /* .esri-component.esri-locate.esri-widget--button.esri-widget{
+    position: absolute;
+    right: 149px;
+    top: 3px;
+  } */
+  bkexpand {
+    position: absolute;
+    right:4px;
+    bottom:38px;
+    top:unset
+  }
+  bmGallery{
+    position: absolute;
+    right: 5px;
+    top: unset;
+    bottom: 72px;
+  }
+  .esri-component.esri-layer-list.esri-widget.esri-widget--panel{
+    padding: 2px;
+  }
+  .esri-layer-list__list.esri-layer-list__list--root.esri-layer-list__list--independent{
+    margin: 2px;
+  }
+  printExpand .esri-view-width-xsmall.esri-expand--auto.esri-expand__container--expanded{
+    position: sticky;
+  }
+  printExpand {
+    position: absolute;
+    right:4px;
+    bottom:4px;
+    top: unset;
+  }
+  locateWidget {
+    position: absolute;
+    top: 3px;
+    right: 150px;
+  }
+
+  .tool-btn{
+    padding: 2px;
+  }
+  calcite-radio-button {
+    font-size: 12px !important;
+    height:30px;
+  }
+  sc-calcite-label-h sc-calcite-label-s{
+    font-size: 12px !important;
+    height:30px;
+  }
+  #viewDiv{
+    margin: 2px;
+  }
+  #traceDiv{
+    width:182px !important;
+  }
+  .button-grp{
+    margin-right: -6px;
+    margin-left: -6px;
+  }
+  .esri-ui-top-right{
+    right: -12px !important;
+    top: -12px !important;
+  }
+  .esri-ui-top-left{
+    left: -12px !important;
+    top: -20px !important;
+  }
+  .esri-component.esri-layer-list.esri-widget.esri-widget--panel{
+    /* width: auto !important; */
+    width: 180px;
+  }
+  .esri-component.esri-search.esri-widget{
+    width: 145px;
+  }
+  /* :root{
+    --calcite-font-size--1: 8px;
+  } */
+  .item.titlediv{
+    display: none;
+  }
+  .esri-attribution__sources, .esri-attribution, #vScale, .esri-zoom{
+    display: none;
+  }
+  #TraceToolTitle .article .content{
+    font-size: 10px !important;
+    padding-left: 5px !important;
+    padding-right: 1px !important;
+    padding-top: 1px !important;
+    padding-bottom: 1px !important;
+  }
 }

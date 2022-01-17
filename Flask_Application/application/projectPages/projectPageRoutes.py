@@ -35,3 +35,7 @@ def dashboardsandmaps():
 @projectPages_BP.route("/stravamapserverside")
 def stravaserversideprocessing():
     return render_template("project-Strava-Activities-Server-Side/project-Strava-Activities-Server-Side.html")
+
+@projectPages_BP.route("/lacostormwatertrace")
+def lacostormwatertrace():
+    return render_template("project-LA-County-Stormwater-Trace/project-LA-County-Stormwater-Trace.html")

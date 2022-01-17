@@ -30,4 +30,5 @@ logs/
 .platform
 *.pickle
 Flask_Application.zip
-requirements_old.txt
+Flask_Application/requirements_old.txt
+StartFlaskLocalHost

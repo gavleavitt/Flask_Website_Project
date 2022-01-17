@@ -14,6 +14,7 @@ https://blog.miguelgrinberg.com/post/the-flask-mega-tutorial-part-i-hello-world
 
 """
 from flask import Flask
+from flask_cors import CORS
 import os
 import atexit
 from apscheduler.schedulers.background import BackgroundScheduler
@@ -25,8 +26,10 @@ from sqlathanor import FlaskBaseModel, initialize_flask_sqlathanor
 from flask_sqlalchemy import SQLAlchemy
 
 # Create flask application, I believe "application" has to be used to work properly on AWS EB
-application = app = Flask(__name__)
-
+application = app = Flask(__name__, subdomain_matching=True)
+cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
+# Setup CORS
+# CORS(app)
 
 # Setup logger
 logger = logging.getLogger(__name__)
@@ -47,19 +50,18 @@ if application.config['ENV'] == "development":
     # app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get("DBCON_LOCAL")
     app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get("DBCON_PROD")
     # engine = create_engine(os.environ.get("DBCON_LOCAL"))
-    localurl = "leavitttesting.com:5000"
-    application.logger.debug(f"Setting up local development server name: {localurl}")
-    app.config['SERVER_NAME'] = localurl
-    # Setup SQLAlchemy engine sessionmaker factory for localhost
-    # engineLocal = create_engine(os.environ.get("DBCON_LOCAL"))
-    # SessionLocal = sessionmaker(bind=engineLocal)
+    # localurl = "leavitttesting.com:5000"
+    # application.logger.debug(f"Setting up local development server name: {localurl}")
+    # app.config['SERVER_NAME'] = localurl
 else:
     # Live deployment
     # see https://stackoverflow.com/a/60549321
     # handler = RotatingFileHandler('/tmp/application.log', maxBytes=1024, backupCount=5)
+    # app.config['SERVER_NAME'] = "leavittmapping.com"
     application.logger.debug('Production mode')
     handler = logging.FileHandler('/tmp/application.log')
     app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get("DBCON_PROD")
+    application.logger.debug(f"Setting up production with the server name: {app.config['SERVER_NAME']}")
     # engine = create_engine(os.environ.get("DBCON"))
 # Set logging handler
 handler.setFormatter(formatter)
@@ -68,17 +70,21 @@ handler.setFormatter(formatter)
 engine = create_engine(os.environ.get("DBCON"))
 Session = sessionmaker(bind=engine)
 
+lacotraceEng = create_engine(os.environ.get("DBCON_LACOTRACE"))
+LacotraceSes = sessionmaker(bind=lacotraceEng)
 
 
 # Disabling modification tracking
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-# Setup SQLAthanor
-db = SQLAlchemy(app, model_class = FlaskBaseModel)
 # Init flask sqlalchemy database with flask
+db = SQLAlchemy(app, model_class = FlaskBaseModel)
 # db.init_app(app)
+# Setup SQLAthanor
 db = initialize_flask_sqlathanor(db)
 
-
+# Setup SQLAlchemy engine sessionmaker factory for localhost
+# engineLocal = create_engine(os.environ.get("DBCON_LOCAL"))
+# SessionLocal = sessionmaker(bind=engineLocal)
 
 # Attach logging handler to application
 application.logger.addHandler(handler)
@@ -113,6 +119,7 @@ app.register_blueprint(sbcWaterQuality_BP, url_prefix='/webapps/sbcwaterquality'
 app.register_blueprint(lacoSWTraceapp_BP, url_prefix='/webapps/lacoswtrace')
 app.register_blueprint(sbcWaterQualityAPI_BP, url_prefix='/api/v1/sbcwaterquality')
 app.register_blueprint(stravaActDashAPI_Admin_BP, url_prefix='/admin/api/v1/activitydashboard')
+# app.register_blueprint(lacoSWTraceapp_API_BP, url_prefix='/api/v1/trace')
 app.register_blueprint(lacoSWTraceapp_API_BP, url_prefix='/api/v1/trace')
 # # Set up celery client, allows async tasks to be setup
 # app.config['CELERY_BROKER_URL'] = 'redis://localhost:6379/0'
@@ -134,21 +141,21 @@ sched = BackgroundScheduler(daemon=True, timezone=utc)
 # Set logging for APS scheduler
 logging.getLogger('apscheduler').setLevel(logging.DEBUG)
 # Setup scheduled tasks
+if application.config['ENV'] == "production":
+    try:
+        # Trigger every day at 9:30 am
+        # sched.add_job(parsePDF.pdfjob, trigger='cron', hour='9', minute='30')
+        # sched.add_job(parsePDF.pdfjob, trigger='cron', hour='15', minute='37')
+        # Add PDF parsing job to trigger daily at 4:30 pm UTC, 9:30 PST
+        sched.add_job(functionsWaterQual.pdfjob, trigger='cron', hour='16', minute='30')
+        # Trigger every minute
+        # sched.add_job(parsePDF.pdfjob, 'cron', minute='*')
+        # Start scheduled jobs
+        sched.start()
+        application.logger.debug("Scheduled task created")
+    except Exception as e:
+        application.logger.error("Failed to create parse pdfjob")
+        application.logger.error(e)
 
-try:
-    # Trigger every day at 9:30 am
-    # sched.add_job(parsePDF.pdfjob, trigger='cron', hour='9', minute='30')
-    # sched.add_job(parsePDF.pdfjob, trigger='cron', hour='15', minute='37')
-    # Add PDF parsing job to trigger daily at 4:30 pm UTC, 9:30 PST
-    sched.add_job(functionsWaterQual.pdfjob, trigger='cron', hour='16', minute='30')
-    # Trigger every minute
-    # sched.add_job(parsePDF.pdfjob, 'cron', minute='*')
-    # Start scheduled jobs
-    sched.start()
-    application.logger.debug("Scheduled task created")
-except Exception as e:
-    application.logger.error("Failed to create parse pdfjob")
-    application.logger.error(e)
-
-# Shutdown cron thread if the web process is stopped
-atexit.register(lambda: sched.shutdown(wait=False))
+    # Shutdown cron thread if the web process is stopped
+    atexit.register(lambda: sched.shutdown(wait=False))

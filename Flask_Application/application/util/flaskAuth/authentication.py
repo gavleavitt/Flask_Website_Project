@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-This module handles authentication checks by calling on database query functions with the credentials provided by the user.  
+This module handles authentication checks by calling on database query functions with the credentials provided by the user.
 
 Created on Fri May 29 13:32:44 2020
 
@@ -14,10 +14,9 @@ from sqlalchemy.orm import sessionmaker
 import os
 
 import application
-from application import application
 from application.util.flaskAuth.modelsAuth import Roles, User
 from application import Session
-# Sets up auth object, is modified by decorators further down the script and called when a 
+# Sets up auth object, is modified by decorators further down the script and called when a
 # user attempts to authenticate when visiting a route.
 auth = HTTPBasicAuth()
 
@@ -31,7 +30,7 @@ auth = HTTPBasicAuth()
 def get_user_roles(username):
     """
     Calls on the DB_Queries getroles function to get the roles of the provided username.
-    This function is separated to keep all authentication and role checks separate from the queries. 
+    This function is separated to keep all authentication and role checks separate from the queries.
 
     Parameters
     ----------
@@ -54,12 +53,12 @@ def get_user_roles(username):
 def verify_password(username, password):
     """
     Verifies if the provided username and password are valid.
-    
+
     The provided username is used to query the DB, if the username is in the DB then the
-    username and stored hashed password (hashed in pbkdf2:sha512) are returned to this function. 
-  
+    username and stored hashed password (hashed in pbkdf2:sha512) are returned to this function.
+
     The user provided password is then hashed and checked against the stored hash, if they match then the
-    username is returned from this function, allowing access to the resource. 
+    username is returned from this function, allowing access to the resource.
 
     Parameters
     ----------
@@ -73,8 +72,8 @@ def verify_password(username, password):
     username : String
         Provided username if the username and password combo are valid, allowing access to the resource.
     None
-        If the username, or username and password combo, are invalid then nothing is returned and auth fails, 
-        denying access to the resource. 
+        If the username, or username and password combo, are invalid then nothing is returned and auth fails,
+        denying access to the resource.
 
     """
     hashPass = getHashPass(username)
@@ -106,17 +105,13 @@ def getroles(username):
     """
     session = Session()
     query = session.query(Roles.roles).filter(Roles.user == username).all()
-    res = []
-    application.logger.debug(query)
-    # Add query object results to tuple
-    for row in query:
-        res.append(row[0])
+    #     res += row
+    res = query[0]
     if len(res) == 0:
         res = None
     # Roles are stored as comma seperated strings
     # Convert result tuple into a list of strings split by commas
     else:
-        res = list(res)
         res = res[0].split(",")
     session.close()
     return res
@@ -152,4 +147,3 @@ def getHashPass(username):
         return None
     else:
         return res_dict
-

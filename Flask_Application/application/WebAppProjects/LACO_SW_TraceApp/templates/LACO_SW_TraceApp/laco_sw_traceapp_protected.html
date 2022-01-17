@@ -15,9 +15,6 @@
       console.log(traceurl)
     </script>
 
-    <!-- Modal JS -->
-    <!-- <script src="{{ url_for('static', filename='js/modal.js') }}"></script> -->
-
     <!-- TileQuery local Dist -->
     <!-- <script src="{{ url_for('lacoSWTraceapp_API_BP.static', filename='SBCO_SW_TraceApp/js/dist/tilequery.js') }}"></script> -->
 
@@ -31,23 +28,25 @@
     <link rel="stylesheet" href="https://js.arcgis.com/4.21/esri/themes/light/main.css">
     <script src="https://js.arcgis.com/4.21/"></script>
 
-    <!-- Application Title bar CSS -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/AppTitleBar.css') }}">
     <!-- Custom local javascript -->
+    <!-- <script src="{{ url_for('lacoSWTraceapp_API_BP.static', filename='SBCO_SW_TraceApp/js/AGOLLogin.js') }}"></script> -->
+
+
     <script src="{{ url_for('lacoSWTraceapp_API_BP.static', filename='SBCO_SW_TraceApp/js/createCSV.js') }}"></script>
     <script src="{{ url_for('lacoSWTraceapp_API_BP.static', filename='SBCO_SW_TraceApp/js/pop-ups.js') }}"></script>
     <script src="{{ url_for('lacoSWTraceapp_API_BP.static', filename='SBCO_SW_TraceApp/js/renderers.js') }}"></script>
-    <script src="{{ url_for('lacoSWTraceapp_API_BP.static', filename='SBCO_SW_TraceApp/js/PresetBookmarks.js') }}"></script>
-    <script src="{{ url_for('lacoSWTraceapp_API_BP.static', filename='SBCO_SW_TraceApp/js/labeling.js') }}"></script>
-    <script src="{{ url_for('lacoSWTraceapp_API_BP.static', filename='SBCO_SW_TraceApp/js/customJS.js') }}"></script>
     <script src="{{ url_for('lacoSWTraceapp_API_BP.static', filename='SBCO_SW_TraceApp/js/vtl_popup.js') }}"></script>
+    <script src="{{ url_for('lacoSWTraceapp_API_BP.static', filename='SBCO_SW_TraceApp/js/labeling.js') }}"></script>
+    <!-- <script src="{{ url_for('lacoSWTraceapp_API_BP.static', filename='SBCO_SW_TraceApp/js/LoadSecuredServices.js') }}"></script> -->
+    <script src="{{ url_for('lacoSWTraceapp_API_BP.static', filename='SBCO_SW_TraceApp/js/customJSProtectedData.js') }}"></script>
     <script src="{{ url_for('lacoSWTraceapp_API_BP.static', filename='SBCO_SW_TraceApp/js/createZIP.js') }}"></script>
     <!-- Custom local CSS -->
     <link rel="stylesheet" href="{{ url_for('lacoSWTraceapp_API_BP.static', filename='SBCO_SW_TraceApp/css/customCSS.css') }}">
 
-
+    <!-- Application Title bar CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/AppTitleBar.css') }}">
     <!-- Modal JS -->
-    <!-- <script src="{{ url_for('static', filename='js/modal.js') }}"></script> -->
+    <script src="{{ url_for('static', filename='js/modal.js') }}"></script>
 
     <!-- Calcite -->
     <script type="module" src="https://js.arcgis.com/calcite-components/1.0.0-beta.69/calcite.esm.js"></script>
@@ -65,7 +64,7 @@
 
   </head>
   <body>
-    <div id="appContainer" class="container">
+    <div class="container">
       <div>
         <calcite-alert id="NoSelAlert" icon="information">
           <div slot="title">Error - No Map Selection</div>
@@ -119,33 +118,31 @@
             <!-- <div id="linearft">
             </div> -->
             <calcite-panel id="results" heading="Results">
-                <div id="resultsText">
-                </div>
               <!-- <calcite-icon scale="m" slot="fab" text-enabled text="Download Result CSV" icon="download-to"></calcite-icon> -->
-                <calcite-block id="OutletsWindow" heading="Outlets">
+                <calcite-block id="OutletsWindow" heading="Outlets" collapsible>
                   <calcite-icon scale="s" slot="icon" icon="diamond"></calcite-icon>
                     <!-- <calcite-notice active>
                         <div slot="message"></div>
                     </calcite-notice> -->
                 </calcite-block>
-                <calcite-block id="InletsWindow" heading="Inlets">
+                <calcite-block id="InletsWindow" heading="Inlets" collapsible>
                    <calcite-icon scale="s" slot="icon" icon="square-area"></calcite-icon>
                     <!-- <calcite-notice active>
                         <div slot="message"></div>
                     </calcite-notice> -->
                 </calcite-block>
-                <calcite-block id="MH-Window" heading="Maintenance Holes">
+                <calcite-block id="MH-Window" heading="Maintenance Holes" collapsible>
                   <calcite-icon scale="s" slot="icon" icon="circle-area"></calcite-icon>
                     <!-- <calcite-notice active>
                         <div slot="message"></div>
                     </calcite-notice> -->
                 </calcite-block>
-                <calcite-block  id="GM-Window" heading="Gravity Mains">
+                <calcite-block  id="GM-Window" heading="Gravity Mains" collapsible>
                   <calcite-icon scale="s" slot="icon" icon="line-solid"></calcite-icon>
                     <!-- <calcite-notice active>
                     </calcite-notice> -->
                 </calcite-block>
-                <calcite-block id="Lat-Window" heading="Laterals">
+                <calcite-block id="Lat-Window" heading="Laterals" collapsible>
                   <calcite-icon scale="s" slot="icon" icon="line-solid"></calcite-icon>
                     <!-- <calcite-notice active>
                     </calcite-notice> -->
@@ -204,14 +201,7 @@
            </div>
         </div>
       </div>
-      <div id="tableContainer">
-        <button id="closeTab">
-          <calcite-icon icon="x"></calcite-icon>
-        </button>
-        <div id="tableDiv"></div>
-      </div>
      </div>
-     <script src="{{ url_for('static', filename='js/modalFastLoad.js') }}"></script>
      <script>
      var email = "gav" + "lea" + "web" + "@g" + "mail" + ".com";
      document.getElementById("emailaddr").innerHTML = "<a href='mailto:" + email + "'>" + email + "</a>"

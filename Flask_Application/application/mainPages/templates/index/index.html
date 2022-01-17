@@ -19,6 +19,14 @@
 			<div class="project-head">Projects</div>
 			<div class="project-grid">
 				<div class="grid-item">
+					<a class = "divlink" href = "{{ url_for('projectPages_BP.lacostormwatertrace') }}">
+						<img class="proj-img" src="{{ url_for('mainSite_BP.static', filename='index/icons_images/lacosw_ex_comp.png') }}"></img>
+						<b>LA County Stormwater Trace App</b>
+						<span>Personal project to create a map application for tracing storm water flow and assets within the various storm waters in LA County.</span>
+						<div class="tagText">-Personal</div>
+					</a>
+				</div>
+				<div class="grid-item">
 					<a class = "divlink" href = "{{ url_for('projectPages_BP.stravaserversideprocessing') }}">
 						<img class="proj-img" src="{{ url_for('mainSite_BP.static', filename='index/icons_images/strava_dashboard_ex_comp.PNG') }}"></img>
 						<!-- The following allows nginx to grab file, not serve up from Flask I think -->
