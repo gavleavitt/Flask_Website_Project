@@ -78,15 +78,16 @@ def handleSubCallback(request):
     application.logger.debug(f"Request to Strava callback url. Request is: {request}")
     # Check if request is a GET callback request, part of webhook subscription process
     if request.method == 'GET':
-        application.logger.debug("Got a GET callback request from Strava to verify webhook!")
+        application.logger.debug("Got a GET callback request from Strava to verify webhook. Request args are: "
+                                 f"{request.args}")
         # Extract challenge and verification tokens
         callBackContent = request.args.get("hub.challenge")
         callBackVerifyToken = request.args.get("hub.verify_token")
         # Form callback response as dict
         callBackResponse = {"hub.challenge": callBackContent}
         # Check if verification tokens match, i.e. if GET request is from Strava
-        if DBQueriesStrava.checkVerificationToken(callBackVerifyToken):
-            application.logger.debug(f"Strava callback verification succeeded, the request was: {request}, "
+        if callBackVerifyToken and DBQueriesStrava.checkVerificationToken(callBackVerifyToken):
+            application.logger.debug(f"Strava callback verification succeeded, "
                                      f" responding with the challenge code"
                                      f" message: {callBackResponse}")
             # Verification succeeded, return challenge code as dict

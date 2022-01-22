@@ -8,6 +8,7 @@ from geojson import Feature, FeatureCollection, MultiLineString
 import topojson as tp
 import re
 
+
 def updateSubId(subId, verifytoken):
     """
     Updates webhook subscriptions table with the new subscription id provided by Strava then updates all athletes
@@ -18,9 +19,12 @@ def updateSubId(subId, verifytoken):
     """
     session = Session()
     try:
+        application.logger.debug(f"Updating record with the following token: {verifytoken}")
         # Update recently created record which only has the verify token populated
-        session.query(webhook_subs.verify_token == verifytoken).update({webhook_subs.sub_id: subId,
-                                                                        webhook_subs.activesub: "Yes"})
+        # application.logger.debug(session.query(webhook_subs.verify_token == verifytoken).first())
+        insQ = session.query(webhook_subs).filter(webhook_subs.verify_token == verifytoken).update(
+            {webhook_subs.sub_id: subId,
+             webhook_subs.activesub: "Yes"})
         session.commit()
         # Get the primary key from the new webhook subscription
         record = session.query(webhook_subs).filter(webhook_subs.verify_token == verifytoken).first()
@@ -49,6 +53,7 @@ def getAthleteList():
     session.close()
     return athleteList
 
+
 def getActiveSubID():
     """
     Gets the active Strava webhook subscription ID from the database.
@@ -57,7 +62,9 @@ def getActiveSubID():
     session = Session()
     query = session.query(webhook_subs).filter(webhook_subs.activesub == "Yes").first()
     session.close()
-    return int(query.sub_id)
+    if query:
+        return int(query.sub_id)
+
 
 def getSubIdList():
     """
@@ -120,7 +127,7 @@ def updateExistingActivity(update):
     newTitle = update.updates['title']
     session = Session()
     # use SQL alchemy to update existing feature title
-    session.query(strava_activities).filter(strava_activities.actID == objectID).\
+    session.query(strava_activities).filter(strava_activities.actID == objectID). \
         update({strava_activities.name: newTitle})
     session.commit()
     session.close()
@@ -214,9 +221,9 @@ def createStravaPublicActTopoJSON():
                     "average_speed": round(row.average_speed, 1), "max_speed": row.max_speed,
                     "gear_name": row.gear_name,
                     "type_extended": row.type_extended, "moving_time": row.moving_time.seconds,
-                    "average_watts": row.average_watts,"has_heartrate":row.has_heartrate,
-                    "average_cadence":row.average_cadence, "max_heartrate":row.max_heartrate,
-                    "average_heartrate":row.average_heartrate}
+                    "average_watts": row.average_watts, "has_heartrate": row.has_heartrate,
+                    "average_cadence": row.average_cadence, "max_heartrate": row.max_heartrate,
+                    "average_heartrate": row.average_heartrate}
         # Take ST_AsGeoJSON() result and load as geojson object
         geojsonGeom = geojson.loads(row[0])
         # Build the feature and add to feature list
@@ -228,6 +235,7 @@ def createStravaPublicActTopoJSON():
     # and prequantize the data, this reduces file size at the cost of processing time.
     # prequantize 1e7 is used over default, 1e6, to avoid errors in which data were placed in the South Pacific Ocean
     return tp.Topology(feature_collection, topology=False, prequantize=10000000).to_json()
+
 
 def processActivitiesPublic(recordID):
     """
@@ -336,6 +344,7 @@ def processActivitiesPublic(recordID):
     session.commit()
     session.close()
 
+
 def formatPointResponse(point):
     """
     Takes single St_AsText(ST_DumpPoint) record and formats as a lon,lat string
@@ -348,6 +357,7 @@ def formatPointResponse(point):
     res = res.replace(" ", ",").replace("((", "").replace("))", "")
     # listRes = res.split(",")
     return res
+
 
 def getIntersectingPoints(wktStr):
     """
@@ -365,7 +375,7 @@ def getIntersectingPoints(wktStr):
         # Create a labled common table expression to query privacy zones geometries collected into a single multi-polygon
         privacy_cte = session.query(
             sqlfunc.ST_CollectionExtract(
-            sqlfunc.ST_Collect(AOI.geom), collectionExtract).label("ctelab")).filter(
+                sqlfunc.ST_Collect(AOI.geom), collectionExtract).label("ctelab")).filter(
             AOI.privacy == "Yes").cte()
         # points_cte = session.query(sqlfunc.ST_DumpPoints(sqlfunc.st_geomfromewkt(wktStr)))
         # Take provided EWKT string and convert to GeoAlchemy geometry
@@ -373,7 +383,8 @@ def getIntersectingPoints(wktStr):
         # application.logger.debug(f"Geoalchemy Geom is: \n{dir(lineString)}")
         # Get a list of points from the linestring which fall inside the privacy zone
         # ST_DumpPoints provides a point geometry per iterative loop which is converted to a text representation using As_Text
-        pointQuery = session.query(sqlfunc.ST_AsText(sqlfunc.ST_DumpPoints(sqlfunc.ST_Intersection(sqlfunc.ST_GeomFromEWKT(wktStr), privacy_cte.c.ctelab)).geom))
+        pointQuery = session.query(sqlfunc.ST_AsText(
+            sqlfunc.ST_DumpPoints(sqlfunc.ST_Intersection(sqlfunc.ST_GeomFromEWKT(wktStr), privacy_cte.c.ctelab)).geom))
         # pointQuery = session.query(sqlfunc.ST_AsText(
         #     sqlfunc.ST_DumpPoints(sqlfunc.ST_Intersection(sqlfunc.ST_GeomFromEWKT(wktStr),
         #     privacy_cte.c.ctelab)).geom)).filter(privacy_cte.c.ctelab.
@@ -386,6 +397,7 @@ def getIntersectingPoints(wktStr):
     finally:
         session.close()
     return coordinateList
+
 
 def removeActivityFromDB(actID):
     """
@@ -405,6 +417,7 @@ def removeActivityFromDB(actID):
     # Close session
     session.close()
 
+
 def checkActID(actID):
     """
     Checks if the provided actID is already within the database.
@@ -419,6 +432,7 @@ def checkActID(actID):
     session.close()
     return record
 
+
 def checkAthleteAndSub(athID, subID):
     """
     Checks if provided athlete and subscription ID are in the database with an active subscription status
@@ -429,11 +443,12 @@ def checkAthleteAndSub(athID, subID):
     # Open session
     session = Session()
     # Query database
-    record = session.query(athletes).\
-        join(webhook_subs).\
+    record = session.query(athletes). \
+        join(webhook_subs). \
         filter(athletes.athlete_id == athID, webhook_subs.sub_id == subID, webhook_subs.activesub == "Yes").first()
     session.close()
     return record
+
 
 def setWebhookInactive(subID):
     """
@@ -450,6 +465,7 @@ def setWebhookInactive(subID):
     # Close out session
     session.close()
 
+
 def checkathleteID(athID):
     """
     Checks if the provided actID is already within the database.
@@ -463,6 +479,7 @@ def checkathleteID(athID):
     record = session.query(athletes.athlete_id == athID).first()
     session.close()
     return record
+
 
 def insertVerifyToken(token):
     """
@@ -479,6 +496,7 @@ def insertVerifyToken(token):
     session.commit()
     session.close()
 
+
 def checkVerificationToken(token):
     """
     Verifies that the provided verification token is in the database. Used as part Strava Webhook subscription callback
@@ -491,7 +509,9 @@ def checkVerificationToken(token):
     # Query database, get most recent record in case the token is in the database multiple times
     record = session.query(webhook_subs.verify_token == token).order_by(webhook_subs.id.desc()).first()
     session.close()
-    return record
+    if record:
+        return record
+
 
 def deleteVerifyTokenRecord(token):
     """

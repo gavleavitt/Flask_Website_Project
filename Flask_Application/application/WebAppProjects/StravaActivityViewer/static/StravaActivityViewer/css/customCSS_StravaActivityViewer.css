@@ -24,7 +24,8 @@ html{
     width: 100%;
     height: 100%;
     grid-template-columns: 1fr;
-    grid-template-rows: 0.05fr 0.95fr;
+    /* grid-template-rows: 0.02fr 0.98fr; */
+    grid-template-rows: 0.01fr 0.999fr;
     grid-gap: 0.4rem;
 }
 

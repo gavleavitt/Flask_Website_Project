@@ -1,17 +1,21 @@
-from flask import Blueprint, request, Response
+from flask import Blueprint, request, Response, redirect, url_for
 from application.util.flaskAuth.authentication import auth
-from application.WebAppProjects.StravaActivityViewer import DBQueriesStrava, APIFunctionsStrava, OAuthStrava, StravaAWSS3
+from application.WebAppProjects.StravaActivityViewer import DBQueriesStrava, APIFunctionsStrava, OAuthStrava, \
+    StravaAWSS3
 import os
 from application import application
 import logging
 import secrets
 import time
 import traceback
+import requests
+from urllib.parse import urlencode
 
 stravaActDashAPI_Admin_BP = Blueprint('stravaActDashAPI_Admin_BP', __name__,
-                        template_folder='templates',
-                        static_folder='static')
+                                      template_folder='templates',
+                                      static_folder='static')
 
+stravaSubUrl = "https://www.strava.com/api/v3/push_subscriptions"
 @stravaActDashAPI_Admin_BP.route("/processactivity", methods=['POST'])
 @auth.login_required(role='admin')
 def processActivity():
@@ -85,16 +89,31 @@ def removewebhooksub():
     # Send request to Strava to delete webhook subscription
     # Get webhook subID
     subID = DBQueriesStrava.getActiveSubID()
-    try:
-        application.logger.debug(f"Received request to remove the webhook subscription {subID}")
-        client.delete_subscription(subID, os.getenv('STRAVA_CLIENT_ID'), os.getenv('STRAVA_CLIENT_SECRET'))
-        # Set active webhook to inactive in database
-        DBQueriesStrava.setWebhookInactive(subID)
-        application.logger.debug(f"webhook subscription {subID} has been set to inactive")
+    application.logger.debug(f"Sub ID is: {subID}")
+    if subID:
+        try:
+            application.logger.debug(f"Received request to remove the webhook subscription {subID}")
+            client.delete_subscription(subID, os.getenv('STRAVA_CLIENT_ID'), os.getenv('STRAVA_CLIENT_SECRET'))
+            # Set active webhook to inactive in database
+            DBQueriesStrava.setWebhookInactive(subID)
+            application.logger.debug(f"webhook subscription {subID} has been set to inactive")
+            return Response(status=200)
+        except Exception as e:
+            application.logger.error(e)
+            return Response(status=400)
+    else:
+        application.logger.debug("No active webhook subscription to remove in DB, querying Strava API to check if one "
+                                 "exists.")
+        # Send request to Strava API webhook service to get details of existing subscription
+        request = requests.get(stravaSubUrl, data={"client_id":os.getenv("STRAVA_CLIENT_ID"),
+                                              "client_secret":os.getenv("STRAVA_CLIENT_SECRET")})
+        # Parse to JSON
+        r = request.json()[0]
+        if r["id"]:
+            application.logger.debug("Webhook exists, sending delete request")
+            delR = client.delete_subscription(r["id"], os.getenv('STRAVA_CLIENT_ID'), os.getenv('STRAVA_CLIENT_SECRET'))
+            application.logger.debug("Existing webhook has been removed!")
         return Response(status=200)
-    except Exception as e:
-        application.logger.error(e)
-        return Response(status=400)
 
 @stravaActDashAPI_Admin_BP.route("/addsubscription", methods=['POST'])
 @auth.login_required(role='admin')
@@ -115,18 +134,32 @@ def addwebhooksub():
     client = OAuthStrava.getAuth()
     try:
         # Send request to create webhook subscription, will be given the new subscription ID in response
-        application.logger.debug(f"Callback url is {os.getenv('FULL_STRAVA_CALLBACK_URL')}")
-        response = client.create_subscription(client_id=os.getenv("STRAVA_CLIENT_ID"),
-                                              client_secret=os.getenv("STRAVA_CLIENT_SECRET"),
-                                              callback_url=os.getenv('FULL_STRAVA_CALLBACK_URL'),
-                                              verify_token=verifytoken)
-        application.logger.debug(f"New sub id is {response.id}, updating database")
+        application.logger.debug(f"Callback url is {os.getenv('STRAVA_CALLBACK_URL')}")
+        # postDat = {"client_id": os.getenv("STRAVA_CLIENT_ID"),
+        #            "client_secret": os.getenv("STRAVA_CLIENT_SECRET"),
+        #            "callback_url": os.getenv('FULL_STRAVA_CALLBACK_URL'),
+        #            "verify_token": verifytoken}
+        #
+        # r = requests.post("https://www.strava.com/api/v3/push_subscriptions", data=postDat)
+        # resp = r.json()
+
+        resp = client.create_subscription(client_id=os.getenv("STRAVA_CLIENT_ID"),
+                                          client_secret=os.getenv("STRAVA_CLIENT_SECRET"),
+                                          # callback_url=os.getenv('FULL_STRAVA_CALLBACK_URL'),
+                                          callback_url=os.getenv('STRAVA_CALLBACK_URL'),
+                                          verify_token=verifytoken)
+        application.logger.debug(resp)
+        # application.logger.debug(f"New sub id is {resp['id']}, updating database")
+        application.logger.debug(f"New sub id is {resp.id}, updating database")
         # Update database with new sub id
-        DBQueriesStrava.updateSubId(response.id, verifytoken)
-        application.logger.debug(f"New sub id {response.id} has been added to the database")
+        # DBQueriesStrava.updateSubId(resp["id"], verifytoken)
+        DBQueriesStrava.updateSubId(resp.id, verifytoken)
+        # application.logger.debug(f"New sub id {resp['id']} has been added to the database")
+        application.logger.debug(f"New sub id {resp.id} has been added to the database")
         return Response(status=200)
     except Exception as e:
         application.logger.debug(f"Webhook creation process failed with the error {e}")
+        # logging.error(e, exc_info=True)
         DBQueriesStrava.deleteVerifyTokenRecord(verifytoken)
         return Response(status=400, response=str(e))
 
@@ -145,6 +178,7 @@ def genTopoJSON():
     StravaAWSS3.uploadToS3(topoJSON)
     application.logger.debug(f"New TopoJSON has been generated")
     return Response(status=200)
+
 
 @stravaActDashAPI_Admin_BP.route("/bulkprocess", methods=['POST'])
 @auth.login_required(role='admin')
@@ -181,6 +215,44 @@ def bulkprocess():
                     break
 
         return Response(status=200)
+
+
+@stravaActDashAPI_Admin_BP.route("/authuser", methods=['GET'])
+@auth.login_required(role='admin')
+def authUser():
+    """
+    URL for kicking off process for OAuth, user will be redirected Strava's Oauth page before being bounced back to
+    this website. Redirection URL will contain parameters for this application and website.
+    @return:
+    """
+    stravaAuthurl = "https://www.strava.com/oauth/authorize?"
+    params = {"client_id": os.getenv("STRAVA_CLIENT_ID"),
+              "redirect_uri": url_for("stravaActDashAPI_Admin_BP.getauthdetails"),
+              "scope": "activity:read_all",
+              "response_type": "code"
+              }
+    paramsEncoded = urlencode(params)
+    return redirect(stravaAuthurl + paramsEncoded)
+
+
+@stravaActDashAPI_Admin_BP.route("/authuserredirected", methods=['GET'])
+@auth.login_required(role='admin')
+def getauthdetails():
+    """
+    Handles Strava OAuth redirection. Pulls one-time use code from the redirection and exchanges for access and refresh
+    tokens.
+    @return: Nothing.
+    """
+    scopes = request.args.get("scope")
+    code = request.args.get("code")
+    # Post Code to Strava oauth to get access token for user
+    params = {"client_id":os.getenv("STRAVA_CLIENT_ID"), "client_secret": os.getenv("STRAVA_CLIENT_SECRET"),
+              "code":code,"grant_type":"authorization_code"}
+    postR = requests.post("https://www.strava.com/oauth/token", data=params)
+    # Get response as dict
+    r = postR.json()[0]
+    # TODO: Write queries to write to DB
+    pass
 # @stravaActDashAPI_BP.route("/admin/stravacreatesub", methods=['POST'])
 # @auth.login_required(role='admin')
 # def handle_Create_Strava_Sub():

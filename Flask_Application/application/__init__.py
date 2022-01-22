@@ -73,7 +73,6 @@ Session = sessionmaker(bind=engine)
 lacotraceEng = create_engine(os.environ.get("DBCON_LACOTRACE"))
 LacotraceSes = sessionmaker(bind=lacotraceEng)
 
-
 # Disabling modification tracking
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 # Init flask sqlalchemy database with flask

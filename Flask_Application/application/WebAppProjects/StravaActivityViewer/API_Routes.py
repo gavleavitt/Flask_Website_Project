@@ -26,8 +26,10 @@ def subCallback():
     res = WebHookFunctionsStrava.handleSubCallback(request)
     application.logger.debug("Returning code!")
     if res:
+        application.logger.debug(f"Returned response: {res}")
         return res
     else:
+        application.logger.debug("Return response was empty, responsed with 400 code")
         return Response(status=400)
 
 # @stravaActDashAPI_BP.route("/stravaroutes", methods=['GET'])

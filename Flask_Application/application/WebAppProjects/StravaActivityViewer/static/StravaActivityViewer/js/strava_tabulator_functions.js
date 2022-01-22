@@ -53,29 +53,22 @@ function initTable(groupedData){
       }}
     ],
     // Fires when users selects a row in the table, update Leaflet, panels, and chart based on the user's selection
-    rowClick:function(e, row){
-      selectedID = row.getData().actID
-      // Highlight cell
-      // row.getElement().style.backgroundColor ='rgba(55, 126, 184, 0.2)'
-      // console.log(row.getElement())
-      // clear existing layers
-      filteredGroup.clearLayers();
-      // Update map layer
-      addActiveLayers(userStartDate = null, userEndDate = null, actType = selectedID);
-      // Update Panels
-      updateDataPanels(filteredGroup,actDataDict, clear="True");
-      // Update chart
-      filterSingleActDisplay(selectedID);
-      // Clear any stream highlight markers
-      markerGroup.clearLayers();
-      // //get array of currently selected data.
-      // var selectedID = table.getSelectedData()[0].id;
-      // // console.log(selectedData)
-      // // Update data table
-      // // refreshes selection, store selection and reapply using table.selectRow(id)?
-      // generateTableFormatedData(filteredGroup, "Update");
-      // table.selectRow(selectedID);
-    },
+  });
+  table.on("rowClick", function(e, row){
+    selectedID = row.getData().actID
+    // Highlight cell
+    // row.getElement().style.backgroundColor ='rgba(55, 126, 184, 0.2)'
+    // console.log(row.getElement())
+    // clear existing layers
+    filteredGroup.clearLayers();
+    // Update map layer
+    addActiveLayers(userStartDate = null, userEndDate = null, actType = selectedID);
+    // Update Panels
+    updateDataPanels(filteredGroup,actDataDict, clear="True");
+    // Update chart
+    filterSingleActDisplay(selectedID);
+    // Clear any stream highlight markers
+    markerGroup.clearLayers();
   });
 };
 
@@ -91,8 +84,10 @@ function generateTableFormatedData(groupedData, update){
   } else {  for (i of geoJSONDat.features) {
       id ++
       var name = i.properties.name
+      // console.log(moment(i.properties.startDate))
       // Convert datetime format to be easier to read
-      var date = moment(i.properties.startDate).format("YYYY-MM-DD hh:mm A")
+      var date = moment(i.properties.startDate).format("YYYY-MM-DD hh:mm a")
+      // console.log(date)
       var type = i.properties.type
       var typeExtended = i.properties.type_extended
       var movingTime = convertDuration(i.properties.moving_time)

@@ -1,3 +1,4 @@
+import application
 from application.pythonLib.stravalib.client import Client
 import os
 import time
@@ -26,8 +27,10 @@ def getAuth():
         authDict["Access_Token"] = i.access_token
         authDict["Expiration"] = i.access_token_exp
         authDict["Refresh_Token"] = i.refresh_token
+    application.logger.debug(f"Auth token details are: {authDict}")
     # Check if access token has expired, if so request a new one and update Postgres
     if time.time() > authDict["Expiration"]:
+        application.logger.debug("Access token has expired, refreshing")
         refresh_response = client.refresh_access_token(client_id=int(os.environ.get('STRAVA_CLIENT_ID')),
                                                        client_secret=os.environ.get('STRAVA_CLIENT_SECRET'),
                                                        refresh_token=authDict["Refresh_Token"])
@@ -42,6 +45,7 @@ def getAuth():
         client.refresh_token = authDict["Refresh_Token"]
         client.token_expires_at = refresh_response['expires_at']
     else:
+        application.logger.debug("Access token is fresh, no refresh required")
         # Access token is up-to-date, set client details
         client.access_token = authDict["Access_Token"]
         client.refresh_token = authDict["Refresh_Token"]
