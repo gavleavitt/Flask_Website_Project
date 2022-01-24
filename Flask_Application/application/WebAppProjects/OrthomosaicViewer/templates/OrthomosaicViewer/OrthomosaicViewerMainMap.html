@@ -1,23 +1,29 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title>Title</title>
+	<title>Orthomosaic Viewer</title>
 	{% include 'projectimports.html' %}
 
 	<!-- Project specific imports -->
-
+	<script src="https://cdn.jsdelivr.net/gh/openlayers/openlayers.github.io@master/en/v6.12.0/build/ol.js"></script>
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/openlayers/openlayers.github.io@master/en/v6.12.0/css/ol.css" type="text/css">
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.6.0/proj4.js"></script>
+	<!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/openlayers/4.6.5/ol.js" integrity="sha512-O7kHS9ooekX8EveiC94z9xSvD/4xt10Qigl6uEKvspYykdux3Ci5QNu5fwi4ca0ZkZI/oCgx5ja8RklWUEqzxQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/openlayers/4.6.5/ol.css" integrity="sha512-D2c/nmSVlwoZk29SLwJK8GkLyCyPuNbZ/vZQL/lNzw+o+yXzsbnJt7lK/iCfdBmgyLRDi0qx27gpE8Zb1C6I7g==" crossorigin="anonymous" referrerpolicy="no-referrer" /> -->
 	<!-- Local static files-->
 	<!-- Custom local javascript functions -->
-
-
 	<!-- Custom CSS -->
-	<!-- <link rel="stylesheet" href="{{ url_for('static', filename='css/AppTitleBar.css') }}"> -->
-	<!-- <link rel="stylesheet" href="{{static', filename='css/MapStandardCSS.css') }}"> -->
+
+	<!-- Custom local javascript functions -->
+	<script type="module" src="{{url_for('orthoviewer_BP.static', filename='OrthomosaicViewer/js/customjs.js')}}"></script>
+	<!-- Custom CSS -->
+	<link rel="stylesheet" href="{{ url_for('orthoviewer_BP.static', filename='OrthomosaicViewer/css/customCSS.css') }}"/>
+
 </head>
 <body>
 	<div class="container sansserif">
 		<div class="item titlediv">
-			<!-- <div id = "Title" class="titletext">Titler</div> -->
+			<!-- <div id = "Title" class="titletext">Orthomosaic Viewer</div> -->
 			{% include 'WebAppTitleBar.html' %}
 			<!-- Modal -->
 			<!-- The Modal -->
@@ -28,7 +34,7 @@
 					<div class="modal-text">
 						<p style="margin-top:0px;"><b>Map Details</b>
 						<br>
-							This personal project displays my up-to-date <a href=https://www.strava.com/>Strava</a> activity information on a interactive mobile friendly data dashboard using Leaflet to display geographical data and Chart.JS to display graphical information. Data can be filtered and explored by using buttons, date selections, searches, and by selecting geographical data.
+							This map displays my personally collected and processed orthomosaic drone imagery. All of these collections are non-commerical and flown under the FAA recreational exception rules.
 						</p>
 						<p>
 							Histroic Strava data were initially pulled from the <a href=https://developers.strava.com/>Strava API</a> and processed using Python, then a webhook subscription was created which updates my server when new activities are available for processing. Strava activity data are processed in Python using PostGIS functions to remove private areas and to simplify geometries to reduce file sizes, at the cost of spatial accuracy. Data are pre-calculated and served to the Leaflet map in the TopoJSON format to further reduce file sizes and server response times.
@@ -49,10 +55,10 @@
 			 </div>
 		 </div>
 		</div>
-		<script src="{{ url_for('static', filename='js/modalFastLoad.js') }}"></script>
-		<script>
-		var email = "gav" + "lea" + "web" + "@g" + "mail" + ".com";
-		document.getElementById("emailaddr").innerHTML = "<a href='mailto:" + email + "'>" + email + "</a>"
-		</script>
+		<div id="viewDiv"></div>
+		<!-- <div class="item map-panel detail-panel-col">
+			<div id='map' class="map"></div>
+		</div> -->
+		{% include 'mapFooter.html' %}
 </body>
 </html>

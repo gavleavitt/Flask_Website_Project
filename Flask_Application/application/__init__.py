@@ -107,6 +107,7 @@ from .WebAppProjects.WaterQualityViewer.routes import sbcWaterQuality_BP
 from .WebAppProjects.WaterQualityViewer.API_Routes import sbcWaterQualityAPI_BP
 from .WebAppProjects.LACO_SW_TraceApp.routes import lacoSWTraceapp_BP
 from .WebAppProjects.LACO_SW_TraceApp.API_Routes import lacoSWTraceapp_API_BP
+from .WebAppProjects.OrthomosaicViewer.routes import orthoviewer_BP
 # Register blueprints with application
 app.register_blueprint(mainSite_BP)
 app.register_blueprint(projectPages_BP)
@@ -118,6 +119,7 @@ app.register_blueprint(sbcWaterQuality_BP, url_prefix='/webapps/sbcwaterquality'
 app.register_blueprint(lacoSWTraceapp_BP, url_prefix='/webapps/lacoswtrace')
 app.register_blueprint(sbcWaterQualityAPI_BP, url_prefix='/api/v1/sbcwaterquality')
 app.register_blueprint(stravaActDashAPI_Admin_BP, url_prefix='/admin/api/v1/activitydashboard')
+app.register_blueprint(orthoviewer_BP, url_prefix='/webapps/orthoviewer')
 # app.register_blueprint(lacoSWTraceapp_API_BP, url_prefix='/api/v1/trace')
 app.register_blueprint(lacoSWTraceapp_API_BP, url_prefix='/api/v1/trace')
 # # Set up celery client, allows async tasks to be setup
