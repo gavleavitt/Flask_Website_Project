@@ -3,14 +3,19 @@
   --calcite-panel-max-width: 300px;
   --titlebackground: #dbdbdb;
 }
-html,
-body {
+/* body, */
+html {
   height: 100%;
-  width: 100%;
-  margin: 0;
-  padding: 0;
+  /* width: 100%; */
+  margin: 0px;
+  padding: 0px;
   background-color:var(--titlebackground);
 }
+body {
+  margin: 0px;
+  height:100%;
+}
+
 calcite-pick-list-item{
   white-space: pre-line;
 }

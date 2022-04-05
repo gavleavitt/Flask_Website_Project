@@ -19,16 +19,16 @@
 				Summary
 			</h2>
 			<p>
-				This application was developed as an unofficial personal project and allows a user to trace storm water flow within LA County and cities storm drain networks. Flow can be traced upstream or downstream,
+				This application was developed as an unofficial personal project and allows a user to trace stormwater flow within LA County storm drain networks. Flow can be traced upstream or downstream,
 				and when tracing upstream custom generated subwatershed basins can be used to identify parcels which may be contributing water or pollutants to the storm drain system. Flow can be blocked in the trace process
-				to exclude certain network nodes from the analysis. These results, excluding parcels and subwatersheds, can be exported as a CSV or as geojson files.
+				to exclude certain network nodes from the analysis. These results, excluding parcels and subwatersheds, can be exported as an CSV or as GeoJSON files.
 			</p>
 			<p>
 				This application uses the ArcGIS API for Javascript for client-side mapping and results handling and uses the Esri Caclite Design System for UI elements. Server-side processing occurs on a Python Flask server
-				which executes SQL commands to a Postgres/PostGIS database.
+				which generates and exectues SQL commands to a Postgres/PostGIS database.
 			</p>
 			<p>
-				LA County's storm drain data were downloaded from <a href="https://pw.lacounty.gov/fcd/StormDrain/index.cfm">here</a> and edited by splitting such that polyline feature's start and end points did not intersect midline, all line end points must either end at a point feature or the start of another line feature.
+				LA County's storm drain data, which includes data within many cities, were downloaded from <a href="https://pw.lacounty.gov/fcd/StormDrain/index.cfm">here</a> and edited by splitting such that polyline feature's start and end points did not intersect midline, all line end points must either end at a point feature or the start of another line feature.
 				While the source data has outlets for the system, many gravity mains were shown as ending without outlets, in these cases pseudo outlets were derived. Source data were also snapped such that nearby, ~5ft of each other,
 				features were correctly coincident. Finally, all line feature geometries and IDs were combined into a single network table that was noded using pgrRouting's <a href="https://docs.pgrouting.org/3.1/en/pgr_createTopology.html">pgr_createTopology</a>.
 			</p>

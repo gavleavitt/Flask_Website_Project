@@ -16,9 +16,13 @@ calcite-pick-list-item{
 }
 
 
-.titlediv{
-  margin:3px;
+.titletext {
+  align-items: unset;
 }
+
+/* .titlediv{
+  margin:3px;
+} */
 * {
   box-sizing: border-box;
 }

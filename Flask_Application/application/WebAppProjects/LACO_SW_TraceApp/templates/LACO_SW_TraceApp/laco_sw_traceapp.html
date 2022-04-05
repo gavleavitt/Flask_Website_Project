@@ -14,6 +14,9 @@
       console.log(JSON.stringify(traceurl))
       console.log(traceurl)
     </script>
+    <!-- Standard custom CSS/JS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/AppTitleBar.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/MapStandardCSS.css') }}">
 
     <!-- Modal JS -->
     <!-- <script src="{{ url_for('static', filename='js/modal.js') }}"></script> -->
@@ -197,7 +200,7 @@
              If you have any questions, feature suggestions, comments, or notice any errors/bugs feel free to email me at <span id="emailaddr"></span>
              </p>
              <p>
-               You can see my other projects under my <a href=/#goto-proj>projects</a> section and you can see a description on how I made this map <a href={{ url_for('projectPages_BP.stravaserversideprocessing')}}>here</a>.
+               You can see my other projects under my <a href=/#goto-proj>projects</a> section and you can see a description on how I made this map <a href={{ url_for('projectPages_BP.lacostormwatertrace')}}>here</a>.
              </p>
              <p>You can visit the GitHub repo for the overall website project <a href=https://github.com/gavleavitt/Flask_Website_Project target="_blank">here</a> and the repo for the website/Esri JS API application <a href=https://github.com/gavleavitt/Flask_Website_Project/tree/master/Flask_Application/application/WebAppProjects/LACO_SW_TraceApp target="_blank">here</a>.
              </p>

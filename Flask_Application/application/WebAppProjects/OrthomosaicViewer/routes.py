@@ -7,4 +7,5 @@ orthoviewer_BP = Blueprint('orthoviewer_BP', __name__,
 
 @orthoviewer_BP.route("/orthoviewermain")
 def orthoviewermain():
-    return render_template("OrthomosaicViewer/OrthomosaicViewerMainMap.html", title="Orthomosaic Viewer")
+    tilesJSON = ""
+    return render_template("OrthomosaicViewer/OrthomosaicViewerMainMap.html", title="Orthomosaic Viewer", s3Tiles = tilesJSON)

@@ -1,19 +1,18 @@
 :root{
-  --backgroundwhite: #fcfcfc;
-  --titlebackground: #f7f7f7;
+  /* --backgroundwhite: #fcfcfc;
+  --titlebackground: #f7f7f7; */
 }
 body {
   background-color:var(--backgroundwhite:);
-  height: 98%;
+  height: 100%;
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
-html{
+/* html{
   height: 100%;
-  /* margin: 8px; */
-}
+} */
 
 p{
   font-size: 16px;
@@ -24,7 +23,7 @@ p{
   height:100%;
   grid-template-columns: 1fr;
   grid-template-rows: 0.05fr 0.95fr;
-  grid-gap: 0.4rem;
+  /* grid-gap: 0.4rem; */
 }
 
 .sansserif {
@@ -144,6 +143,7 @@ p{
   text-align: center;
   font-size: 1.2rem;
   font-weight: bold;
+  margin: 3px;
 }
 
 .detail-context{
@@ -185,7 +185,7 @@ p{
 .titlediv{
   display:flex;
   align-items: center;
-  background-color: #f7f7f7;
+  /* background-color: #f7f7f7; */
   display: grid;
   grid-template-columns: 0.5fr 0.5fr;
   grid-template-rows: 1fr;
@@ -336,64 +336,6 @@ p{
   border-bottom:#7b9798 solid 2px;
 }
 
-
-
-/* Modal CSS from https://www.w3schools.com/howto/howto_css_modals.asp */
-/* The Modal (background) */
-.modal {
-  display: none; /* Hidden by default */
-  position: fixed; /* Stay in place */
-  z-index: 2; /* Sit on top */
-  padding-top: 100px; /* Location of the box */
-  left: 0;
-  top: 0;
-  width: 100%; /* Full width */
-  height: 100%; /* Full height */
-  overflow: auto; /* Enable scroll if needed */
-  background-color: rgb(0,0,0); /* Fallback color */
-  background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
-  /* border-radius: 30px;
-  border: 2px solid #888; */
-}
-
-/* Modal Content */
-.modal-content-container {
-  background-color: var(--titlebackground);
-  color: #161616;
-  /* display: grid; */
-  /* grid-template-rows: 32px 1fr; */
-  margin: auto;
-  padding-top: 10px;
-  padding-bottom: 10px;
-  padding-left: 25px;
-  padding-right: 25px;
-  border: 2px solid #000;
-  border-radius: 20px;
-  /* width: 60%; */
-  font-size: 16px;
-  overflow-y: auto;
-  max-height: 80%;
-  max-width: 80%;
-
-  /* box-sizing: border-box; */
-}
-
-/* The Close Button */
-.close {
-  /* grid-row: 1/1; */
-  color: #aaaaaa;
-  font-size: 32px;
-  font-weight: bold;
-  margin-top: -10px;
-  /* text-align: right; */
-  /* position: sticky; */
-  /* position: -webkit-sticky; */
-  position: fixed;
-  right: 10%;
-  transform: translateX(40%);
-  /* background-color: var(--titlebackground); */
-  /* opacity: 95%; */
-}
 
 .modal-text{
   /* grid-row: 2/2; */

@@ -2,9 +2,11 @@
 <html>
 <head>
 	<title>Water Quality Map</title>
-
 	{% include 'projectimports.html' %}
-
+	<!-- Standard custom CSS/JS -->
+	<link rel="stylesheet" href="{{ url_for('static', filename='css/AppTitleBar.css') }}">
+	<link rel="stylesheet" href="{{ url_for('static', filename='css/MapStandardCSS.css') }}">
+	{% include 'projectimports.html' %}
 	<!-- Chart.js JS-->
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.min.js"></script>
 	<!-- Chart.js CSS -->
@@ -14,7 +16,6 @@
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"/>
 	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet.locatecontrol@0.72.0/dist/L.Control.Locate.min.css" />
 	<script src="https://cdn.jsdelivr.net/npm/leaflet.locatecontrol@0.72.0/dist/L.Control.Locate.min.js" charset="utf-8"></script>
-
 </head>
 <body>
 	<div class="container sansserif">
@@ -28,10 +29,8 @@
 				<button class="headerbtn" id="btn">Map Details</button>
 			</div>
 			<!-- Modal -->
-			<!-- The Modal -->
 			<div id="myModal" class="modal">
 			  <div class="modal-content-container">
-			    <!-- <div class="close">&times;</div> -->
 					<div class="close">&times;</div>
 					<div class="modal-text">
 						<p style="margin-top:0px;"><b>Map Details</b>
