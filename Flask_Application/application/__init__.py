@@ -24,6 +24,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlathanor import FlaskBaseModel, initialize_flask_sqlathanor
 from flask_sqlalchemy import SQLAlchemy
+from pygeoapi.flask_app import BLUEPRINT as pygeoapi_blueprint
 
 # Create flask application, I believe "application" has to be used to work properly on AWS EB
 application = app = Flask(__name__, subdomain_matching=True)
@@ -120,6 +121,8 @@ app.register_blueprint(lacoSWTraceapp_BP, url_prefix='/webapps/lacoswtrace')
 app.register_blueprint(sbcWaterQualityAPI_BP, url_prefix='/api/v1/sbcwaterquality')
 app.register_blueprint(stravaActDashAPI_Admin_BP, url_prefix='/admin/api/v1/activitydashboard')
 app.register_blueprint(orthoviewer_BP, url_prefix='/webapps/orthoviewer')
+# Register PyGeoAPI
+app.register_blueprint(pygeoapi_blueprint, url_prefix='/pygeo')
 # app.register_blueprint(lacoSWTraceapp_API_BP, url_prefix='/api/v1/trace')
 app.register_blueprint(lacoSWTraceapp_API_BP, url_prefix='/api/v1/trace')
 # # Set up celery client, allows async tasks to be setup

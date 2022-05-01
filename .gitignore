@@ -32,3 +32,4 @@ logs/
 Flask_Application.zip
 Flask_Application/requirements_old.txt
 StartFlaskLocalHost
+pygeosettings.yml
