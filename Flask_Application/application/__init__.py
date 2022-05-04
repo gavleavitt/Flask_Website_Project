@@ -44,6 +44,8 @@ application.logger.debug(f"Flask is running in {application.config['ENV']} mode"
 # Set logging and SQL DB connection settings based on if in production or development mocde
 if application.config['ENV'] == "development":
     # Localhost development testing
+    # TODO: Test
+    app.config['SERVER_NAME'] = "leavitttesting.local:5000"
     application.logger.debug('Development mode')
     dirname = os.path.dirname(__file__)
     # handler = RotatingFileHandler(os.path.join(dirname, '../logs/application.log'), maxBytes=1024, backupCount=5)
@@ -58,8 +60,9 @@ else:
     # Live deployment
     # see https://stackoverflow.com/a/60549321
     # handler = RotatingFileHandler('/tmp/application.log', maxBytes=1024, backupCount=5)
-    # app.config['SERVER_NAME'] = "leavittmapping.com"
     application.logger.debug('Production mode')
+    # TODO: Test
+    app.config['SERVER_NAME'] = "leavittmapping.com"
     handler = logging.FileHandler('/tmp/application.log')
     app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get("DBCON_PROD")
     application.logger.debug(f"Setting up production with the server name: {app.config['SERVER_NAME']}")
@@ -122,7 +125,8 @@ app.register_blueprint(sbcWaterQualityAPI_BP, url_prefix='/api/v1/sbcwaterqualit
 app.register_blueprint(stravaActDashAPI_Admin_BP, url_prefix='/admin/api/v1/activitydashboard')
 app.register_blueprint(orthoviewer_BP, url_prefix='/webapps/orthoviewer')
 # Register PyGeoAPI
-app.register_blueprint(pygeoapi_blueprint, url_prefix='/pygeo')
+# app.register_blueprint(pygeoapi_blueprint, url_prefix='/pygeo')
+app.register_blueprint(pygeoapi_blueprint, subdomain='geo')
 # app.register_blueprint(lacoSWTraceapp_API_BP, url_prefix='/api/v1/trace')
 app.register_blueprint(lacoSWTraceapp_API_BP, url_prefix='/api/v1/trace')
 # # Set up celery client, allows async tasks to be setup
