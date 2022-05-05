@@ -4,6 +4,8 @@ from io import StringIO
 from application import application, errorEmail
 from application.WebAppProjects.StravaActivityViewer import DBQueriesStrava, StravaAWSS3, OAuthStrava
 import time
+import requests
+
 def singleActivityProcessing(client, actID):
     """
     Processes a single Strava Activity by placing the full activity in the database, making a simplified and masked public
@@ -18,7 +20,9 @@ def singleActivityProcessing(client, actID):
     try:
         # Wait 45 minutes before processing update, this allows time for user to update any ride details before they
         #  are processed, in particular changing details uploaded from Wahoo
-        time.sleep(2700)
+        # Check if in development mode, if not wait 45 minutes
+        if application.config['ENV'] != "development":
+            time.sleep(2700)
         application.logger.debug("Getting full activity details")
         # Get all activity details for newly created activity, including stream data
         activity = getFullDetails(client, actID)
@@ -115,8 +119,10 @@ def getFullDetails(client, actId):
     Log.setLevel('ERROR')
     # Stream data to get from activity streams
     types = ['time', 'latlng', 'altitude', 'velocity_smooth', 'grade_smooth', "distance", "heartrate", "cadence", "temp"]
-    # Get activity details as a dictionary
-    act = client.get_activity(actId).to_dict()
+    # Get activity details as a dictionary, stravalib method no longer works properly
+    # act = client.get_activity(actId).to_dict()
+    headers = {f"Authorization": f"Bearer {client.access_token}"}
+    act = requests.get(f"https://www.strava.com/api/v3/activities/{actId}", headers=headers).json()
     # Get the activity stream details for the activity id
     stream = client.get_activity_streams(actId, types=types)
     # Get athlete ID directly from API call, instead of digging into the nested result provided by get_activity
