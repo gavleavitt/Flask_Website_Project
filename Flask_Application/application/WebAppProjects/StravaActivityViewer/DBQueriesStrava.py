@@ -146,6 +146,7 @@ def insertOriginalAct(actDict):
     -------
     Nothing. Data are inserted into Postgres/PostGIS.
     """
+    # TODO: Run a make valid on the input geometry
     insert = strava_activities(actID=actDict['actId'], upload_id=actDict['upload_id'], name=actDict['name'],
                                distance=actDict['distance'], moving_time=actDict['moving_time'],
                                elapsed_time=actDict['elapsed_time'],
@@ -165,7 +166,7 @@ def insertOriginalAct(actDict):
                                type_extended=actDict['type_extended'], avgtemp=actDict['average_temp'],
                                has_heartrate=actDict['has_heartrate'], average_cadence=actDict["average_cadence"],
                                average_heartrate=actDict['average_heartrate'], max_heartrate=actDict['max_heartrate'],
-                               geom=actDict['geom_wkt'])
+                               geom=sqlfunc.ST_MakeValid(actDict['geom_wkt']))
     session = Session()
     session.add(insert)
     session.commit()
@@ -302,7 +303,7 @@ def processActivitiesPublic(recordID):
     # vertex snapping
     gridSnap = 5
     # See https://gis.stackexchange.com/a/90271, fixes non-noded intersection error
-    nonNodedSnap = 0.0001
+    nonNodedSnap = 0.001
     # Extract polygons from geometry collection
     collectionExtract = 3
     # Create CTE to query privacy zone polygons, combine them, extract polygons, and transform to geometricProj

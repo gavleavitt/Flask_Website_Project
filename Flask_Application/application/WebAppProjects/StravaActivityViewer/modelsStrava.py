@@ -92,8 +92,10 @@ class strava_activities(Base):
     average_cadence = Column(Float)
 
     ##
-    geom = Column(Geometry(geometry_type='LINESTRINGM', srid=4326, from_text = 'ST_GeomFromEWKT',  name='geometry',
-                           dimension=3))
+    # geom = Column(Geometry(geometry_type='LINESTRINGM', srid=4326, from_text = 'ST_GeomFromEWKT',  name='geometry',
+    #                        dimension=3))
+    geom = Column(Geometry(geometry_type='LINESTRING', srid=4326, from_text = 'ST_GeomFromEWKT',  name='geometry',
+                           dimension=2))
     gear_rel = relationship(strava_gear, backref="strava_gear")
     ath_rel = relationship(athletes, backref="strava_athletes")
 
