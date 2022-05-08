@@ -1,10 +1,9 @@
 from flask import Blueprint, request, Response, redirect, url_for
 from application.util.flaskAuth.authentication import auth
-from application.WebAppProjects.StravaActivityViewer import DBQueriesStrava, APIFunctionsStrava, OAuthStrava, \
-    StravaAWSS3
+from application.WebAppProjects.StravaActivityViewer import DBQueriesStrava, APIFunctionsStrava, OAuthStrava
+from application.util import StravaAWSS3
 import os
 from application import application
-import logging
 import secrets
 import time
 import traceback

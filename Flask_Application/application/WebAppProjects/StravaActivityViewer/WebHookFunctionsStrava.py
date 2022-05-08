@@ -1,6 +1,5 @@
-import os
 from application import application, errorEmail
-from application.WebAppProjects.StravaActivityViewer import OAuthStrava, DBQueriesStrava, APIFunctionsStrava, StravaAWSS3
+from application.WebAppProjects.StravaActivityViewer import OAuthStrava, DBQueriesStrava, APIFunctionsStrava
 import json
 from threading import Thread
 from flask import Response

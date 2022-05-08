@@ -42,6 +42,30 @@ def create_presigned_url(fileID, expiration=300):
     # The response contains the presigned URL
     return response
 
+def get_presigned_url(fileID, bucket, expiration=300):
+    """Generate a presigned URL to share an S3 object
+
+    :param expiration: Time in seconds for the presigned URL to remain valid
+    :return: Presigned URL as string. If error, returns None.
+    """
+    # Generate a presigned URL for the S3 object
+    # print("Generating temp access URL")
+    s3_client = connectToS3()
+
+    try:
+        if fileID:
+            response = s3_client.generate_presigned_url('get_object',
+                                                        Params={'Bucket': bucket,
+                                                                'Key': fileID},
+                                                        ExpiresIn=expiration)
+        else:
+            return None
+    except ClientError as e:
+        logging.error(e)
+        return None
+    # The response contains the presigned URL
+    return response
+
 def writeMemoryCSV(streamData):
     """
     Converts activity stream data dictionary to a In-memory text buffer, avoids needing to write a local file since data

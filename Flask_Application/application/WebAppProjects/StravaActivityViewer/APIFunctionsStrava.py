@@ -2,7 +2,8 @@ from datetime import datetime, timedelta
 import logging, os, csv
 from io import StringIO
 from application import application, errorEmail
-from application.WebAppProjects.StravaActivityViewer import DBQueriesStrava, StravaAWSS3, OAuthStrava
+from application.WebAppProjects.StravaActivityViewer import DBQueriesStrava
+from application.util import StravaAWSS3
 import time
 def singleActivityProcessing(client, actID):
     """
