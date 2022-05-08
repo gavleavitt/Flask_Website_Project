@@ -1,7 +1,8 @@
 from application.WebAppProjects.StravaActivityViewer.modelsStrava import athletes, sub_update, strava_activities, \
     strava_activities_masked, strava_gear, AOI, webhook_subs
 from datetime import datetime
-from application import application, Session, errorEmail
+from application import application, Session
+from application.util.ErrorEmail import errorEmail
 from sqlalchemy import func as sqlfunc
 import geojson
 from geojson import Feature, FeatureCollection, MultiLineString

@@ -2,9 +2,9 @@ import os
 import boto3
 from botocore.exceptions import ClientError
 import logging
-from io import StringIO
-import csv
-from application import application, errorEmail
+from application import application
+from application.util.ErrorEmail import errorEmail
+
 
 def connectToS3():
     """

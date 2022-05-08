@@ -1,7 +1,7 @@
 from application import application
 from flask import Blueprint, Response, request
 from application.WebAppProjects.StravaActivityViewer import WebHookFunctionsStrava
-from application.util import StravaAWSS3
+from application.util.Boto3AWS import StravaAWSS3
 
 stravaActDashAPI_BP = Blueprint('stravaActDashAPI_BP', __name__,
                         template_folder='templates',

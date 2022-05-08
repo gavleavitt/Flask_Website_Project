@@ -1,10 +1,11 @@
 import smtplib, ssl, os, email
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-from application import logger
-from application import application
+# from application import logger
+# from application import application
 from datetime import datetime
 import traceback
+import logging
 
 port = 465  # For SSL
 # Get email settings from environmental variables
@@ -12,6 +13,7 @@ emailpassword = os.environ.get("EMAILPASS")
 emailaddr = os.environ.get("EMAILADDR")
 emailtoaddr = os.environ.get("EMAILTOADDR")
 
+logging.basicConfig(filename="ErrorEmail.log", level=logging.DEBUG)
 
 def sendErrorEmail(script, exceptiontype, body):
     """
@@ -32,14 +34,14 @@ def sendErrorEmail(script, exceptiontype, body):
     body = str(traceback.format_exc())
     exceptiontype = str(exceptiontype)
     try:
-        application.logger.debug("Trying to send error email")
+        logging.debug("Trying to send error email")
         # Create a secure SSL context
         context = ssl.create_default_context()
         # create connection to gmail smtplib server
         with smtplib.SMTP_SSL("smtp.gmail.com", port, context=context) as server:
             # login to server
             server.login(emailaddr, emailpassword)
-            application.logger.debug("Logged into SMTP server")
+            logging.debug("Logged into SMTP server")
             # Create a multipart message and set headers
             message = MIMEMultipart()
             message["from"] = emailaddr
@@ -48,12 +50,12 @@ def sendErrorEmail(script, exceptiontype, body):
             # Add body to email
             message.attach(MIMEText(body, "plain"))
             # Send email
-            application.logger.debug("Issuing command to send formatted email")
+            logging.debug("Issuing command to send formatted email")
             server.sendmail(emailaddr, emailtoaddr, message.as_string())
             # print("Message has been sent!")
     except Exception as e:
-        application.logger.debug("Failed to send error email")
-        application.logger.error(e)
+        logging.debug("Failed to send error email")
+        logging.error(e)
         # print("The following exception was thrown when trying to email error report")
         # print(e)
 
@@ -75,14 +77,14 @@ def sendSuccessEmail(script, body):
     # Convert error message and exception type to strings
     body = str(body)
     try:
-        application.logger.debug("Trying to send success email")
+        logging.debug("Trying to send success email")
         # Create a secure SSL context
         context = ssl.create_default_context()
         # create connection to gmail smtplib server
         with smtplib.SMTP_SSL("smtp.gmail.com", port, context=context) as server:
             # login to server
             server.login(emailaddr, emailpassword)
-            application.logger.debug("Logged into SMTP server")
+            logging.debug("Logged into SMTP server")
             # Create a multipart message and set headers
             message = MIMEMultipart()
             message["from"] = emailaddr
@@ -91,11 +93,11 @@ def sendSuccessEmail(script, body):
             # Add body to email
             message.attach(MIMEText(body, "plain"))
             # Send email
-            application.logger.debug("Issuing command to send formatted email")
+            logging.debug("Issuing command to send formatted email")
             server.sendmail(emailaddr, emailtoaddr, message.as_string())
             # print("Message has been sent!")
     except Exception as e:
-        application.logger.debug("Failed to send success email")
-        application.logger.error(e)
+        logging.debug("Failed to send success email")
+        logging.error(e)
         # print("The following exception was thrown when trying to email error report")
         # print(e)

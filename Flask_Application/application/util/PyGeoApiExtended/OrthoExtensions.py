@@ -1,12 +1,10 @@
-from pygeoapi.provider.base import BaseProvider
 from pygeoapi.provider.postgresql import PostgreSQLProvider
-import application
-from application.util import StravaAWSS3
+# from application.util.Boto3AWS import StravaAWSS3
+from Boto3AWS import StravaAWSS3
 import os
 # https://stackoverflow.com/questions/805066/how-do-i-call-a-parent-classs-method-from-a-child-class-in-python
 class orthoPoints(PostgreSQLProvider):
     def query(self, **kwargs):
-        application.logger.debug("query request!")
         # queryRes= super().query(**kwargs)
         queryRes = PostgreSQLProvider.query(self, **kwargs)
         # application.logger.debug(queryRes)
@@ -16,10 +14,8 @@ class orthoPoints(PostgreSQLProvider):
                                                          expiration=600)
             queryRes['features'][c]['properties']["URL"] = preSignedURL
         # process queryRes
-        application.logger.debug(queryRes)
         return queryRes
     def get(self, identifier, **kwargs):
-        application.logger.debug("get request!")
         queryRes = PostgreSQLProvider.get(self, identifier, **kwargs)
         preSignedURL = StravaAWSS3.get_presigned_url(queryRes['properties']['Media Name'], os.getenv("orthobucket"),
                                                      expiration=600)

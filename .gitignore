@@ -1,4 +1,4 @@
-
+*.log
 *.pyc
 Misc/leaflet_testing/script_config.py
 Data.*
@@ -34,3 +34,4 @@ Flask_Application/requirements_old.txt
 StartFlaskLocalHost
 pygeosettings.yml
 openapi.yml
+Flask_Application/ErrorEmail.log

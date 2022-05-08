@@ -1,9 +1,10 @@
 from datetime import datetime, timedelta
 import logging, os, csv
 from io import StringIO
-from application import application, errorEmail
+from application import application
+from application.util.ErrorEmail import errorEmail
 from application.WebAppProjects.StravaActivityViewer import DBQueriesStrava
-from application.util import StravaAWSS3
+from application.util.Boto3AWS import StravaAWSS3
 import time
 def singleActivityProcessing(client, actID):
     """

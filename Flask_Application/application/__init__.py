@@ -96,7 +96,7 @@ application.logger.debug("Python Flask debugger active!")
 # Import HTTP auth
 from application.util.flaskAuth.authentication import auth
 # Import error email reporting
-from application.util import errorEmail
+from .util.ErrorEmail import errorEmail
 # Import shared assets
 # from .util import assets
 # Import Blueprints
@@ -124,6 +124,7 @@ app.register_blueprint(lacoSWTraceapp_BP, url_prefix='/webapps/lacoswtrace')
 app.register_blueprint(sbcWaterQualityAPI_BP, url_prefix='/api/v1/sbcwaterquality')
 app.register_blueprint(stravaActDashAPI_Admin_BP, url_prefix='/admin/api/v1/activitydashboard')
 app.register_blueprint(orthoviewer_BP, url_prefix='/webapps/orthoviewer')
+
 # Register PyGeoAPI
 # app.register_blueprint(pygeoapi_blueprint, url_prefix='/pygeo')
 app.register_blueprint(pygeoapi_blueprint, subdomain='geo')

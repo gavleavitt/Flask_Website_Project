@@ -6,9 +6,9 @@ import pdfplumber
 import unicodedata
 from datetime import datetime
 import hashlib
-from urllib.parse import quote
 from urllib.request import urlretrieve
-from application import app, errorEmail, GoogleDrive_WaterQual, application
+from application import app, GoogleDrive_WaterQual, application
+from application.util.ErrorEmail import errorEmail
 from application import DB_Queries_WaterQual as DBQ_PDF
 import os
 from application import logger

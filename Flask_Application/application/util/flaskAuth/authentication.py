@@ -12,13 +12,14 @@ from flask_httpauth import HTTPBasicAuth
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
 import os
-
-import application
-from application.util.flaskAuth.modelsAuth import Roles, User
-from application import Session
+from flaskAuth.modelsAuth import Roles, User
+# from application import Session
 # Sets up auth object, is modified by decorators further down the script and called when a
 # user attempts to authenticate when visiting a route.
 auth = HTTPBasicAuth()
+
+engine = create_engine(os.environ.get("DBCON"))
+Session = sessionmaker(bind=engine)
 
 # def createSession():
 #     engine = create_engine(os.environ.get("DBCON"))

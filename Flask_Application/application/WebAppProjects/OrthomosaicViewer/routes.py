@@ -9,3 +9,8 @@ orthoviewer_BP = Blueprint('orthoviewer_BP', __name__,
 def orthoviewermain():
     tilesJSON = ""
     return render_template("OrthomosaicViewer/OrthomosaicViewerMainMap.html", title="Orthomosaic Viewer", s3Tiles = tilesJSON)
+
+@orthoviewer_BP.route("/orthoviewer/<int:id>", methods=['GET'])
+def orthoviewersingle():
+    tilesJSON = ""
+    return render_template("OrthomosaicViewer/OrthomosaicViewerMainMap.html", title="Orthomosaic Viewer", s3Tiles = tilesJSON)

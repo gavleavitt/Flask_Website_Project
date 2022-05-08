@@ -3,8 +3,9 @@ import unicodedata
 from datetime import datetime
 import hashlib
 from urllib.request import urlretrieve
-from application import app, errorEmail, application
-from application.WebAppProjects.WaterQualityViewer import GoogleDriveUploadWaterQuality, DBQueriesWaterQuality, AWSS3Upload
+from application import app, application
+from application.util.ErrorEmail import errorEmail
+from application.WebAppProjects.WaterQualityViewer import DBQueriesWaterQuality, AWSS3Upload
 import os
 from application import logger
 from geojson import Point, Feature, FeatureCollection
