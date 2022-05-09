@@ -28,7 +28,9 @@ from pygeoapi.flask_app import BLUEPRINT as pygeoapi_blueprint
 
 # Create flask application, I believe "application" has to be used to work properly on AWS EB
 application = app = Flask(__name__, subdomain_matching=True)
-cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
+# cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
+cors = CORS(app, origins=["https://leavittmapping.com","http://leavitttesting.local:5000",
+                          "http://geo.leavitttesting.local:5000"])
 # Setup CORS
 # CORS(app)
 
