@@ -8,9 +8,13 @@
 	<link rel="stylesheet" href="{{ url_for('static', filename='css/MapStandardCSS.css') }}">
 
 	<!-- Project specific imports -->
-	<script src="https://cdn.jsdelivr.net/gh/openlayers/openlayers.github.io@master/en/v6.14.1/build/ol.js"></script>
+	<!-- <script src="https://cdn.jsdelivr.net/gh/openlayers/openlayers.github.io@master/en/v6.14.1/build/ol.js"></script>
 	<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/openlayers/openlayers.github.io@master/en/v6.12.0/css/ol.css" type="text/css">
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.6.0/proj4.js"></script>
+
+	<!-- ol-ext -->
+	<!-- <link rel="stylesheet" href="https://cdn.rawgit.com/Viglino/ol-ext/master/dist/ol-ext.min.css" /> -->
+	<!-- <script type="text/javascript" src="https://cdn.rawgit.com/Viglino/ol-ext/master/dist/ol-ext.min.js"></script> -->
 	<!-- <script async src="https://cdn.jsdelivr.net/npm/geotiff"></script> -->
 	<!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/openlayers/4.6.5/ol.js" integrity="sha512-O7kHS9ooekX8EveiC94z9xSvD/4xt10Qigl6uEKvspYykdux3Ci5QNu5fwi4ca0ZkZI/oCgx5ja8RklWUEqzxQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/openlayers/4.6.5/ol.css" integrity="sha512-D2c/nmSVlwoZk29SLwJK8GkLyCyPuNbZ/vZQL/lNzw+o+yXzsbnJt7lK/iCfdBmgyLRDi0qx27gpE8Zb1C6I7g==" crossorigin="anonymous" referrerpolicy="no-referrer" /> -->
@@ -18,8 +22,13 @@
 	<!-- Custom local javascript functions -->
 	<!-- Custom CSS -->
 
+	<script src='https://api.mapbox.com/mapbox.js/v3.3.1/mapbox.js'></script>
+	<link href='https://api.mapbox.com/mapbox.js/v3.3.1/mapbox.css' rel='stylesheet' />
+
+
+
 	<!-- Custom local javascript functions -->
-	<script type="module" src="{{url_for('orthoviewer_BP.static', filename='OrthomosaicViewer/js/customjs.js')}}"></script>
+	<script type="module" src="{{url_for('orthoviewer_BP.static', filename='OrthomosaicViewer/js/customjsmb.js')}}"></script>
 	<!-- Custom CSS -->
 	<link rel="stylesheet" href="{{ url_for('orthoviewer_BP.static', filename='OrthomosaicViewer/css/customCSS.css') }}"/>
 
