@@ -94,9 +94,10 @@ fetch('http://geo.leavitttesting.local:5000/collections/mission_points_extended/
       srcList.push(
         new ol.layer.WebGLTile({
           source: source,
-          name: item.properties["Mission Name"],
-          title: item.properties["Mission Name"],
+          // name: item.properties["Mission Name"] + "\n" item.properties["Mission Date"],
+          title: item.properties["Mission Name"] + "<br><span>" + item.properties["Mission Date"].substring(0,10) + " - " + item.properties["Mission Elevation"] + " Ft" +"</span>",
           crossOrigin: 'anonymous',
+          // extent: true
         })
       )
     });
@@ -128,19 +129,21 @@ var switcher = new ol.control.LayerSwitcher({
   show_progress:true,
   collapsed: false,
   extent: true,
-  // trash: true,
+  trash: true,
   // oninfo: function (l) { alert(l.get("title")); }
 });
 // Add a new button to the list
-switcher.on('drawlist', function(e) {
-  var layer = e.layer;
-  $('<div>').text('?')// addClass('layerInfo')
-    .click(function(){
-      // Alter to show a popup/window instead of an altert
-      alert(layer.get('title'));
-    })
-    .appendTo($('> .ol-layerswitcher-buttons', e.li));
-});
+
+// switcher.on('drawlist', function(e) {
+//   var layer = e.layer;
+//   $('<div>').text('?')// addClass('layerInfo')
+//     .click(function(){
+//       // Alter to show a popup/window instead of an altert
+//       alert(layer.get('title'));
+//     })
+//     .appendTo($('> .ol-layerswitcher-buttons', e.li));
+// });
+
 // Add a button to show/hide the layers
 // var button = $('<div class="toggleVisibility" title="show/hide">')
 //   .text("Show/hide all")
@@ -156,6 +159,61 @@ switcher.on('drawlist', function(e) {
 // switcher.setHeader($('<div>').append(button).get(0))
 
 map.addControl(switcher);
+
+// // The serach input
+// var search = $('<input>').attr('placeholder','filter');
+// function filterLayers(rex, layers) {
+//   var found = false;
+//   layers.forEach(function(l){
+//     // Layer Group
+//     if (l.getLayers) {
+//       if (filterLayers(rex, l.getLayers().getArray())) {
+//         l.set('noLayer', false);
+//         found = true;
+//       } else {
+//         l.set('noLayer', true);
+//       }
+//     } else {
+//       if (rex.test(l.get('title'))) {
+//         l.setVisible(true);
+//         found = true;
+//       } else {
+//         l.setVisible(false);
+//       }
+//     }
+//   });
+//   return found;
+// }
+// search.on('keyup change', function(){
+//   var rex = new RegExp(search.val());
+//   filterLayers(rex, imageryGroup.layers);
+//   // Force layer switcher redraw
+//   // layers[0].changed();
+// });
+//
+// // Add search input in the switcher header
+// switcher.setHeader(search.get(0));
+//
+// // When switcher is drawn hide/show the list item according to its visility
+// switcher.on('drawlist', function(e) {
+//   // Hide Layer Group with no layers visible
+//   if (e.layer.getLayers) {
+//     if (e.layer.get('noLayer')) {
+//       $(e.li).hide();
+//     } else {
+//       $(e.li).show();
+//     }
+//   } else {
+//     var rex = new RegExp(search.val());
+//     if (rex.test(e.layer.get('title'))) {
+//       $(e.li).show();
+//     } else {
+//       $(e.li).hide();
+//     }
+//   }
+// });
+
+
 // see: https://viglino.github.io/ol-ext/examples/control/map.switcher.html
 // Insert mapbox layer in layer switcher
 // function displayInLayerSwitcher(b) {

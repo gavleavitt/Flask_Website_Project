@@ -11,14 +11,14 @@ class orthoPoints(PostgreSQLProvider):
         # media name: ['features'][5]['properties']['Media Name']
         for c,i in enumerate(queryRes['features']):
             preSignedURL = StravaAWSS3.get_presigned_url(i['properties']['Media Name'], os.getenv("orthobucket"),
-                                                         expiration=600)
+                                                         expiration=1800)
             queryRes['features'][c]['properties']["URL"] = preSignedURL
         # process queryRes
         return queryRes
     def get(self, identifier, **kwargs):
         queryRes = PostgreSQLProvider.get(self, identifier, **kwargs)
         preSignedURL = StravaAWSS3.get_presigned_url(queryRes['properties']['Media Name'], os.getenv("orthobucket"),
-                                                     expiration=600)
+                                                     expiration=1800)
         queryRes['properties']["URL"] = preSignedURL
         return queryRes
 

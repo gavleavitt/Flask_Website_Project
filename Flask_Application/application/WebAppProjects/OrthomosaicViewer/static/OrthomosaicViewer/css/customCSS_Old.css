@@ -42,8 +42,6 @@
 .ol-layerswitcher li .li-content {
   /* width: calc(100% - 3em); */
   width: 100%;
-  padding-top: 2px;
-  padding-bottom: 2px;
 }
 
 .ol-layerswitcher li .li-content label {
@@ -115,7 +113,7 @@
   /* position: absolute; */
   background: none;
   /* top: 18px; */
-  /* right: 50px; */
+  right: 50px;
   /* float: right; */
   height: 2.5em;
   z-index: 1;
@@ -129,14 +127,13 @@
 }
  .ol-layerswitcher .layerup:before {
   color: #017eff;
-  position: static;
   content: "\F0C9";
   font-family: FontAwesome;
   border: 0;
-  /* top: 50%; */
+  top: 50%;
   transform: translateY(-50%);
-  /* height: 1em; */
-  /* left: .5em; */
+  height: 1em;
+  left: .5em;
 }
 
 .ol-layerswitcher [type=checkbox]+label:before,
