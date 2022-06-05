@@ -19,7 +19,7 @@ RUN cd /usr/bin && ln -s python3.6 python
 
 #Install the required python packages listed in the requirements file
 
-RUN python -m pip install -r requirements.txt
+RUN python -m pip install -r requirements_mod.txt
 
 #Run uwsgi with the configuration in the .ini file
 
