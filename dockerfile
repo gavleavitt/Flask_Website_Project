@@ -1,7 +1,8 @@
 #Use CentOS 7 as the container OS
 
-FROM centos:7
+#FROM centos:7
 #Copy our files to the container
+FROM python:alpine3.7
 
 COPY . ./app
 #Install python and other programs required to run our app
@@ -16,6 +17,12 @@ WORKDIR /app
 RUN mv /usr/bin/python /usr/bin/python_old
 
 RUN cd /usr/bin && ln -s python3.6 python
+
+# install GDAL
+
+RUN apt-get update &&\
+    apt-get install -y binutils libproj-dev gdal-bin
+
 
 #Install the required python packages listed in the requirements file
 
