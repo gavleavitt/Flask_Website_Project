@@ -53,7 +53,7 @@ dask==2021.4.0
 decorator==5.0.6
 defusedxml==0.7.1
 diff-match-patch==20200713
-distributed==2021.4.0
+distributed==2021.10.0
 docker==5.0.3
 docutils==0.17
 entrypoints==0.3
