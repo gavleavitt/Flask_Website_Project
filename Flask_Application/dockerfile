@@ -1,29 +1,66 @@
-#Use CentOS 7 as the container OS
+# Taken from: https://github.com/thinkWhere/GDAL-Docker/blob/develop/3.8-ubuntu/Dockerfile
+#### Use latest Ubuntu
+FROM ubuntu:focal
 
-FROM centos:7
-#Copy our files to the container
+# Update base container install
+RUN apt-get update
+#RUN apt-get upgrade -y
+
+ENV TZ 'GB'
+RUN echo $TZ > /etc/timezone && \
+    apt-get install -y tzdata && \
+    rm /etc/localtime && \
+    ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && \
+    dpkg-reconfigure -f noninteractive tzdata && \
+    apt-get clean
+
+# Install GDAL dependencies
+RUN apt-get install -y python3-pip libgdal-dev locales
+
+# Ensure locales configured correctly
+RUN locale-gen en_GB.UTF-8
+ENV LC_ALL='en_GB.utf8'
+
+# Set python aliases for python3
+RUN echo 'alias python=python3' >> ~/.bashrc
+RUN echo 'alias pip=pip3' >> ~/.bashrc
+
+# Update C env vars so compiler can find gdal
+ENV CPLUS_INCLUDE_PATH=/usr/include/gdal
+ENV C_INCLUDE_PATH=/usr/include/gdal
+
+# This will install latest version of GDAL
+RUN pip3 install GDAL==3.0.4
+
+
 
 COPY . ./app
-#Install python and other programs required to run our app
 
-RUN yum install -y python-pip python36u python36u-libs python36-devel python36u-pip uwsgi which gcc
 #Change the working directory to /app
 
 WORKDIR /app
 
-#Changing the default python version from 2 to 3. We do this by first renaming the old python version and linking python filename to python3.6.
+# install uwsgi
+RUN apk add uwsgi-python3
 
-RUN mv /usr/bin/python /usr/bin/python_old
-
-RUN cd /usr/bin && ln -s python3.6 python
+#export C_INCLUDE_PATH=/usr/include/gdal
+#RUN pip3 install --upgrade pip setuptools wheel
+#RUN pip3 install --upgrade pip
+#RUN pip3 install p5py
+#RUN pip3 install PEP517
 
 #Install the required python packages listed in the requirements file
 
-RUN python -m pip install -r requirements_mod.txt
-
+RUN pip3 install -r requirements_mod.txt
 #Run uwsgi with the configuration in the .ini file
 
-CMD ["uwsgi","--ini","app.ini"]
+#CMD ["uwsgi","--ini","app.ini"]
+
+CMD [ "uwsgi", "--socket", "0.0.0.0:3031", \
+               "--uid", "uwsgi", \
+               "--plugins", "python3", \
+               "--protocol", "uwsgi", \
+               "--wsgi", "application" ]
 
 #Expose port 90 of the container to the outside
 
