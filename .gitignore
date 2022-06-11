@@ -32,4 +32,8 @@ logs/
 Flask_Application.zip
 Flask_Application/requirements_old.txt
 StartFlaskLocalHost
+dockerfile
 Flask_Application/dockerfile
+Flask_Application/Flask/dockerfile
+nginx.conf
+db-data/
