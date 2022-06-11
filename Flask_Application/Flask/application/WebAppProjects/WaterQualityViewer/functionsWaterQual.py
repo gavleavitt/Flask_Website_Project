@@ -2,6 +2,7 @@ import pdfplumber
 import unicodedata
 from datetime import datetime
 import hashlib
+import urllib
 from urllib.request import urlretrieve
 from application import app, errorEmail, application
 from application.WebAppProjects.WaterQualityViewer import GoogleDriveUploadWaterQuality, DBQueriesWaterQuality, AWSS3Upload
@@ -136,7 +137,11 @@ def downloadPDF(url, pdfDest):
     :return:
     """
     # url = quote(url)
-    return urlretrieve(url, pdfDest)
+    opener = urllib.request.URLopener()
+    opener.addheader('User-Agent', 'whatever')
+    filename, headers = opener.retrieve(url, pdfDest)
+    return filename
+    # return urlretrieve(url, pdfDest)
 
 
 def md5hash(text):
