@@ -10,6 +10,7 @@ import os
 from application import logger
 from geojson import Point, Feature, FeatureCollection
 import pytz
+import requests
 
 # resampcol = ['Total Coliform Results (MPN*)', "Fecal Coliform Results (MPN*)", 'Enterococcus Results (MPN*)']
 
@@ -137,11 +138,15 @@ def downloadPDF(url, pdfDest):
     :return:
     """
     # url = quote(url)
-    opener = urllib.request.URLopener()
-    opener.addheader('User-Agent', 'whatever')
-    filename, headers = opener.retrieve(url, pdfDest)
-    return filename
+    # opener = urllib.request.URLopener()
+    # opener.addheader('User-Agent', 'whatever')
+    # filename, headers = opener.retrieve(url, pdfDest)
+    # return filename
     # return urlretrieve(url, pdfDest)
+    r = requests.get(url)
+    with open(pdfDest, 'wb') as outfile:
+        outfile.write(r.content)
+    return pdfDest
 
 
 def md5hash(text):
