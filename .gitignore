@@ -1,5 +1,6 @@
 *.log
 *.pyc
+*.pem
 Misc/leaflet_testing/script_config.py
 Data.*
 Data/
@@ -37,3 +38,4 @@ Flask_Application/dockerfile
 Flask_Application/Flask/dockerfile
 nginx.conf
 db-data/
+cloudflared/

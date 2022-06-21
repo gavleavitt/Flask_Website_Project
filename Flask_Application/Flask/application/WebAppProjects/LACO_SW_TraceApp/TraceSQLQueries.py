@@ -3,8 +3,9 @@ from application import db
 import geojson
 from geojson import Feature, Point, Polygon, FeatureCollection, MultiLineString
 from application.WebAppProjects.LACO_SW_TraceApp import DomainLookUps
-from application import LacotraceSes
+# from application import LacotraceSes
 from sqlalchemy import text
+from . import lacotraceSes
 
 def getSubWaterSheds(lnglatList):
     latlngStr = ""
@@ -30,7 +31,7 @@ WHERE
     resList = []
     # Query DB
     # results = db.session.execute(sql)
-    with LacotraceSes() as session:
+    with lacotraceSes() as session:
         results = session.execute(sql)
     for i in results:
         # Load postgres subwatershed geom query result into geojson format
@@ -67,7 +68,7 @@ WHERE
     res = []
     # Query DB
     # results = db.session.execute(sql)
-    with LacotraceSes() as session:
+    with lacotraceSes() as session:
         results = session.execute(sql)
     # results = lacotraceSes.execute(sql)
     application.logger.debug(f"Unioned suberwatersheds length is: {results.rowcount}")
@@ -145,7 +146,7 @@ def TraceNetwork(lon, lat, directionSQL):
     # Lists to hold results
     # results = db.session.execute(sql, {"lat": lat, "lon": lon, "directionSQL": directionSQL})
     # results = lacotraceSes.execute(sql, {"lat": lat, "lon": lon, "directionSQL": directionSQL})
-    with LacotraceSes() as session:
+    with lacotraceSes() as session:
         results = session.execute(sql, {"lat": lat, "lon": lon, "directionSQL": directionSQL})
     # if returnType == "geojson":
     resultDict = {'startpoint': [], "Inlets": [], "Outlets": [], "Maintenance Holes": [], "Gravity Mains": [],
@@ -249,7 +250,7 @@ def queryNearestEdges(blockList):
     # application.logger.debug(nearestEdgeSQL)
     # execute query to get nearest edge id for each input
     # edgeresults = db.session.execute(nearestEdgeSQL)
-    with LacotraceSes() as session:
+    with lacotraceSes() as session:
         edgeresults  = session.execute(nearestEdgeSQL)
     # edgeresults = lacotraceSes.execute(nearestEdgeSQL)
     #  Get results of query and build SQL expression of edgeIDs, (#,#,etc)

@@ -1,4 +1,5 @@
-from application import app, application, auth
+from application import application
+from application.util.flaskAuth.authentication import auth
 from flask import Blueprint, Response, request
 import os
 from application.WebAppProjects.StravaActivityViewer import WebHookFunctionsStrava, DBQueriesStrava, StravaAWSS3

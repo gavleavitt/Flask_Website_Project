@@ -13,6 +13,8 @@ https://blog.miguelgrinberg.com/post/the-flask-mega-tutorial-part-i-hello-world
 @Author: Gavin Leavitt
 
 """
+import sys
+
 from flask import Flask
 from flask_cors import CORS
 import os
@@ -24,12 +26,11 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlathanor import FlaskBaseModel, initialize_flask_sqlathanor
 from flask_sqlalchemy import SQLAlchemy
-
-# Create flask application, I believe "application" has to be used to work properly on AWS EB
-application = app = Flask(__name__, subdomain_matching=True)
-cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
-# Setup CORS
-# CORS(app)
+# # Create flask application, I believe "application" has to be used to work properly on AWS EB
+application = Flask(__name__, subdomain_matching=True)
+cors = CORS(application, resources={r"/api/*": {"origins": "*"}})
+#Setup CORS
+CORS(application)
 
 # Setup logger
 logger = logging.getLogger(__name__)
@@ -40,6 +41,7 @@ logger.setLevel(logging.DEBUG)
 # Set logging pathway depending on if Flask is running local or on AWS EB on Amazon Linux 2
 application.logger.debug(f"Flask is running in {application.config['ENV']} mode")
 # if "B:\\" in os.getcwd():
+
 # Set logging and SQL DB connection settings based on if in production or development mocde
 if application.config['ENV'] == "development":
     # Localhost development testing
@@ -48,7 +50,7 @@ if application.config['ENV'] == "development":
     # handler = RotatingFileHandler(os.path.join(dirname, '../logs/application.log'), maxBytes=1024, backupCount=5)
     handler = logging.FileHandler(os.path.join(dirname, '../logs/application.log'))
     # app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get("DBCON_LOCAL")
-    app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get("DBCON_PROD")
+    # app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get("DBCON_PROD")
     # engine = create_engine(os.environ.get("DBCON_LOCAL"))
     # localurl = "leavitttesting.com:5000"
     # application.logger.debug(f"Setting up local development server name: {localurl}")
@@ -59,24 +61,25 @@ else:
     # handler = RotatingFileHandler('/tmp/application.log', maxBytes=1024, backupCount=5)
     # app.config['SERVER_NAME'] = "leavittmapping.com"
     application.logger.debug('Production mode')
-    handler = logging.FileHandler('/tmp/application.log')
-    app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get("DBCON_PROD")
-    application.logger.debug(f"Setting up production with the server name: {app.config['SERVER_NAME']}")
+    # handler = logging.FileHandler('/tmp/application.log')
+    handler = logging.FileHandler('../logs/application.log')
+    # app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get("DBCON_PROD")
+    application.logger.debug(f"Setting up production with the server name: {application.config['SERVER_NAME']}")
     # engine = create_engine(os.environ.get("DBCON"))
 # Set logging handler
 handler.setFormatter(formatter)
-
+application.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get("DBCON_AUTH")
 # Setup SQLAlchemy engine sessionmaker factory
-engine = create_engine(os.environ.get("DBCON"))
+engine = create_engine(os.environ.get("DBCON_AUTH"))
 Session = sessionmaker(bind=engine)
-
-lacotraceEng = create_engine(os.environ.get("DBCON_LACOTRACE"))
-LacotraceSes = sessionmaker(bind=lacotraceEng)
+#
+# lacotraceEng = create_engine(os.environ.get("DBCON_LACOTRACE"))
+# LacotraceSes = sessionmaker(bind=lacotraceEng)
 
 # Disabling modification tracking
-app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+application.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 # Init flask sqlalchemy database with flask
-db = SQLAlchemy(app, model_class = FlaskBaseModel)
+db = SQLAlchemy(application, model_class = FlaskBaseModel)
 # db.init_app(app)
 # Setup SQLAthanor
 db = initialize_flask_sqlathanor(db)
@@ -90,9 +93,9 @@ application.logger.addHandler(handler)
 application.logger.debug("Python Flask debugger active!")
 
 # Import HTTP auth
-from application.util.flaskAuth.authentication import auth
+#from application.util.flaskAuth.authentication import auth
 # Import error email reporting
-from application.util import errorEmail
+#from application.util import errorEmail
 # Import shared assets
 # from .util import assets
 # Import Blueprints
@@ -108,18 +111,18 @@ from .WebAppProjects.WaterQualityViewer.API_Routes import sbcWaterQualityAPI_BP
 from .WebAppProjects.LACO_SW_TraceApp.routes import lacoSWTraceapp_BP
 from .WebAppProjects.LACO_SW_TraceApp.API_Routes import lacoSWTraceapp_API_BP
 # Register blueprints with application
-app.register_blueprint(mainSite_BP)
-app.register_blueprint(projectPages_BP)
-app.register_blueprint(liveTracker_BP, url_prefix='/webapps/tracker')
-app.register_blueprint(livetrackerAPI_BP, url_prefix='/api/v1/tracker')
-app.register_blueprint(stravaActDashAPI_BP, url_prefix='/api/v1/activitydashboard')
-app.register_blueprint(stravaActDash_BP, url_prefix='/webapps/stravapp')
-app.register_blueprint(sbcWaterQuality_BP, url_prefix='/webapps/sbcwaterquality')
-app.register_blueprint(lacoSWTraceapp_BP, url_prefix='/webapps/lacoswtrace')
-app.register_blueprint(sbcWaterQualityAPI_BP, url_prefix='/api/v1/sbcwaterquality')
-app.register_blueprint(stravaActDashAPI_Admin_BP, url_prefix='/admin/api/v1/activitydashboard')
+application.register_blueprint(mainSite_BP)
+application.register_blueprint(projectPages_BP)
+application.register_blueprint(liveTracker_BP, url_prefix='/webapps/tracker')
+application.register_blueprint(livetrackerAPI_BP, url_prefix='/api/v1/tracker')
+application.register_blueprint(stravaActDashAPI_BP, url_prefix='/api/v1/activitydashboard')
+application.register_blueprint(stravaActDash_BP, url_prefix='/webapps/stravapp')
+application.register_blueprint(sbcWaterQuality_BP, url_prefix='/webapps/sbcwaterquality')
+application.register_blueprint(lacoSWTraceapp_BP, url_prefix='/webapps/lacoswtrace')
+application.register_blueprint(sbcWaterQualityAPI_BP, url_prefix='/api/v1/sbcwaterquality')
+application.register_blueprint(stravaActDashAPI_Admin_BP, url_prefix='/admin/api/v1/activitydashboard')
 # app.register_blueprint(lacoSWTraceapp_API_BP, url_prefix='/api/v1/trace')
-app.register_blueprint(lacoSWTraceapp_API_BP, url_prefix='/api/v1/trace')
+application.register_blueprint(lacoSWTraceapp_API_BP, url_prefix='/api/v1/trace')
 # # Set up celery client, allows async tasks to be setup
 # app.config['CELERY_BROKER_URL'] = 'redis://localhost:6379/0'
 # # app.config['CELERY_RESULT_BACKEND'] = 'redis://localhost:6379/0'
@@ -140,7 +143,7 @@ sched = BackgroundScheduler(daemon=True, timezone=utc)
 # Set logging for APS scheduler
 logging.getLogger('apscheduler').setLevel(logging.DEBUG)
 # Setup scheduled tasks
-if application.config['ENV'] == "production":
+if application.config['ENV'] != "development":
     try:
         # Trigger every day at 9:30 am
         # sched.add_job(parsePDF.pdfjob, trigger='cron', hour='9', minute='30')

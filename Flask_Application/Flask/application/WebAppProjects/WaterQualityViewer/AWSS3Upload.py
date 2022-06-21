@@ -4,7 +4,8 @@ from botocore.exceptions import ClientError
 import logging
 from io import StringIO
 import csv
-from application import application, errorEmail
+from application import application
+from application.util import errorEmail
 
 def connectToS3():
     """

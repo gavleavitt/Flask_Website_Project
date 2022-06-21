@@ -1,5 +1,6 @@
 import os
-from application import application, errorEmail
+from application import application
+from application.util import errorEmail
 from application.WebAppProjects.StravaActivityViewer import OAuthStrava, DBQueriesStrava, APIFunctionsStrava, StravaAWSS3
 import json
 from threading import Thread

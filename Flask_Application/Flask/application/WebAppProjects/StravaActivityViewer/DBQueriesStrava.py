@@ -1,13 +1,14 @@
 from application.WebAppProjects.StravaActivityViewer.modelsStrava import athletes, sub_update, strava_activities, \
     strava_activities_masked, strava_gear, AOI, webhook_subs
 from datetime import datetime
-from application import application, Session, errorEmail
+from application import application
+from application.util import errorEmail
 from sqlalchemy import func as sqlfunc
 import geojson
 from geojson import Feature, FeatureCollection, MultiLineString
 import topojson as tp
 import re
-
+from . import stravaViewerSes
 
 def updateSubId(subId, verifytoken):
     """
@@ -17,7 +18,7 @@ def updateSubId(subId, verifytoken):
     @param verifytoken: String. Script generated verification token
     @return: Nothing. Database is updated
     """
-    session = Session()
+    session = stravaViewerSes()
     try:
         application.logger.debug(f"Updating record with the following token: {verifytoken}")
         # Update recently created record which only has the verify token populated
@@ -45,7 +46,7 @@ def getAthleteList():
     -------
     List. Athlete IDs (int) stored in database.
     """
-    session = Session()
+    session = stravaViewerSes()
     query = session.query(athletes).all()
     athleteList = []
     for i in query:
@@ -59,7 +60,7 @@ def getActiveSubID():
     Gets the active Strava webhook subscription ID from the database.
     @return: Int. Active subscription ID
     """
-    session = Session()
+    session = stravaViewerSes()
     query = session.query(webhook_subs).filter(webhook_subs.activesub == "Yes").first()
     session.close()
     if query:
@@ -74,7 +75,7 @@ def getSubIdList():
     -------
     List. Subscription webhook IDs (Int) stored in database.
     """
-    session = Session()
+    session = stravaViewerSes()
     query = session.query(athletes).all()
     subIdList = []
     for i in query:
@@ -103,7 +104,7 @@ def insertSubUpdate(content):
         application.logger.debug(f"Title of new activity is {title}")
     else:
         title = None
-    session = Session()
+    session = stravaViewerSes()
     insert = sub_update(aspect=content.aspect_type, event_time=datetime.fromtimestamp(content.event_time.timestamp),
                         object_id=content.object_id, object_type=content.object_type, owner_id=content.owner_id,
                         subscription_id=content.subscription_id,
@@ -125,7 +126,7 @@ def updateExistingActivity(update):
     objectID = update.object_id
     # Get new activity title, if applicable
     newTitle = update.updates['title']
-    session = Session()
+    session = stravaViewerSes()
     # use SQL alchemy to update existing feature title
     session.query(strava_activities).filter(strava_activities.actID == objectID). \
         update({strava_activities.name: newTitle})
@@ -167,7 +168,7 @@ def insertOriginalAct(actDict):
                                has_heartrate=actDict['has_heartrate'], average_cadence=actDict["average_cadence"],
                                average_heartrate=actDict['average_heartrate'], max_heartrate=actDict['max_heartrate'],
                                geom=sqlfunc.ST_MakeValid(actDict['geom_wkt']))
-    session = Session()
+    session = stravaViewerSes()
     session.add(insert)
     session.commit()
     session.close()
@@ -186,7 +187,7 @@ def createStravaPublicActTopoJSON():
     In memory TopoJSON file.
     """
     # Create Postgres connection
-    session = Session()
+    session = stravaViewerSes()
     # Query geom as GeoJSON and other attribute information
     query = session.query(sqlfunc.ST_AsGeoJSON(strava_activities_masked.geom, 5),
                           strava_activities.name,
@@ -290,7 +291,7 @@ def processActivitiesPublic(recordID):
     -------
     Nothing. Data are processed and committed to PostgresSQL/PostGIS database.
     """
-    session = Session()
+    session = stravaViewerSes()
     # Simplification tolerance in geometry's units, which is meters here. Higher values more aggressively simplify
     # geometries
     simplifyFactor = 15
@@ -370,7 +371,7 @@ def getIntersectingPoints(wktStr):
     # geometricProj = 32610
     collectionExtract = 3
     # Open session
-    session = Session()
+    session = stravaViewerSes()
     # Get coordinates from within privacy zones
     try:
         # Create a labled common table expression to query privacy zones geometries collected into a single multi-polygon
@@ -408,7 +409,7 @@ def removeActivityFromDB(actID):
     @return: Nothing.
     """
     # Open session
-    session = Session()
+    session = stravaViewerSes()
     # Delete from masked table
     session.query(strava_activities_masked).filter(strava_activities_masked.actID == actID).delete()
     # Delete from original DB table
@@ -427,7 +428,7 @@ def checkActID(actID):
     @return: String. "True" or "False" depending if record exists in databse
     """
     # Open session
-    session = Session()
+    session = stravaViewerSes()
     # Query database
     record = session.query(strava_activities.actID == actID).first()
     session.close()
@@ -442,7 +443,7 @@ def checkAthleteAndSub(athID, subID):
     @return: Object Instance. Instance of Athletes Model with results
     """
     # Open session
-    session = Session()
+    session = stravaViewerSes()
     # Query database
     record = session.query(athletes). \
         join(webhook_subs). \
@@ -458,7 +459,7 @@ def setWebhookInactive(subID):
     @return: Nothing
     """
     # Open session
-    session = Session()
+    session = stravaViewerSes()
     # Set active status to No
     session.query(webhook_subs).filter(webhook_subs.sub_id == subID).update({webhook_subs.activesub: "No"})
     # Commit changes
@@ -475,7 +476,7 @@ def checkathleteID(athID):
     @return: String. "True" or "False" depending if record exists in databse
     """
     # Open session
-    session = Session()
+    session = stravaViewerSes()
     # Query database
     record = session.query(athletes.athlete_id == athID).first()
     session.close()
@@ -489,7 +490,7 @@ def insertVerifyToken(token):
     @return: Nothing
     """
     # Open session
-    session = Session()
+    session = stravaViewerSes()
     # Create new record
     newRec = webhook_subs(verify_token=token)
     # Add new record to session
@@ -506,7 +507,7 @@ def checkVerificationToken(token):
     @return: Instance of webhook sub model if exists, None otherwise
     """
     # Open session
-    session = Session()
+    session = stravaViewerSes()
     # Query database, get most recent record in case the token is in the database multiple times
     record = session.query(webhook_subs.verify_token == token).order_by(webhook_subs.id.desc()).first()
     session.close()
@@ -521,7 +522,7 @@ def deleteVerifyTokenRecord(token):
     @return: Nothing
     """
     # Open session
-    session = Session()
+    session = stravaViewerSes()
     session.query(webhook_subs).filter(webhook_subs.verify_token == token).delete()
     session.commit()
     session.close()

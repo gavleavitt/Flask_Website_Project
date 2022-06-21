@@ -1,7 +1,8 @@
 from datetime import datetime, timedelta
 import logging, os, csv
 from io import StringIO
-from application import application, errorEmail
+from application import application
+from application.util import errorEmail
 from application.WebAppProjects.StravaActivityViewer import DBQueriesStrava, StravaAWSS3, OAuthStrava
 import time
 import requests

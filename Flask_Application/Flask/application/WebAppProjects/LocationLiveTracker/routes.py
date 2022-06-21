@@ -1,5 +1,5 @@
 from flask import render_template, Blueprint
-from application import auth
+from application.util.flaskAuth.authentication import auth
 
 liveTracker_BP = Blueprint('liveTracker_BP', __name__,
                         template_folder='templates',

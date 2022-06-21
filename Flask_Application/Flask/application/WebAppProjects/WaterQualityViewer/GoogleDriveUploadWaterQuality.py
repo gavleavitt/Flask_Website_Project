@@ -1,7 +1,8 @@
 from pydrive.auth import GoogleAuth
 from pydrive.drive import GoogleDrive
 import os
-from application import app, errorEmail, application
+from application import application
+from application.util import errorEmail
 
 def addtoGDrive(pdfloc, pdfname):
     """

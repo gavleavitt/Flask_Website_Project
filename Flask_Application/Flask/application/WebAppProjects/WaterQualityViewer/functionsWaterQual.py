@@ -4,7 +4,8 @@ from datetime import datetime
 import hashlib
 import urllib
 from urllib.request import urlretrieve
-from application import app, errorEmail, application
+from application import application
+from application.util import errorEmail
 from application.WebAppProjects.WaterQualityViewer import GoogleDriveUploadWaterQuality, DBQueriesWaterQuality, AWSS3Upload
 import os
 from application import logger
@@ -482,7 +483,7 @@ def parsePDF():
     pdfLoc = pdfDest = os.path.join(app.root_path, 'WebAppProjects', 'WaterQualityViewer', 'static',
                                     'WaterQualityViewer', 'docs', pdfName)
     # downloadURL = "http://countyofsb.org/uploadedFiles/phd/PROGRAMS/EHS/Ocean%20Water%20Weekly%20Results.pdf"
-    downloadURL = "https://content.civicplus.com/api/assets/82208a28-a63d-4dc7-9956-e8e628076d9f?cache=1800"
+    downloadURL = "https://content.civicplus.com/api/assets/82208a28-a63d-4dc7-9956-e8e628076d9f?cache=1800.pdf"
     # Kick off script by downloading PDF
     application.logger.debug("Starting to parse PDF")
     # pdfFile = urlretrieve(downloadURL)
