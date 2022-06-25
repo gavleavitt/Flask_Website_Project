@@ -39,3 +39,4 @@ Flask_Application/Flask/dockerfile
 nginx.conf
 db-data/
 cloudflared/
+*.log

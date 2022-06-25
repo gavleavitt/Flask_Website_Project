@@ -1,4 +1,4 @@
-./application/util/PyGeoApiExtended
+./flask_application/util/PyGeoApiExtended
 affine==2.3.1
 appdirs==1.4.4
 APScheduler==3.7.0
