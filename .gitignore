@@ -1,5 +1,8 @@
+*.pem
 *.log
 *.pyc
+*.conf
+*.zip
 Misc/leaflet_testing/script_config.py
 Data.*
 Data/
@@ -35,3 +38,8 @@ StartFlaskLocalHost
 pygeosettings.yml
 openapi.yml
 Flask_Application/ErrorEmail.log
+nginx.conf
+db-data/
+cloudflared/
+dockerfile
+StartFlaskLocalHost
