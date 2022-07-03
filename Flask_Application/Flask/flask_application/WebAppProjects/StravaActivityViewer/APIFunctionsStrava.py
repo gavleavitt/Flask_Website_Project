@@ -6,6 +6,9 @@ from flask_application.util.ErrorEmail import errorEmail
 from flask_application.WebAppProjects.StravaActivityViewer import DBQueriesStrava
 from flask_application.util.Boto3AWS import StravaAWSS3
 import time
+import requests
+import traceback
+
 def singleActivityProcessing(client, actID):
     """
     Processes a single Strava Activity by placing the full activity in the database, making a simplified and masked public
@@ -20,7 +23,9 @@ def singleActivityProcessing(client, actID):
     try:
         # Wait 45 minutes before processing update, this allows time for user to update any ride details before they
         #  are processed, in particular changing details uploaded from Wahoo
-        time.sleep(2700)
+        # Check if in development mode, if not wait 45 minutes
+        if application.config['ENV'] != "development":
+            time.sleep(2700)
         application.logger.debug("Getting full activity details")
         # Get all activity details for newly created activity, including stream data
         activity = getFullDetails(client, actID)
@@ -44,7 +49,7 @@ def singleActivityProcessing(client, actID):
         application.logger.debug("Strava activity has been processed!")
     except Exception as e:
         application.logger.error(f"Handling and inserting new webhook activity inside a thread failed with the error {e}")
-        errorEmail.sendErrorEmail(script="Webhook Activity Threaded Task Update", exceptiontype=e.__class__.__name__, body=e)
+        errorEmail.sendErrorEmail(script="Webhook Activity Threaded Task Update", exceptiontype=e.__class__.__name__, body=traceback.format_exc())
         # Raise another exception, this will signal the route function to return an error 500
         raise()
 
@@ -117,15 +122,19 @@ def getFullDetails(client, actId):
     Log.setLevel('ERROR')
     # Stream data to get from activity streams
     types = ['time', 'latlng', 'altitude', 'velocity_smooth', 'grade_smooth', "distance", "heartrate", "cadence", "temp"]
-    # Get activity details as a dictionary
-    act = client.get_activity(actId).to_dict()
+    # Get activity details as a dictionary, stravalib method no longer works properly
+    # act = client.get_activity(actId).to_dict()
+    headers = {f"Authorization": f"Bearer {client.access_token}"}
+    act = requests.get(f"https://www.strava.com/api/v3/activities/{actId}", headers=headers).json()
     # Get the activity stream details for the activity id
     stream = client.get_activity_streams(actId, types=types)
     # Get athlete ID directly from API call, instead of digging into the nested result provided by get_activity
     athId = client.get_athlete().id
     # Extract latlng and time information from activity stream
     latlng = stream['latlng'].data
-    time = stream['time'].data
+    # Originally used time to make 3D data, but this is not well supported, removed for now. This need has been replaced
+    # with using the other activity stream information
+    # time = stream['time'].data
     lineStringData = []
     wktList = []
     # Iterate over time and latlng streams, combining them into a list containing sublists with lat, lng, time
@@ -134,7 +143,8 @@ def getFullDetails(client, actId):
         ## as datetime UTC (time is provided as time
         ## since start of the activity and is converted to datetime)
         # newEntry = [latlng[i][1], latlng[i][0], (starttime + timedelta(seconds=time[i])).timestamp()]
-        newEntry = [latlng[i][1], latlng[i][0], time[i]]
+        # newEntry = [latlng[i][1], latlng[i][0], time[i]]
+        newEntry = [latlng[i][1], latlng[i][0]]
         # Append data as nested list
         lineStringData.append(newEntry)
         # Take newEntry list and create a string with a space delimiter between list items, add to list of wkt
@@ -143,7 +153,7 @@ def getFullDetails(client, actId):
         # print(wktList)
     # Format entire list to be friendly with geoalchemy ST_GeomFromEWKT
     sep = ", "
-    wktStr = f"SRID=4326;LINESTRINGM({sep.join(wktList)})"
+    wktStr = f"SRID=4326;LINESTRING({sep.join(wktList)})"
     # Add lat, lng, time as geom key to dict
     act['geom'] = lineStringData
     act['actId'] = actId
@@ -163,6 +173,9 @@ def getFullDetails(client, actId):
         act['type_extended'] = "Run"
     elif act['type'] == "Hike":
         act['type_extended'] = "Walk"
+    # Set interval values to time deltas
+    act["moving_time"] = timedelta(seconds=act["moving_time"])
+    act["elapsed_time"] = timedelta(seconds=act["elapsed_time"])
     # Wahoo Bolt provides additional data, check if populated, if not set to null
     wahooList = ["average_temp", "has_heartrate", "max_heartrate", "average_heartrate", "average_cadence"]
     for i in wahooList:
@@ -177,6 +190,19 @@ def getFullDetails(client, actId):
                    'embed_token', 'trainer', 'photos', 'instagram_primary_photo', 'partner_logo_url',
                    'partner_brand_tag', 'from_accepted_tag', 'segment_leaderboard_opt_out', 'highlighted_kudosers',
                    'laps']
+
+    # values that should be returned by the API
+    expectedKeys = ['upload_id','name','distance','moving_time','elapsed_time','total_elevation_gain','elev_high',
+                    'elev_low', 'type', 'start_date','start_date_local','timezone','utc_offset','start_latlng',
+                    'end_latlng','start_latitude','start_longitude','achievement_count','pr_count','private',
+                    'average_speed','max_speed','average_watts','kilojoules','description','workout_type','calories',
+                    'device_name','manual']
+    # Check if all values were returned, the API suddenly stopped sending some keys which caused exceptions downstream
+    # Set these values to None and continue processing
+    for k in expectedKeys:
+        if k not in act.keys():
+            application.logger.error(f"Key {k} not in strava response, getting to None to prevent exceptions")
+            act[k] = None
     # Iterate over dict keys, removing unnecessary/unwanted keys
     for key in list(act.keys()):
         if key in remove_keys:

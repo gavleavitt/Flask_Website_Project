@@ -6,7 +6,7 @@ from datetime import datetime
 from flask_application import application, Session
 from sqlalchemy import func as sqlfunc
 import pytz
-
+from . import waterQualitySes
 
 def checkmd5(hash, pdfDate):
     """
@@ -22,7 +22,7 @@ def checkmd5(hash, pdfDate):
         "Update" - Hash is not in Postgres but other hashes exist for the PDF result week
     """
     # Query Postgres with pdfDate of newly downloaded PDF
-    session = Session()
+    session = waterQualitySes()
     application.logger.debug(f"Querying water quality MD5 hashes with the date {pdfDate}")
     query = session.query(waterQualityMD5).filter(waterQualityMD5.pdfdate == pdfDate).all()
     hashList = []
@@ -48,7 +48,7 @@ def getNullBeaches(pdfDate):
     :return: List[Strings,]
         Names of beaches with null test results
     """
-    session = Session()
+    session = waterQualitySes()
     query = session.query(waterQuality) \
         .join(waterQualityMD5) \
         .join(beaches) \
@@ -73,7 +73,7 @@ def insmd5(MD5, pdfDate, pdfName):
     :return:
     Int, primary key of new MD5 entry
     """
-    session = Session()
+    session = waterQualitySes()
     # flask_application.logger.debug(f"Inserting new md5 hash using the following details: md5:{MD5}, pdfdate:{pdfDate}",
     #                          f" pdfname:{pdfName}, insdate:{datetime.now()}")
     application.logger.debug(f"Inserting new md5 hash using the following details:")
@@ -106,7 +106,7 @@ def insertWaterQual(beachDict, md5_fk):
     -------
     Print statement.
     """
-    session = Session()
+    session = waterQualitySes()
     inslist = []
     # Iterate over beaches in dictionary creating waterQuality objects for each beach key
     for key in beachDict.keys():
@@ -142,7 +142,7 @@ def getBeachWaterQual():
             2 floats:
                 x and y coordinates of the associated beach
     """
-    session = Session()
+    session = waterQualitySes()
     records = session.query(waterQuality, waterQualityMD5, beaches, sqlfunc.ST_GeometryType(beaches.geom),
                                sqlfunc.st_x(beaches.geom), sqlfunc.st_y(beaches.geom)) \
         .join(waterQualityMD5) \
@@ -166,7 +166,7 @@ def getStandards():
         Dict of State health standards, with the standard name as the keys and values as values.
 
     """
-    session = Session()
+    session = waterQualitySes()
     records = session.query(stateStandards).all()
     recDict = {}
     for i in records:
@@ -181,7 +181,7 @@ def getBeachResults(beach):
     @param beach:
     @return:
     """
-    session = Session()
+    session = waterQualitySes()
     records = session.query(waterQuality, waterQualityMD5) \
         .join(waterQualityMD5) \
         .join(beaches) \

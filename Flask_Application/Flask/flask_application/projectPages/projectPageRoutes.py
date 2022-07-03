@@ -1,4 +1,4 @@
-from flask_application import app
+#from flask_application import flask_application
 from flask import render_template, Blueprint
 
 

@@ -43,6 +43,7 @@ logger.setLevel(logging.DEBUG)
 # Set logging pathway depending on if Flask is running local or on AWS EB on Amazon Linux 2
 application.logger.debug(f"Flask is running in {application.config['ENV']} mode")
 # if "B:\\" in os.getcwd():
+
 # Set logging and SQL DB connection settings based on if in production or development mocde
 if application.config['ENV'] == "development":
     # Localhost development testing
@@ -84,9 +85,9 @@ handler.setFormatter(formatter)
 
 
 # Disabling modification tracking
-app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+application.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 # Init flask sqlalchemy database with flask
-db = SQLAlchemy(app, model_class = FlaskBaseModel)
+db = SQLAlchemy(application, model_class = FlaskBaseModel)
 # db.init_app(app)
 # Setup SQLAthanor
 db = initialize_flask_sqlathanor(db)
@@ -135,7 +136,7 @@ app.register_blueprint(orthoviewer_BP, url_prefix='/webapps/orthoviewer')
 # app.register_blueprint(pygeoapi_blueprint, url_prefix='/pygeo')
 app.register_blueprint(pygeoapi_blueprint, subdomain='geo')
 # app.register_blueprint(lacoSWTraceapp_API_BP, url_prefix='/api/v1/trace')
-app.register_blueprint(lacoSWTraceapp_API_BP, url_prefix='/api/v1/trace')
+application.register_blueprint(lacoSWTraceapp_API_BP, url_prefix='/api/v1/trace')
 # # Set up celery client, allows async tasks to be setup
 # app.config['CELERY_BROKER_URL'] = 'redis://localhost:6379/0'
 # # app.config['CELERY_RESULT_BACKEND'] = 'redis://localhost:6379/0'
@@ -156,7 +157,7 @@ sched = BackgroundScheduler(daemon=True, timezone=utc)
 # Set logging for APS scheduler
 logging.getLogger('apscheduler').setLevel(logging.DEBUG)
 # Setup scheduled tasks
-if application.config['ENV'] == "production":
+if application.config['ENV'] != "development":
     try:
         # Trigger every day at 9:30 am
         # sched.add_job(parsePDF.pdfjob, trigger='cron', hour='9', minute='30')

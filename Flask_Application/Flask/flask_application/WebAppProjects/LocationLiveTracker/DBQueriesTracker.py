@@ -12,12 +12,12 @@ from flask_application.WebAppProjects.LocationLiveTracker.modelsTracker import g
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import func as sqlfunc
-from flask_application import Session
-from flask_application import application
+# from flask_application import Session
+# from flask_application import flask_application
 import os
 import pytz
 import geojson
-
+from . import gpsTrackSes
 
 # def createSession():
 #     engine = create_engine(os.environ.get("DBCON"))
@@ -44,7 +44,7 @@ def getTrackerFeatCollection(datatype, reclimit):
     GeoJSON Feature Collection of datatype parameter containing all stored attribute information.
 
     """
-    session = Session()
+    session = gpsTrackSes()
     if datatype == "gpspoints":
         # Query using GeoAlchemy PostGIS function to get geojson representation of geometry and regular query to get
         # tabular data
@@ -111,7 +111,7 @@ def getDist(coordinate1, coordinate2):
         Distance in meters between the newest and most recent recorded points.
 
     """
-    session = Session()
+    session = gpsTrackSes()
     # Geoalchemy ORM expression
     res = session.query(
         sqlfunc.ST_DistanceSphere(sqlfunc.ST_GeomFromText(coordinate1), sqlfunc.ST_GeomFromText(coordinate2)))
@@ -144,7 +144,7 @@ def getPathPointRecords():
 
     """
 
-    session = Session()
+    session = gpsTrackSes()
     # records = session.query(gpsdatmodel.id, gpsdatmodel.lat, gpsdatmodel.lon, gpsdatmodel.geom, gpsdatmodel.timeutc,
     #                         gpsdatmodel.date). \
     #     filter(gpsdatmodel.getLocalTime() >= dateTime). \
@@ -189,7 +189,7 @@ def AOIIntersection(geomdat):
         dictionary created by the handleTrackerQueries function.
 
     """
-    session = Session()
+    session = gpsTrackSes()
     # SQLAlchemy and GeoAlchemy SQL query
     query = session.query(AOI).filter(AOI.geom.ST_Intersects(geomdat))
     # Get the size of the result, used for building out the string result.
@@ -233,7 +233,7 @@ def cityIntersection(geomdat):
         records returned.
 
     """
-    session = Session()
+    session = gpsTrackSes()
     query = session.query(CaliforniaPlaces).filter(CaliforniaPlaces.geom.ST_Intersects(geomdat))
     query_count = 0
     for i in query:
@@ -275,7 +275,7 @@ def countyIntersection(geomdat):
 
     """
 
-    session = Session()
+    session = gpsTrackSes()
     query = session.query(CACounty).filter(CACounty.geom.ST_Intersects(geomdat))
 
     query_count = 0
@@ -343,7 +343,7 @@ def getNearestRoad(coordinate):
         	roads.geom <-> (ST_GeomFromText(:param, 4326))
     LIMIT 40)
 
-    SELECT 
+    SELECT
         nearestcanidates.name,
         ST_DistanceSphere(
                 nearestcanidates.geom,
@@ -355,7 +355,7 @@ def getNearestRoad(coordinate):
         distance
     LIMIT 1""")
 
-    session = Session()
+    session = gpsTrackSes()
     # Execute database query using the coordinates as a variable.
     # print(f"Going to run query with coordinate: {coordinate}")
     query = session.execute(sql, {"param": coordinate})
@@ -416,7 +416,7 @@ def getNearestTrail(coordinate):
         	trails.geom <-> (ST_GeomFromText(:param, 4326))
     LIMIT 40)
 
-    SELECT 
+    SELECT
         nearestcanidates.name,
         ST_Distance(
                 ST_Transform(nearestcanidates.geom,2228),
@@ -428,7 +428,7 @@ def getNearestTrail(coordinate):
         distance
     LIMIT 1
     ''')
-    session = Session()
+    session = gpsTrackSes()
     query = session.execute(sql, {"param": coordinate})
     result = {}
     query_count = 0

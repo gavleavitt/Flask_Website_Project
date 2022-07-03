@@ -126,7 +126,7 @@ class gpsPointModel(Base):
         for i in removedictlist:
             res_dict.pop(i, None)
         for v in dateCol:
-            if type(res_dict[v]) is not "str":
+            if type(res_dict[v]) != "str":
                 res_dict[v] = res_dict[v].isoformat()
         res_dict["timeLocal"] = self.getLocalTime(self.timezone)
         # print(self.getPSTTime())

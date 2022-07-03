@@ -1,4 +1,4 @@
-from flask_application import app
+from flask_application import application
 from flask import Blueprint, request, jsonify
 from flask_application.util.flaskAuth.authentication import auth
 from flask_application.WebAppProjects.LocationLiveTracker import DBQueriesTracker, modelsTracker, objectGenerationTracker, OverPassAPI

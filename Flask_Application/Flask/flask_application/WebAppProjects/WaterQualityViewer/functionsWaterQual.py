@@ -2,6 +2,7 @@ import pdfplumber
 import unicodedata
 from datetime import datetime
 import hashlib
+import urllib
 from urllib.request import urlretrieve
 from flask_application import app, application
 from flask_application.util.ErrorEmail import errorEmail
@@ -10,6 +11,7 @@ import os
 from flask_application import logger
 from geojson import Point, Feature, FeatureCollection
 import pytz
+import requests
 
 # resampcol = ['Total Coliform Results (MPN*)', "Fecal Coliform Results (MPN*)", 'Enterococcus Results (MPN*)']
 
@@ -137,7 +139,15 @@ def downloadPDF(url, pdfDest):
     :return:
     """
     # url = quote(url)
-    return urlretrieve(url, pdfDest)
+    # opener = urllib.request.URLopener()
+    # opener.addheader('User-Agent', 'whatever')
+    # filename, headers = opener.retrieve(url, pdfDest)
+    # return filename
+    # return urlretrieve(url, pdfDest)
+    r = requests.get(url)
+    with open(pdfDest, 'wb') as outfile:
+        outfile.write(r.content)
+    return pdfDest
 
 
 def md5hash(text):
@@ -470,9 +480,10 @@ def parsePDF():
     # set PDF name
     # pdfName = f"Ocean_Water_Quality_Report_{datetime.now().strftime('%Y%m%d')}.pdf"
     pdfName = f"Ocean_Water_Quality_Report_{datetime.now(pytz.timezone('America/Los_Angeles')).strftime('%Y%m%d')}.pdf"
-    pdfLoc = pdfDest = os.path.join(app.root_path, 'WebAppProjects', 'WaterQualityViewer', 'static',
+    pdfLoc = pdfDest = os.path.join(application.root_path, 'WebAppProjects', 'WaterQualityViewer', 'static',
                                     'WaterQualityViewer', 'docs', pdfName)
-    downloadURL = "http://countyofsb.org/uploadedFiles/phd/PROGRAMS/EHS/Ocean%20Water%20Weekly%20Results.pdf"
+    # downloadURL = "http://countyofsb.org/uploadedFiles/phd/PROGRAMS/EHS/Ocean%20Water%20Weekly%20Results.pdf"
+    downloadURL = "https://content.civicplus.com/api/assets/82208a28-a63d-4dc7-9956-e8e628076d9f?cache=1800.pdf"
     # Kick off script by downloading PDF
     application.logger.debug("Starting to parse PDF")
     # pdfFile = urlretrieve(downloadURL)
