@@ -48,14 +48,12 @@
 					<div class="modal-text">
 						<p style="margin-top:0px;"><b>Map Details</b>
 						<br>
-							This map displays my personally collected and processed orthomosaic drone imagery. All of these collections are non-commerical and flown under the FAA recreational exception rules.
+							This map displays my personally collected and processed orthomosaic drone imagery. While I am a Part 107 licensed pilot, all of these collections are non-commerical and flown under FAA recreational exception rules.
 						</p>
 						<p>
-							Histroic Strava data were initially pulled from the <a href=https://developers.strava.com/>Strava API</a> and processed using Python, then a webhook subscription was created which updates my server when new activities are available for processing. Strava activity data are processed in Python using PostGIS functions to remove private areas and to simplify geometries to reduce file sizes, at the cost of spatial accuracy. Data are pre-calculated and served to the Leaflet map in the TopoJSON format to further reduce file sizes and server response times.
+							This is an ongoing personal project to collect, process, and display orthomosaic imagery collected from a Mavic Mini 1 drone. Mission planning and execution are conducted using the <a href="https://www.dronelink.com/">Dronelink</a> web and mobile applications and currently all mission flights are flown using a DJI Mavic Mini 1.
 						</p>
-						<p>
-						Visit the <a href=/projects/stravamapserverside>server-side processing project page</a> for this dashboard to see a full description of the server side processing and data preparation steps.
-						</p>
+						<p></p>
 						<p><b>Contact Me</b>
 						<br>
 						If you have any questions, feature suggestions, comments, or notice any errors/bugs feel free to email me at <span id="emailaddr"></span>

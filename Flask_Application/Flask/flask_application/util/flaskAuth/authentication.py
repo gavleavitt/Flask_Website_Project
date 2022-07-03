@@ -20,9 +20,6 @@ from flask_application import Session
 # user attempts to authenticate when visiting a route.
 auth = HTTPBasicAuth()
 
-engine = create_engine(os.environ.get("DBCON"))
-Session = sessionmaker(bind=engine)
-
 # def createSession():
 #     engine = create_engine(os.environ.get("DBCON"))
 #     Session = sessionmaker(bind=engine)

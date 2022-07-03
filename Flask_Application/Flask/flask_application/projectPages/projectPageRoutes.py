@@ -7,7 +7,7 @@ projectPages_BP = Blueprint('projectPages_BP', __name__,
                         url_prefix='/projectpages',
                         static_folder='static')
 
-
+#TODO: Build map title dictionary to pass as a variable to all project pages and maps/apps to maintain consistent naming, likely needs to be built in __init__
 @projectPages_BP.route("/sbcoceanquality")
 def sbcwaterquality():
     return render_template("project-SBC-Water-Quality/project-SBC-Water-Quality.html")
@@ -39,3 +39,8 @@ def stravaserversideprocessing():
 @projectPages_BP.route("/lacostormwatertrace")
 def lacostormwatertrace():
     return render_template("project-LA-County-Stormwater-Trace/project-LA-County-Stormwater-Trace.html")
+
+@projectPages_BP.route("/orthomosaicviewer")
+def orthomosaicviewer():
+    return render_template("project-Ortho-Viewer/OrthoViewer_Main.html")
+

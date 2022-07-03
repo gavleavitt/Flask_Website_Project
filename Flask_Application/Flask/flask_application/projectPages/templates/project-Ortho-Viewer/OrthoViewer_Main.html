@@ -1,37 +1,50 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title>Template Testing</title>
+	<title>{{mapTitle}}</title>
 	{% include 'mainImports.html' %}
 </head>
 <body>
   <div class="container-projects sansserif">
 		{% include 'navBar.html' %}
 		<div class="project-content">
-			<div class="title">Santa Barbara County Ocean Water Quality</div>
+			<div class="title">{{mapTitle}}</div>
 			<div class="separatorbar-title"></div>
-			<iframe src="/sbcoceanwaterquality"></iframe>
+			<iframe src="{{ url_for('orthoviewer_BP.orthoviewermainol') }}"></iframe>
 			<div class="iframe-link">
-				<a href="/sbcoceanwaterquality" target="_blank">View fullpage map</a>
+				<a href="{{ url_for('orthoviewer_BP.orthoviewermainol') }}"target="_blank">View fullpage map</a>
 			</div>
 			<div class="separatorbar-title"></div>
-			<h2>
-				Desc
-			</h2>
+			<span id="orthoviewer-summary" class="goto"></span>
+			<h2><a href=#orthoviewer-summary>
+				Summary
+			</a></h2>
 			<p>
-				Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Erat nam at lectus urna duis convallis convallis tellus id. Ultrices mi tempus imperdiet nulla malesuada pellentesque elit eget. Suspendisse sed nisi lacus sed viverra tellus. Fermentum et sollicitudin ac orci phasellus egestas tellus rutrum tellus. Fermentum posuere urna nec tincidunt praesent semper feugiat. Pretium aenean pharetra magna ac placerat.
+			This is an ongoing personal project to collect, process, and display orthomosaic imagery collected from a Mavic Mini 1 drone. Mission planning and execution are conducted using the <a href="https://www.dronelink.com/">Dronelink</a> web and mobile applications and currently all mission flights are flown using a DJI Mavic Mini 1. After collection, imagery are processed into orthomosaics using the free, Docker command line, version of <a href"https://www.opendronemap.org/odm/">OpenDroneMap</a>. The imagery are then compressed and converted into <a href="https://www.cogeo.org/">Cloud Optimized GeoTIFFS (COG)</a> and uploaded to <a href="https://aws.amazon.com/s3/">S3</a> cloud storage. Finally, the data are displayed using <a href="https://openlayers.org/">OpenLayers</a> which supports COGs.
+		</p>
+		<p>
+			COGs allow for easy and efficient storage and retrieval of raster data without the need for a dedicated imagery server. Data are retrieved based on view scale, limiting the data transfer required to view the imagery. The data can be viewed at full source resolution when viewed at smaller scales. This method also requires much less server-side storage space than raster tiles, at the cost of client-side processing, which must be pre-processed and stored at the desired scales.
+		</p>
+		<div class="toc-container">
+			<p class="toc-title">Project Description Contents</p>
+			<ol class="toc-list">
+				<li><a href="#orthoviewer-summary">Summary</a></li>
+				<li><a href="#planning">Mission Planning</a></li>
+				<li><a href="#execution">Mission Execution</a></li>
+				<li><a href="#orthoprocessing">Orthomosaic Processing</a></li>
+				<li><a href="#servingcogs">Serving Imagery Data - COGs</a></li>
+				<li><a href="#viewingcogs">Viewing the Imagery Data - OpenLayers</a></li>
+				<li><a href="#final-thoughts">Final Thoughts</a></li>
+			</ol>
+		</div>
+		<span id="planning" class="goto"></span>
+		<h3><a href=#planning>Mission Planning</a></h3>
+			<p>
+				The <a href="https://www.dronelink.com/">Dronelink</a> service is used for mission planning and execution, this service is not free and requires a one time purchase for non-commerical use. Note that I am operating under a legacy license which includes more advanced features such as Terrain follow, I believe this now requires a higher level license to access. Dronelink supports many drones, including the Mavic Mini, by using a <a href="https://support.dronelink.com/hc/en-us/articles/360052533133-What-makes-Dronelink-different-or-better-than-other-apps-">Virtual Stick</a> command method which sends virtual stick commands to the drone through the controller, as if they were issued by an human operator. While this requires constant connection between the phone, controller, and drone, and can cause input delays, it allows more advanced missions than normally available to cheap/simple drones like the Mini, which has no native support for waypoints to be uploaded to the drone.
 			</p>
-			<h3>
-				Project Workflow
-			</h3>
-			<h4> Section Title </h4>
-				<p>
-					Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Erat nam at lectus urna duis convallis convallis tellus id. Ultrices mi tempus imperdiet nulla malesuada pellentesque elit eget. Suspendisse sed nisi lacus sed viverra tellus. Fermentum et sollicitudin ac orci phasellus egestas tellus rutrum tellus. Fermentum posuere urna nec tincidunt praesent semper feugiat. Pretium aenean pharetra magna ac placerat.
-				</p>
-			<h4> Section Title 2 </h4>
-				<p>
-					Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Erat nam at lectus urna duis convallis convallis tellus id. Ultrices mi tempus imperdiet nulla malesuada pellentesque elit eget. Suspendisse sed nisi lacus sed viverra tellus. Fermentum et sollicitudin ac orci phasellus egestas tellus rutrum tellus. Fermentum posuere urna nec tincidunt praesent semper feugiat. Pretium aenean pharetra magna ac placerat.
-				</p>
+			<p>
+				Missions are planned on a desktop using the Dronelink web browser application. This application supports a variety of mission types, but the <a href="https://support.dronelink.com/hc/en-us/articles/6823062938899-Basic-Mapping-Map-Mission-Component-Intro">Map</a> option is used for collecting the necessary nadir images.
+			</p>
 		</div>
 		{% include 'footer.html' %}
 		</div>

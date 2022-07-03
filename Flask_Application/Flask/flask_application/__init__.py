@@ -57,9 +57,11 @@ if application.config['ENV'] == "development":
     app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get("DBCON_DEV")
     # Setup SQLAlachemy engine sessionmaker factories with development connections
     lacotraceEng = create_engine(os.environ.get("DBCON_LACOTRACE_DEV"))
-    LacotraceSes = sessionmaker(bind=lacotraceEng)
     engine = create_engine(os.environ.get("DBCON_DEV"))
-    Session = sessionmaker(bind=engine)
+    stravaViewerEng = create_engine(os.environ.get("DBCON_STRAVAVIEWER_DEV"))
+    gpsTrackEng = create_engine(os.environ.get("DBCON_GPSTRACKING_DEV"))
+    waterQualityEng = create_engine(os.environ.get("DBCON_WATERQUALITY_DEV"))
+
     # localurl = "leavitttesting.com:5000"
     # flask_application.logger.debug(f"Setting up local development server name: {localurl}")
     # app.config['SERVER_NAME'] = localurl
@@ -74,11 +76,17 @@ else:
     app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get("DBCON_PROD")
     application.logger.debug(f"Setting up in Production mode with the server name: {app.config['SERVER_NAME']}")
     lacotraceEng = create_engine(os.environ.get("DBCON_LACOTRACE_PROD"))
-    LacotraceSes = sessionmaker(bind=lacotraceEng)
     engine = create_engine(os.environ.get("DBCON_PROD"))
-    Session = sessionmaker(bind=engine)
+    stravaViewerEng = create_engine(os.environ.get("DBCON_STRAVAVIEWER_PROD"))
+    gpsTrackEng = create_engine(os.environ.get("DBCON_GPSTRACKING_PROD"))
+    waterQualityEng = create_engine(os.environ.get("DBCON_WATERQUALITY_PROD"))
 
-    # engine = create_engine(os.environ.get("DBCON"))
+#  Bind sessionmakers
+lacotraceSes = sessionmaker(bind=lacotraceEng)
+stravaViewerSes = sessionmaker(bind=stravaViewerEng)
+Session = sessionmaker(bind=engine)
+gpsTrackSes = sessionmaker(bind=gpsTrackEng)
+waterQualitySes = sessionmaker(bind=waterQualityEng)
 # Set logging handler
 handler.setFormatter(formatter)
 

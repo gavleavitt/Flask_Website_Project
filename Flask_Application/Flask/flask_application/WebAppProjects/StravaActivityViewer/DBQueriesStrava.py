@@ -1,14 +1,15 @@
 from flask_application.WebAppProjects.StravaActivityViewer.modelsStrava import athletes, sub_update, strava_activities, \
     strava_activities_masked, strava_gear, AOI, webhook_subs
 from datetime import datetime
-from flask_application import application, Session
+from flask_application import application, stravaViewerSes
 from flask_application.util.ErrorEmail import errorEmail
 from sqlalchemy import func as sqlfunc
 import geojson
 from geojson import Feature, FeatureCollection, MultiLineString
 import topojson as tp
 import re
-from . import stravaViewerSes
+#from . import stravaViewerSes
+
 
 def updateSubId(subId, verifytoken):
     """

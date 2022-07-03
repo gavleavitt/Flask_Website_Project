@@ -3,9 +3,8 @@ from flask_application import db
 import geojson
 from geojson import Feature, Point, Polygon, FeatureCollection, MultiLineString
 from flask_application.WebAppProjects.LACO_SW_TraceApp import DomainLookUps
-# from flask_application import LacotraceSes
+from flask_application import lacotraceSes
 from sqlalchemy import text
-from . import lacotraceSes
 
 def getSubWaterSheds(lnglatList):
     latlngStr = ""

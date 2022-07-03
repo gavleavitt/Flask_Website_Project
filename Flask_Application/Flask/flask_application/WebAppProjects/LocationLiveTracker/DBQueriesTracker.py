@@ -17,7 +17,7 @@ from sqlalchemy import func as sqlfunc
 import os
 import pytz
 import geojson
-from . import gpsTrackSes
+from flask_application import gpsTrackSes
 
 # def createSession():
 #     engine = create_engine(os.environ.get("DBCON"))
