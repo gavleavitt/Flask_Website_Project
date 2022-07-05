@@ -95,7 +95,8 @@ fetch('http://geo.leavitttesting.local:5000/collections/mission_points_extended/
         new ol.layer.WebGLTile({
           source: source,
           // name: item.properties["Mission Name"] + "\n" item.properties["Mission Date"],
-          title: item.properties["Mission Name"] + "<br><span>" + item.properties["Mission Date"].substring(0,10) + " - " + item.properties["Mission Elevation"] + " Ft" +"</span>",
+          //title: item.properties["Mission Name"] + "<br><span>" + item.properties["Mission Date"].substring(0,10) + " - " + item.properties["Mission Elevation"] + " Ft" +"</span>",
+          title: item.properties["Mission Name"] + "<br><span>" + item.properties["Mission Date"].substring(0,10) + " - " + item.properties["GSD"] + " in/px" +"</span>",
           crossOrigin: 'anonymous',
           // extent: true
         })
