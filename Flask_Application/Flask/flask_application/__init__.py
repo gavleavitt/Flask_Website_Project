@@ -68,11 +68,12 @@ if application.config['ENV'] == "development":
 else:
     # Live deployment
     # see https://stackoverflow.com/a/60549321
-    # handler = RotatingFileHandler('/tmp/flask_application.log', maxBytes=1024, backupCount=5)
     application.logger.debug('Production mode')
     # TODO: Test
     app.config['SERVER_NAME'] = "leavittmapping.com"
-    handler = logging.FileHandler('/tmp/flask_application.log')
+    # handler = logging.FileHandler('/tmp/flask_application.log')
+    # handler = logging.
+    application.logger.setLevel(logging.DEBUG)
     app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get("DBCON_PROD")
     application.logger.debug(f"Setting up in Production mode with the server name: {app.config['SERVER_NAME']}")
     lacotraceEng = create_engine(os.environ.get("DBCON_LACOTRACE_PROD"))
@@ -88,7 +89,7 @@ Session = sessionmaker(bind=engine)
 gpsTrackSes = sessionmaker(bind=gpsTrackEng)
 waterQualitySes = sessionmaker(bind=waterQualityEng)
 # Set logging handler
-handler.setFormatter(formatter)
+# handler.setFormatter(formatter)
 
 
 
