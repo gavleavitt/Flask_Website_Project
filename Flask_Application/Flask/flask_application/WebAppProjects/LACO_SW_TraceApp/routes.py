@@ -10,7 +10,7 @@ lacoSWTraceapp_BP = Blueprint('lacoSWTraceapp_BP', __name__,
 @lacoSWTraceapp_BP.route("/laco-sw-trace-app")
 def lacountyswtraceappviewer():
     # Check if production or development mode
-    apiURL = f"http://{application.config['SERVER_NAME']}{url_for('lacoSWTraceapp_API_BP.handletracerequest')}"
+    apiURL = f"https://{application.config['SERVER_NAME']}{url_for('lacoSWTraceapp_API_BP.handletracerequest')}"
     # if application.config['ENV'] == "development":
     #     # apiURL = f"http://api.{app.config['SERVER_NAME'] + url_for('lacoSWTraceapp_API_BP.handletracerequest')}"
     #     apiURL = f"http://{application.config['SERVER_NAME']}{url_for('lacoSWTraceapp_API_BP.handletracerequest')}"
@@ -25,7 +25,7 @@ def lacountyswtraceappviewer():
 @lacoSWTraceapp_BP.route("/laco-sw-trace-app-protected")
 def lacountyswtraceappprotectedviewer():
     # Check if production or development mode
-    apiURL = f"http://{application.config['SERVER_NAME']}{url_for('lacoSWTraceapp_API_BP.handletracerequest')}"
+    apiURL = f"https://{application.config['SERVER_NAME']}{url_for('lacoSWTraceapp_API_BP.handletracerequest')}"
     # if application.config['ENV'] == "development":
     #     # apiURL = f"http://api.{app.config['SERVER_NAME'] + url_for('lacoSWTraceapp_API_BP.handletracerequest')}"
     #     apiURL = f"http://localhost:5000{url_for('lacoSWTraceapp_API_BP.handletracerequest')}"

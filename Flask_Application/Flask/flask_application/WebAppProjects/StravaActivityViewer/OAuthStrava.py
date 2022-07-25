@@ -2,7 +2,7 @@ import flask_application
 from flask_application.pythonLib.stravalib.client import Client
 import os
 import time
-from flask_application import Session
+from flask_application import stravaViewerSes
 from flask_application.WebAppProjects.StravaActivityViewer.modelsStrava import athletes
 
 def getAuth():
@@ -17,9 +17,9 @@ def getAuth():
     # Build empty stravalib client instance
     client = Client()
     # create db session
-    session = Session()
+    session = stravaViewerSes()
     # Hard coded athlete id
-    athleteID = 7170058
+    athleteID =int(os.environ.get("ATHLETEID"))
     authDict = {}
     # Load tokens and expiration time from Postgres
     query = session.query(athletes).filter(athletes.athlete_id == athleteID)

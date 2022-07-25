@@ -29,7 +29,8 @@ from pygeoapi.flask_app import BLUEPRINT as pygeoapi_blueprint
 # Create flask flask_application, I believe "flask_application" has to be used to work properly on AWS EB
 application = app = Flask(__name__, subdomain_matching=True)
 # cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
-cors = CORS(app, origins=["https://leavittmapping.com","http://leavitttesting.local:5000",
+cors = CORS(app, origins=["https://www.leavittmapping.com","http://www.leavittmapping.com/",
+                          "https://leavittmapping.com","http://leavitttesting.local:5000",
                           "http://geo.leavitttesting.local:5000"])
 # Setup CORS
 # CORS(app)
@@ -53,6 +54,8 @@ if application.config['ENV'] == "development":
     dirname = os.path.dirname(__file__)
     # handler = RotatingFileHandler(os.path.join(dirname, '../logs/flask_application.log'), maxBytes=1024, backupCount=5)
     handler = logging.FileHandler(os.path.join(dirname, '../logs/flask_application.log'))
+    # Set logging handler
+    handler.setFormatter(formatter)
     # app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get("DBCON_LOCAL")
     app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get("DBCON_DEV")
     # Setup SQLAlachemy engine sessionmaker factories with development connections
@@ -69,8 +72,8 @@ else:
     # Live deployment
     # see https://stackoverflow.com/a/60549321
     application.logger.debug('Production mode')
-    # TODO: Test
     app.config['SERVER_NAME'] = "leavittmapping.com"
+    # app.url_map.default_subdomain = "www"
     # handler = logging.FileHandler('/tmp/flask_application.log')
     # handler = logging.
     application.logger.setLevel(logging.DEBUG)
@@ -106,7 +109,7 @@ db = initialize_flask_sqlathanor(db)
 # SessionLocal = sessionmaker(bind=engineLocal)
 
 # Attach logging handler to flask_application
-application.logger.addHandler(handler)
+# application.logger.addHandler(handler)
 application.logger.debug("Python Flask debugger active!")
 
 # Import HTTP auth
@@ -133,7 +136,7 @@ app.register_blueprint(mainSite_BP)
 app.register_blueprint(projectPages_BP)
 app.register_blueprint(liveTracker_BP, url_prefix='/webapps/tracker')
 app.register_blueprint(livetrackerAPI_BP, url_prefix='/api/v1/tracker')
-app.register_blueprint(stravaActDashAPI_BP, url_prefix='/api/v1/activitydashboard')
+app.register_blueprint(stravaActDashAPI_BP, url_prefix='/api/v1/activitydashboard', subdomain='api')
 app.register_blueprint(stravaActDash_BP, url_prefix='/webapps/stravapp')
 app.register_blueprint(sbcWaterQuality_BP, url_prefix='/webapps/sbcwaterquality')
 app.register_blueprint(lacoSWTraceapp_BP, url_prefix='/webapps/lacoswtrace')
@@ -184,3 +187,4 @@ if application.config['ENV'] != "development":
 
     # Shutdown cron thread if the web process is stopped
     atexit.register(lambda: sched.shutdown(wait=False))
+application.logger.debug(f"Active URLs are: /n{application.url_map}")

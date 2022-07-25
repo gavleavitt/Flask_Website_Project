@@ -12,6 +12,7 @@ mainSite_BP = Blueprint('mainSite_BP', __name__,
                         static_folder='static')
 
 # @mainSite_BP.route("/main")
+# @mainSite_BP.route("/*")
 @mainSite_BP.route("/")
 @mainSite_BP.route("/index")
 def index():

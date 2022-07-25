@@ -5,8 +5,7 @@ import logging
 from io import StringIO
 import csv
 # from flask_application import flask_application
-# from flask_application.util.ErrorEmail import errorEmail
-from ErrorEmail import errorEmail
+#from ErrorEmail import errorEmail
 from flask_application.util.ErrorEmail import errorEmail
 from flask_application import application
 
