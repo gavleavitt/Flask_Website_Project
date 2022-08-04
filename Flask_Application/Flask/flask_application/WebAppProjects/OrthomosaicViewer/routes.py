@@ -12,13 +12,12 @@ else:
 @orthoviewer_BP.route("/orthoviewermainopenlayers")
 def orthoviewermainol():
     mapTitle = "Orthomosaic Collection, Processing, and Web Viewer"
-    tilesJSON = ""
     # TODO: Figure out how to make dynamic link, can I grab the subdomain and url from the pygeoapi blueprint?
 
     # f"http://{application.config['SERVER_NAME']}{url_for('pygeoapi_blueprint.handletracerequest')}"
     dataURL = dataURLBase + "?f=json"
     return render_template("OrthomosaicViewer/OrthomosaicViewerMainMapOpenLayers.html", title="Orthomosaic Viewer",
-                           mapTitle=mapTitle, s3Tiles = tilesJSON, dataURL=dataURL)
+                           mapTitle=mapTitle, dataURL=dataURL)
 
 @orthoviewer_BP.route("/orthoviewermainmapbox")
 def orthoviewermainmb():
@@ -27,9 +26,12 @@ def orthoviewermainmb():
 
 @orthoviewer_BP.route("/orthoviewermainopenlayers/<int:rid>", methods=['GET'])
 def orthoviewersingle(rid):
+    mapTitle = "Orthomosaic Collection, Processing, and Web Viewer"
     dataURL = dataURLBase + f"/{rid}?f=json"
     # Get ID from GET request and to pass into template
-    return render_template("OrthomosaicViewer/OrthomosaicViewerMainMapSingle.html", title="Orthomosaic Viewer", dataURL=dataURL)
+    return render_template("OrthomosaicViewer/OrthomosaicViewerMainMapOpenLayers.html", title="Orthomosaic Viewer",
+                           mapTitle=mapTitle, dataURL=dataURL)
+    # return render_template("OrthomosaicViewer/OrthomosaicViewerMainMapSingle.html", title="Orthomosaic Viewer", dataURL=dataURL)
 
 @orthoviewer_BP.route("/orthoviewermainopenlayers/mesh/<int:rid>", methods=['GET'])
 def orthoviewermeshsingle(rid):
