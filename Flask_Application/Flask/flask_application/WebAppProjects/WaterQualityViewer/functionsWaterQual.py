@@ -8,7 +8,6 @@ from flask_application import app, application
 from flask_application.util.ErrorEmail import errorEmail
 from flask_application.WebAppProjects.WaterQualityViewer import DBQueriesWaterQuality, AWSS3Upload
 import os
-from flask_application import logger
 from geojson import Point, Feature, FeatureCollection
 import pytz
 import requests
@@ -357,7 +356,7 @@ def genReSampleDict(tab, pdfDate):
             # print(f"Testing {tab[row][0]}")
             resampRow = tab[row]
             resampRow[0] = resampRow[0].split(' Re')[0].rstrip(" ")
-            logger.debug(f"Adding {resampRow[0]} to resample beach list")
+            application.logger.debug(f"Adding {resampRow[0]} to resample beach list")
             # Add to resample beach list
             resampBeaches.append(resampRow[0])
             # Add to resample table
@@ -452,12 +451,12 @@ def populateDict(tab, beachDict, resample):
     # print("Inside pop dict func")
     for row in range(1, len(tab)):
         # print(f"Working on row {tab[row]}")
-        logger.debug(f"Processing {tab[row]}")
+        application.logger.debug(f"Processing {tab[row]}")
         # For every row in the table, iterate over the columns, ignoring the first column (beach name),
         # since this is the key value. Use the column index to call on the column names list, which acts as a lookup
         # for the dictionary key value (column name) to be added to the 2nd level dictionary
         for i in range(1, (len(tab[row]))):
-            logger.debug(f"Filling key {beachDict[tab[row][0]][col[i - 1]]} with value {tab[row][i]}")
+            application.logger.debug(f"Filling key {beachDict[tab[row][0]][col[i - 1]]} with value {tab[row][i]}")
             # col[i-1] is needed since the loop is starting at index 1 to avoid iterating over the beach name in the
             # original list (table), this index is needed to grab the proper column name(key) starting at index 0,
             # so its decreased by 1 to maintain proper index location for filling in data
@@ -527,7 +526,7 @@ def pdfjob():
         errorEmail.sendSuccessEmail(script="parsePDF", body=f"The PDF: {pdfName} was successfully processed!")
         application.logger.debug("Successfully parsed a new PDF!")
     except SystemExit:
-        logger.debug("Ended ParsePDF early since file has already been processed")
+        application.logger.debug("Ended ParsePDF early since file has already been processed")
         application.logger.debug("Ended ParsePDF job early")
     except Exception as e:
         # print("Parse PDF threw an error, emailing exception")

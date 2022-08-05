@@ -24,38 +24,59 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlathanor import FlaskBaseModel, initialize_flask_sqlathanor
 from flask_sqlalchemy import SQLAlchemy
-from pygeoapi.flask_app import BLUEPRINT as pygeoapi_blueprint
+import sys
 
 # Create flask flask_application, I believe "flask_application" has to be used to work properly on AWS EB
-application = app = Flask(__name__, subdomain_matching=True)
+app = application = Flask(__name__, subdomain_matching=True)
 # cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
 cors = CORS(app, origins=["https://www.leavittmapping.com","http://www.leavittmapping.com/",
                           "https://leavittmapping.com","http://leavitttesting.local:5000",
                           "http://geo.leavitttesting.local:5000"])
-# Setup CORS
-# CORS(app)
 
+print(f'__name__ is: {__name__}', file=sys.stderr)
+dirname = os.path.dirname(__file__)
+print(f'Dirname at init.py is:{dirname}', file=sys.stderr)
+files = os.listdir(dirname)
+print(files, file=sys.stderr)
+print(f"Root files are: {os.listdir()}", file=sys.stderr)
+print(f'Checking if /log/ exists {os.path.exists("./logs/")}', file=sys.stderr)
+# print(os.path.abspath(os.path.join(os.path.dirname( __file__ ), '..', 'Flask/logs/flask_application.log')), file=sys.stderr)
+print(f'Checking if ./logs exists {os.path.exists("./logs/flask_application.log")}', file=sys.stderr)
+print(f'Checking if /logs exists {os.path.exists("/logs/flask_application.log")}', file=sys.stderr)
+print(f'Checking if /logs exists {os.path.exists("/logs/flask_application.log")}', file=sys.stderr)
+print(f"Checking if log path exists:{os.path.join(dirname, '..' , 'logs','flask_application.log')} - {os.path.exists(os.path.join(dirname, '..','logs', 'flask_application.log'))}", file=sys.stderr)
+print(f"Checking if log path exists:{os.path.join('..' ,'logs','flask_application.log')} - {os.path.exists(os.path.join(os.path.join('..' ,'logs','flask_application.log')))}", file=sys.stderr)
+print(f"Checking if log path exists:{os.path.join(dirname,'logs','flask_application.log')} - {os.path.exists(os.path.join(os.path.join(dirname,'logs','flask_application.log')))}", file=sys.stderr)
+print(f"Checking if log path exists:{os.path.join('./logs/')} - {os.path.exists(os.path.join('./logs/'))}", file=sys.stderr)
+print(f"Checking if log path exists:{os.path.join(dirname, '..' , 'logs','flask_application.log')} - {os.path.exists(os.path.join(dirname, '..' , 'logs','flask_application.log'))}", file=sys.stderr)
+print(f"Checking if log path exists:{os.path.join(dirname, '..' , 'logs','flask_application.log')} - {os.path.exists(os.path.join(dirname, '..' , 'logs','flask_application.log'))}", file=sys.stderr)
+print(f"Checking if log path exists:{os.path.join(os.path.dirname(__file__), 'logs', 'flask_application.log')} - {os.path.exists(os.path.join(os.path.dirname(__file__), 'logs', 'flask_application.log'))}", file=sys.stderr)
 # Setup logger
-logger = logging.getLogger(__name__)
+# logger = logging.getLogger(__name__)
+logger = logging.getLogger()
 # Set time and message format of logs
 formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
 # Set Logger to debug level
 logger.setLevel(logging.DEBUG)
-# Set logging pathway depending on if Flask is running local or on AWS EB on Amazon Linux 2
-application.logger.debug(f"Flask is running in {application.config['ENV']} mode")
-# if "B:\\" in os.getcwd():
-
-# Set logging and SQL DB connection settings based on if in production or development mocde
+# Flask's dir is: Flask_Application\Flask\flask_application, need to go up one level
+# logging.basicConfig(format='%(asctime)s %(levelname)-8s %(message)s',
+#                     level=logging.INFO,
+#                     datefmt='%Y-%m-%d %H:%M:%S',
+#                     filename='./logs/flask_application.log',
+#                     filemode='w')
 if application.config['ENV'] == "development":
     # Localhost development testing
     # TODO: Test
     app.config['SERVER_NAME'] = "leavitttesting.local:5000"
-    application.logger.debug('Development mode')
-    dirname = os.path.dirname(__file__)
-    # handler = RotatingFileHandler(os.path.join(dirname, '../logs/flask_application.log'), maxBytes=1024, backupCount=5)
-    handler = logging.FileHandler(os.path.join(dirname, '../logs/flask_application.log'))
-    # Set logging handler
+    # logging.basicConfig(format='%(asctime)s %(levelname)-8s %(message)s',
+    #                     level=logging.INFO,
+    #                     datefmt='%Y-%m-%d %H:%M:%S',
+    #                     filename='./logs/flask_application.log',
+    #                     filemode='w')
+    handler = logging.FileHandler(os.path.join(os.path.dirname(__file__), '..', 'logs', 'flask_application.log'))
     handler.setFormatter(formatter)
+    # # Attach logging handler to flask_application
+    application.logger.addHandler(handler)
     # app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get("DBCON_LOCAL")
     app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get("DBCON_DEV")
     # Setup SQLAlachemy engine sessionmaker factories with development connections
@@ -64,37 +85,41 @@ if application.config['ENV'] == "development":
     stravaViewerEng = create_engine(os.environ.get("DBCON_STRAVAVIEWER_DEV"))
     gpsTrackEng = create_engine(os.environ.get("DBCON_GPSTRACKING_DEV"))
     waterQualityEng = create_engine(os.environ.get("DBCON_WATERQUALITY_DEV"))
-
     # localurl = "leavitttesting.com:5000"
     # flask_application.logger.debug(f"Setting up local development server name: {localurl}")
     # app.config['SERVER_NAME'] = localurl
 else:
     # Live deployment
     # see https://stackoverflow.com/a/60549321
-    application.logger.debug('Production mode')
+    # uwsgi configures it own logger, don't need to set here
+    # logging.basicConfig(format='%(asctime)s %(levelname)-8s %(message)s',
+    #                     level=logging.INFO,
+    #                     datefmt='%Y-%m-%d %H:%M:%S',
+    #                     # filename=os.path.join('/app/logs/flask_application.log'),
+    #                     filename=os.path.join('flask_application.log'),
+    #                     filemode='w')
+    # application.logger.debug('Production mode')
     app.config['SERVER_NAME'] = "leavittmapping.com"
-    # app.url_map.default_subdomain = "www"
-    # handler = logging.FileHandler('/tmp/flask_application.log')
-    # handler = logging.
-    application.logger.setLevel(logging.DEBUG)
     app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get("DBCON_PROD")
-    application.logger.debug(f"Setting up in Production mode with the server name: {app.config['SERVER_NAME']}")
+#    application.logger.debug(f"Setting up in Production mode with the server name: {app.config['SERVER_NAME']}")
     lacotraceEng = create_engine(os.environ.get("DBCON_LACOTRACE_PROD"))
     engine = create_engine(os.environ.get("DBCON_PROD"))
     stravaViewerEng = create_engine(os.environ.get("DBCON_STRAVAVIEWER_PROD"))
     gpsTrackEng = create_engine(os.environ.get("DBCON_GPSTRACKING_PROD"))
     waterQualityEng = create_engine(os.environ.get("DBCON_WATERQUALITY_PROD"))
-
+# Set logging handler
+# handler.setFormatter(formatter)
+# # Attach logging handler to flask_application
+# application.logger.addHandler(handler)
+# application.logger.setLevel(logging.DEBUG)
+application.logger.debug("Python Flask debugger active!")
+application.logger.debug(f"Flask is running in {application.config['ENV']} mode with the server name: {app.config['SERVER_NAME']}")
 #  Bind sessionmakers
 lacotraceSes = sessionmaker(bind=lacotraceEng)
 stravaViewerSes = sessionmaker(bind=stravaViewerEng)
 Session = sessionmaker(bind=engine)
 gpsTrackSes = sessionmaker(bind=gpsTrackEng)
 waterQualitySes = sessionmaker(bind=waterQualityEng)
-# Set logging handler
-# handler.setFormatter(formatter)
-
-
 
 # Disabling modification tracking
 application.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
@@ -108,9 +133,6 @@ db = initialize_flask_sqlathanor(db)
 # engineLocal = create_engine(os.environ.get("DBCON_LOCAL"))
 # SessionLocal = sessionmaker(bind=engineLocal)
 
-# Attach logging handler to flask_application
-# application.logger.addHandler(handler)
-application.logger.debug("Python Flask debugger active!")
 
 # Import HTTP auth
 from flask_application.util.flaskAuth.authentication import auth
@@ -145,6 +167,8 @@ app.register_blueprint(stravaActDashAPI_Admin_BP, url_prefix='/admin/api/v1/acti
 app.register_blueprint(orthoviewer_BP, url_prefix='/webapps/orthoviewer')
 
 # Register PyGeoAPI
+# Import pygeoapi, need to import after configuring logger or else this will setup its own logger
+from pygeoapi.flask_app import BLUEPRINT as pygeoapi_blueprint
 # app.register_blueprint(pygeoapi_blueprint, url_prefix='/pygeo')
 app.register_blueprint(pygeoapi_blueprint, subdomain='geo')
 # app.register_blueprint(lacoSWTraceapp_API_BP, url_prefix='/api/v1/trace')
