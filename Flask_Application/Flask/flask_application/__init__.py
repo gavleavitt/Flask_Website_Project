@@ -33,31 +33,18 @@ cors = CORS(app, origins=["https://www.leavittmapping.com","http://www.leavittma
                           "https://leavittmapping.com","http://leavitttesting.local:5000",
                           "http://geo.leavitttesting.local:5000"])
 
-print(f'__name__ is: {__name__}', file=sys.stderr)
 dirname = os.path.dirname(__file__)
-print(f'Dirname at init.py is:{dirname}', file=sys.stderr)
-files = os.listdir(dirname)
-print(files, file=sys.stderr)
-print(f"Root files are: {os.listdir()}", file=sys.stderr)
-print(f'Checking if /log/ exists {os.path.exists("./logs/")}', file=sys.stderr)
-# print(os.path.abspath(os.path.join(os.path.dirname( __file__ ), '..', 'Flask/logs/flask_application.log')), file=sys.stderr)
-print(f'Checking if ./logs exists {os.path.exists("./logs/flask_application.log")}', file=sys.stderr)
-print(f'Checking if /logs exists {os.path.exists("/logs/flask_application.log")}', file=sys.stderr)
-print(f'Checking if /logs exists {os.path.exists("/logs/flask_application.log")}', file=sys.stderr)
-print(f"Checking if log path exists:{os.path.join(dirname, '..' , 'logs','flask_application.log')} - {os.path.exists(os.path.join(dirname, '..','logs', 'flask_application.log'))}", file=sys.stderr)
-print(f"Checking if log path exists:{os.path.join('..' ,'logs','flask_application.log')} - {os.path.exists(os.path.join(os.path.join('..' ,'logs','flask_application.log')))}", file=sys.stderr)
-print(f"Checking if log path exists:{os.path.join(dirname,'logs','flask_application.log')} - {os.path.exists(os.path.join(os.path.join(dirname,'logs','flask_application.log')))}", file=sys.stderr)
-print(f"Checking if log path exists:{os.path.join('./logs/')} - {os.path.exists(os.path.join('./logs/'))}", file=sys.stderr)
-print(f"Checking if log path exists:{os.path.join(dirname, '..' , 'logs','flask_application.log')} - {os.path.exists(os.path.join(dirname, '..' , 'logs','flask_application.log'))}", file=sys.stderr)
-print(f"Checking if log path exists:{os.path.join(dirname, '..' , 'logs','flask_application.log')} - {os.path.exists(os.path.join(dirname, '..' , 'logs','flask_application.log'))}", file=sys.stderr)
-print(f"Checking if log path exists:{os.path.join(os.path.dirname(__file__), 'logs', 'flask_application.log')} - {os.path.exists(os.path.join(os.path.dirname(__file__), 'logs', 'flask_application.log'))}", file=sys.stderr)
 # Setup logger
 # logger = logging.getLogger(__name__)
 logger = logging.getLogger()
-# Set time and message format of logs
-formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
 # Set Logger to debug level
 logger.setLevel(logging.DEBUG)
+# Set time and message format of logs
+formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
+handler = logging.StreamHandler(sys.stdout)
+handler.setLevel(logging.DEBUG)
+handler.setFormatter(formatter)
+logger.addHandler(handler)
 # Flask's dir is: Flask_Application\Flask\flask_application, need to go up one level
 # logging.basicConfig(format='%(asctime)s %(levelname)-8s %(message)s',
 #                     level=logging.INFO,
@@ -68,11 +55,6 @@ if application.config['ENV'] == "development":
     # Localhost development testing
     # TODO: Test
     app.config['SERVER_NAME'] = "leavitttesting.local:5000"
-    # logging.basicConfig(format='%(asctime)s %(levelname)-8s %(message)s',
-    #                     level=logging.INFO,
-    #                     datefmt='%Y-%m-%d %H:%M:%S',
-    #                     filename='./logs/flask_application.log',
-    #                     filemode='w')
     handler = logging.FileHandler(os.path.join(os.path.dirname(__file__), '..', 'logs', 'flask_application.log'))
     handler.setFormatter(formatter)
     # # Attach logging handler to flask_application
@@ -92,12 +74,6 @@ else:
     # Live deployment
     # see https://stackoverflow.com/a/60549321
     # uwsgi configures it own logger, don't need to set here
-    # logging.basicConfig(format='%(asctime)s %(levelname)-8s %(message)s',
-    #                     level=logging.INFO,
-    #                     datefmt='%Y-%m-%d %H:%M:%S',
-    #                     # filename=os.path.join('/app/logs/flask_application.log'),
-    #                     filename=os.path.join('flask_application.log'),
-    #                     filemode='w')
     # application.logger.debug('Production mode')
     app.config['SERVER_NAME'] = "leavittmapping.com"
     app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get("DBCON_PROD")
@@ -107,11 +83,7 @@ else:
     stravaViewerEng = create_engine(os.environ.get("DBCON_STRAVAVIEWER_PROD"))
     gpsTrackEng = create_engine(os.environ.get("DBCON_GPSTRACKING_PROD"))
     waterQualityEng = create_engine(os.environ.get("DBCON_WATERQUALITY_PROD"))
-# Set logging handler
-# handler.setFormatter(formatter)
-# # Attach logging handler to flask_application
-# application.logger.addHandler(handler)
-# application.logger.setLevel(logging.DEBUG)
+
 application.logger.debug("Python Flask debugger active!")
 application.logger.debug(f"Flask is running in {application.config['ENV']} mode with the server name: {app.config['SERVER_NAME']}")
 #  Bind sessionmakers

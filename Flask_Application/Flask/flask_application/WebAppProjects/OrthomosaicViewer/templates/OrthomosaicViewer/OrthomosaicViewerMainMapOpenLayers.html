@@ -22,6 +22,9 @@
 	<!-- Custom local javascript functions -->
 	<!-- Custom CSS -->
 
+	<!-- Bootstrap icons from: https://blog.getbootstrap.com/2021/01/07/bootstrap-icons-1-3-0/ -->
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.3.0/font/bootstrap-icons.css">
+
 	<!-- Custom local javascript functions -->
 	<script type="module" src="{{url_for('orthoviewer_BP.static', filename='OrthomosaicViewer/js/customjsol.js')}}"></script>
 	<!-- Custom CSS -->
@@ -69,6 +72,16 @@
 					</div>
 			 </div>
 		 </div>
+		 <div id="infoModal" class="infomodal">
+			 <div class="modal-content-container modal-content-container-info">
+				 <!-- <div class="close">&times;</div> -->
+				 <div id="infoClose" class="close">&times;</div>
+				 <div id="modalHeader" class="modal-text">
+					 <p style="margin-top:0px;"><b>Orthomosaic</b></p>
+					 <span>1235345345</span>
+				 </div>
+			</div>
+		</div>
 		</div>
 		<div id="popup" class="ol-popup">
       <a href="#" id="popup-closer" class="ol-popup-closer"></a>

@@ -1,3 +1,68 @@
+#infoModal{
+  display:none;
+  /* max-width: 10%; */
+}
+.action_btns{
+  /* width:30px; */
+  /* height:25px; */
+  /* border-radius: 5px; */
+  cursor: pointer;
+  border-radius: 10px;
+  padding: 8px;
+  /* border: 2px solid #017EFF; */
+  background: #017EFF;
+  color: white;
+  /* font-style: bold; */
+  font-weight: bold;
+  border: none;
+}
+.action_btns> * {
+  /* Turn off pointer events for all elements under action-btn, this prevents the clicked items from appeared as targets within event listeners */
+  pointer-events: none;
+}
+.action_btns:hover{
+  background: #08488A;
+}
+.btntxt{
+padding-left: 5px;
+}
+.popbtngrp{
+  display: flex;
+  margin-top: 5px;
+  justify-content: space-evenly;
+}
+.modal-content-container-info{
+  max-width: 20%;
+  position: relative;
+}
+.infomodal {
+  display: block; /* Hidden by default */
+  position: fixed; /* Stay in place */
+  z-index: 2; /* Sit on top */
+  padding-top: 250px; /* Location of the box */
+  left: 0;
+  top: 0;
+  width: 100%; /* Full width */
+  height: 100%; /* Full height */
+  overflow: auto; /* Enable scroll if needed */
+  background-color: rgb(0,0,0); /* Fallback color */
+  background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+  /* border-radius: 30px;
+  border: 2px solid #888; */
+}
+#infoClose {
+  color: #aaaaaa;
+  font-size: 32px !important;
+  font-weight: bold;
+  /* margin-top: -10px; */
+  position: absolute;
+  right: 12px;
+  /* position: fixed; */
+  /* right: 46%; */
+  /* right: 12%; */
+  /* transform: translateX(-12%); */
+}
+
 .titletext {
   align-items: unset;
 }
@@ -287,9 +352,11 @@
   overflow: visible;
 }
 .ol-layerswitcher .layerInfo {
-  right: -.5em;
+  /* right: -.5em; */
+  right: -2px;
   background: #017eff;
 }
+
 
 .ol-control.ol-layerswitcher .ol-switchertopdiv,
 .ol-control.ol-layerswitcher .ol-switcherbottomdiv {

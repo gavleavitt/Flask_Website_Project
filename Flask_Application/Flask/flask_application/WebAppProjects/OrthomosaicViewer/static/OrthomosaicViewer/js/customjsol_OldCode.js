@@ -4,7 +4,6 @@
 const container = document.getElementById('popup');
 const content = document.getElementById('popup-content');
 const closer = document.getElementById('popup-closer');
-var visible = true
 // Create overlay that wraps the popup html element and interacts with map
 const overlay = new ol.Overlay({
   element: container,
@@ -16,20 +15,7 @@ const overlay = new ol.Overlay({
 });
 
 function zoomToExtent(){
-// Get
-}
 
-function showSingleLayer(e){
-  var rid = e.getAttribute("rid")
-  // Loop over all layers in imagery group, turning off visibiltiy if not equal to current rid
-  var lyrs = imageryGroup.getLayers()
-  lyrs.forEach((item, i) => {
-    if (item.A.rid !=rid){
-      item.setVisible(false)
-    } else {
-      item.setVisible(true)
-    }
-  })
 }
 
 
@@ -38,50 +24,18 @@ function closeModal(){
 }
 
 function popupinfo(item){
-  // Format Info popup window
-  // console.log(item);
   var infoModal = document.getElementById('infoModal');
   infoModal.style.display = "block";
   var modalHeader = document.getElementById('modalHeader')
   modalHeader.innerHTML = ""
-  if (item.raster == true){
-    modalHeader.innerHTML += `<span class='popup-header'>Drone Orthomosaic - ${item["Mission Name"].replace("_"," ")}</span>`
-    modalHeader.innerHTML +=`</b><br>Collection Date: ${item["Mission Date"].substring(0,10)}`
-    modalHeader.innerHTML += `<br>GSD: ${Math.round((item["GSD"]*10))/10} (in/px)`
-    modalHeader.innerHTML += `<br>Flight Elevation: ${item["Mission Elevation"]}`
-    modalHeader.innerHTML += `<br>Altitude Flight Type: ${item["Altitude Flight Type"]}`
-    // TODO: Add action butions
-    // modalHeader.innerHTML += `<br>Actions:`
-    modalHeader.innerHTML += `<br><div class="popbtngrp"><button rid=${item["id"]} id="zoomTo" class="action_btns"><i class="bi bi-square"></i><span class="btntxt">Zoom</span></button><button rid=${item["id"]} id="toggleDisplay" class="action_btns"><i class="bi bi-eye-fill"></i><span class="btntxt">Toggle</span></button><button rid=${item["id"]} id="newWindow" class="action_btns"><i class="bi bi-arrow-up-right-square-fill"></i><span rid=${item["id"]} class="btntxt">New Window</span></button></div>`
-    // Add event listeners to popup buttons
-    document.getElementById("newWindow").addEventListener("click", function(e){
-      // Open new window
-      window.open(`${window.location}/${item["id"]}`)
-    })
-    // TODO: build out to toggle just the selected layer on, already have logic for, consider building into a function to be called here and in other location
-    document.getElementById("toggleDisplay").addEventListener("click", function(e){
-      var rid = e.target.rid
-    })
-    document.getElementById("zoomTo").addEventListener("click", function(e){
-      // Zoom to event of target layer
-      // Get ID value assigned to layer
-      var rid = e.target.attributes.rid.value
-      // Get all layers in imagery group
-      var layers = imageryGroup.getLayers()
-      layers.forEach((item, i) => {
-        // Find layer associated with popup button
-        if (item.A['id'] == rid){
-          // Get extent of layer
-          var extent = item.A["extent"]
-          // Set map view based on extent
-          map.getView().fit(extent);
-        }
-      });
-    })
-  }
-  else{
-    modalHeader.innerHTML += `<span class='popup-header'>${item.title}</span>`
-  }
+  modalHeader.innerHTML += `<span class='popup-header'>Drone Orthomosaic - ${item["Mission Name"]}</span>`
+  modalHeader.innerHTML +=`</b><br>Collection Date: ${item["Mission Date"].substring(0,10)}`
+  modalHeader.innerHTML += `<br>GSD: ${Math.round((item["GSD"]*10))/10} (in/px)`
+  modalHeader.innerHTML += `<br>Flight Elevation: ${item["Mission Elevation"]}`
+  modalHeader.innerHTML += `<br>Altitude Flight Type: ${item["Altitude Flight Type"]}`
+  // TODO: Add action butions
+  modalHeader.innerHTML += `<br>Actions:`
+  modalHeader.innerHTML += `<br><button></button><button></button><button></button>`
   // Check if 3D view available, add link if so
   document.getElementById('infoClose').addEventListener("click", closeModal)
   window.addEventListener('click', function(event) {
@@ -116,13 +70,12 @@ function createWebGLTile(item, extent=Null){
   var rasterTile = new ol.layer.WebGLTile({
     source: rasterSource,
     displayInLayerSwitcher: true,
-    title: item.properties["Mission Name"].replace("_"," ") + "<br><span>" + item.properties["Mission Date"].substring(0,10) + " - " + item.properties["GSD"] + " in/px" +"</span>",
+    title: item.properties["Mission Name"] + "<br><span>" + item.properties["Mission Date"].substring(0,10) + " - " + item.properties["GSD"] + " in/px" +"</span>",
     // Set rid as object property, will be usually to toggle visibility on and off
     rid: item.properties["id"],
     // Set properties from vector layer soruce
     properties: item.properties,
-    extent: extent,
-    raster: true
+    extent: extent
   });
   return rasterTile;
 }
@@ -150,8 +103,7 @@ const hiddenPolygon = new ol.style.Style({
 const imageryGroup =  new ol.layer.Group({
       openInLayerSwitcher: true,
       title: "Imagery",
-      layers: [],
-      raster: false
+      layers: []
     })
 // Create openlayers map with popup overlay, basemap, and empty imagery group layer
 var map = new ol.Map({
@@ -160,7 +112,6 @@ var map = new ol.Map({
   layers: [
     new ol.layer.Tile({
       title: "OpenStreetMap",
-      raster: false,
       source: new ol.source.OSM()
     }),
     imageryGroup
@@ -229,6 +180,12 @@ fetch(dataURL)
       var rasterTile = createWebGLTile(item, extTrans)
       // Push a list of group layers to imagery group layer, this is done such that the extent polygon, with attributes, are grouped together with the raster layers
       srcList.push(rasterTile)
+        // new ol.layer.Group({
+        //       openInLayerSwitcher: true,
+        //       title: item.properties["Mission Name"] + "<br><span>" + item.properties["Mission Date"].substring(0,10) + " - " + item.properties["GSD"] + " in/px" +"</span>",
+        //       layers: [rasterTile]
+        // })
+      // )
     });
   } else {
     // Input is a single Feature instead of collection, handle differently
@@ -237,6 +194,10 @@ fetch(dataURL)
   }
   // Extent imagery group with newly populated list
   imageryGroup.getLayers().extend(srcList)
+//  http://jsfiddle.net/HarolddP/2wfo5acf/3/
+// https://openlayers.org/en/latest/apidoc/module-ol_Map-Map.html#addOverlay
+  // const popup = new ol.Overlay.Popup();
+  // map.addOverlay(popup);
   // Click event handler, populates popup and additional event handlers
   map.on("click", (evt) => {
     var pixel = evt.pixel;
@@ -252,7 +213,7 @@ fetch(dataURL)
     if (features.length > 0){
       content.innerHTML += "<span class='popup-header'>Drone Orthomosaic(s)</span>"
       features.forEach((item, i) => {
-        content.innerHTML += `<br><b>Name: ${item["Mission Name"].replace("_"," ")}</b><br>Date: ${item["Mission Date"].substring(0,10)}<br>GSD: ${Math.round((item["GSD"]*10))/10} (in/px)<br><button rid=${item["id"]} class='layertogglebtn'>Make just this imagery visible</button><br><a href=${window.location}/${item["id"]}>Open just this orthomosaic</a>`
+        content.innerHTML += `<br><b>Name: ${item["Mission Name"]}</b><br>Date: ${item["Mission Date"].substring(0,10)}<br>GSD: ${Math.round((item["GSD"]*10))/10} (in/px)<br><button rid=${item["id"]} class='layertogglebtn'>Make just this imagery visible</button><br><a href=${window.location}/${item["id"]}>Open just this orthomosaic</a>`
         // Check if 3D view available, add link if so
         if (item["3DMesh"]){
           content.innerHTML += `<br><a href=${window.location}/mesh/${item["id"]}></a>`
@@ -305,18 +266,13 @@ var button = $('<div class="toggleVisibility" title="show/hide">')
     // var a = map.getLayers().getArray();
     var a = map.getAllLayers()
     a.forEach((item, i) => {
-      // if (item.getVisible() && item.A.title!="OpenStreetMap" && item.A.title!="Imagery Extents"){
-      if (visible == true && item.A.raster==true){
+      if (item.getVisible() && item.A.title!="OpenStreetMap"){
         item.setVisible(false)
       } else {
         item.setVisible(true)
       }
     });
-    if (visible == true){
-      visible = false
-    } else {
-      visible = true
-    }
+
     console.log(map)
   });
 switcher.setHeader($('<div>').append(button).get(0))
