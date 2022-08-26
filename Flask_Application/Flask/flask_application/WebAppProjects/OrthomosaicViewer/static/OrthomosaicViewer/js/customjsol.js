@@ -15,23 +15,23 @@ const overlay = new ol.Overlay({
   },
 });
 
-function zoomToExtent(){
-// Get
+function showThisLayerBtn(btn){
+  // item.addEventListener("click", function(btn){
+    // Get rid of clicked button
+    var rid = btn.target.getAttribute("rid")
+    // Loop over all layers in imagery group, turning off visibiltiy if not equal to current rid
+    var lyrs = imageryGroup.getLayers()
+    lyrs.forEach((item, i) => {
+      if (item.A.rid !=rid){
+        item.setVisible(false)
+      } else {
+        item.setVisible(true)
+        var extent = item.A["extent"]
+        // Set map view based on extent
+        map.getView().fit(extent);
+      }
+    });
 }
-
-function showSingleLayer(e){
-  var rid = e.getAttribute("rid")
-  // Loop over all layers in imagery group, turning off visibiltiy if not equal to current rid
-  var lyrs = imageryGroup.getLayers()
-  lyrs.forEach((item, i) => {
-    if (item.A.rid !=rid){
-      item.setVisible(false)
-    } else {
-      item.setVisible(true)
-    }
-  })
-}
-
 
 function closeModal(){
   document.getElementById('infoModal').style.display= "none";
@@ -50,7 +50,6 @@ function popupinfo(item){
     modalHeader.innerHTML += `<br>GSD: ${Math.round((item["GSD"]*10))/10} (in/px)`
     modalHeader.innerHTML += `<br>Flight Elevation: ${item["Mission Elevation"]}`
     modalHeader.innerHTML += `<br>Altitude Flight Type: ${item["Altitude Flight Type"]}`
-    // TODO: Add action butions
     // modalHeader.innerHTML += `<br>Actions:`
     modalHeader.innerHTML += `<br><div class="popbtngrp"><button rid=${item["id"]} id="zoomTo" class="action_btns"><i class="bi bi-square"></i><span class="btntxt">Zoom</span></button><button rid=${item["id"]} id="toggleDisplay" class="action_btns"><i class="bi bi-eye-fill"></i><span class="btntxt">Toggle</span></button><button rid=${item["id"]} id="newWindow" class="action_btns"><i class="bi bi-arrow-up-right-square-fill"></i><span rid=${item["id"]} class="btntxt">New Window</span></button></div>`
     // Add event listeners to popup buttons
@@ -59,9 +58,7 @@ function popupinfo(item){
       window.open(`${window.location}/${item["id"]}`)
     })
     // TODO: build out to toggle just the selected layer on, already have logic for, consider building into a function to be called here and in other location
-    document.getElementById("toggleDisplay").addEventListener("click", function(e){
-      var rid = e.target.rid
-    })
+    document.getElementById("toggleDisplay").addEventListener("click", showThisLayerBtn);
     document.getElementById("zoomTo").addEventListener("click", function(e){
       // Zoom to event of target layer
       // Get ID value assigned to layer
@@ -77,7 +74,7 @@ function popupinfo(item){
           map.getView().fit(extent);
         }
       });
-    })
+    });
   }
   else{
     modalHeader.innerHTML += `<span class='popup-header'>${item.title}</span>`
@@ -246,38 +243,29 @@ fetch(dataURL)
     map.forEachFeatureAtPixel(pixel, function(feature, layer) {
       features.push(feature.getProperties());
     });
+    var newContent = ""
     // Reset innerhtml
     content.innerHTML = ""
     // Dynamically build popup html
     if (features.length > 0){
-      content.innerHTML += "<span class='popup-header'>Drone Orthomosaic(s)</span>"
+      newContent += "<span class='popup-header'>Drone Orthomosaic(s)</span>"
       features.forEach((item, i) => {
-        content.innerHTML += `<br><b>Name: ${item["Mission Name"].replace("_"," ")}</b><br>Date: ${item["Mission Date"].substring(0,10)}<br>GSD: ${Math.round((item["GSD"]*10))/10} (in/px)<br><button rid=${item["id"]} class='layertogglebtn'>Make just this imagery visible</button><br><a href=${window.location}/${item["id"]}>Open just this orthomosaic</a>`
+        newContent += `<div class="popupItem"><br><b><span class="popupItemName">Name: ${item["Mission Name"].replace("_"," ")}</span></b><br>Date: ${item["Mission Date"].substring(0,10)}<br>GSD: ${Math.round((item["GSD"]*10))/10} (in/px)`
+        newContent += `<div class="popbtngrp"><button rid=${item["id"]} id="zoomTo" class="popupbtns"><i class="bi bi-square"></i><span class="btntxt"></span></button><button rid=${item["id"]} id="toggleDisplay" class="popupbtns"><i class="bi bi-eye-fill"></i><span class="btntxt"></span></button><button rid=${item["id"]} id="newWindow" class="popupbtns"><i class="bi bi-arrow-up-right-square-fill"></i><span rid=${item["id"]} class="btntxt"></span></button></div>`
         // Check if 3D view available, add link if so
         if (item["3DMesh"]){
-          content.innerHTML += `<br><a href=${window.location}/mesh/${item["id"]}></a>`
+          newContent += `<br><a href=${window.location}/mesh/${item["id"]}></a>`
         }
+        newContent += "</div>"
+        content.innerHTML = newContent
+        // TODO: apply button functions to each button on each loop 
+        // Get all elements with the rid property, this will be all dynamically generated buttons
+        // var sel = document.querySelectorAll('[rid]');
+        // Loop over each popup button adding an event listener which allows user to toggle only showing a single orthomosaic
+        // sel.forEach((item, i) => {
+        //   item.addEventListener("click", showThisLayerBtn);
+        // });
       });
-      // Get all elements with the rid property, this will be all dynamically generated buttons
-      var sel = document.querySelectorAll('[rid]');
-      // Loop over each popup button adding an event listener which allows user to toggle only showing a single orthomosaic
-      // TODO: attach to icon in popup
-      sel.forEach((item, i) => {
-        item.addEventListener("click", function(btn){
-          // Get rid of clicked button
-          var rid = btn.target.getAttribute("rid")
-          // Loop over all layers in imagery group, turning off visibiltiy if not equal to current rid
-          var lyrs = imageryGroup.getLayers()
-          lyrs.forEach((item, i) => {
-            if (item.A.rid !=rid){
-              item.setVisible(false)
-            } else {
-              item.setVisible(true)
-            }
-          });
-        });
-      });
-
       const coordinate = evt.coordinate;
       overlay.setPosition(evt.coordinate);
     } else {

@@ -2,6 +2,9 @@
   display:none;
   /* max-width: 10%; */
 }
+.ol-layerswitcher > button{
+  font-size: 1.5em;
+}
 .action_btns{
   /* width:30px; */
   /* height:25px; */
@@ -16,6 +19,12 @@
   font-weight: bold;
   border: none;
 }
+
+/* .popupbtns > *{
+  padding: none;
+  background: none;
+} */
+
 .action_btns> * {
   /* Turn off pointer events for all elements under action-btn, this prevents the clicked items from appeared as targets within event listeners */
   pointer-events: none;
@@ -90,7 +99,7 @@ padding-left: 5px;
   border: 1px solid #cccccc;
   bottom: 12px;
   left: -50px;
-  min-width: 400px;
+  min-width: 230px;
 }
 .ol-popup:after, .ol-popup:before {
   top: 100%;
@@ -101,10 +110,24 @@ padding-left: 5px;
   position: absolute;
   pointer-events: none;
 }
+ .popupbtns{
+   font-size: 16px;
+   padding: 0px;
+   background: none;
+   color: #017EFF;
+   border: none;
+   cursor: pointer;
+ }
+ .popupItem{
+   margin-top: -10px;
+ }
+ .popupItemName{
+   border-top: solid 2px black;
+ }
 .popup-header{
   font-weight: bold;
   font-size: 16px;
-  border-bottom: 2px solid black;
+  /* border-bottom: 2px solid black; */
   /* padding-bottom: 10px; */
 }
 .ol-popup:after {
@@ -361,4 +384,23 @@ padding-left: 5px;
 .ol-control.ol-layerswitcher .ol-switchertopdiv,
 .ol-control.ol-layerswitcher .ol-switcherbottomdiv {
   display: none!important;
+}
+
+@media (max-width: 460px){
+.titlediv{
+  display: none;
+}
+.ol-layerswitcher, .ol-layerswitcher.ol-forceopen {
+  width: 300px;
+  /* min-width: 8em; */
+}
+.ol-control.ol-layerswitcher {
+  top: 10px;
+}
+.ol-popup {
+  min-width: 230px;
+}
+.ol-layerswitcher .panel li .layerswitcher-opacity {
+  width: 14%;
+}
 }
