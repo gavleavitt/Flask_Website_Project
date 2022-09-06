@@ -19,10 +19,10 @@ def orthoviewermainol():
     return render_template("OrthomosaicViewer/OrthomosaicViewerMainMapOpenLayers.html", title="Orthomosaic Viewer",
                            mapTitle=mapTitle, dataURL=dataURL)
 
-@orthoviewer_BP.route("/orthoviewermainmapbox")
-def orthoviewermainmb():
-    tilesJSON = ""
-    return render_template("OrthomosaicViewer/OrthomosaicViewerMainMapMapBox.html", title="Orthomosaic Viewer", s3Tiles = tilesJSON)
+# @orthoviewer_BP.route("/orthoviewermainmapbox")
+# def orthoviewermainmb():
+#     tilesJSON = ""
+#     return render_template("OrthomosaicViewer/OrthomosaicViewerMainMapMapBox.html", title="Orthomosaic Viewer", s3Tiles = tilesJSON)
 
 @orthoviewer_BP.route("/orthoviewermainopenlayers/<int:rid>", methods=['GET'])
 def orthoviewersingle(rid):

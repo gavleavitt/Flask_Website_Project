@@ -45,44 +45,19 @@
 		<div class="item titlediv">
 			<!-- <div id = "Title" class="titletext">Orthomosaic Viewer</div> -->
 			{% include 'WebAppTitleBar.html' %}
-			<!-- Modal -->
-			<!-- The Modal -->
-			<div id="myModal" class="modal">
-			  <div class="modal-content-container">
-			    <!-- <div class="close">&times;</div> -->
-					<div class="close">&times;</div>
-					<div class="modal-text">
-						<p style="margin-top:0px;"><b>Map Details</b>
-						<br>
-							This map displays my personally collected and processed orthomosaic drone imagery. While I am a Part 107 licensed pilot, all of these collections are non-commerical and flown under FAA recreational exception rules.
-						</p>
-						<p>
-							This is an ongoing personal project to collect, process, and display orthomosaic imagery collected from a drone. Mission planning and execution are conducted using the <a href="https://www.dronelink.com/">Dronelink</a> web and mobile applications and all missions are flown using a DJI Mavic Mini SE.
-						</p>
-						<p></p>
-						<p><b>Contact Me</b>
-						<br>
-						If you have any questions, feature suggestions, comments, or notice any errors/bugs feel free to email me at <span id="emailaddr"></span>
-						</p>
-						<p>
-							You can see my other projects under the <a href=/#goto-proj>projects</a> section of this site.
-						</p>
-						<p>You can visit my GitHub repo for this project and others <a href=https://github.com/gavleavitt/Flask_Website_Project target="_blank">here</a>.
-						</p>
-					</div>
-			 </div>
+		<!-- Modal -->
+		</div>
+		{% include 'OrthomosaicViewer/modalText.html' %}
+		<div id="infoModal" class="infomodal">
+			<div class="modal-content-container modal-content-container-info">
+				<!-- <div class="close">&times;</div> -->
+				<div id="infoClose" class="close">&times;</div>
+				<div id="modalHeader" class="modal-text">
+					<p style="margin-top:0px;"><b>Orthomosaic</b></p>
+					<span>1</span>
+				</div>
 		 </div>
-		 <div id="infoModal" class="infomodal">
-			 <div class="modal-content-container modal-content-container-info">
-				 <!-- <div class="close">&times;</div> -->
-				 <div id="infoClose" class="close">&times;</div>
-				 <div id="modalHeader" class="modal-text">
-					 <p style="margin-top:0px;"><b>Orthomosaic</b></p>
-					 <span>1235345345</span>
-				 </div>
-			</div>
-		</div>
-		</div>
+	 </div>
 		<div id="popup" class="ol-popup">
       <a href="#" id="popup-closer" class="ol-popup-closer"></a>
       <div id="popup-content"></div>

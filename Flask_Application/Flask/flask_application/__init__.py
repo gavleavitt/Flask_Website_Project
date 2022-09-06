@@ -25,6 +25,7 @@ from sqlalchemy.orm import sessionmaker
 from sqlathanor import FlaskBaseModel, initialize_flask_sqlathanor
 from flask_sqlalchemy import SQLAlchemy
 import sys
+import traceback
 
 # Create flask flask_application, I believe "flask_application" has to be used to work properly on AWS EB
 app = application = Flask(__name__, subdomain_matching=True)
@@ -36,29 +37,49 @@ cors = CORS(app, origins=["https://www.leavittmapping.com","http://www.leavittma
 dirname = os.path.dirname(__file__)
 # Setup logger
 # logger = logging.getLogger(__name__)
-logger = logging.getLogger()
+# logger = logging.getLogger()
 # Set Logger to debug level
-logger.setLevel(logging.DEBUG)
+# logger.setLevel(logging.DEBUG)
 # Set time and message format of logs
-formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
-handler = logging.StreamHandler(sys.stdout)
-handler.setLevel(logging.DEBUG)
-handler.setFormatter(formatter)
-logger.addHandler(handler)
+# formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
+#handler = logging.StreamHandler(sys.stdout)
+#handler.setLevel(logging.DEBUG)
+#handler.setFormatter(formatter)
+#logger.addHandler(handler)
+# Attach logging handler to flask_application
+# handler = logging.FileHandler(os.path.join(os.path.dirname(__file__), '..', 'logs', 'flask_application.log'))
+#handler.setFormatter(formatter)
+# # Attach logging handler to flask_application
+#application.logger.addHandler(handler)
 # Flask's dir is: Flask_Application\Flask\flask_application, need to go up one level
-# logging.basicConfig(format='%(asctime)s %(levelname)-8s %(message)s',
-#                     level=logging.INFO,
-#                     datefmt='%Y-%m-%d %H:%M:%S',
-#                     filename='./logs/flask_application.log',
-#                     filemode='w')
+# application.logger.addHandler(logging.StreamHandler())
+# try:
+#     logging.basicConfig(format='%(asctime)s %(levelname)-8s %(message)s',
+#                         level=logging.DEBUG,
+#                         datefmt='%Y-%m-%d %H:%M:%S',
+#                         # filename='./logs/flask_application.log',
+#                         filename='flask_application.log',
+#                         filemode='w')
+# except Exception as e:
+#     # logging.getLogger().addHandler(logging.StreamHandler())
+#     application.logger.addHandler(logging.StreamHandler())
+#     application.logger.setLevel(logging.DEBUG)
+#     print(e, file=sys.stderr)
+#     print(traceback.format_exc(), file=sys.stderr)
+# Set application to handle logging, this prevents various library functions from filling up the logs
+# Set logging to StreamHandler, this logs everything to console (stdout?) where docker can capture it in its logs
+# Attempting to log to file results in an error, for some reason there is an extra prefix adding to the file pathing
+# /app/ even though the entire docker contain resides within that dir and the dir is not part of the path inside
+# the container
+application.logger.addHandler(logging.StreamHandler())
+application.logger.setLevel(logging.DEBUG)
 if application.config['ENV'] == "development":
     # Localhost development testing
-    # TODO: Test
     app.config['SERVER_NAME'] = "leavitttesting.local:5000"
-    handler = logging.FileHandler(os.path.join(os.path.dirname(__file__), '..', 'logs', 'flask_application.log'))
-    handler.setFormatter(formatter)
+    # handler = logging.FileHandler(os.path.join(os.path.dirname(__file__), '..', 'logs', 'flask_application.log'))
+    # handler.setFormatter(formatter)
     # # Attach logging handler to flask_application
-    application.logger.addHandler(handler)
+    # application.logger.addHandler(handler)
     # app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get("DBCON_LOCAL")
     app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get("DBCON_DEV")
     # Setup SQLAlachemy engine sessionmaker factories with development connections

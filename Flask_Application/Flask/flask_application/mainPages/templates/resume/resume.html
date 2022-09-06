@@ -11,11 +11,33 @@
 			<div class="title">Resume</div>
 			<div class="separatorbar-title"></div>
 			<div class="resume-download">
-				<a href="/static/documents/GavinL_Web_Resume.pdf" style="text-decoration:none;"><h4 style="margin-top:10px;font-size:16px;">Download Resume PDF</h4></a>
+				<a href="{{ url_for('mainSite_BP.static', filename='resume/docs/GavinL_Web_Resume.pdf') }}" style="text-decoration:none;"><h4 style="margin-top:10px;font-size:16px;">Download Resume PDF</h4></a>
 			</div>
 			<div class="resume-content">
 				<div class="experience-education">
 					<h3>Professional Experience</h3>
+					<div class="resume-entry">
+						<a href="https://zworldgis.com/"><img src="{{ url_for('mainSite_BP.static', filename='resume/icons_images/zworldgis_icon.webp') }}"></a>
+						<span><h4>GIS Analyst</h4></span>
+						<div class="resume-employ-dates">
+							<span class="resume-text">
+									<h5>ZWORLD GIS</h5>
+							</span>
+							<span class="resume-text">
+								December 2020 – Present
+							</span>
+						</div>
+						<div>
+							<ul>
+								<li>Managed GIS development, ArcGIS Online organizations, map generation, online map applications, and data collection needs for local governments, public utilities, and pubic safety agencies </li>
+								<li>Located and field inventoried public utility assets, including stormwater, water distribution, sewer, and street signage, using high precision GPS receivers and mobile data collection applications</li>
+								<li>Digitized underground network assets and utility easements using Coordinate Geometry (COGO) techniques following engineering plans, survey plans, and legal descriptions</li>
+								<li>Optimized staff time dedicated to handling field and routine data updates by developing Python geoprocessing scripts to automate data and file processing workflows</li>
+								<li>Developed and quality reviewed street centerlines dataset for use in the future Santa Barbara County Fire Department 911 dispatch system using Python scripts, ArcGIS Data Reviewer, Attribute Rules, and domains to ensure data compliance </li>
+								<li>Developed and maintained ArcGIS Online Hosted Feature Layers, Web Maps, and Offline maps for use by the Montecito Fire District in the Tablet Command applicatio</li>
+							</ul>
+						</div>
+					</div>
 					<div class="resume-entry">
 						<a href="https://www.cityofsalinas.org/"><img src="{{ url_for('mainSite_BP.static', filename='resume/icons_images/SalinasLogo-updated_cropped.png') }}"></a>
 						<span><h4>GIS Technician</h4></span>
@@ -149,17 +171,21 @@
 								<span>QGIS</span>
 							</div>
 					</div>
-					<h4>Scripting, Automation, Statistics</h4>
+					<h4>Scripting and Automation</h4>
 						<div class="skill-div">
 							<div class="skill-icon-text">
 								<img src="{{ url_for('mainSite_BP.static', filename='resume/icons_images/Python-logo.svg') }}">
-								<span>Python/ArcPy</span>
+								<span>Python</span>
 							</div>
 							<div class="skill-icon-text">
-								<img src="{{ url_for('mainSite_BP.static', filename='resume/icons_images/Rlogo.svg') }}">
-								<span>R</span>
+								<img src="{{ url_for('mainSite_BP.static', filename='resume/icons_images/APIforPython.png') }}">
+								<span>ArcPy/ArcGIS API for Python</span>
 							</div>
-					</div>
+							<div class="skill-icon-text">
+								<img src="{{ url_for('mainSite_BP.static', filename='resume/icons_images/ArcadeIcon.png') }}">
+								<span>ArcGIS Arcade</span>
+							</div>
+						</div>
 					<h4>Database Querying & Management</h4>
 						<div class="skill-div">
 							<div class="skill-icon-text">
@@ -171,7 +197,7 @@
 								<span>Python SQLAlchemy ORM</span>
 							</div>
 						</div>
-					<h4>Website Development</h4>
+					<h4>GIS Website Development</h4>
 						<div class="skill-div">
 							<div class="skill-icon-text">
 								<img src="{{ url_for('mainSite_BP.static', filename='resume/icons_images/HTML5_Logo.svg') }}">
@@ -189,12 +215,40 @@
 								<img src="{{ url_for('mainSite_BP.static', filename='resume/icons_images/flask-icon.png') }}">
 								<span>Python Flask</span>
 							</div>
+							<div class="skill-icon-text">
+								<img src="{{ url_for('mainSite_BP.static', filename='resume/icons_images/APIforPython.png') }}">
+								<span>ArcGIS JavaScript API</span>
+							</div>
+							<div class="skill-icon-text">
+								<img src="{{ url_for('mainSite_BP.static', filename='resume/icons_images/leaflet_logo.png') }}">
+								<span>Leaflet</span>
+							</div>
 						</div>
 					<h4>UAV Operator</h4>
 						<div class="skill-div">
 							<div class="skill-icon-text">
 								<img src="{{ url_for('mainSite_BP.static', filename='resume/icons_images/drone.svg') }}">
 								<span>Part 107 Pilot</span>
+							</div>
+							<div class="skill-icon-text">
+								<img src="{{ url_for('mainSite_BP.static', filename='resume/icons_images/odm-logo.svg') }}">
+								<span>OpenDroneMap</span>
+							</div>
+							<div class="skill-icon-text">
+								<img src="{{ url_for('mainSite_BP.static', filename='resume/icons_images/dronelink_logo.webp') }}">
+								<span>Dronelink</span>
+							</div>
+						</div>
+					</div>
+					<h4>Other Tools/Software</h4>
+						<div class="skill-div">
+							<div class="skill-icon-text">
+								<img src="{{ url_for('mainSite_BP.static', filename='resume/icons_images/docker_logo.png') }}">
+								<span>Docker</span>
+							</div>
+							<div class="skill-icon-text">
+								<img src="{{ url_for('mainSite_BP.static', filename='resume/icons_images/GitHubMark120pxplus.png') }}">
+								<span>Git/Github</span>
 							</div>
 						</div>
 					</div>

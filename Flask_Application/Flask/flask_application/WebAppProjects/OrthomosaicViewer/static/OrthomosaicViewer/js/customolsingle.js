@@ -5,7 +5,6 @@ const imageryGroup =  new ol.layer.Group({
       layers: []
 })
 
-
 // Create openlayers map with popup overlay, basemap, and empty imagery group layer
 var map = new ol.Map({
   // overlays: [overlay],
@@ -46,44 +45,12 @@ fetch(dataURL)
 .then(response => response.json())
 // process response json data
 .then(data => {
-  // var vectorSource = new ol.source.Vector()
-  // const features = new ol.format.GeoJSON().readFeatures(data);
-  // vectorSource.addFeatures(features);
-    // Doesnt work:
-    // features: new ol.format.GeoJSON().readFeatures(data)
-    // features: new ol.format.GeoJSON().readFeatures(
-    //   data, {dataProjection:"EPSG:4326"}),
-    // features: new ol.format.Collection data,
-    // Works:
-    // url: 'http://geo.leavitttesting.local:5000/collections/ortho_mission_extents/items?f=json',
-    // format: new ol.format.GeoJSON(),
-  // });
-  // create vector layer to hold geojson vector source, hide in switcher
-  // const vectorLayer = new ol.layer.Vector({
-  //   source: vectorSource,
-  //   title:"Imagery Extents",
-  //   // projection: 'EPSG:4326'
-  //   // displayInLayerSwitcher: false,
-  //   // style: hiddenPolygon,
-  // });
-  // map.addLayer(vectorLayer);
   // Loop over each response in the Feature Collection response
   data.features.forEach((item, i) => {
     // get presigned cogURL, this is dynamic from server
     var cogURL = item.properties.URL
     // Get the item, which is a GeoJSON Feature
     var geojsonObject = item
-    // Contruct vector source using the geojson Feature
-    // const vectorSource = new ol.source.Vector({
-    //   features: new ol.format.GeoJSON().readFeatures(geojsonObject)
-    // });
-    // // create vector layer to hold geojson vector source, hide in switcher
-    // // Not defining the style makes it empty which is desired here
-    // const vectorLayer = new ol.layer.Vector({
-    //   source: vectorSource,
-    //   displayInLayerSwitcher: false,
-    //   style: hiddenPolygon,
-    // });
     // Get the geotiff source using the URL provided in the geojson Feature
     var rasterSource = new ol.source.GeoTIFF({
       sources: [
@@ -110,12 +77,6 @@ fetch(dataURL)
     });
     // Push a list of group layers to imagery group layer, this is done such that the extent polygon, with attributes, are grouped together with the raster layers
     srcList.push(rasterTile)
-      // new ol.layer.Group({
-      //       openInLayerSwitcher: true,
-      //       title: item.properties["Mission Name"] + "<br><span>" + item.properties["Mission Date"].substring(0,10) + " - " + item.properties["GSD"] + " in/px" +"</span>",
-      //       layers: [rasterTile]
-      // })
-    // )
   });
   // Extent imagery group with newly populated list
   imageryGroup.getLayers().extend(srcList)
