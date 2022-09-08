@@ -1,8 +1,7 @@
-import flask_application
 from flask_application.pythonLib.stravalib.client import Client
 import os
 import time
-from flask_application import Session
+from flask_application import stravaViewerSes, application
 from flask_application.WebAppProjects.StravaActivityViewer.modelsStrava import athletes
 
 def getAuth():
@@ -17,9 +16,9 @@ def getAuth():
     # Build empty stravalib client instance
     client = Client()
     # create db session
-    session = Session()
+    session = stravaViewerSes()
     # Hard coded athlete id
-    athleteID = 7170058
+    athleteID =int(os.environ.get("ATHLETEID"))
     authDict = {}
     # Load tokens and expiration time from Postgres
     query = session.query(athletes).filter(athletes.athlete_id == athleteID)
@@ -27,10 +26,10 @@ def getAuth():
         authDict["Access_Token"] = i.access_token
         authDict["Expiration"] = i.access_token_exp
         authDict["Refresh_Token"] = i.refresh_token
-    flask_application.logger.debug(f"Auth token details are: {authDict}")
+    application.logger.debug(f"Auth token details are: {authDict}")
     # Check if access token has expired, if so request a new one and update Postgres
     if time.time() > authDict["Expiration"]:
-        flask_application.logger.debug("Access token has expired, refreshing")
+        application.logger.debug("Access token has expired, refreshing")
         refresh_response = client.refresh_access_token(client_id=int(os.environ.get('STRAVA_CLIENT_ID')),
                                                        client_secret=os.environ.get('STRAVA_CLIENT_SECRET'),
                                                        refresh_token=authDict["Refresh_Token"])
@@ -45,7 +44,7 @@ def getAuth():
         client.refresh_token = authDict["Refresh_Token"]
         client.token_expires_at = refresh_response['expires_at']
     else:
-        flask_application.logger.debug("Access token is fresh, no refresh required")
+        application.logger.debug("Access token is fresh, no refresh required")
         # Access token is up-to-date, set client details
         client.access_token = authDict["Access_Token"]
         client.refresh_token = authDict["Refresh_Token"]

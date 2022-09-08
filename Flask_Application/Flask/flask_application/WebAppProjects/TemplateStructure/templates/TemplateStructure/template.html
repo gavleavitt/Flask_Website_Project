@@ -3,19 +3,25 @@
 <head>
 	<title>Title</title>
 	{% include 'projectimports.html' %}
+	<!-- Standard custom CSS/JS -->
+	<link rel="stylesheet" href="{{ url_for('static', filename='css/AppTitleBar.css') }}">
+	<link rel="stylesheet" href="{{ url_for('static', filename='css/MapStandardCSS.css') }}">
 
 	<!-- Project specific imports -->
 
 	<!-- Local static files-->
 	<!-- Custom local javascript functions -->
 
-	<!-- Custom CSS -->
 
+	<!-- Custom CSS -->
+	<!-- <link rel="stylesheet" href="{{ url_for('static', filename='css/AppTitleBar.css') }}"> -->
+	<!-- <link rel="stylesheet" href="{{static', filename='css/MapStandardCSS.css') }}"> -->
 </head>
 <body>
 	<div class="container sansserif">
 		<div class="item titlediv">
-			<div id = "Title" class="titletext">Titler</div>
+			<!-- <div id = "Title" class="titletext">Titler</div> -->
+			{% include 'WebAppTitleBar.html' %}
 			<!-- Modal -->
 			<!-- The Modal -->
 			<div id="myModal" class="modal">
@@ -46,5 +52,10 @@
 			 </div>
 		 </div>
 		</div>
+		<script src="{{ url_for('static', filename='js/modalFastLoad.js') }}"></script>
+		<script>
+		var email = "gav" + "lea" + "web" + "@g" + "mail" + ".com";
+		document.getElementById("emailaddr").innerHTML = "<a href='mailto:" + email + "'>" + email + "</a>"
+		</script>
 </body>
 </html>

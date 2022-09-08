@@ -1,8 +1,9 @@
 from pydrive.auth import GoogleAuth
 from pydrive.drive import GoogleDrive
 import os
-from flask_application import application
-from flask_application.util import errorEmail
+from flask_application import app, application
+from flask_application.util.ErrorEmail import errorEmail
+
 
 def addtoGDrive(pdfloc, pdfname):
     """

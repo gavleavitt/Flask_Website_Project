@@ -1,12 +1,11 @@
-from sqlalchemy import create_engine, or_
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy import or_
 from flask_application.WebAppProjects.WaterQualityViewer.modelsWaterQual import beaches, waterQualityMD5, stateStandards, waterQuality
 from flask_application.WebAppProjects.WaterQualityViewer.AWSS3Upload import create_presigned_url
 from datetime import datetime
-from flask_application import application
+from flask_application import application, waterQualitySes
 from sqlalchemy import func as sqlfunc
 import pytz
-from . import waterQualitySes
+# from . import waterQualitySes
 
 def checkmd5(hash, pdfDate):
     """

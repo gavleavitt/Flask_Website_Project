@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Orthomosaic Viewer</title>
+	{% include 'projectimports.html' %}
+	<!-- Standard custom CSS/JS -->
+	<link rel="stylesheet" href="{{ url_for('static', filename='css/AppTitleBar.css') }}">
+	<link rel="stylesheet" href="{{ url_for('static', filename='css/MapStandardCSS.css') }}">
+
+	<!-- Project specific imports -->
+	<script src="https://cdn.jsdelivr.net/gh/openlayers/openlayers.github.io@master/en/v6.15.1/build/ol.js"></script>
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/openlayers/openlayers.github.io@master/en/v6.15.1/css/ol.css" type="text/css">
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.6.0/proj4.js"></script>
+
+	<!-- ol-ext -->
+	<link rel="stylesheet" href="https://cdn.rawgit.com/Viglino/ol-ext/master/dist/ol-ext.min.css" />
+	<script type="text/javascript" src="https://cdn.rawgit.com/Viglino/ol-ext/master/dist/ol-ext.min.js"></script>
+	<!-- <script async src="https://cdn.jsdelivr.net/npm/geotiff"></script> -->
+	<!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/openlayers/4.6.5/ol.js" integrity="sha512-O7kHS9ooekX8EveiC94z9xSvD/4xt10Qigl6uEKvspYykdux3Ci5QNu5fwi4ca0ZkZI/oCgx5ja8RklWUEqzxQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/openlayers/4.6.5/ol.css" integrity="sha512-D2c/nmSVlwoZk29SLwJK8GkLyCyPuNbZ/vZQL/lNzw+o+yXzsbnJt7lK/iCfdBmgyLRDi0qx27gpE8Zb1C6I7g==" crossorigin="anonymous" referrerpolicy="no-referrer" /> -->
+	<!-- Local static files-->
+	<!-- Custom local javascript functions -->
+	<!-- Custom CSS -->
+
+	<!-- Custom local javascript functions -->
+	<script type="module" src="{{url_for('orthoviewer_BP.static', filename='OrthomosaicViewer/js/customolsingle.js')}}"></script>
+	<!-- Custom CSS -->
+	<link rel="stylesheet" href="{{ url_for('orthoviewer_BP.static', filename='OrthomosaicViewer/css/customCSS.css') }}"/>
+
+<!-- Load globals from server -->
+<script type='text/javascript' >
+	var dataURL = new URL("{{dataURL}}")
+	console.log(JSON.stringify(dataURL))
+	console.log(dataURL)
+	// var s3Tiles = new URL("{{ apiURL }}")
+	// var s3Tiles = JSON.parse({{s3Tiles}})
+</script>
+
+</head>
+<body>
+	<div class="container sansserif">
+		<div class="item titlediv">
+			<!-- <div id = "Title" class="titletext">Orthomosaic Viewer</div> -->
+			{% include 'WebAppTitleBar.html' %}
+			<!-- Modal -->
+			<!-- The Modal -->
+			<div id="myModal" class="modal">
+			  <div class="modal-content-container">
+			    <!-- <div class="close">&times;</div> -->
+					<div class="close">&times;</div>
+					<div class="modal-text">
+						<p style="margin-top:0px;"><b>Map Details</b>
+						<br>
+							This map displays my personally collected and processed orthomosaic drone imagery. While I am a Part 107 licensed pilot, all of these collections are non-commerical and flown under FAA recreational exception rules.
+						</p>
+						<p>
+							This is an ongoing personal project to collect, process, and display orthomosaic imagery collected from a drone. Mission planning and execution are conducted using the <a href="https://www.dronelink.com/">Dronelink</a> web and mobile applications and all missions are flown using a DJI Mavic Mini SE.
+						</p>
+						<p></p>
+						<p><b>Contact Me</b>
+						<br>
+						If you have any questions, feature suggestions, comments, or notice any errors/bugs feel free to email me at <span id="emailaddr"></span>
+						</p>
+						<p>
+							You can see my other projects under the <a href=/#goto-proj>projects</a> section of this site.
+						</p>
+						<p>You can visit my GitHub repo for this project and others <a href=https://github.com/gavleavitt/Flask_Website_Project target="_blank">here</a>.
+						</p>
+					</div>
+			 </div>
+		 </div>
+		</div>
+		<div id="popup" class="ol-popup">
+      <a href="#" id="popup-closer" class="ol-popup-closer"></a>
+      <div id="popup-content"></div>
+    </div>
+		<div id="viewDiv"></div>
+		<!-- <div class="item map-panel detail-panel-col">
+			<div id='map' class="map"></div>
+		</div> -->
+		{% include 'mapFooter.html' %}
+</body>
+</html>

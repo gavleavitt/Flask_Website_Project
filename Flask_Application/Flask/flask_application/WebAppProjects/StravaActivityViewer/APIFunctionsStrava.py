@@ -2,13 +2,14 @@ from datetime import datetime, timedelta
 import logging, os, csv
 from io import StringIO
 from flask_application import application
-from flask_application.util import errorEmail
-from flask_application.WebAppProjects.StravaActivityViewer import DBQueriesStrava, StravaAWSS3, OAuthStrava
+from flask_application.util.ErrorEmail import errorEmail
+from flask_application.WebAppProjects.StravaActivityViewer import DBQueriesStrava
+from flask_application.util.Boto3AWS import StravaAWSS3
 import time
 import requests
 import traceback
 
-def singleActivityProcessing(client, actID):
+def singleActivityProcessing(client, actID, mode="wait"):
     """
     Processes a single Strava Activity by placing the full activity in the database, making a simplified and masked public
     version, and by creating a privacy masked stream CSV which is added to a S3 Bucket. Finally a TopoJSON of the
@@ -23,8 +24,12 @@ def singleActivityProcessing(client, actID):
         # Wait 45 minutes before processing update, this allows time for user to update any ride details before they
         #  are processed, in particular changing details uploaded from Wahoo
         # Check if in development mode, if not wait 45 minutes
-        if application.config['ENV'] != "development":
-            time.sleep(2700)
+        if mode == "wait":
+            wait=2700
+            application.logger.debug(f"Production/wait mode, waiting {wait} seconds to process activity")
+            time.sleep(wait)
+        else:
+            application.logger.debug(f"Activity trigged in {mode} mode, processing immediately")
         application.logger.debug("Getting full activity details")
         # Get all activity details for newly created activity, including stream data
         activity = getFullDetails(client, actID)

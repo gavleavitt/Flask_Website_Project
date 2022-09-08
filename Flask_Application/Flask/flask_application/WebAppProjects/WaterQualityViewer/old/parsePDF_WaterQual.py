@@ -6,9 +6,9 @@ import pdfplumber
 import unicodedata
 from datetime import datetime
 import hashlib
-from urllib.parse import quote
 from urllib.request import urlretrieve
-from flask_application import app, errorEmail, GoogleDrive_WaterQual, application
+from flask_application import app, GoogleDrive_WaterQual, application
+from flask_application.util.ErrorEmail import errorEmail
 from flask_application import DB_Queries_WaterQual as DBQ_PDF
 import os
 from flask_application import logger

@@ -1,7 +1,7 @@
-from flask_application import app, application, auth
-from flask import Blueprint, Response, request
+from flask_application import application
 import os
-from flask_application.WebAppProjects.StravaActivityViewer import WebHookFunctionsStrava, DBQueriesStrava, StravaAWSS3
+from flask_application.WebAppProjects.StravaActivityViewer import DBQueriesStrava
+
 
 def createStravaWebhook(client):
     """

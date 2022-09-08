@@ -1,10 +1,10 @@
-import os
 from flask_application import application
-from flask_application.util import errorEmail
-from flask_application.WebAppProjects.StravaActivityViewer import OAuthStrava, DBQueriesStrava, APIFunctionsStrava, StravaAWSS3
+from flask_application.util.ErrorEmail import errorEmail
+from flask_application.WebAppProjects.StravaActivityViewer import OAuthStrava, DBQueriesStrava, APIFunctionsStrava
 import json
 from threading import Thread
 from flask import Response
+import traceback
 
 def handleSubUpdate(client, updateContent):
     """
@@ -114,4 +114,6 @@ def handleSubCallback(request):
             application.logger.debug("Inserted webhook update and activity details into postgres tables!")
             return Response(status=200)
         except Exception as e:
+            application.logger.error(traceback.format_exc())
             application.logger.error(f"Strava subscription update failed with the error {e}")
+

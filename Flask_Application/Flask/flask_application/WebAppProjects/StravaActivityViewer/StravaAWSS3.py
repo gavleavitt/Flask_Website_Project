@@ -4,8 +4,18 @@ from botocore.exceptions import ClientError
 import logging
 from io import StringIO
 import csv
+<<<<<<<< HEAD:Flask_Application/Flask/flask_application/util/Boto3AWS/StravaAWSS3.py
+import logging
+# from flask_application import flask_application
+# from flask_application.util.ErrorEmail import errorEmail
+from ErrorEmail import errorEmail
+
+def setupLogging():
+    logging.basicConfig(filename="Boto3.log", level=logging.DEBUG)
+========
 from flask_application import application
 from flask_application.util import errorEmail
+>>>>>>>> master:Flask_Application/Flask/flask_application/WebAppProjects/StravaActivityViewer/StravaAWSS3.py
 
 def connectToS3():
     """
@@ -27,7 +37,7 @@ def create_presigned_url(fileID, expiration=300):
     # Generate a presigned URL for the S3 object
     # print("Generating temp access URL")
     s3_client = connectToS3()
-
+    setupLogging()
     try:
         if fileID == "activitiesTopoJSON":
             fileName = "topoJSONPublicActivities.json"
@@ -43,6 +53,30 @@ def create_presigned_url(fileID, expiration=300):
     # The response contains the presigned URL
     return response
 
+def get_presigned_url(fileID, bucket, expiration=300):
+    """Generate a presigned URL to share an S3 object
+
+    :param expiration: Time in seconds for the presigned URL to remain valid
+    :return: Presigned URL as string. If error, returns None.
+    """
+    # Generate a presigned URL for the S3 object
+    # print("Generating temp access URL")
+    s3_client = connectToS3()
+    setupLogging()
+    try:
+        if fileID:
+            response = s3_client.generate_presigned_url('get_object',
+                                                        Params={'Bucket': bucket,
+                                                                'Key': fileID},
+                                                        ExpiresIn=expiration)
+        else:
+            return None
+    except ClientError as e:
+        logging.error(e)
+        return None
+    # The response contains the presigned URL
+    return response
+
 def writeMemoryCSV(streamData):
     """
     Converts activity stream data dictionary to a In-memory text buffer, avoids needing to write a local file since data
@@ -51,6 +85,7 @@ def writeMemoryCSV(streamData):
     :param streamData: Dict. Formatted Strava Stream Data with lat/longs removed
     :return: In-memory text buffer. Activity stream CSV
     """
+    setupLogging()
     # Create in-memory text buffer
     memOutput = StringIO()
     dataDict = {}
@@ -61,7 +96,7 @@ def writeMemoryCSV(streamData):
         try:
             dataDict[streamType] = streamData[streamType].data
         except:
-            application.logger.debug(f"The stream type {streamType} doesn't exist, skipping")
+            logging.debug(f"The stream type {streamType} doesn't exist, skipping")
     # Iterate over latlngs, which is a list with lat lng, converting to string of lat,lng
     for c, i in enumerate(dataDict['latlng']):
         dataDict['latlng'][c] = ",".join(str(x) for x in i)
@@ -91,7 +126,7 @@ def uploadToS3(file, actID=None):
     bucket = os.getenv("S3_TRIMMED_STREAM_BUCKET")
     # Establish connection to S3 API
     conn = connectToS3()
-
+    setupLogging()
     try:
         # conn.put_object(Body=memCSV.getvalue(), Bucket=bucket, Key=fileName, ContentType='flask_application/vnd.ms-excel')
         if actID:
@@ -102,13 +137,13 @@ def uploadToS3(file, actID=None):
             # https://stackoverflow.com/a/60293770
             fileName = f"stream_{actID}.csv"
             conn.put_object(Body=file.getvalue(), Bucket=bucket, Key=fileName)
-            application.logger.debug(f"CSV {fileName} has been added to S3 Bucket {bucket}")
+            logging.debug(f"CSV {fileName} has been added to S3 Bucket {bucket}")
         else:
             # Add in-memory buffer TopoJSON file to bucket, file name is static
             fileName = "topoJSONPublicActivities.json"
             conn.put_object(Body=file, Bucket=bucket, Key=fileName)
     except Exception as e:
-        application.logger.error(f"Upload to S3 bucket failed in the error: {e}")
+        logging.error(f"Upload to S3 bucket failed in the error: {e}")
         errorEmail.sendErrorEmail(script="UploadToS3Bucket", exceptiontype=e.__class__.__name__, body=e)
 
     # finally:

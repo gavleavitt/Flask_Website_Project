@@ -1,14 +1,15 @@
 from flask_application.WebAppProjects.StravaActivityViewer.modelsStrava import athletes, sub_update, strava_activities, \
     strava_activities_masked, strava_gear, AOI, webhook_subs
 from datetime import datetime
-from flask_application import application
-from flask_application.util import errorEmail
+from flask_application import application, stravaViewerSes
+from flask_application.util.ErrorEmail import errorEmail
 from sqlalchemy import func as sqlfunc
 import geojson
 from geojson import Feature, FeatureCollection, MultiLineString
 import topojson as tp
 import re
-from . import stravaViewerSes
+#from . import stravaViewerSes
+
 
 def updateSubId(subId, verifytoken):
     """
@@ -104,14 +105,19 @@ def insertSubUpdate(content):
         application.logger.debug(f"Title of new activity is {title}")
     else:
         title = None
-    session = stravaViewerSes()
-    insert = sub_update(aspect=content.aspect_type, event_time=datetime.fromtimestamp(content.event_time.timestamp),
-                        object_id=content.object_id, object_type=content.object_type, owner_id=content.owner_id,
-                        subscription_id=content.subscription_id,
-                        update_title=title)
-    session.add(insert)
-    session.commit()
-    session.close()
+    # session = stravaViewerSes()
+    application.logger.debug("Updating DB with subscription update details")
+    with stravaViewerSes() as session:
+        insert = sub_update(aspect=content.aspect_type, event_time=datetime.fromtimestamp(content.event_time),
+                            object_id=content.object_id, object_type=content.object_type, owner_id=content.owner_id,
+                            subscription_id=content.subscription_id,
+                            update_title=title)
+        # insert = sub_update(aspect=content.aspect_type, event_time=datetime.fromtimestamp(content.event_time.timestamp),
+        #                     object_id=content.object_id, object_type=content.object_type, owner_id=content.owner_id,
+        #                     subscription_id=content.subscription_id,
+        #                     update_title=title)
+        session.add(insert)
+        session.commit()
     application.logger.debug(f"New webhook update has been added to Postgres!")
 
 

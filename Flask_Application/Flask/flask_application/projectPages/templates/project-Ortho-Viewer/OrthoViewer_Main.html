@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>{{mapTitle}}</title>
+	{% include 'mainImports.html' %}
+</head>
+<body>
+  <div class="container-projects sansserif">
+		{% include 'navBar.html' %}
+		<div class="project-content">
+			<div class="title">{{mapTitle}}</div>
+			<div class="separatorbar-title"></div>
+			<iframe src="{{ url_for('orthoviewer_BP.orthoviewermainol') }}"></iframe>
+			<div class="iframe-link">
+				<a href="{{ url_for('orthoviewer_BP.orthoviewermainol') }}"target="_blank">View fullpage map</a>
+			</div>
+			<div class="separatorbar-title"></div>
+			<span id="orthoviewer-summary" class="goto"></span>
+			<h2><a href=#orthoviewer-summary>
+				Summary
+			</a></h2>
+			<p>
+			This is an ongoing personal project to collect, process, and display orthomosaic imagery collected from a Mavic Mini SE drone. Mission planning and execution are conducted using the <a href="https://www.dronelink.com/">Dronelink</a> web and mobile applications and currently all mission flights are flown using a DJI Mavic Mini SE. After collection, imagery are processed into orthomosaics using the free, Docker command line, version of <a href"https://www.opendronemap.org/odm/">OpenDroneMap</a>. The imagery are then compressed and converted into <a href="https://www.cogeo.org/">Cloud Optimized GeoTIFFS (COG)</a> and uploaded to <a href="https://aws.amazon.com/s3/">S3</a> cloud storage. Finally, the data are displayed using <a href="https://openlayers.org/">OpenLayers</a> which supports COGs.
+		</p>
+		<p>
+			COGs allow for easy and efficient storage and retrieval of raster data without the need for a dedicated imagery server. Data are retrieved based on view scale, limiting the data transfer required to view the imagery. The data can be viewed at full source resolution when viewed at smaller scales. This method also requires much less server-side storage space than raster tiles, at the cost of client-side processing, which must be pre-processed and stored at the desired scales.
+		</p>
+		<div class="toc-container">
+			<p class="toc-title">Project Description Contents</p>
+			<ol class="toc-list">
+				<li><a href="#orthoviewer-summary">Summary</a></li>
+				<li><a href="#drone">Mavic Mini SE</a></li>
+				<li><a href="#planning">Mission Planning</a></li>
+				<li><a href="#execution">Mission Execution</a></li>
+				<li><a href="#orthoprocessing">Orthomosaic Processing</a></li>
+				<li><a href="#servingcogs">Serving Imagery Data - COGs</a></li>
+				<li><a href="#viewingcogs">Viewing the Imagery Data - OpenLayers</a></li>
+				<li><a href="#final-thoughts-ortho">Final Thoughts</a></li>
+			</ol>
+		</div>
+		<span id="drone" class="goto"></span>
+		<h3><a href=#drone>Drone - Mavic Mini SE</a></h3>
+		<div style="display:flex;justify-content:center;margin-bottom:18px;">
+			<img src="{{ url_for('projectPages_BP.static', filename='project-Ortho-Viewer/icons_images/DronePhoto_Smaller_Comp.jpg') }}" style="max-width:50%;">
+		</div>
+		<p>
+			The drone used for imagery collection is the Mavic Mini SE, DJIs class of lightweight drone. It weighs 249 grams, right under the FAAs mass limit for non-commerical registration. I primarily use hand launch and landings due to the poor ground prop clearance. The default flight control app, DJI Fly, is barebones and does not include advanced functions for mission planning or waypoints. However, the Mavic Mini has an open APK that third party vendors can use in their own flight applications.
+		</p>
+		<span id="planning" class="goto"></span>
+		<h3><a href=#planning>Mission Planning</a></h3>
+			<p>
+				The <a href="https://www.dronelink.com/">Dronelink</a> service is used for mission planning and execution, this service is not free and requires a one time purchase for non-commerical use. Note that I am operating under a legacy license which includes more advanced features such as Terrain follow, I believe this now requires a higher level license to access. Dronelink supports many drones, including the Mavic Mini, by using a <a href="https://support.dronelink.com/hc/en-us/articles/360052533133-What-makes-Dronelink-different-or-better-than-other-apps-">Virtual Stick</a> command method which sends virtual stick commands to the drone through the controller, as if they were issued by an human operator. This approach requires constant connection between the phone, controller, and drone, and can cause input delays and loss of automated control if the link is lost. However, it allows more advanced missions than normally available to cheap/simple drones like the Mini, which has no native support for waypoints to be uploaded to the drone.
+			</p>
+			<p>
+				Missions are planned on a desktop using the Dronelink web browser application. This application supports a variety of mission types, but the <a href="https://support.dronelink.com/hc/en-us/articles/6823062938899-Basic-Mapping-Map-Mission-Component-Intro">Map</a> option is used for planning.
+			</p>
+			<p>
+				Upon opening the Map option, a small plan area will be drawn on the screen, it can be adjusted to the desired mission area using the polygon corner handles. Next, the desired paramaters for camera type, flight altitude, altitude reference, overlaps and max speed are selected. The Ground Sample Distance and flight lines will update as paramaters are adjusted. Example from a flight near Via Gaitero road in Goleta:
+			</p>
+				<div style="display:flex;justify-content:center;margin-bottom:18px;">
+					<img src="{{ url_for('projectPages_BP.static', filename='project-Ortho-Viewer/icons_images/Via_Gaitero_Comp.png') }}" style="max-width:50%;">
+				</div>
+			<p>
+				While the software supports multi-battery missions, the flight area was adjusted such that a single battery can be used for each planned mission, the mission estimation window gives the estimated battery use:
+			</p>
+			<div style="display:flex;justify-content:center;margin-bottom:18px;">
+				<img src="{{ url_for('projectPages_BP.static', filename='project-Ortho-Viewer/icons_images/Mission_Estimate.png') }}" style="max-width:40%;">
+			</div>
+			<p>
+				The ground sample distance goal for most missions is 0.75 in/px and front/side overlaps of 80/70% are used. For the Mini this means flying at 170 ft altitude, this also puts the drone well above buildings, trees, and utility poles in the area. Using the Terrain Follow reference option allows the drone to maintain a constant height above the terrain level ensuring correct GSD and overlap for the entire mission. In the mission preview window, more detailed estimates can be viewed, including 3D flight lines adjusted for terrain:
+				<div style="display:flex;justify-content:center;margin-bottom:18px;">
+					<img src="{{ url_for('projectPages_BP.static', filename='project-Ortho-Viewer/icons_images/Via_Gaitero_Mission_Preview_Comp.png') }}" style="max-width:50%;">
+				</div>
+			</p>
+			<p>
+				However, using Terran Follow requires that the drone be lauched from within a specfic pre-planned area so its important to place it in a safe and easy to find location. Fortunately, this location can be adjusted using the mobile application if needed.
+			</p>
+		<span id="execution" class="goto"></span>
+		<h3><a href=##execution>Mission Execution</a></h3>
+			<p>
+			Flight execution is straight foward using the Dronelink mobile application as the application handles all flight input and provides drone telemetry. When using Terrain Follow it can be challenging to find the correct launch point as the application doesn't do a great job showing your current location, this can be compounded when the basemap imagery is old or low quality.
+			</p>
+			<p>
+			The application always shows poor connection, presumably due to a weak transmitter on the drone. I also ran into difficulties with the application reporting good calibration metrics but being unable to properly start missions due to location problems. This appears to be fixed by always performing a drone calibration when arriving on site.
+			</p>
+			<p>
+			 Geofencing and <a href="https://www.dji.com/flysafe/geo-map">authorization zones</a> around airports can be troublesome to deal with as they do not match <a href="https://www.faa.gov/uas/programs_partnerships/data_exchange">FAA LAANC</a> areas:
+		 	</p>
+			<div style="display:flex;justify-content:center;margin-bottom:18px;">
+				<img src="{{ url_for('projectPages_BP.static', filename='project-Ortho-Viewer/icons_images/AuthDifferencesMarkedUp.png') }}" style="max-width:70%;">
+			</div>
+			<p>
+				In my area, LAANC approval can be automatically recieved for areas and altitudes that DJI will prevent the drone from flying within. Since Dronelink is beholden to limits set by the DJI APK, it cannot operate within these zones. This has lead to issues with executing flights that are allowed within LAANC but not DJI. I've also ran into issues when using Terran Follow. I believe that in the DJI APK the drone calculates its altitude in reference to the take-off location and not its current location. This means that if the drone climbs in altitude to maintain height above terrain it may hit a DJI enforced altitude ceiling, preventing further mission execution. The solution for this problem appears to be taking off at the highest point possible, ensuring that the drone never climbs too heigh in relation to the start location.
+		 </p>
+		 <p>
+			 Both these problems could possibly be solved by going through the DJI authorization process, which I have not done yet.
+		 </p>
+	 <span id="orthoprocessing" class="goto"></span>
+	 <h3><a href=#orthoprocessing>Orthomosaic Processing</a></h3>
+	 <p>
+		 After collection, imagery are processed using the free command line version of <a href="https://www.opendronemap.org/odm/">OpenDroneMap</a>. This version of ODM runs within a <a href="https://www.docker.com/">Docker</a> Container which greatly simplifies the install process since all requirements are included within the container.
+	 </p>
+	 <p>
+		 While the free version does not have a GUI, the command line commands are relatively easy to understand. The optional commands are described <a href="https://docs.opendronemap.org/arguments/">here</a>. A variety of outputs are supported, including orthomosaics, DSMs, DTMs, meshes, and 3D models. ODM supports loading GCPs, but they must be configured using 3rd party applications. I briefly experimented with this process using Google Imagery locations as control points, I do not have access to a high accuracy GPS unit, but ran into odd issues with the data not ended up in the correct location.
+	 </p>
+	 <p>
+		 Here is an example ODM command, in Docker, to create and ortho, dtm, and dsm at a resolution of 1.905 cm, or 0.75 inch.
+	 </p>
+<pre><code>
+	docker run -ti --rm -v path/to/project:/datasets opendronemap/odm --project-path /datasets project --dtm --dsm --time --orthophoto-resolution 1.905
+</pre></code>
+	 <p>
+		 Note that the geotifss created by ODM caused errors when loaded into OpenLayers, discussed below. This necessitated a lot of troubleshooting of GDAL tools and options to create a compatible file. Eventually, I found that the following operations needed to be performed in GDAL:
+		 <ul>
+			 <li>
+				 Warp out of the default UTM Coordinate system and into Web Mercator, EPSG:3857
+			 </li>
+			 <li>
+				 Extract just the RGB bands, dropping the alpha band.
+			 </li>
+			 <li>
+				 Set the NoData value to 0, I think this ensures that there are no unsupported values
+			 </li>
+			 <li>
+				 Output to COG format with the "GoogleMapsCompatible" tiling scheme
+			 </li>
+		 </ul>
+		 </p>
+		 <p>
+		 Finally, the COGs are compressed using the JPEG format to reduce file size.
+		 This results in the following two GDAL commands:
+		 </p>
+ <pre><code>
+ gdalwarp -s_srs EPSG:32610 -t_srs EPSG:3857 -of GTiff odm_output.tif warptemp.tif
+ gdal_translate warptemp.tif outputcog.tif -b 1 -b 2 -b 3 -co TILING_SCHEME=GoogleMapsCompatible -a_nodata 0 -co COMPRESS=JPEG -co QUALITY=65 -of cog
+ </pre></code>
+	 <span id="servingcogs" class="goto"></span>
+	 <h3><a href=#servingcogs>Serving Imagery Data - COGs</a></h3>
+		<p>
+			The orthos are stored and served as <a href="https://www.cogeo.org/">Cloud-Optimized Geotiffs(COG)</a>. This is a raster geotiff format designed for storage in the cloud, it utilizes internal views called by HTTP requests to minimize data transfer to the client. Instead of loading an entire geotiff, smaller pre-cached rasters are returned dynamically based on current view extent.
+		</p>
+		<p>
+			 These COGS are stored in a, as of writing, non-public <a href="https://aws.amazon.com/s3/">AWS S3</a> bucket. A separate dataset of the ortho extents and attributes is maintained and served by the <a href="https://pygeoapi.io/">pygeoapi</a> runnining within Flask. This dataset is used to provide pre-signed, temporary, links to the orthomosaics.
+		</p>
+		<div style="display:flex;justify-content:center;margin-bottom:18px;">
+			<img src="{{ url_for('projectPages_BP.static', filename='project-Ortho-Viewer/icons_images/pygeoapi_item.png') }}" style="max-width:50%;">
+		</div>
+	 <span id="viewingcogs" class="goto"></span>
+	 <h3><a href=#viewingcogs>Viewing the Imagery Data - OpenLayers</a></h3>
+	 <p>
+		 Finally, orthos are displayed within <a href="openlayers.org/">OpenLayers</a>, which is a open source Javascript mapping library that supports many GIS file formats. As discussed above, this provided challenging since the COGs generated by ODM threw exceptions.
+	 </p>
+	 <p>
+		 The library does not directly display the COGs to the viewer, instead they are internally converted to Raster Tiles by the client. This likely has a performance hit on the client-side compared to generating the Raster Tiles on the client side and serving them. This method allows for much smaller cloud storage space compared to the Raster Tiles, maintaining the ability to view the full source resolution.
+	 </p>
+	 <p>
+		 Unfortunately, the COGs display JPEG artifacts around the perimeter of the datasets. While these artifacts are hardly visible in the full, zoomed in, resolution version, they are very apparent in the lower resolution internal views. I attempted to use a variety of GDAL options to remove them, but it appears that they will always be present as long as the JPEG compression method is used. I do not intend to leave the images uncompressed as this drastically reduces file size with minimal loss of information for qualitative analysis.
+	 </p>
+	 <div class="centered-imgs">
+		<img src="{{ url_for('projectPages_BP.static', filename='project-Ortho-Viewer/icons_images/zoomedout_artifacts.png') }}">
+		<img src="{{ url_for('projectPages_BP.static', filename='project-Ortho-Viewer/icons_images/zoomedin_artifacts.png') }}" style="width:9.4%;">
+	</div>
+	 <span id="final-thoughts-ortho" class="goto"></span>
+	 <h3><a href=#final-thoughts-ortho>Final Thoughts</a></h3>
+	 <p>
+		 Developing the workflow, datasets, and application for this project required a lot of learning and troubleshooting, but ultimately it resulted in an interesting application for viewing high resolution imagery. While working through the workflow, I also developed my own custom GUI, using PyQT, for generating the ODM commands and uploading the orthos and extent/attribute data. I also started building a Qfield application for guiding and recording flight information. Once completed, these will likely get there own project pages.
+	 </p>
+	 <p>
+		 There is a lot of room for improvment throughout the process. In particular, I would like to make the COGs accessible from a Geoserver install, create a viewer for the 3D data that can be linked to from popups, and add a time slider using the collection date. I also intend to make a separate viewer for non-orthomosaic drone imagery that uses location and pitch information to provide view boxes.
+	 </p>
+	 <p>
+		 I plan to continue to collect and display orthomosaics, as the number of collections grows, I will likely need to make various improvements to the web viewer.
+	 </p>
+ 		</div>
+		{% include 'footer.html' %}
+		</div>
+	</div>
+</body>
+</html>

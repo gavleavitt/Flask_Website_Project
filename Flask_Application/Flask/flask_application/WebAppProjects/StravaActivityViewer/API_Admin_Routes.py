@@ -1,10 +1,9 @@
 from flask import Blueprint, request, Response, redirect, url_for
 from flask_application.util.flaskAuth.authentication import auth
-from flask_application.WebAppProjects.StravaActivityViewer import DBQueriesStrava, APIFunctionsStrava, OAuthStrava, \
-    StravaAWSS3
+from flask_application.WebAppProjects.StravaActivityViewer import DBQueriesStrava, APIFunctionsStrava, OAuthStrava
+from flask_application.util.Boto3AWS import StravaAWSS3
 import os
 from flask_application import application
-import logging
 import secrets
 import time
 import traceback
@@ -43,7 +42,7 @@ def processActivity():
                 if actionType == "Add":
                     application.logger.debug(f"Fully processing the activity {actID}")
                     # Issue activity Update
-                    APIFunctionsStrava.singleActivityProcessing(client, actID)
+                    APIFunctionsStrava.singleActivityProcessing(client, actID, "manual")
                 # elif actionType == "Delete":
                 #     flask_application.logger.debug(f"Fully deleting the activity {actID}, if it exists")
                 #     APIFunctionsStrava.deleteSingleActivity(actID)
@@ -134,7 +133,7 @@ def addwebhooksub():
     client = OAuthStrava.getAuth()
     try:
         # Send request to create webhook subscription, will be given the new subscription ID in response
-        application.logger.debug(f"Callback url is {os.getenv('STRAVA_CALLBACK_URL')}")
+        application.logger.debug(f"Callback url is {os.getenv('FULL_STRAVA_CALLBACK_URL')}")
         # postDat = {"client_id": os.getenv("STRAVA_CLIENT_ID"),
         #            "client_secret": os.getenv("STRAVA_CLIENT_SECRET"),
         #            "callback_url": os.getenv('FULL_STRAVA_CALLBACK_URL'),
@@ -146,7 +145,7 @@ def addwebhooksub():
         resp = client.create_subscription(client_id=os.getenv("STRAVA_CLIENT_ID"),
                                           client_secret=os.getenv("STRAVA_CLIENT_SECRET"),
                                           # callback_url=os.getenv('FULL_STRAVA_CALLBACK_URL'),
-                                          callback_url=os.getenv('STRAVA_CALLBACK_URL'),
+                                          callback_url=os.getenv('FULL_STRAVA_CALLBACK_URL'),
                                           verify_token=verifytoken)
         application.logger.debug(resp)
         # flask_application.logger.debug(f"New sub id is {resp['id']}, updating database")

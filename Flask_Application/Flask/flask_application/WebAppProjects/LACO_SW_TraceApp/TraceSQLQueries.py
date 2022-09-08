@@ -3,9 +3,8 @@ from flask_application import db
 import geojson
 from geojson import Feature, Point, Polygon, FeatureCollection, MultiLineString
 from flask_application.WebAppProjects.LACO_SW_TraceApp import DomainLookUps
-# from flask_application import LacotraceSes
+from flask_application import lacotraceSes
 from sqlalchemy import text
-from . import lacotraceSes
 
 def getSubWaterSheds(lnglatList):
     latlngStr = ""
@@ -20,12 +19,12 @@ def getSubWaterSheds(lnglatList):
     sql =f"""
 WITH pttcollect AS (SELECT ST_Collect(
 		ARRAY[{latlngStr}]) AS geom)
-SELECT 
+SELECT
     ST_AsGeoJSON(st_transform(sw.geom, 4326)) AS geom, sw.val AS id
 FROM
-    {watershedLayer} AS sw, pttcollect AS pts 
-WHERE 
-    ST_Intersects(sw.geom, pts.geom) 
+    {watershedLayer} AS sw, pttcollect AS pts
+WHERE
+    ST_Intersects(sw.geom, pts.geom)
     """
     # resultDict['Outlets'].append(Feature(geometry=Point(geojsonGeom), properties=propDict))
     resList = []
@@ -57,12 +56,12 @@ def getUnionedSubWaterSheds(lnglatList):
     sql =f"""
 WITH pttcollect AS (SELECT ST_Collect(
 		ARRAY[{latlngStr}]) AS geom)
-SELECT 
+SELECT
     ST_AsGeoJSON(st_union(st_transform(sw.geom, 4326))) AS geom
 FROM
-    {watershedLayer} AS sw, pttcollect AS pts 
-WHERE 
-    ST_Intersects(sw.geom, pts.geom) 
+    {watershedLayer} AS sw, pttcollect AS pts
+WHERE
+    ST_Intersects(sw.geom, pts.geom)
     """
     # resDict = {}
     res = []
@@ -87,14 +86,14 @@ def TraceNetwork(lon, lat, directionSQL):
     # Raw sql statement, used since PG_Routing doesnt have SQLAlchemy ORM support
     # flask_application.logger.debug(directionSQL)
     sql = ("""
-    SELECT 
+    SELECT
     	node.id as id, node.the_geom as geom, GeometryType(node.the_geom) as geomtype
     INTO TEMP TABLE sp
     FROM
     	storm_network_vertices_pgr as node
     WHERE
     	st_intersects(ST_Snap(ST_Transform(ST_SetSRID(ST_Point(:lon, :lat), 4326),2229),node.the_geom, 500), node.the_geom)
-    ORDER BY 
+    ORDER BY
     	node.the_geom <-> ST_Transform(ST_SetSRID(ST_Point(:lon, :lat), 4326),2229)
     LIMIT 1;
 
@@ -104,35 +103,35 @@ def TraceNetwork(lon, lat, directionSQL):
 
     SELECT
     	mh.uuid, st_asgeojson(st_transform(mh.geom, 4326)) as geojson, mh.factype as factype,  tr.cost as cost, dwgno, NULL as size, facid as facid, CAST(material as text) as material, CAST(stnd_plan as text) as subtype, GeometryType(mh.geom) as geomtype
-    FROM 
+    FROM
     	maintenanceholes mh, traceresults as tr
     WHERE
     	(mh.node_fk = tr.node)
     UNION
-    select 
+    select
     	i.uuid, st_asgeojson(st_transform(i.geom, 4326)) as geojson, i.factype as factype, tr.cost as cost, dwgno, NULL as size, facid as facid, NULL as material, CAST(stnd_plan as text) as subtype, GeometryType(i.geom) as geomtype
-    FROM 
+    FROM
     	inlets i, traceresults as tr
     WHERE
     	(i.node_fk = tr.node)
     UNION
-    select 
-    	ol.uuid, st_asgeojson(st_transform(ol.geom, 4326)) as geojson, ol.factype as factype, tr.cost as cost, dwgno, CAST(diameter_h as text) as size, outfall_id as facid, CAST(material as text) as material, CAST(cross_sect as text) as subtype, GeometryType(ol.geom) as geomtype 
-    FROM 
+    select
+    	ol.uuid, st_asgeojson(st_transform(ol.geom, 4326)) as geojson, ol.factype as factype, tr.cost as cost, dwgno, CAST(diameter_h as text) as size, outfall_id as facid, CAST(material as text) as material, CAST(cross_sect as text) as subtype, GeometryType(ol.geom) as geomtype
+    FROM
     	outlets ol, traceresults as tr
     WHERE
     	(ol.node_fk = tr.node)
     UNION
     SELECT
     	gm.uuid, st_asgeojson(st_transform(gm.geom, 4326)) as geojson, gm.factype as factype,  tr.cost as cost, NULL as dwgno, CAST(diameter_h as text) as size, facid as facid,CAST(material as text) as material, CAST(subtype as text) as subtype, GeometryType(gm.geom) as geomtype
-    FROM 
+    FROM
     	gravitymains gm, traceresults as tr
     WHERE
     	(gm.edge_fk = tr.edge)
     UNION
     SELECT
-    	l.uuid, st_asgeojson(st_transform(l.geom, 4326)) as geojson, l.factype as factype,  tr.cost as cost, dwgno, CAST(diameter_height as text) as size, facid as facid, CAST(material as text) as material, CAST(subtype as text) as subtype, GeometryType(l.geom) as geomtype  
-    FROM 
+    	l.uuid, st_asgeojson(st_transform(l.geom, 4326)) as geojson, l.factype as factype,  tr.cost as cost, dwgno, CAST(diameter_height as text) as size, facid as facid, CAST(material as text) as material, CAST(subtype as text) as subtype, GeometryType(l.geom) as geomtype
+    FROM
     	laterals l, traceresults as tr
     WHERE
     	(l.edge_fk = tr.edge)
@@ -231,19 +230,19 @@ def queryNearestEdges(blockList):
             # Last line of temp table input
             nearestEdgeSQL += ";"
     nearestEdgeSQL += """
-    SELECT 
+    SELECT
     	network.id AS edgeid,
     	ST_Distance(pts.geom, network.geom) AS dist
-    from 
-    	pts 
+    from
+    	pts
     CROSS JOIN LATERAL (
-    	SELECT 
+    	SELECT
     		storm_network.id,
     		storm_network.geom
-    	FROM 
-    		storm_network 
-    	ORDER BY 
-    		storm_network.geom <-> pts.geom 
+    	FROM
+    		storm_network
+    	ORDER BY
+    		storm_network.geom <-> pts.geom
     	LIMIT 1
     ) AS network
      """

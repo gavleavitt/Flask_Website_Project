@@ -1,10 +1,10 @@
 import smtplib, ssl, os, email
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-from flask_application import logger
 from flask_application import application
 from datetime import datetime
 import traceback
+import logging
 
 port = 465  # For SSL
 # Get email settings from environmental variables
@@ -12,6 +12,7 @@ emailpassword = os.environ.get("EMAILPASS")
 emailaddr = os.environ.get("EMAILADDR")
 emailtoaddr = os.environ.get("EMAILTOADDR")
 
+#logging.basicConfig(filename="ErrorEmail.log", level=logging.DEBUG)
 
 def sendErrorEmail(script, exceptiontype, body):
     """

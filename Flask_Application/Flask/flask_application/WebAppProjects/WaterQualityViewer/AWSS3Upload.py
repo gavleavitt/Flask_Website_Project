@@ -2,10 +2,9 @@ import os
 import boto3
 from botocore.exceptions import ClientError
 import logging
-from io import StringIO
-import csv
 from flask_application import application
-from flask_application.util import errorEmail
+from flask_application.util.ErrorEmail import errorEmail
+
 
 def connectToS3():
     """

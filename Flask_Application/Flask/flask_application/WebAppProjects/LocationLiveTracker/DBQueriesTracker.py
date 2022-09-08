@@ -17,7 +17,7 @@ from sqlalchemy import func as sqlfunc
 import os
 import pytz
 import geojson
-from . import gpsTrackSes
+from flask_application import gpsTrackSes
 
 # def createSession():
 #     engine = create_engine(os.environ.get("DBCON"))
@@ -343,7 +343,7 @@ def getNearestRoad(coordinate):
         	roads.geom <-> (ST_GeomFromText(:param, 4326))
     LIMIT 40)
 
-    SELECT 
+    SELECT
         nearestcanidates.name,
         ST_DistanceSphere(
                 nearestcanidates.geom,
@@ -416,7 +416,7 @@ def getNearestTrail(coordinate):
         	trails.geom <-> (ST_GeomFromText(:param, 4326))
     LIMIT 40)
 
-    SELECT 
+    SELECT
         nearestcanidates.name,
         ST_Distance(
                 ST_Transform(nearestcanidates.geom,2228),

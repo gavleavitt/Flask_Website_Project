@@ -5,6 +5,9 @@ import json
 from flask_application import application
 from arcgis2geojson import arcgis2geojson
 import time
+import sys
+from fileinput import FileInput
+
 class featureServReq:
     """
 
