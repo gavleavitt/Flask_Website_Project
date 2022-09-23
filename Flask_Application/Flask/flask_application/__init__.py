@@ -71,8 +71,8 @@ dirname = os.path.dirname(__file__)
 # Attempting to log to file results in an error, for some reason there is an extra prefix adding to the file pathing
 # /app/ even though the entire docker contain resides within that dir and the dir is not part of the path inside
 # the container
-application.logger.addHandler(logging.StreamHandler())
-application.logger.setLevel(logging.DEBUG)
+#application.logger.addHandler(logging.StreamHandler())
+#application.logger.setLevel(logging.DEBUG)
 if application.config['ENV'] == "development":
     # Localhost development testing
     app.config['SERVER_NAME'] = "leavitttesting.local:5000"

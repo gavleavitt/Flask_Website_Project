@@ -8,6 +8,7 @@ import geojson
 from geojson import Feature, FeatureCollection, MultiLineString
 import topojson as tp
 import re
+import arrow
 #from . import stravaViewerSes
 
 
@@ -108,7 +109,9 @@ def insertSubUpdate(content):
     # session = stravaViewerSes()
     application.logger.debug("Updating DB with subscription update details")
     with stravaViewerSes() as session:
-        insert = sub_update(aspect=content.aspect_type, event_time=datetime.fromtimestamp(content.event_time),
+        # stravalib converts webhook update seconds since epoch, integar, into arrow format, convert to datetime format
+        # that is required by sqlalchemy
+        insert = sub_update(aspect=content.aspect_type, event_time=content.event_time.datetime,
                             object_id=content.object_id, object_type=content.object_type, owner_id=content.owner_id,
                             subscription_id=content.subscription_id,
                             update_title=title)

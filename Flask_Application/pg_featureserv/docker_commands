@@ -1,0 +1,3 @@
+docker stop testing-pg_featserv-container
+docker rm testing-pg_featserv-container
+docker run -p 8081:8081 -p 80:80 --name testing-nginx-container -d custom-nginx 

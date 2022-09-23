@@ -43,3 +43,7 @@ db-data/
 cloudflared/
 dockerfile
 StartFlaskLocalHost
+nginx/
+*.bat
+Flask_Application/Flask/GenerateOpenApiYML.bat
+*.bat
