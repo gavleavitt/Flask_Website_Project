@@ -77,7 +77,7 @@ pandas==1.4.2
 parse==1.19.0
 pdfminer.six==20200517
 pdfplumber==0.5.28
-Pillow==9.0.1
+Pillow==9.3.0
 pip==21.2.3
 protobuf==3.17.3
 psycopg2-binary==2.9.1
