@@ -1,5 +1,5 @@
 call activate flaskenv
 D:
-cd D:\Github\Website_Project\Flask_Application
+cd D:\Github\Website_Project\Flask_Application\Flask
 
-pygeoapi openapi generate pygeosettings.yml > openapi.yml
+dotenv run pygeoapi openapi generate pygeosettings_openapi_generation.yml > openapi.yml

@@ -47,3 +47,4 @@ nginx/
 *.bat
 Flask_Application/Flask/GenerateOpenApiYML.bat
 *.bat
+pihole/

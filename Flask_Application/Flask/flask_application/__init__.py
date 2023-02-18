@@ -30,9 +30,10 @@ import traceback
 # Create flask flask_application, I believe "flask_application" has to be used to work properly on AWS EB
 app = application = Flask(__name__, subdomain_matching=True)
 # cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
-cors = CORS(app, origins=["https://www.leavittmapping.com","http://www.leavittmapping.com/",
-                          "https://leavittmapping.com","http://leavitttesting.local:5000",
-                          "http://geo.leavitttesting.local:5000"])
+# cors = CORS(app, origins=["https://www.leavittmapping.com","http://www.leavittmapping.com/","https://maps.leavittmapping.com"
+#                           "https://leavittmapping.com","http://leavitttesting.local:5000",
+#                           "http://geo.leavitttesting.local:5000"])
+cors = CORS(app)
 
 dirname = os.path.dirname(__file__)
 # Setup logger
