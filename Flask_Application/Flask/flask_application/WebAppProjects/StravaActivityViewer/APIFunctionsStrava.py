@@ -169,7 +169,7 @@ def getFullDetails(client, actId):
     # Calculate type of riding activity, using GearIDs
     if act['gear_id'] in ["b4317610", "b2066194"]:
         act['type_extended'] = "Mountain Bike"
-    elif act['gear_id'] == "b5970935":
+    elif act['gear_id'] in ["b5970935","12224114"]:
         act['type_extended'] = "Road Cycling"
     elif act['type'] == "Walk":
         act['type_extended'] = "Walk"
