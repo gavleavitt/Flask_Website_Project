@@ -183,7 +183,7 @@ def getFullDetails(client, actId):
     # Wahoo Bolt provides additional data, check if populated, if not set to null
     wahooList = ["average_temp", "has_heartrate", "max_heartrate", "average_heartrate", "average_cadence"]
     for i in wahooList:
-        if act[i] == "":
+        if i not in act.keys or not act[i] or act[i] == "":
             act[i] = None
     # List of dictionary keys to remove, these are null or uninteresting
     remove_keys = ['guid', 'external_id', 'athlete', 'location_city', 'location_state', 'location_country',
