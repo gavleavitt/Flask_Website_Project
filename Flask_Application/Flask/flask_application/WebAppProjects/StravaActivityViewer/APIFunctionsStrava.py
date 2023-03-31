@@ -180,7 +180,7 @@ def getFullDetails(client, actId):
     # Set interval values to time deltas
     act["moving_time"] = timedelta(seconds=act["moving_time"])
     act["elapsed_time"] = timedelta(seconds=act["elapsed_time"])
-    # Wahoo Bolt provides additional data, check if populated, if not set to null
+    # Wahoo Bolt provides additional data, check if populated or if key exists, if not set to null
     wahooList = ["average_temp", "has_heartrate", "max_heartrate", "average_heartrate", "average_cadence"]
     for i in wahooList:
         if i not in act.keys or not act[i] or act[i] == "":
