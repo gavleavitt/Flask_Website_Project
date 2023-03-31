@@ -413,13 +413,20 @@ def getPDFContents(pdfLoc):
         pdfDict['tab'] = raw_tab
 
     # Extract date from title and create a list of values
-    pdfTitleList = pdfDict['text'].split("Sample Results for the Week of: ")[1].split(" ")
+    if "Sample Results for the Week of" in pdfDict['text']:
+        split_text = "Sample Results for the Week of: "
+    elif "Sample Results from the Week of" in pdfDict['text']:
+        split_text = "Sample Results from the Week of: "
+    else:
+        split_text = "Week of: "
+    pdfTitleList = pdfDict['text'].split(split_text)[1].split(" ")
     # Pull the first 3 values from list, these are the date values
-    dirtyTitle = f"{pdfTitleList[0]} {pdfTitleList[1]} {pdfTitleList[2]}"
-    # Normalize and remove extra characters
-    pdfDate = cleanText([dirtyTitle])[0]
+    # dirtyTitle = f"{pdfTitleList[0]} {pdfTitleList[1]} {pdfTitleList[2]}"
+    # pdfDate = cleanText([dirtyTitle])[0]
+    pdfDate = pdfDict['text'].split("\n")[2].split(": ")[1].strip()
+    application.logger.debug(f"Cleaned PDF Date is {pdfDate}")
     # Convert to string time
-    pdfDict['pdfDate'] = datetime.strptime(pdfDate, '%B %d %Y')
+    pdfDict['pdfDate'] = datetime.strptime(pdfDate, '%B %d, %Y')
     cleanedtext = []
     # Normalize the data within the raw table, each row is a nested list
     for beachdetails in raw_tab:
@@ -455,17 +462,20 @@ def populateDict(tab, beachDict, resample):
         # For every row in the table, iterate over the columns, ignoring the first column (beach name),
         # since this is the key value. Use the column index to call on the column names list, which acts as a lookup
         # for the dictionary key value (column name) to be added to the 2nd level dictionary
-        for i in range(1, (len(tab[row]))):
-            application.logger.debug(f"Filling key {beachDict[tab[row][0]][col[i - 1]]} with value {tab[row][i]}")
-            # col[i-1] is needed since the loop is starting at index 1 to avoid iterating over the beach name in the
-            # original list (table), this index is needed to grab the proper column name(key) starting at index 0,
-            # so its decreased by 1 to maintain proper index location for filling in data
-            # beachDict[tab[row][0]][col[i-1]] = tab[row][i]
-            if tab[row][i] is not None:
-                beachDict[tab[row][0]][col[i - 1]] = tab[row][i].rstrip(" ")
-            else:
-                beachDict[tab[row][0]][col[i - 1]] = None
-            beachDict[tab[row][0]]['resample'] = resample
+        try:
+            for i in range(1, (len(tab[row]))):
+                application.logger.debug(f"Filling key {beachDict[tab[row][0]][col[i - 1]]} with value {tab[row][i]}")
+                # col[i-1] is needed since the loop is starting at index 1 to avoid iterating over the beach name in the
+                # original list (table), this index is needed to grab the proper column name(key) starting at index 0,
+                # so its decreased by 1 to maintain proper index location for filling in data
+                # beachDict[tab[row][0]][col[i-1]] = tab[row][i]
+                if tab[row][i] is not None:
+                    beachDict[tab[row][0]][col[i - 1]] = tab[row][i].rstrip(" ")
+                else:
+                    beachDict[tab[row][0]][col[i - 1]] = None
+                beachDict[tab[row][0]]['resample'] = resample
+        except Exception as e:
+            application.logger.error(f"Failed to process {tab[row]} - {e}")
     return beachDict
 
 

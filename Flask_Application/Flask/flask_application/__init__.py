@@ -20,6 +20,7 @@ import atexit
 from apscheduler.schedulers.background import BackgroundScheduler
 from pytz import utc
 import logging
+from logging.config import dictConfig
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlathanor import FlaskBaseModel, initialize_flask_sqlathanor
@@ -27,15 +28,58 @@ from flask_sqlalchemy import SQLAlchemy
 import sys
 import traceback
 
+dirname = os.path.dirname(__file__)
+# os.chdir('logs')
+print(f"Dirname is {dirname}")
+print(f"Sys path is: {sys.path}")
+print(f"PYTHON path ENV is: {os.environ.get('PYTHONPATH', '')}")
+print(f"Files in this dir: {os.listdir()}")
+print(f"{os.path.exists('./logs/flask_application.log')}")
+print(f"{os.path.exists('/logs/flask_application.log')}")
+print(f"{os.path.exists('logs/flask_application.log')}")
+print(f"{os.path.exists('logs')}")
+# taken from: https://flask.palletsprojects.com/en/2.2.x/logging/
+# modifed using: https://stackoverflow.com/a/66728490/19899988
+try:
+    dictConfig({
+        'version': 1,
+        'formatters': {'default': {
+            'format': '[%(asctime)s] %(levelname)s in %(module)s: %(message)s',
+        }},
+        'handlers': {
+            'wsgi': {
+                'class': 'logging.StreamHandler',
+                'stream': 'ext://flask.logging.wsgi_errors_stream',
+                'formatter': 'default'
+            },
+            'file': {
+                'level': 'DEBUG',
+#                'filename': 'flask_application.log',
+                 'filename': 'logs/flask_application.log',
+                'class': 'logging.FileHandler',
+                'formatter': 'default',
+                # "mode": "a",
+                "encoding": "utf-8"
+            }
+        },
+        'root': {
+            'level': 'INFO',
+            'handlers': ['wsgi']
+        }
+    })
+except Exception as e:
+    print(e)
+    print(traceback.print_exc())
 # Create flask flask_application, I believe "flask_application" has to be used to work properly on AWS EB
 app = application = Flask(__name__, subdomain_matching=True)
+# logging.basicConfig(filename='flask_logs.log', level=logging.DEBUG, format=f'%(asctime)s %(levelname)s %(name)s %(threadName)s : %(message)s')
+
 # cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
 # cors = CORS(app, origins=["https://www.leavittmapping.com","http://www.leavittmapping.com/","https://maps.leavittmapping.com"
 #                           "https://leavittmapping.com","http://leavitttesting.local:5000",
 #                           "http://geo.leavitttesting.local:5000"])
 cors = CORS(app)
 
-dirname = os.path.dirname(__file__)
 # Setup logger
 # logger = logging.getLogger(__name__)
 # logger = logging.getLogger()
@@ -43,25 +87,37 @@ dirname = os.path.dirname(__file__)
 # logger.setLevel(logging.DEBUG)
 # Set time and message format of logs
 # formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
-#handler = logging.StreamHandler(sys.stdout)
-#handler.setLevel(logging.DEBUG)
-#handler.setFormatter(formatter)
-#logger.addHandler(handler)
+# handler = logging.StreamHandler(sys.stdout)
+# handler.setLevel(logging.DEBUG)
+# handler.setFormatter(formatter)
+# logger.addHandler(handler)
 # Attach logging handler to flask_application
 # handler = logging.FileHandler(os.path.join(os.path.dirname(__file__), '..', 'logs', 'flask_application.log'))
-#handler.setFormatter(formatter)
+# handler.setFormatter(formatter)
 # # Attach logging handler to flask_application
-#application.logger.addHandler(handler)
+# application.logger.addHandler(handler)
 # Flask's dir is: Flask_Application\Flask\flask_application, need to go up one level
 # application.logger.addHandler(logging.StreamHandler())
+
 # try:
+#     print(f"Setting basic logging!")
+#     print(os.listdir())
+#     print(f"{os.path.exists('./logs/flask_application.log')}")
 #     logging.basicConfig(format='%(asctime)s %(levelname)-8s %(message)s',
 #                         level=logging.DEBUG,
 #                         datefmt='%Y-%m-%d %H:%M:%S',
-#                         # filename='./logs/flask_application.log',
+# #                        filename='./logs/flask_application.log',
 #                         filename='flask_application.log',
 #                         filemode='w')
+#     logging.debug(f"basic config logging active!")
+#     application.logger.debug("basic config logging active!")
 # except Exception as e:
+#     print(e)
+#     print(traceback.format_exc())
+#     application.logger.debug(e)
+#     application.logger.debug(traceback.format_exc())
+
+
 #     # logging.getLogger().addHandler(logging.StreamHandler())
 #     application.logger.addHandler(logging.StreamHandler())
 #     application.logger.setLevel(logging.DEBUG)
@@ -72,8 +128,10 @@ dirname = os.path.dirname(__file__)
 # Attempting to log to file results in an error, for some reason there is an extra prefix adding to the file pathing
 # /app/ even though the entire docker contain resides within that dir and the dir is not part of the path inside
 # the container
-#application.logger.addHandler(logging.StreamHandler())
-#application.logger.setLevel(logging.DEBUG)
+
+# application.logger.addHandler(logging.StreamHandler())
+# application.logger.setLevel(logging.DEBUG)
+
 if application.config['ENV'] == "development":
     # Localhost development testing
     app.config['SERVER_NAME'] = "leavitttesting.local:5000"
@@ -99,7 +157,7 @@ else:
     # application.logger.debug('Production mode')
     app.config['SERVER_NAME'] = "leavittmapping.com"
     app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get("DBCON_PROD")
-#    application.logger.debug(f"Setting up in Production mode with the server name: {app.config['SERVER_NAME']}")
+    #    application.logger.debug(f"Setting up in Production mode with the server name: {app.config['SERVER_NAME']}")
     lacotraceEng = create_engine(os.environ.get("DBCON_LACOTRACE_PROD"))
     engine = create_engine(os.environ.get("DBCON_PROD"))
     stravaViewerEng = create_engine(os.environ.get("DBCON_STRAVAVIEWER_PROD"))
@@ -107,7 +165,8 @@ else:
     waterQualityEng = create_engine(os.environ.get("DBCON_WATERQUALITY_PROD"))
 
 application.logger.debug("Python Flask debugger active!")
-application.logger.debug(f"Flask is running in {application.config['ENV']} mode with the server name: {app.config['SERVER_NAME']}")
+application.logger.debug(
+    f"Flask is running in {application.config['ENV']} mode with the server name: {app.config['SERVER_NAME']}")
 #  Bind sessionmakers
 lacotraceSes = sessionmaker(bind=lacotraceEng)
 stravaViewerSes = sessionmaker(bind=stravaViewerEng)
@@ -118,7 +177,7 @@ waterQualitySes = sessionmaker(bind=waterQualityEng)
 # Disabling modification tracking
 application.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 # Init flask sqlalchemy database with flask
-db = SQLAlchemy(application, model_class = FlaskBaseModel)
+db = SQLAlchemy(application, model_class=FlaskBaseModel)
 # db.init_app(app)
 # Setup SQLAthanor
 db = initialize_flask_sqlathanor(db)
@@ -147,6 +206,7 @@ from .WebAppProjects.WaterQualityViewer.API_Routes import sbcWaterQualityAPI_BP
 from .WebAppProjects.LACO_SW_TraceApp.routes import lacoSWTraceapp_BP
 from .WebAppProjects.LACO_SW_TraceApp.API_Routes import lacoSWTraceapp_API_BP
 from .WebAppProjects.OrthomosaicViewer.routes import orthoviewer_BP
+
 # Register blueprints with flask_application
 app.register_blueprint(mainSite_BP)
 app.register_blueprint(projectPages_BP)
@@ -163,6 +223,7 @@ app.register_blueprint(orthoviewer_BP, url_prefix='/webapps/orthoviewer')
 # Register PyGeoAPI
 # Import pygeoapi, need to import after configuring logger or else this will setup its own logger
 from pygeoapi.flask_app import BLUEPRINT as pygeoapi_blueprint
+
 # app.register_blueprint(pygeoapi_blueprint, url_prefix='/pygeo')
 app.register_blueprint(pygeoapi_blueprint, subdomain='geo')
 # app.register_blueprint(lacoSWTraceapp_API_BP, url_prefix='/api/v1/trace')
@@ -180,6 +241,7 @@ application.register_blueprint(lacoSWTraceapp_API_BP, url_prefix='/api/v1/trace'
 # from flask_application.development import testingAndDevelopmentRoutes
 # from flask_application.WebAppProjects import location_tracker, strava_activities, water_quality
 from flask_application.WebAppProjects.WaterQualityViewer import functionsWaterQual
+
 # from flask_application.WebAppProjects.strava_activities import DBQueriesStrava, StravaAWSS3
 
 # Setup APS scheduler instance
