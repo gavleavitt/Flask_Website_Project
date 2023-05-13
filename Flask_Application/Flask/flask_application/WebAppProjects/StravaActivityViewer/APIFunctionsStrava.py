@@ -169,7 +169,8 @@ def getFullDetails(client, actId):
     # Calculate type of riding activity, using GearIDs
     if act['gear_id'] in ["b4317610", "b2066194"]:
         act['type_extended'] = "Mountain Bike"
-    elif act['gear_id'] in ["b5970935","12224114"]:
+    # Should grab this lookup from the DB instead of hardcoing
+    elif act['gear_id'] in ["b5970935","b12224114"]:
         act['type_extended'] = "Road Cycling"
     elif act['type'] == "Walk":
         act['type_extended'] = "Walk"
@@ -183,7 +184,7 @@ def getFullDetails(client, actId):
     # Wahoo Bolt provides additional data, check if populated or if key exists, if not set to null
     wahooList = ["average_temp", "has_heartrate", "max_heartrate", "average_heartrate", "average_cadence"]
     for i in wahooList:
-        if i not in act.keys or not act[i] or act[i] == "":
+        if i not in act.keys() or not act[i] or act[i] == "":
             act[i] = None
     # List of dictionary keys to remove, these are null or uninteresting
     remove_keys = ['guid', 'external_id', 'athlete', 'location_city', 'location_state', 'location_country',
