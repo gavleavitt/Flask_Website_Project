@@ -137,7 +137,7 @@ w3lib==1.22.0
 Wand==0.6.6
 websockets==10.3
 Werkzeug==2.1.2
-wheel==0.37.0
+wheel==0.38.1
 wincertstore==0.2
 wsproto==1.1.0
 WTForms==2.3.3
