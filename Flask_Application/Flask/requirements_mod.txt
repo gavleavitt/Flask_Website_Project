@@ -60,7 +60,7 @@ pdfminer.six==20200517
 pdfplumber==0.5.28
 Pillow
 pip==21.2.3
-protobuf==3.17.3
+protobuf==3.18.3
 psycopg2-binary==2.9.1
 pyasn1==0.4.8
 pyasn1-modules==0.2.8
