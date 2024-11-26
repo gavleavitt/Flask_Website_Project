@@ -34,7 +34,7 @@ Flask-SQLAlchemy==2.5.1
 Flask-WTF==0.15.1
 fonttools==4.25.0
 future-annotations==1.0.0
-numpy==1.21.2
+numpy==1.22.0
 GDAL==3.0.2
 GeoAlchemy2==0.9.3
 geojson==2.5.0
